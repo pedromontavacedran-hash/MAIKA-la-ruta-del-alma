@@ -1,49 +1,195 @@
 import { useState, useEffect } from "react";
 import type { Producto } from "./App";
+import { INTENCIONES_OPCIONES } from "./types";
+import { useFavoritos } from "./hooks/useFavoritos";
 
+export type CategoriaEntrada = { id: string; nombre: string };
+
+/** Item mínimo del carrito para calcular disponibles = stock - en carrito */
+type ItemCarritoRef = { id: number; cantidad: number };
+
+/** Props: velas, inciensos, figuras y kits son la base real del catálogo (misma fuente que Inventario). */
 interface Props {
   velas: Producto[];
   inciensos: Producto[];
   figuras: Producto[];
+  kits?: Producto[];
+  categoriasCatalogo?: CategoriaEntrada[];
+  cart?: ItemCarritoRef[];
   agregarAlCarrito: (producto: Producto) => void;
   volver: () => void;
+  /** Si se pasa, al montar se muestra esta categoría (ej. desde accesos rápidos en Inicio). */
+  categoriaInicial?: string | null;
+  /** Se llama una vez después de aplicar categoriaInicial para limpiar el estado en el padre. */
+  onCategoriaInicialAplicada?: () => void;
 }
 
-export default function Tienda({ velas, inciensos, figuras, agregarAlCarrito, volver }: Props) {
+function getProductosForCategoria(
+  cat: string,
+  velas: Producto[],
+  inciensos: Producto[],
+  figuras: Producto[],
+  kits: Producto[] = []
+): Producto[] {
+  const c = cat.toLowerCase();
+  if (c === "velas") return velas;
+  if (c === "inciensos") return inciensos;
+  if (c === "figuras") return figuras;
+  if (c === "kits") return kits;
+  return [];
+}
+
+function getEmoji(cat: string): string {
+  const c = cat.toLowerCase();
+  if (c === "velas") return "🕯️";
+  if (c === "inciensos") return "🌿";
+  if (c === "figuras") return "🪷";
+  if (c === "kits") return "📦";
+  return "📦";
+}
+
+/** Precio de venta con descuento aplicado (igual que en Inventario y useCatalogo). */
+function precioConDescuento(p: Producto): number {
+  const base = Number(p.precio) || 0;
+  const d = p.descuentoPorcentaje != null ? Math.min(100, Math.max(0, Number(p.descuentoPorcentaje))) : 0;
+  if (d <= 0) return base;
+  return Math.round(base * (1 - d / 100) * 100) / 100;
+}
+
+/** Convierte el nombre del producto en nombre de archivo: "Vela Blanca" → "vela-blanca.jpg" */
+function nombreProductoToImagen(nombre: string): string {
+  const slug = nombre
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\u0300-\u036f/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "");
+  return slug ? `/${slug}.jpg` : "";
+}
+
+const categoriasPorDefecto: CategoriaEntrada[] = [
+  { id: "velas", nombre: "velas" },
+  { id: "inciensos", nombre: "inciensos" },
+  { id: "figuras", nombre: "figuras" },
+  { id: "kits", nombre: "kits" }
+];
+
+export default function Tienda({ velas, inciensos, figuras, kits = [], categoriasCatalogo = categoriasPorDefecto, cart = [], agregarAlCarrito, volver, categoriaInicial, onCategoriaInicialAplicada }: Props) {
   const [mostrarCategoria, setMostrarCategoria] = useState<string | null>(null);
-  
-  // 👇 NUEVO: Para forzar actualizaciones
+  const [filtroIntencion, setFiltroIntencion] = useState<string>("");
+  const fondoServicios = "#0B0B0D";
+  const [lightboxImagen, setLightboxImagen] = useState<{ src: string; alt: string } | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
-  
-  // 👇 NUEVO: Se activa cuando cambian los productos
+  const { isFavorito, toggleFavorito } = useFavoritos();
+
+  const getProductImageSrc = (prod: Producto): string =>
+    prod.imagen && (prod.imagen.startsWith("data:") || prod.imagen.startsWith("http") || prod.imagen.startsWith("/"))
+      ? prod.imagen
+      : prod.imagen
+        ? `/${prod.imagen.replace(/^\//, "")}`
+        : nombreProductoToImagen(prod.nombre) || `/${prod.categoria}-${prod.id}.jpg`;
+
+  const cerrarLightbox = () => setLightboxImagen(null);
+
+  const Lightbox = () =>
+    lightboxImagen ? (
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Imagen ampliada"
+        onClick={cerrarLightbox}
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 9999,
+          background: "rgba(0,0,0,0.9)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 24,
+          cursor: "pointer",
+        }}
+      >
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); cerrarLightbox(); }}
+          aria-label="Cerrar"
+          style={{
+            position: "absolute",
+            top: 16,
+            right: 16,
+            zIndex: 10000,
+            width: 44,
+            height: 44,
+            borderRadius: "50%",
+            border: "2px solid #C9A24A",
+            background: "rgba(11,11,13,0.9)",
+            color: "#C9A24A",
+            fontSize: "1.5rem",
+            lineHeight: 1,
+            cursor: "pointer",
+          }}
+        >
+          ×
+        </button>
+        <img
+          src={lightboxImagen.src}
+          alt={lightboxImagen.alt}
+          onClick={(e) => e.stopPropagation()}
+          style={{ maxWidth: "100%", maxHeight: "85vh", objectFit: "contain", borderRadius: 12 }}
+        />
+        <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.9rem", marginTop: 12 }}>
+          Clic fuera o tecla Escape para cerrar
+        </p>
+      </div>
+    ) : null;
+
+  useEffect(() => {
+    if (categoriaInicial) {
+      setMostrarCategoria(categoriaInicial);
+      onCategoriaInicialAplicada?.();
+    }
+  }, [categoriaInicial, onCategoriaInicialAplicada]);
+
+  /** Cantidad de este producto en el carrito (para mostrar disponibles = stock - en carrito). */
+  const cantidadEnCarrito = (idProducto: number) =>
+    cart.find((it) => Number(it.id) === idProducto)?.cantidad ?? 0;
+
   useEffect(() => {
     setRefreshKey(prev => prev + 1);
-    console.log("🔄 Productos actualizados - refreshKey:", refreshKey + 1);
-  }, [velas, inciensos, figuras]);
+  }, [velas, inciensos, figuras, categoriasCatalogo, cart]);
+
+  useEffect(() => {
+    if (!lightboxImagen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setLightboxImagen(null); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightboxImagen]);
 
   if (mostrarCategoria) {
-    let productos: Producto[] = [];
-    let titulo = "";
-
-    if (mostrarCategoria === "velas") {
-      productos = velas;
-      titulo = "🕯️ Velas";
-    } else if (mostrarCategoria === "inciensos") {
-      productos = inciensos;
-      titulo = "🌿 Inciensos";
-    } else if (mostrarCategoria === "figuras") {
-      productos = figuras;
-      titulo = "🪷 Figuras";
-    }
+    const productosCat = getProductosForCategoria(mostrarCategoria, velas, inciensos, figuras, kits);
+    const productos = filtroIntencion
+      ? productosCat.filter((p) => p.intencion === filtroIntencion)
+      : productosCat;
+    const entrada = categoriasCatalogo.find((c) => c.id === mostrarCategoria);
+    const nombreDisplay = entrada?.nombre ?? mostrarCategoria;
+    const titulo = getEmoji(mostrarCategoria) + " " + nombreDisplay.charAt(0).toUpperCase() + nombreDisplay.slice(1);
 
     return (
-      <div style={{ padding: 40 }}>
+      <>
+      <div className="tienda-vista" style={{ padding: 40 }}>
         <button
-          onClick={() => setMostrarCategoria(null)}
+          onClick={() => { setMostrarCategoria(null); setFiltroIntencion(""); }}
+          className="btn-volver-azul"
           style={{
-            background: "#ffd700",
-            color: "#1b1745",
-            border: "none",
+            backgroundImage: "linear-gradient(rgba(10, 7, 25, 0.45), rgba(10, 7, 25, 0.45)), url('/fondo%20estrellado.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            color: "#C9A24A",
+            border: "2px solid #C9A24A",
             borderRadius: "30px",
             padding: "8px 20px",
             cursor: "pointer",
@@ -54,9 +200,34 @@ export default function Tienda({ velas, inciensos, figuras, agregarAlCarrito, vo
           ← Volver a Categorías
         </button>
 
-        <h2 style={{ textAlign: "center", color: "gold", fontSize: "2rem", marginBottom: 30 }}>
+        <h2 style={{ textAlign: "center", color: "#C9A24A", fontSize: "2rem", marginBottom: 30 }}>
           {titulo}
         </h2>
+
+        <div style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <span style={{ color: "#C9A24A", fontSize: 14 }}>Filtrar por intención:</span>
+          <select
+            value={filtroIntencion}
+            onChange={(e) => setFiltroIntencion(e.target.value)}
+            style={{
+              padding: "8px 12px",
+              borderRadius: 10,
+              border: "2px solid #C9A24A",
+              background: "#0B0B0D",
+              color: "white",
+              fontSize: 14,
+              minWidth: 180
+            }}
+          >
+            <option value="">Todas</option>
+            {INTENCIONES_OPCIONES.filter((o) => o.value).map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+          {filtroIntencion && (
+            <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 13 }}>{productos.length} productos</span>
+          )}
+        </div>
 
         <div
           style={{
@@ -65,20 +236,60 @@ export default function Tienda({ velas, inciensos, figuras, agregarAlCarrito, vo
             gap: 20,
           }}
         >
-          {productos.map((prod) => (
+          {productos.map((prod) => {
+            const enCarrito = cantidadEnCarrito(Number(prod.id));
+            const disponibles = Math.max(0, Number(prod.stock) - enCarrito);
+            return (
             <div
-              key={`${prod.id}-${prod.stock}-${refreshKey}`}  // 👈 CAMBIADO: Incluye stock y refreshKey
+              key={`${prod.id}-${prod.stock}-${enCarrito}-${refreshKey}`}
               style={{
-                border: "2px solid gold",
+                border: "2px solid #C9A24A",
                 padding: 20,
                 borderRadius: 15,
                 textAlign: "center",
-                background: "#2b2560",
-                opacity: prod.stock === 0 ? 0.6 : 1,
+                background: fondoServicios,
+                opacity: disponibles === 0 ? 0.6 : 1,
                 position: "relative"
               }}
             >
-              {prod.stock === 0 && (
+              {/* Botón Favorito */}
+              <div
+                role="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleFavorito(prod.id);
+                }}
+                style={{
+                  position: "absolute",
+                  top: 10,
+                  left: 10,
+                  fontSize: "1.6rem",
+                  cursor: "pointer",
+                  zIndex: 2,
+                  opacity: isFavorito(prod.id) ? 1 : 0.5,
+                  transition: "opacity 0.2s, transform 0.2s",
+                  transform: isFavorito(prod.id) ? "scale(1.1)" : "scale(1)",
+                  userSelect: "none",
+                  WebkitTapHighlightColor: "transparent"
+                }}
+                title={isFavorito(prod.id) ? "Quitar de favoritos" : "Añadir a favoritos"}
+              >
+                {isFavorito(prod.id) ? "💛" : "🤍"}
+              </div>
+
+              <div style={{ marginBottom: 12, minHeight: 120, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <img
+                  src={getProductImageSrc(prod)}
+                  alt={prod.nombre}
+                  role="button"
+                  tabIndex={0}
+                  onClick={(e) => { e.stopPropagation(); setLightboxImagen({ src: getProductImageSrc(prod), alt: prod.nombre }); }}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setLightboxImagen({ src: getProductImageSrc(prod), alt: prod.nombre }); } }}
+                  style={{ maxWidth: "100%", maxHeight: 140, objectFit: "contain", borderRadius: 10, border: "1px solid rgba(212,175,55,0.5)", cursor: "pointer" }}
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                />
+              </div>
+              {disponibles === 0 && (
                 <div style={{
                   position: "absolute",
                   top: 10,
@@ -94,31 +305,57 @@ export default function Tienda({ velas, inciensos, figuras, agregarAlCarrito, vo
                 </div>
               )}
 
-              {prod.stock > 0 && prod.stock <= 3 && (
+              {disponibles > 0 && disponibles <= 3 && (
                 <div style={{
                   position: "absolute",
                   top: 10,
                   right: 10,
-                  background: "#ffaa00",
+                  background: "#C9A24A",
                   color: "#1b1745",
                   padding: "4px 10px",
                   borderRadius: 15,
                   fontSize: "0.7rem",
                   fontWeight: "bold"
                 }}>
-                  ¡ÚLTIMAS {prod.stock}!
+                  ¡ÚLTIMAS {disponibles}!
                 </div>
               )}
 
-              <h3 style={{ color: "white" }}>{prod.nombre}</h3>
-              <p style={{ color: "gold", fontSize: "1.2rem", margin: "10px 0" }}>
-                {prod.precio.toFixed(2)} €
+              <h3 style={{
+                color: prod.nombreColor ?? "white",
+                fontSize: prod.nombreTamano ? `${prod.nombreTamano}px` : undefined,
+                fontStyle: prod.nombreEstilo === "italic" ? "italic" : undefined,
+                fontWeight: prod.nombreEstilo === "bold" ? "bold" : undefined
+              }}>
+                {prod.nombre}
+              </h3>
+              <p style={{ color: "#C9A24A", fontSize: "1.2rem", margin: "10px 0" }}>
+                {prod.descuentoPorcentaje != null && prod.descuentoPorcentaje > 0 && (
+                  <span style={{ textDecoration: "line-through", opacity: 0.8, marginRight: 8 }}>
+                    {Number(prod.precio).toFixed(2)} €
+                  </span>
+                )}
+                {precioConDescuento(prod).toFixed(2)} € <span style={{ fontSize: "0.75rem", opacity: 0.9 }}>(IVA incl.)</span>
+                {prod.descuentoPorcentaje != null && prod.descuentoPorcentaje > 0 && (
+                  <span style={{ fontSize: "0.75rem", color: "#4caf50", marginLeft: 6 }}>−{prod.descuentoPorcentaje}%</span>
+                )}
               </p>
 
-              <div style={{ marginBottom: 15, fontSize: "0.8rem", color: prod.stock > 5 ? "#4caf50" : prod.stock > 0 ? "#ffaa00" : "#ff4444" }}>
-                {prod.stock > 0 ? (
+              {prod.paraQueSirve && (
+                <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.9)", margin: "4px 0", fontStyle: "italic" }}>
+                  ✦ {prod.paraQueSirve}
+                </p>
+              )}
+              {prod.comoUsar && (
+                <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.75)", margin: "2px 0 8px" }}>
+                  {prod.comoUsar}
+                </p>
+              )}
+
+              <div style={{ marginBottom: 15, fontSize: "0.8rem", color: disponibles > 5 ? "#4caf50" : disponibles > 0 ? "#C9A24A" : "#ff4444" }}>
+                {disponibles > 0 ? (
                   <>
-                    <span>📦 {prod.stock} disponibles</span>
+                    <span>📦 {disponibles} disponibles</span>
                     <div style={{
                       width: "100%",
                       height: 4,
@@ -128,9 +365,9 @@ export default function Tienda({ velas, inciensos, figuras, agregarAlCarrito, vo
                       overflow: "hidden"
                     }}>
                       <div style={{
-                        width: `${Math.min((prod.stock / 20) * 100, 100)}%`,
+                        width: `${Math.min((disponibles / 20) * 100, 100)}%`,
                         height: "100%",
-                        background: prod.stock > 5 ? "#4caf50" : "#ffaa00",
+                        background: disponibles > 5 ? "#4caf50" : "#C9A24A",
                         borderRadius: 2
                       }} />
                     </div>
@@ -140,42 +377,52 @@ export default function Tienda({ velas, inciensos, figuras, agregarAlCarrito, vo
                 )}
               </div>
 
-              <button
-                onClick={() => {
-                  if (prod.stock > 0) {
-                    agregarAlCarrito(prod);
-                    setRefreshKey(prev => prev + 1);  // 👈 NUEVO: Forzar actualización después de comprar
-                  }
-                }}
-                disabled={prod.stock === 0}
-                style={{
-                  background: prod.stock > 0 ? "gold" : "#666",
-                  border: "none",
-                  padding: "10px 25px",
-                  borderRadius: 25,
-                  cursor: prod.stock > 0 ? "pointer" : "not-allowed",
-                  fontWeight: "bold",
-                  color: prod.stock > 0 ? "#1b1745" : "#ccc",
-                  width: "100%"
-                }}
-              >
-                {prod.stock > 0 ? "Añadir al carrito" : "Sin stock"}
-              </button>
+       <button
+  type="button"
+  className={disponibles > 0 ? "btn-anadir-dorado" : undefined}
+  onClick={() => {
+    if (disponibles > 0) {
+      agregarAlCarrito(prod);
+      setRefreshKey(prev => prev + 1);
+    }
+  }}
+  disabled={disponibles === 0}
+  style={{
+    background: disponibles > 0 ? "#1565c0" : "#666",
+    border: "2px solid #C9A24A",
+    padding: "10px 25px",
+    borderRadius: 25,
+    cursor: disponibles > 0 ? "pointer" : "not-allowed",
+    fontWeight: "bold",
+    color: disponibles > 0 ? "#C9A24A" : "#ccc",
+    width: "100%"
+  }}
+>
+  {disponibles > 0 ? "Añadir al carrito" : "Sin stock"}
+</button>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
+      <Lightbox />
+    </>
     );
   }
 
   return (
-    <div style={{ padding: 40 }}>
+    <>
+    <div className="tienda-vista" style={{ padding: 40 }}>
       <button
+        className="btn-volver-azul"
         onClick={volver}
         style={{
-          background: "#ffd700",
-          color: "#1b1745",
-          border: "none",
+          backgroundImage: "linear-gradient(rgba(10, 7, 25, 0.45), rgba(10, 7, 25, 0.45)), url('/fondo%20estrellado.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          color: "#C9A24A",
+          border: "2px solid #C9A24A",
           borderRadius: "30px",
           padding: "8px 20px",
           cursor: "pointer",
@@ -188,61 +435,96 @@ export default function Tienda({ velas, inciensos, figuras, agregarAlCarrito, vo
 
       {/* MÁS VENDIDOS */}
       <div key={`mas-vendidos-${refreshKey}`} style={{  // 👈 NUEVO: Key para actualizar esta sección
-        marginBottom: 60,
-        background: "linear-gradient(135deg, #1b1745 0%, #2b2560 100%)",
-        padding: "30px 20px",
-        borderRadius: 30,
-        border: "2px solid gold"
+        marginBottom: 44,
+        background: fondoServicios,
+        padding: "16px 12px",
+        borderRadius: 22,
+        border: "2px solid #C9A24A"
       }}>
         <h3 style={{
           textAlign: "center",
-          color: "gold",
-          fontSize: "1.8rem",
-          marginBottom: 30,
+          color: "#C9A24A",
+          fontSize: "1.08rem",
+          marginBottom: 14,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          gap: 10
+          gap: 8
         }}>
-          <span style={{ fontSize: "2rem" }}>🔥</span>
+          <span style={{ fontSize: "1.2rem" }}>🔥</span>
           LOS MÁS VENDIDOS
-          <span style={{ fontSize: "2rem" }}>✨</span>
+          <span style={{ fontSize: "1.2rem" }}>✨</span>
         </h3>
 
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-          gap: 25,
+          gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
+          gap: 10,
         }}>
           {/* Vela Blanca */}
           <div style={{
-            background: "#2b2560",
-            borderRadius: 20,
-            padding: "20px",
-            border: "2px solid gold",
+            background: fondoServicios,
+            borderRadius: 16,
+            padding: "10px",
+            border: "2px solid #C9A24A",
             position: "relative",
           }}>
+            <div
+              role="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFavorito(1);
+              }}
+              style={{
+                position: "absolute",
+                top: 5,
+                left: 5,
+                fontSize: "1.4rem",
+                cursor: "pointer",
+                zIndex: 2,
+                opacity: isFavorito(1) ? 1 : 0.5,
+                transition: "opacity 0.2s, transform 0.2s",
+                transform: isFavorito(1) ? "scale(1.1)" : "scale(1)",
+                userSelect: "none",
+                WebkitTapHighlightColor: "transparent"
+              }}
+              title={isFavorito(1) ? "Quitar de favoritos" : "Añadir a favoritos"}
+            >
+              {isFavorito(1) ? "💛" : "🤍"}
+            </div>
             <div style={{
               position: "absolute",
-              top: -10,
-              right: -10,
+              top: -8,
+              right: -8,
               background: "#ff4444",
               color: "white",
-              padding: "5px 12px",
+              padding: "5px 10px",
               borderRadius: 20,
               fontWeight: "bold",
-              fontSize: "0.8rem",
+              fontSize: "0.82rem",
             }}>
               🔥 234 vendidos
             </div>
-            <div style={{ fontSize: "3rem", textAlign: "center", marginBottom: 10 }}>🕯️</div>
-            <h4 style={{ color: "gold", textAlign: "center" }}>Vela Blanca</h4>
-            <p style={{ color: "white", fontSize: "0.85rem", margin: "10px 0" }}>
+            <div style={{ fontSize: "1.7rem", textAlign: "center", marginBottom: 6 }}>🕯️</div>
+            <h4 style={{
+              color: velas.find(v => v.id === 1)?.nombreColor ?? "#C9A24A",
+              textAlign: "center",
+              fontSize: velas.find(v => v.id === 1)?.nombreTamano ? `${velas.find(v => v.id === 1)!.nombreTamano}px` : "1.06rem",
+              fontWeight: "bold",
+              lineHeight: 1.2,
+              textShadow: "0 1px 2px rgba(0,0,0,0.45)",
+              fontStyle: velas.find(v => v.id === 1)?.nombreEstilo === "italic" ? "italic" : undefined
+            }}>
+              {velas.find(v => v.id === 1)?.nombre ?? "Vela Blanca"}
+            </h4>
+            <p style={{ color: "rgba(255,255,255,0.96)", fontSize: "0.98rem", margin: "8px 0", lineHeight: 1.45 }}>
               La favorita para limpiezas
             </p>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 15 }}>
-              <span style={{ color: "gold", fontWeight: "bold" }}>12.50€</span>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+              <span style={{ color: "#C9A24A", fontWeight: "bold", fontSize: "0.85rem" }}>12.50€</span>
               <button
+                type="button"
+                className={`btn-mas-vendidos ${velas.find(v => v.id === 1)?.stock ? "btn-anadir-dorado" : ""}`}
                 onClick={() => {
                   const vela = velas.find(v => v.id === 1);
                   if (vela && vela.stock > 0) {
@@ -251,12 +533,13 @@ export default function Tienda({ velas, inciensos, figuras, agregarAlCarrito, vo
                   }
                 }}
                 style={{
-                  background: velas.find(v => v.id === 1)?.stock ? "gold" : "#666",
+                  background: velas.find(v => v.id === 1)?.stock ? "#C9A24A" : "#666",
                   border: "none",
-                  padding: "5px 15px",
+                  padding: "8px 14px",
                   borderRadius: 20,
                   cursor: velas.find(v => v.id === 1)?.stock ? "pointer" : "not-allowed",
                   fontWeight: "bold",
+                  fontSize: "1rem",
                   color: velas.find(v => v.id === 1)?.stock ? "#1b1745" : "#ccc"
                 }}
               >
@@ -267,33 +550,68 @@ export default function Tienda({ velas, inciensos, figuras, agregarAlCarrito, vo
 
           {/* Incienso Sándalo */}
           <div style={{
-            background: "#2b2560",
-            borderRadius: 20,
-            padding: "20px",
-            border: "2px solid gold",
+            background: fondoServicios,
+            borderRadius: 16,
+            padding: "10px",
+            border: "2px solid #C9A24A",
             position: "relative",
           }}>
+            <div
+              role="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFavorito(101);
+              }}
+              style={{
+                position: "absolute",
+                top: 5,
+                left: 5,
+                fontSize: "1.4rem",
+                cursor: "pointer",
+                zIndex: 2,
+                opacity: isFavorito(101) ? 1 : 0.5,
+                transition: "opacity 0.2s, transform 0.2s",
+                transform: isFavorito(101) ? "scale(1.1)" : "scale(1)",
+                userSelect: "none",
+                WebkitTapHighlightColor: "transparent"
+              }}
+              title={isFavorito(101) ? "Quitar de favoritos" : "Añadir a favoritos"}
+            >
+              {isFavorito(101) ? "💛" : "🤍"}
+            </div>
             <div style={{
               position: "absolute",
-              top: -10,
-              right: -10,
+              top: -8,
+              right: -8,
               background: "#ff4444",
               color: "white",
-              padding: "5px 12px",
+              padding: "5px 10px",
               borderRadius: 20,
               fontWeight: "bold",
-              fontSize: "0.8rem",
+              fontSize: "0.82rem",
             }}>
               🔥 189 vendidos
             </div>
-            <div style={{ fontSize: "3rem", textAlign: "center", marginBottom: 10 }}>🌿</div>
-            <h4 style={{ color: "gold", textAlign: "center" }}>Incienso Sándalo</h4>
-            <p style={{ color: "white", fontSize: "0.85rem", margin: "10px 0" }}>
+            <div style={{ fontSize: "1.7rem", textAlign: "center", marginBottom: 6 }}>🌿</div>
+            <h4 style={{
+              color: inciensos.find(i => i.id === 101)?.nombreColor ?? "#C9A24A",
+              textAlign: "center",
+              fontSize: inciensos.find(i => i.id === 101)?.nombreTamano ? `${inciensos.find(i => i.id === 101)!.nombreTamano}px` : "1.06rem",
+              fontWeight: "bold",
+              lineHeight: 1.2,
+              textShadow: "0 1px 2px rgba(0,0,0,0.45)",
+              fontStyle: inciensos.find(i => i.id === 101)?.nombreEstilo === "italic" ? "italic" : undefined
+            }}>
+              {inciensos.find(i => i.id === 101)?.nombre ?? "Incienso Sándalo"}
+            </h4>
+            <p style={{ color: "rgba(255,255,255,0.96)", fontSize: "0.98rem", margin: "8px 0", lineHeight: 1.45 }}>
               Conexión espiritual
             </p>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 15 }}>
-              <span style={{ color: "gold", fontWeight: "bold" }}>6.50€</span>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+              <span style={{ color: "#C9A24A", fontWeight: "bold", fontSize: "0.85rem" }}>6.50€</span>
               <button
+                type="button"
+                className={`btn-mas-vendidos ${inciensos.find(i => i.id === 101)?.stock ? "btn-anadir-dorado" : ""}`}
                 onClick={() => {
                   const incienso = inciensos.find(i => i.id === 101);
                   if (incienso && incienso.stock > 0) {
@@ -302,12 +620,13 @@ export default function Tienda({ velas, inciensos, figuras, agregarAlCarrito, vo
                   }
                 }}
                 style={{
-                  background: inciensos.find(i => i.id === 101)?.stock ? "gold" : "#666",
+                  background: inciensos.find(i => i.id === 101)?.stock ? "#C9A24A" : "#666",
                   border: "none",
-                  padding: "5px 15px",
+                  padding: "8px 14px",
                   borderRadius: 20,
                   cursor: inciensos.find(i => i.id === 101)?.stock ? "pointer" : "not-allowed",
                   fontWeight: "bold",
+                  fontSize: "1rem",
                   color: inciensos.find(i => i.id === 101)?.stock ? "#1b1745" : "#ccc"
                 }}
               >
@@ -318,33 +637,68 @@ export default function Tienda({ velas, inciensos, figuras, agregarAlCarrito, vo
 
           {/* Buda Dorado */}
           <div style={{
-            background: "#2b2560",
-            borderRadius: 20,
-            padding: "20px",
-            border: "2px solid gold",
+            background: fondoServicios,
+            borderRadius: 16,
+            padding: "10px",
+            border: "2px solid #C9A24A",
             position: "relative",
           }}>
+            <div
+              role="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFavorito(201);
+              }}
+              style={{
+                position: "absolute",
+                top: 5,
+                left: 5,
+                fontSize: "1.4rem",
+                cursor: "pointer",
+                zIndex: 2,
+                opacity: isFavorito(201) ? 1 : 0.5,
+                transition: "opacity 0.2s, transform 0.2s",
+                transform: isFavorito(201) ? "scale(1.1)" : "scale(1)",
+                userSelect: "none",
+                WebkitTapHighlightColor: "transparent"
+              }}
+              title={isFavorito(201) ? "Quitar de favoritos" : "Añadir a favoritos"}
+            >
+              {isFavorito(201) ? "💛" : "🤍"}
+            </div>
             <div style={{
               position: "absolute",
-              top: -10,
-              right: -10,
+              top: -8,
+              right: -8,
               background: "#ff4444",
               color: "white",
-              padding: "5px 12px",
+              padding: "5px 10px",
               borderRadius: 20,
               fontWeight: "bold",
-              fontSize: "0.8rem",
+              fontSize: "0.82rem",
             }}>
               🔥 156 vendidos
             </div>
-            <div style={{ fontSize: "3rem", textAlign: "center", marginBottom: 10 }}>🪷</div>
-            <h4 style={{ color: "gold", textAlign: "center" }}>Buda Dorado</h4>
-            <p style={{ color: "white", fontSize: "0.85rem", margin: "10px 0" }}>
+            <div style={{ fontSize: "1.7rem", textAlign: "center", marginBottom: 6 }}>🪷</div>
+            <h4 style={{
+              color: figuras.find(f => f.id === 201)?.nombreColor ?? "#C9A24A",
+              textAlign: "center",
+              fontSize: figuras.find(f => f.id === 201)?.nombreTamano ? `${figuras.find(f => f.id === 201)!.nombreTamano}px` : "1.06rem",
+              fontWeight: "bold",
+              lineHeight: 1.2,
+              textShadow: "0 1px 2px rgba(0,0,0,0.45)",
+              fontStyle: figuras.find(f => f.id === 201)?.nombreEstilo === "italic" ? "italic" : undefined
+            }}>
+              {figuras.find(f => f.id === 201)?.nombre ?? "Buda Dorado"}
+            </h4>
+            <p style={{ color: "rgba(255,255,255,0.96)", fontSize: "0.98rem", margin: "8px 0", lineHeight: 1.45 }}>
               Prosperidad
             </p>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 15 }}>
-              <span style={{ color: "gold", fontWeight: "bold" }}>35.00€</span>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+              <span style={{ color: "#C9A24A", fontWeight: "bold", fontSize: "0.85rem" }}>35.00€</span>
               <button
+                type="button"
+                className={`btn-mas-vendidos ${figuras.find(f => f.id === 201)?.stock ? "btn-anadir-dorado" : ""}`}
                 onClick={() => {
                   const figura = figuras.find(f => f.id === 201);
                   if (figura && figura.stock > 0) {
@@ -353,12 +707,13 @@ export default function Tienda({ velas, inciensos, figuras, agregarAlCarrito, vo
                   }
                 }}
                 style={{
-                  background: figuras.find(f => f.id === 201)?.stock ? "gold" : "#666",
+                  background: figuras.find(f => f.id === 201)?.stock ? "#C9A24A" : "#666",
                   border: "none",
-                  padding: "5px 15px",
+                  padding: "8px 14px",
                   borderRadius: 20,
                   cursor: figuras.find(f => f.id === 201)?.stock ? "pointer" : "not-allowed",
                   fontWeight: "bold",
+                  fontSize: "1rem",
                   color: figuras.find(f => f.id === 201)?.stock ? "#1b1745" : "#ccc"
                 }}
               >
@@ -369,8 +724,8 @@ export default function Tienda({ velas, inciensos, figuras, agregarAlCarrito, vo
         </div>
       </div>
 
-      {/* CATEGORÍAS */}
-      <h2 style={{ textAlign: "center", color: "gold", fontSize: "2rem", marginBottom: 30 }}>
+      {/* CATEGORÍAS (sincronizadas con Editar Categorías) */}
+      <h2 style={{ textAlign: "center", color: "#C9A24A", fontSize: "2rem", marginBottom: 30 }}>
         Categorías
       </h2>
 
@@ -381,87 +736,53 @@ export default function Tienda({ velas, inciensos, figuras, agregarAlCarrito, vo
           gap: 30,
         }}
       >
-        {/* Velas */}
-        <div
-          onClick={() => setMostrarCategoria("velas")}
-          style={{
-            cursor: "pointer",
-            background: "#2b2560",
-            borderRadius: 20,
-            padding: 30,
-            border: "2px solid gold",
-            textAlign: "center",
-          }}
-        >
-          <h2 style={{ color: "gold" }}>🕯️ Velas</h2>
-          <p style={{ color: "white" }}>{velas.length} productos</p>
-          <div style={{
-            background: "#ffd700",
-            color: "#1b1745",
-            padding: "8px 20px",
-            borderRadius: 20,
-            fontWeight: "bold",
-            display: "inline-block",
-            marginTop: 10
-          }}>
-            Ver todas →
-          </div>
-        </div>
-
-        {/* Inciensos */}
-        <div
-          onClick={() => setMostrarCategoria("inciensos")}
-          style={{
-            cursor: "pointer",
-            background: "#2b2560",
-            borderRadius: 20,
-            padding: 30,
-            border: "2px solid gold",
-            textAlign: "center",
-          }}
-        >
-          <h2 style={{ color: "gold" }}>🌿 Inciensos</h2>
-          <p style={{ color: "white" }}>{inciensos.length} productos</p>
-          <div style={{
-            background: "#ffd700",
-            color: "#1b1745",
-            padding: "8px 20px",
-            borderRadius: 20,
-            fontWeight: "bold",
-            display: "inline-block",
-            marginTop: 10
-          }}>
-            Ver todas →
-          </div>
-        </div>
-
-        {/* Figuras */}
-        <div
-          onClick={() => setMostrarCategoria("figuras")}
-          style={{
-            cursor: "pointer",
-            background: "#2b2560",
-            borderRadius: 20,
-            padding: 30,
-            border: "2px solid gold",
-            textAlign: "center",
-          }}
-        >
-          <h2 style={{ color: "gold" }}>🪷 Figuras</h2>
-          <p style={{ color: "white" }}>{figuras.length} productos</p>
-          <div style={{
-            background: "#ffd700",
-            color: "#1b1745",
-            padding: "8px 20px",
-            borderRadius: 20,
-            fontWeight: "bold",
-            display: "inline-block",
-            marginTop: 10
-          }}>
-            Ver todas →
-          </div>
-        </div>
+        {categoriasCatalogo.map((categoria) => {
+          const productosCat = getProductosForCategoria(categoria.id, velas, inciensos, figuras);
+          const nombreDisplay = categoria.nombre.charAt(0).toUpperCase() + categoria.nombre.slice(1);
+          return (
+            <div
+              key={categoria.id}
+              onClick={() => setMostrarCategoria(categoria.id)}
+              style={{
+                cursor: "pointer",
+                background: fondoServicios,
+                borderRadius: 20,
+                padding: 30,
+                border: "2px solid #C9A24A",
+                textAlign: "center",
+              }}
+            >
+              <div style={{ marginBottom: 12, minHeight: 100, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <img
+                  src={`/${categoria.id}.jpg`}
+                  alt={nombreDisplay}
+                  role="button"
+                  tabIndex={0}
+                  onClick={(e) => { e.stopPropagation(); setLightboxImagen({ src: `/${categoria.id}.jpg`, alt: nombreDisplay }); }}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setLightboxImagen({ src: `/${categoria.id}.jpg`, alt: nombreDisplay }); } }}
+                  style={{ maxWidth: "100%", maxHeight: 120, objectFit: "contain", borderRadius: 12, border: "1px solid rgba(212,175,55,0.5)", cursor: "pointer" }}
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                />
+              </div>
+              <h2 style={{ color: "#C9A24A" }}>{getEmoji(categoria.id)} {nombreDisplay}</h2>
+              <p style={{ color: "white" }}>{productosCat.length} productos</p>
+              <div style={{
+                background: "#C9A24A",
+                color: "#1b1745",
+                padding: "8px 20px",
+                borderRadius: 20,
+                fontWeight: "bold",
+                display: "inline-block",
+                marginTop: 10
+              }}>
+                Ver todas →
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
+    <Lightbox />
+  </>
   );
 }

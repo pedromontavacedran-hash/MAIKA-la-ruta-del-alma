@@ -1,17 +1,24 @@
-import React from 'react';
-
 interface ModalConfirmacionProps {
   abierto: boolean;
   mensaje: string;
   onConfirmar: () => void;
   onCancelar: () => void;
+  /** Texto del botón rojo de confirmar. Por defecto: "Confirmar" */
+  textoConfirmar?: string;
+  /** Texto del botón de cancelar. Por defecto: "Cancelar" */
+  textoCancelar?: string;
+  /** z-index del overlay para quedar por encima de otros modales (ej. 10002) */
+  zIndex?: number;
 }
 
 export default function ModalConfirmacion({ 
   abierto, 
   mensaje, 
   onConfirmar, 
-  onCancelar 
+  onCancelar,
+  textoConfirmar = "Confirmar",
+  textoCancelar = "Cancelar",
+  zIndex = 10000
 }: ModalConfirmacionProps) {
   if (!abierto) return null;
 
@@ -27,10 +34,10 @@ export default function ModalConfirmacion({
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      zIndex: 10000
+      zIndex
     }}>
       <div style={{
-        background: "linear-gradient(135deg, #2b2560 0%, #3a2e8a 100%)",
+        background: "#0B0B0D",
         border: "3px solid gold",
         borderRadius: 30,
         padding: "30px 40px",
@@ -42,7 +49,7 @@ export default function ModalConfirmacion({
         {/* Icono decorativo */}
         <div style={{ fontSize: "3rem", marginBottom: 10 }}>🕯️</div>
         
-        <h3 style={{ color: "gold", fontSize: "1.5rem", marginBottom: 15 }}>
+        <h3 style={{ color: "#C9A24A", fontSize: "1.5rem", marginBottom: 15 }}>
           ¿Estás segura?
         </h3>
         
@@ -60,7 +67,7 @@ export default function ModalConfirmacion({
             style={{
               background: "transparent",
               border: "2px solid gold",
-              color: "gold",
+              color: "#C9A24A",
               padding: "12px 25px",
               borderRadius: 30,
               cursor: "pointer",
@@ -76,7 +83,7 @@ export default function ModalConfirmacion({
               e.currentTarget.style.background = "transparent";
             }}
           >
-            Cancelar
+            {textoCancelar}
           </button>
           
           <button
@@ -103,7 +110,7 @@ export default function ModalConfirmacion({
               e.currentTarget.style.background = "#ff4444";
             }}
           >
-            Vaciar carrito
+            {textoConfirmar}
           </button>
         </div>
         

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LA RUTA DEL ALMA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(180deg, #1a2a3a 0%, #2c3e50 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 0 20px;
+        }
+        
+        h1 {
+            color: white;
+            font-size: 3.5em;
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .main-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 40px;
+        }
+        
+        .entrar-tienda {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .btn-entrar {
+            background: #8e44ad;
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            font-size: 1.5em;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(142,68,173,0.4);
+            transition: transform 0.3s;
+        }
+        
+        .btn-entrar:hover {
+            transform: translateY(-2px);
+            background: #9b59b6;
+        }
+        
+        .tienda-contenido {
+            display: none;
+            margin-top: 40px;
+        }
+        
+        .tienda-contenido.mostrar {
+            display: block;
+        }
+        
+        .productos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .producto {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .producto h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .precio {
+            color: #27ae60;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .btn-add {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .btn-add:hover {
+            background: #219a52;
+        }
+        
+        .carrito-info {
+            text-align: right;
+            font-size: 1.2em;
+            color: #8e44ad;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        
+        .carrito-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #e8f5e9;
+            border-radius: 10px;
+        }
+        
+        #carrito-lista {
+            list-style: none;
+            margin: 15px 0;
+        }
+        
+        #carrito-lista li {
+            padding: 10px;
+            border-bottom: 1px solid #c8e6c9;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .carrito-total {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #27ae60;
+            text-align: right;
+        }
+        
+        .console-info {
+            background: #2c3e50;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            margin-top: 30px;
+        }
+        
+        footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+        
+        .weather {
+            background: rgba(0,0,0,0.2);
+            display: inline-block;
+            padding: 10px 30px;
+            border-radius: 30px;
+            font-size: 1.1em;
+        }
+
+        .contador-productos {
+            font-size: 1.3em;
+            color: #8e44ad;
+            margin: 10px 0;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>LA RUTA DEL ALMA</h1>
+        </header>
+        
+        <div class="main-content">
+            <div class="entrar-tienda">
+                <button class="btn-entrar" onclick="mostrarTienda()">
+                    <i class="fas fa-plus"></i> Entrar a la Tienda <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            
+            <div id="tienda" class="tienda-contenido">
+                <h2 style="color: #8e44ad; text-align: center; margin-bottom: 30px;">
+                    <i class="fas fa-store"></i> TIENDA ESPIRITUAL
+                </h2>
+                
+                <div class="productos-grid">
+                    <div class="producto">
+                        <h3>🕯️ Vela Blanca</h3>
+                        <div class="precio">€12.50</div>
+                        <button class="btn-add" onclick="agregarAlCarrito('Vela Blanca', 12.50)">
+                            <i class="fas fa-cart-plus"></i> Añadir
+                        </button>
+                    </div>
+                    
+                    <div class="producto">
+                        <h3>🌿 Incienso</h3>
+                        <div class="precio">€8.99</div>
+                        <button class="btn-add" onclick="agregarAlCarrito('Incienso', 8.99)">
+                            <i class="fas fa-cart-plus"></i> Añadir
+                        </button>
+                    </div>
+                    
+                    <div class="producto">
+                        <h3>💎 Cuarzo</h3>
+                        <div class="precio">€15.00</div>
+                        <button class="btn-add" onclick="agregarAlCarrito('Cuarzo', 15.00)">
+                            <i class="fas fa-cart-plus"></i> Añadir
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="carrito-info" id="info-productos">
+                    0 productos - 0.00 €
+                </div>
+                
+                <div class="carrito-section">
+                    <h3><i class="fas fa-shopping-cart"></i> Carrito</h3>
+                    <ul id="carrito-lista">
+                        <li style="text-align: center; color: #666;">Carrito vacío</li>
+                    </ul>
+                    <div class="carrito-total" id="carrito-total">
+                        Total: €0.00
+                    </div>
+                </div>
+            </div>
+            
+            <div class="console-info">
+                <i class="fas fa-terminal"></i> <strong>CONSOLA (F12):</strong><br>
+                <span id="console-msg">CART: []</span>
+            </div>
+        </div>
+        
+        <footer>
+            <div class="weather">
+                <i class="fas fa-cloud-sun"></i> 16°C Despejado
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        let carrito = [];
+        let totalProductos = 0;
+        
+        console.log('CART:', carrito);
+        console.log('🔥 Tienda lista');
+        
+        function mostrarTienda() {
+            document.getElementById('tienda').classList.add('mostrar');
+            console.log('Tienda abierta');
+        }
+        
+        function agregarAlCarrito(nombre, precio) {
+            // Buscar producto
+            let encontrado = false;
+            for (let i = 0; i < carrito.length; i++) {
+                if (carrito[i].name === nombre) {
+                    carrito[i].quantity++;
+                    encontrado = true;
+                    break;
+                }
+            }
+            
+            if (!encontrado) {
+                carrito.push({
+                    name: nombre,
+                    price: precio,
+                    quantity: 1
+                });
+            }
+            
+            // Calcular total de productos
+            totalProductos = 0;
+            for (let i = 0; i < carrito.length; i++) {
+                totalProductos += carrito[i].quantity;
+            }
+            
+            // Mostrar en consola
+            console.log('CART:', carrito);
+            document.getElementById('console-msg').innerHTML = 'CART: ' + JSON.stringify(carrito);
+            
+            // Actualizar vista
+            actualizarCarrito();
+        }
+        
+        function actualizarCarrito() {
+            const lista = document.getElementById('carrito-lista');
+            const totalElement = document.getElementById('carrito-total');
+            const infoProductos = document.getElementById('info-productos');
+            
+            if (carrito.length === 0) {
+                lista.innerHTML = '<li style="text-align: center; color: #666;">Carrito vacío</li>';
+                totalElement.innerHTML = 'Total: €0.00';
+                infoProductos.innerHTML = '0 productos - 0.00 €';
+            } else {
+                let html = '';
+                let total = 0;
+                let cantidadTotal = 0;
+                
+                for (let i = 0; i < carrito.length; i++) {
+                    const item = carrito[i];
+                    const subtotal = item.price * item.quantity;
+                    total += subtotal;
+                    cantidadTotal += item.quantity;
+                    html += `<li>
+                        <span>${item.name} x${item.quantity}</span>
+                        <span>€${subtotal.toFixed(2)}</span>
+                    </li>`;
+                }
+                
+                lista.innerHTML = html;
+                totalElement.innerHTML = `Total: €${total.toFixed(2)}`;
+                infoProductos.innerHTML = `${cantidadTotal} productos - ${total.toFixed(2)} €`;
+            }
+        }
+    </script>
+</body>
+</html>
