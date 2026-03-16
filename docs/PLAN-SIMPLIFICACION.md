@@ -149,6 +149,8 @@ src/
 - **Datos iniciales**: `src/data/catalogoInicial.ts` — arrays por defecto de velas, inciensos, figuras.
 - **Utilidades**: `src/utils/precio.ts` — `precioSeguro`, `idSeguro`.
 - **Layout y navegación**: `src/components/Layout.tsx`, `src/components/NavPrincipal.tsx` — App renderiza `<Layout>` y `<NavPrincipal>`; mismo aspecto y comportamiento.
-- **App.tsx**: Sigue conteniendo el switch de páginas y el resto del estado (carrito, usuario, pedidos, etc.), pero ya no define tipos, constantes de catálogo ni la lógica de useCatalogo/useCategorias/useNotificacion. Build: OK.
+- **App.tsx**: Sigue conteniendo el switch de páginas y el resto del estado (usuario, pedidos, etc.), pero ya no define tipos, constantes de catálogo ni la lógica de useCatalogo/useCategorias/useNotificacion. Build: OK.
 
-Próximo paso opcional: Fase 3 (extraer cada pantalla a un componente en `src/pages/`).
+- **Fase 2 (carrito)**: `src/hooks/useCarrito.ts` — estado del carrito, persistencia en localStorage (clave en `config`: CARRITO_KEY), agregarAlCarrito, cambiarCantidad, total, totalItemsCarrito. App usa `useCarrito(catalog, mostrarNotificacion)` y obtiene cart, setCart, total, totalItemsCarrito, agregarAlCarrito, cambiarCantidad. También: `src/utils/envio.ts` (calcularEnvio), `src/components/ResumenPago.tsx` (componente de resumen de pago). App importa ResumenPago, calcularEnvio y precioSeguro/idSeguro desde utils.
+
+Próximo paso opcional: Fase 3 ya aplicada (páginas en `src/pages/`). Siguiente: extraer lógica de pedidos a usePedidos si se desea seguir aligerando App.

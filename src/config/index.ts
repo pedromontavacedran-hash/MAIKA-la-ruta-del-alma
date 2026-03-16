@@ -19,6 +19,8 @@ export const CATALOGO_VELAS_KEY = "maikaCatalogoVelas";
 export const CATALOGO_INCIENSOS_KEY = "maikaCatalogoInciensos";
 export const CATALOGO_FIGURAS_KEY = "maikaCatalogoFiguras";
 export const CATALOGO_KITS_KEY = "maikaCatalogoKits";
+/** Clave en localStorage del carrito. */
+export const CARRITO_KEY = "carritoMaika";
 export const CATEGORIA_IMAGENES_KEY = "maikaCategoriaImagenes";
 export const UMBRAL_STOCK_BAJO_KEY = "maikaUmbralStockBajo";
 

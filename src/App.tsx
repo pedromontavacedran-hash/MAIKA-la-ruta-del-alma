@@ -25,7 +25,7 @@ import NuevaCategoriaPage from "./pages/admin/NuevaCategoriaPage";
 import EditarProductosPage from "./pages/admin/EditarProductosPage";
 import InventarioPage from "./pages/admin/InventarioPage";
 import NuevoProductoPage from "./pages/admin/NuevoProductoPage";
-import type { Producto, ItemCarrito, Cliente, Usuario, Pedido, CuponAplicado, ConsentimientoCookies, PerfilCompraRapida, AuthForm, EditUsuarioForm, Pagina } from "./types";
+import type { ItemCarrito, Cliente, Usuario, Pedido, CuponAplicado, ConsentimientoCookies, PerfilCompraRapida, AuthForm, EditUsuarioForm, Pagina } from "./types";
 import { inputStyle } from "./styles/inputStyle";
 import {
   EMAILJS_CONFIG,
@@ -51,95 +51,15 @@ import {
 import { useCatalogo } from "./hooks/useCatalogo";
 import { useCategorias } from "./hooks/useCategorias";
 import { useNotificacion } from "./hooks/useNotificacion";
+import { useCarrito } from "./hooks/useCarrito";
+import ResumenPago from "./components/ResumenPago";
+import { calcularEnvio } from "./utils/envio";
+import { precioSeguro } from "./utils/precio";
 
 export type { Producto, ItemCarrito, Cliente, Usuario, Pedido, EditUsuarioForm } from "./types";
 
 function normalizarCodigoCupon(codigo: string): string {
   return codigo.trim().toUpperCase().replace(/\s+/g, "");
-}
-
-function ResumenPago({
-  total,
-  envioPreview,
-  cuponAplicado,
-  totalAPagar
-}: {
-  total: number;
-  envioPreview: number;
-  cuponAplicado: CuponAplicado | null;
-  totalAPagar: number;
-}) {
-  const descuento =
-    cuponAplicado == null
-      ? 0
-      : cuponAplicado.tipo === "porcentaje"
-        ? (total * cuponAplicado.valor) / 100
-        : envioPreview;
-  const textoDescuento =
-    cuponAplicado == null
-      ? ""
-      : cuponAplicado.tipo === "porcentaje"
-        ? `Descuento (${cuponAplicado.valor}%):`
-        : "Descuento (envío gratis):";
-  const fila = (key: string, label: React.ReactNode, valor: React.ReactNode, destacar = false) => (
-    <div
-      key={key}
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        gap: 16,
-        padding: destacar ? "10px 0" : "6px 0",
-        borderBottom: destacar ? "2px solid #C9A24A" : "1px solid rgba(201,162,74,0.2)",
-        marginBottom: destacar ? 0 : 4
-      }}
-    >
-      <span style={{ color: "white", opacity: destacar ? 1 : 0.9 }}>{label}</span>
-      <span style={{ color: destacar ? "#C9A24A" : "white", fontWeight: destacar ? "bold" : "normal", fontSize: destacar ? 18 : 14 }}>
-        {valor}
-      </span>
-    </div>
-  );
-  return (
-    <>
-      <p style={{ marginBottom: 12 }}><strong>Resumen:</strong></p>
-      {fila("subtotal", "Subtotal", `${Number(total).toFixed(2)} €`)}
-      {fila("envio", "Envío", `${Number(envioPreview).toFixed(2)} €`)}
-      {cuponAplicado != null && (
-        <>
-          {fila("cupon", "🎟️ Cupón", cuponAplicado.codigo)}
-          {fila("descuento", textoDescuento, `-${Number(descuento).toFixed(2)} €`)}
-        </>
-      )}
-      {fila("total", "TOTAL", `${Number(totalAPagar).toFixed(2)} €`, true)}
-    </>
-  );
-}
-
-function calcularEnvio(provincia: string | undefined, subtotal: number) {
-  if (!provincia?.trim()) return 0;
-  if (subtotal >= 50) return 0;
-  return 4.9;
-}
-
-function precioSeguro(precio: unknown): number {
-  if (typeof precio === "string") {
-    const limpio = precio
-      .trim()
-      .replace(/[^\d,.-]/g, "")
-      .replace(/\.(?=\d{3}(\D|$))/g, "")
-      .replace(",", ".");
-    const n = Number(limpio);
-    return Number.isFinite(n) ? n : 0;
-  }
-
-  const n = typeof precio === "number" ? precio : Number(precio);
-  return Number.isFinite(n) ? n : 0;
-}
-
-function idSeguro(id: unknown): number | null {
-  const n = Number(id);
-  return Number.isFinite(n) ? n : null;
 }
 
 function fechaPedidoSeguro(fecha: string): Date | null {
@@ -159,7 +79,6 @@ function fechaPedidoSeguro(fecha: string): Date | null {
 export default function App() {
 const [pagina, setPagina] = useState<Pagina>("inicio");
   const [legalDoc, setLegalDoc] = useState<"aviso-legal" | "politica-cookies" | "politica-privacidad" | "terminos-condiciones" | null>(null);
-  const [cart, setCart] = useState<ItemCarrito[]>([]);
   const { notificacion, setNotificacion, mostrarNotificacion } = useNotificacion();
   const categorias = useCategorias();
   const {
@@ -206,10 +125,23 @@ const [pagina, setPagina] = useState<Pagina>("inicio");
     setKits,
     getProductoByValue,
     precioCatalogoPorId,
-    precioCatalogoPorNombre,
     precioItemCarrito,
     normalizarItemCarrito
   } = catalogo;
+
+  const carrito = useCarrito(
+    {
+      precioItemCarrito,
+      normalizarItemCarrito,
+      precioCatalogoPorId,
+      velas,
+      inciensos,
+      figuras,
+      kits
+    },
+    mostrarNotificacion
+  );
+  const { cart, setCart, total, totalItemsCarrito, agregarAlCarrito, cambiarCantidad } = carrito;
 
   const [categoriaEditarProductos, setCategoriaEditarProductos] = useState<"velas" | "inciensos" | "figuras">("velas");
   const [productoSeleccionado, setProductoSeleccionado] = useState<string>("");
@@ -558,35 +490,6 @@ const [pagina, setPagina] = useState<Pagina>("inicio");
     }
   };
 
-  // Solo cargar carrito desde localStorage una vez al montar (no al cambiar normalizarItemCarrito)
-  const carritoYaCargadoRef = useRef(false);
-  useEffect(() => {
-    if (carritoYaCargadoRef.current) return;
-    carritoYaCargadoRef.current = true;
-
-    const carritoGuardado = localStorage.getItem("carritoMaika");
-    if (carritoGuardado) {
-      try {
-        const carritoParseado = JSON.parse(carritoGuardado) as ItemCarrito[];
-        const carritoSeguro = Array.isArray(carritoParseado) ? carritoParseado : [];
-        const carritoNormalizado = carritoSeguro
-          .map((item) => normalizarItemCarrito(item))
-          .filter((item) => item.cantidad > 0);
-
-        setCart(carritoNormalizado);
-
-        const originalSerializado = JSON.stringify(carritoSeguro);
-        const normalizadoSerializado = JSON.stringify(carritoNormalizado);
-        if (originalSerializado !== normalizadoSerializado) {
-          localStorage.setItem("carritoMaika", normalizadoSerializado);
-        }
-      } catch {
-        localStorage.removeItem("carritoMaika");
-        setCart([]);
-      }
-    }
-  }, [normalizarItemCarrito]);
-
   // Cargar resto de datos guardados (usuario, cookies, etc.)
   useEffect(() => {
     // ✅ Cargar usuario guardado
@@ -717,15 +620,6 @@ const [pagina, setPagina] = useState<Pagina>("inicio");
     }
   }, [pagina, categoriaEditarProductos, velas, inciensos, figuras]);
 
-  const esPrimeraEjecucionGuardarCarritoRef = useRef(true);
-  useEffect(() => {
-    if (esPrimeraEjecucionGuardarCarritoRef.current) {
-      esPrimeraEjecucionGuardarCarritoRef.current = false;
-      return;
-    }
-    localStorage.setItem("carritoMaika", JSON.stringify(cart));
-  }, [cart]);
-
   useEffect(() => {
     const handler = (e: MessageEvent) => {
       if (e.data === "cerrarLegal") setLegalDoc(null);
@@ -734,23 +628,6 @@ const [pagina, setPagina] = useState<Pagina>("inicio");
     return () => window.removeEventListener("message", handler);
   }, []);
 
-  const totalItemsCarrito = useMemo(
-    () =>
-      cart.reduce((sum, item) => {
-        const cantidad = Number.isFinite(Number(item.cantidad)) ? Number(item.cantidad) : 0;
-        return sum + cantidad;
-      }, 0),
-    [cart]
-  );
-
-  const total = useMemo(
-    () =>
-      cart.reduce((sum, item) => {
-        const cantidad = Number.isFinite(Number(item.cantidad)) ? Number(item.cantidad) : 0;
-        return sum + precioItemCarrito(item) * cantidad;
-      }, 0),
-    [cart, precioCatalogoPorId, precioCatalogoPorNombre]
-  );
   const envioPreview = calcularEnvio(datosCliente.provincia, total);
   const totalPreview = total + envioPreview;
   const descuentoCupon = useMemo(() => {
@@ -891,101 +768,6 @@ const [pagina, setPagina] = useState<Pagina>("inicio");
     setCuponInput("");
     setCuponError(null);
     mostrarNotificacion("Cupón eliminado", "normal");
-  };
-
-  const agregarAlCarrito = useCallback((producto: Producto) => {
-    const idNum = Number(producto.id);
-    const stockDisponible = Math.max(0, Number(producto.stock));
-    if (!Number.isFinite(idNum) || stockDisponible <= 0) {
-      mostrarNotificacion(`❌ ${producto.nombre} agotado`, "error");
-      return;
-    }
-
-    const cantidadEnCarrito = (() => {
-      const item = cart.find((p) => idSeguro(p.id) === idNum);
-      return item ? Math.max(0, Number(item.cantidad) || 0) : 0;
-    })();
-    if (cantidadEnCarrito >= stockDisponible) {
-      mostrarNotificacion(`Solo hay ${stockDisponible} unidades disponibles de ${producto.nombre}`, "error");
-      return;
-    }
-
-    const precioNormalizado = (() => {
-      const directo = precioSeguro(producto.precio);
-      if (directo > 0) return directo;
-      return precioCatalogoPorId.get(idNum) ?? precioCatalogoPorId.get(producto.id as number) ?? 0;
-    })();
-
-    setCart((prev) => {
-      const existente = prev.find((p) => idSeguro(p.id) === idNum);
-      const cantidadActual = existente ? Number(existente.cantidad) || 0 : 0;
-      const nuevaCantidad = Math.min(cantidadActual + 1, stockDisponible);
-      if (existente) {
-        return prev.map((p) =>
-          idSeguro(p.id) === idNum
-            ? {
-                ...p,
-                precio: precioNormalizado > 0 ? precioNormalizado : precioItemCarrito(p),
-                cantidad: nuevaCantidad
-              }
-            : p
-        );
-      }
-      return [...prev, normalizarItemCarrito({ ...producto, id: idNum, precio: precioNormalizado, cantidad: 1 })];
-    });
-
-    mostrarNotificacion(`✅ ${producto.nombre} añadido`, "exito");
-  }, [cart, mostrarNotificacion, precioCatalogoPorId, precioItemCarrito, normalizarItemCarrito]);
-
-  const getStockProducto = useCallback((id: number) => {
-    const stock = (id < 100)
-      ? velas.find(p => p.id === id)?.stock
-      : (id < 200) ? inciensos.find(p => p.id === id)?.stock
-      : (id < 300) ? figuras.find(p => p.id === id)?.stock
-      : kits.find(p => p.id === id)?.stock;
-    return Math.max(0, Number(stock ?? 0));
-  }, [velas, inciensos, figuras, kits]);
-
-  const cambiarCantidad = (id: number, incremento: number) => {
-    const idNum = Number(id);
-    if (!Number.isFinite(idNum)) return;
-
-    const stockDisponible = getStockProducto(idNum);
-    const itemActual = cart.find(p => idSeguro(p.id) === idNum || Number(p.id) === idNum);
-    const cantidadActual = itemActual ? (Number(itemActual.cantidad) || 0) : 0;
-
-    if (incremento > 0 && stockDisponible <= 0) {
-      const nombre = itemActual?.nombre ?? "Producto";
-      mostrarNotificacion(`❌ ${nombre} agotado`, "error");
-      return;
-    }
-    if (incremento > 0 && cantidadActual >= stockDisponible) {
-      const nombre = itemActual?.nombre ?? "Producto";
-      mostrarNotificacion(`Solo hay ${stockDisponible} unidades disponibles de ${nombre}`, "error");
-      return;
-    }
-
-    const nextCart = (prev: ItemCarrito[]) => {
-      const item = prev.find(p => idSeguro(p.id) === idNum || Number(p.id) === idNum);
-      if (!item) return prev;
-      let nuevaCantidad = Math.max(0, (Number(item.cantidad) || 0) + incremento);
-      if (incremento > 0) {
-        nuevaCantidad = Math.min(nuevaCantidad, stockDisponible);
-      }
-      return prev.map(p => {
-        if (idSeguro(p.id) !== idNum && Number(p.id) !== idNum) return { ...p };
-        return {
-          ...p,
-          id: idNum,
-          precio: precioItemCarrito(p),
-          cantidad: nuevaCantidad
-        };
-      }).filter(p => p.cantidad > 0);
-    };
-
-    flushSync(() => {
-      setCart(nextCart);
-    });
   };
 
   const vaciarCarrito = () => {
