@@ -1,0 +1,42 @@
+/* Fondo negro estelar — MAIKA espiritual (toda la ventana, incluidos laterales) */
+.fondo-estrellado-aurora {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  min-width: 100%;
+  min-height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  background: #0B0B0D;
+}
+
+.fondo-estrellado-constelaciones {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.estrella-dorada {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--gold-main, #C9A24A);
+  transform: translate(-50%, -50%);
+  animation: parpadear-estrella 5s ease-in-out infinite;
+  box-shadow: 0 0 6px var(--gold-glow);
+}
+
+@keyframes parpadear-estrella {
+  0%, 100% {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(1.03);
+  }
+}

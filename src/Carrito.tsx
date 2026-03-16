@@ -1,4 +1,5 @@
 import { type ItemCarrito } from "./App";
+import BotonCerrar from "./components/BotonCerrar";
 
 interface Props {
   cart: ItemCarrito[];
@@ -25,52 +26,19 @@ export default function Carrito({
   const faltaParaEnvioGratis = Math.max(0, UMBRAL_ENVIO_GRATIS - total);
   const envioCalculado = total >= UMBRAL_ENVIO_GRATIS ? 0 : ENVIO_BASE;
   const totalConEnvio = total + envioCalculado;
-  
+
   if (cart.length === 0) {
     return (
-      <div className="carrito-vista" style={{ textAlign: "center", padding: 40 }}>
-        <div style={{ textAlign: "left" }}>
-          <button
-            className="btn-volver-azul"
-            onClick={volver}
-            style={{
-              background: "#0B0B0D",
-              color: "#C9A24A",
-              border: "2px solid gold",
-              borderRadius: "30px",
-              padding: "8px 20px",
-              cursor: "pointer",
-              fontWeight: "bold",
-              marginBottom: 30
-            }}
-          >
-            ← Volver a tienda
-          </button>
-        </div>
+      <div className="carrito-vista" style={{ textAlign: "center", padding: 40, position: "relative" }}>
+        <BotonCerrar onClick={volver} ariaLabel="Volver a tienda" title="Volver a tienda" />
         <h2 style={{ color: "#C9A24A", fontSize: "2.1rem" }}>🛒 Carrito vacío</h2>
       </div>
     );
   }
 
   return (
-    <div className="carrito-vista" style={{ maxWidth: 800, margin: "0 auto", color: "#C9A24A" }}>
-      <div style={{ textAlign: "left", marginBottom: 20 }}>
-        <button
-          className="btn-volver-azul"
-          onClick={volver}
-          style={{
-            background: "#0B0B0D",
-            color: "#C9A24A",
-            border: "2px solid gold",
-            borderRadius: "30px",
-            padding: "8px 20px",
-            cursor: "pointer",
-            fontWeight: "bold"
-          }}
-        >
-          ← Volver a tienda
-        </button>
-      </div>
+    <div className="carrito-vista" style={{ maxWidth: 800, margin: "0 auto", color: "#C9A24A", position: "relative", padding: 40 }}>
+      <BotonCerrar onClick={volver} ariaLabel="Volver a tienda" title="Volver a tienda" />
       <h2 style={{ textAlign: "center", marginBottom: 30 }}>🛒 Tu carrito</h2>
       
       <div style={{ background: "#0B0B0D", borderRadius: 20, padding: 20, marginBottom: 20 }}>

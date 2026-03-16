@@ -1,6 +1,7 @@
 import { useApp } from "../context/AppContext";
 import { useFavoritos } from "../hooks/useFavoritos";
 import type { Producto } from "../types";
+import BotonCerrar from "../components/BotonCerrar";
 
 export default function FavoritosPage() {
   const { setPagina, velas, inciensos, figuras, agregarAlCarrito } = useApp();
@@ -36,26 +37,8 @@ export default function FavoritosPage() {
   }
 
   return (
-    <div className="tienda-vista" style={{ padding: 40 }}>
-      <button
-        onClick={() => setPagina("tienda")}
-        className="btn-volver-azul"
-        style={{
-          backgroundImage: "linear-gradient(rgba(10, 7, 25, 0.45), rgba(10, 7, 25, 0.45)), url('/fondo%20estrellado.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          color: "#C9A24A",
-          border: "2px solid #C9A24A",
-          borderRadius: "30px",
-          padding: "8px 20px",
-          cursor: "pointer",
-          fontWeight: "bold",
-          marginBottom: 30,
-        }}
-      >
-        ← Volver a la Tienda
-      </button>
+    <div className="tienda-vista" style={{ padding: 40, position: "relative" }}>
+      <BotonCerrar onClick={() => setPagina("tienda")} ariaLabel="Volver a la tienda" title="Volver a la tienda" />
 
       <h2 style={{ textAlign: "center", color: "#C9A24A", fontSize: "2rem", marginBottom: 30 }}>
         Mis Favoritos 💛

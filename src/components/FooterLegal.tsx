@@ -1,4 +1,8 @@
+import { useApp } from "../context/AppContext";
+
 export default function FooterLegal() {
+  const { openLegal } = useApp();
+  const linkStyle = { color: "#C9A24A", margin: "0 8px", background: "none", border: "none", cursor: "pointer", fontSize: "inherit", padding: 0, textDecoration: "underline" };
   return (
     <footer
       style={{
@@ -14,21 +18,21 @@ export default function FooterLegal() {
         maxWidth: "95%"
       }}
     >
-      <a href="/aviso-legal.html" target="_blank" rel="noreferrer" style={{ color: "#C9A24A", margin: "0 8px" }}>
+      <button type="button" style={linkStyle} onClick={() => openLegal("aviso-legal")}>
         Aviso Legal
-      </a>
+      </button>
       ·
-      <a href="/politica-cookies.html" target="_blank" rel="noreferrer" style={{ color: "#C9A24A", margin: "0 8px" }}>
+      <button type="button" style={linkStyle} onClick={() => openLegal("politica-cookies")}>
         Política de Cookies
-      </a>
+      </button>
       ·
-      <a href="/politica-privacidad.html" target="_blank" rel="noreferrer" style={{ color: "#C9A24A", margin: "0 8px" }}>
+      <button type="button" style={linkStyle} onClick={() => openLegal("politica-privacidad")}>
         Política de Privacidad
-      </a>
+      </button>
       ·
-      <a href="/terminos-condiciones.html" target="_blank" rel="noreferrer" style={{ color: "#C9A24A", margin: "0 8px" }}>
+      <button type="button" style={linkStyle} onClick={() => openLegal("terminos-condiciones")}>
         Términos y Condiciones
-      </a>
+      </button>
     </footer>
   );
 }

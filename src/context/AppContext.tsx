@@ -63,6 +63,17 @@ export interface AppContextValue {
   /** Categoría a mostrar al abrir la tienda (se limpia tras aplicar). */
   categoriaTiendaAlAbrir: string | null;
   setCategoriaTiendaAlAbrir: (v: string | null) => void;
+  /** Término de búsqueda para la tienda (desde el menú principal). Se limpia al aplicar. */
+  busquedaTienda: string;
+  setBusquedaTienda: (v: string) => void;
+  /** Bloques desplegables de inicio (cada uno: título, subtítulo, inicio, numProductos). Editable desde Admin. */
+  desplegableInicio: import("../config").BloqueDesplegableInicio[];
+  setDesplegableInicio: (v: import("../config").BloqueDesplegableInicio[]) => void;
+  /** Servicios de la página de inicio (nombre, imagen, duración, precio, botón, WhatsApp). Editable desde Admin. */
+  serviciosInicio: import("../config").ServicioInicio[];
+  setServiciosInicio: (v: import("../config").ServicioInicio[]) => void;
+  /** Abre la pantalla legal dentro de la app (aviso legal, cookies, privacidad, términos). */
+  openLegal: (doc: "aviso-legal" | "politica-cookies" | "politica-privacidad" | "terminos-condiciones") => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);

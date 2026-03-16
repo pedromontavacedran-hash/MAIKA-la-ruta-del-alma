@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import type { AuthForm, Usuario, Pedido, Pagina } from "../types";
 import { inputStyle } from "../styles/inputStyle";
+import BotonCerrar from "../components/BotonCerrar";
 
 export interface CuentaPageProps {
   formAuth: AuthForm;
@@ -93,7 +94,8 @@ export default function CuentaPage({
 
   if (!usuario) {
     return (
-      <div style={{ maxWidth: 500, margin: "0 auto" }}>
+      <div style={{ maxWidth: 500, margin: "0 auto", position: "relative" }}>
+        <BotonCerrar onClick={() => setPagina("inicio")} ariaLabel="Volver al inicio" title="Volver al inicio" />
         <h2 style={{ textAlign: "center", color: "#C9A24A", marginBottom: 30 }}>👤 Mi Cuenta</h2>
         <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
           <button
@@ -104,15 +106,6 @@ export default function CuentaPage({
             onClick={() => { setModoRegistro("register"); setFormAuth((prev) => ({ ...prev, email: "", confirmEmail: "", password: "", confirmPassword: "", pasoVerificacion: 1 })); setReenvioDisponibleEn(0); setModoRecuperar(false); }}
             style={{ flex: 1, padding: 12, background: modoRegistro === "register" && !modoRecuperar ? "#C9A24A" : "transparent", color: modoRegistro === "register" && !modoRecuperar ? "#1b1745" : "#C9A24A", border: "2px solid #C9A24A", borderRadius: 10, cursor: "pointer", fontWeight: "bold" }}
           >Registrarse</button>
-        </div>
-        <div style={{ marginBottom: 16 }}>
-          <button
-            type="button"
-            onClick={() => setPagina("inicio")}
-            style={{ padding: "10px 20px", background: "transparent", color: "#C9A24A", border: "2px solid #C9A24A", borderRadius: 10, cursor: "pointer", fontWeight: "bold", fontSize: 15 }}
-          >
-            Cancelar → Inicio
-          </button>
         </div>
         <div style={{ background: "#0B0B0D", padding: 30, borderRadius: 20, border: "2px solid #C9A24A" }}>
           {!modoRecuperar && modoRegistro === "register" && formAuth.pasoVerificacion === 1 && (
@@ -409,11 +402,9 @@ export default function CuentaPage({
   .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
 
   return (
-    <div style={{ maxWidth: 500, margin: "0 auto" }}>
+    <div style={{ maxWidth: 500, margin: "0 auto", position: "relative" }}>
+      <BotonCerrar onClick={() => setPagina("inicio")} ariaLabel="Volver al inicio" title="Volver al inicio" />
       <h2 style={{ textAlign: "center", color: "#C9A24A", marginBottom: 30 }}>👤 Mi Cuenta</h2>
-      <div style={{ marginBottom: 16 }}>
-        <button type="button" onClick={() => setPagina("inicio")} style={{ padding: "10px 20px", background: "transparent", color: "#C9A24A", border: "2px solid #C9A24A", borderRadius: 10, cursor: "pointer", fontWeight: "bold", fontSize: 15 }}>Cancelar → Inicio</button>
-      </div>
       <div style={{ background: "#0B0B0D", padding: 20, borderRadius: 20, border: "2px solid #C9A24A", marginBottom: 20 }}>
         <h3 style={{ color: "#C9A24A", marginBottom: 15 }}>Bienvenido, {usuario.nombre}</h3>
         <p style={{ color: "white" }}>📧 {usuario.email}</p>

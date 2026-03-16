@@ -377,6 +377,8 @@ button:active {
   .app-inicio-dropdown {
     min-width: min(280px, calc(100vw - 24px)) !important;
     max-width: calc(100vw - 24px) !important;
+    max-height: min(75vh, 520px) !important;
+    overflow-y: auto !important;
   }
   .app-inicio-dropdown button {
     min-height: 44px !important;
@@ -454,38 +456,52 @@ button:active {
   overflow-x: visible;
 }
 
+/* Espacio para que el contenido no quede oculto bajo el header sticky */
+.app-shell__content > .app-topbar + * {
+  scroll-margin-top: 1px;
+}
+.app-shell:not(.app-shell--full-bleed-top) .app-shell__content {
+  padding-top: 0;
+}
+/* Espacio entre header sticky y el contenido que sigue (evita que quede oculto) */
+.app-topbar + * {
+  margin-top: 12px;
+}
+.app-shell--full-bleed-top .app-topbar + * {
+  margin-top: 0;
+}
+
 /* Cuando la primera vista es Inicio: sin hueco arriba para que nav quede a ras */
 .app-shell--full-bleed-top {
   padding-top: 0 !important;
 }
+/* Hero empieza debajo del topbar (o debajo del desplegable si está abierto). Sin solapamientos. */
 .app-shell--full-bleed-top .hero-section {
   margin-top: 0;
 }
 
-/* ========== Hero section: todo el ancho de pantalla (0 a 100vw) ========== */
+/* ========== Hero section ========== */
 .hero-section {
   position: relative;
-  width: 100vw;
-  min-width: 100vw;
-  margin-left: -20px;
-  margin-top: -30px;
-  padding: 0;
-  height: 100vh;
+  width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   overflow: hidden;
   background: #0B0B0D;
-  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
 .hero-section__img {
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center top;
-  display: block;
+  object-position: center 52%;
   pointer-events: none;
+  z-index: 1;
 }
 
 /* Nav integrada en el hero: mismo estilo que el hero (dorado, sin botones) */
@@ -537,51 +553,50 @@ button:active {
   user-select: none;
 }
 
-/* Zona clicable: banda ancha donde está "EXPLORAR TIENDA" para que siempre marque */
-.hero-section__zona-clic {
-  position: absolute;
-  left: 0;
-  right: 0;
-  width: 100%;
-  bottom: 18%;
-  height: 100px;
-  cursor: pointer !important;
-  pointer-events: auto !important;
-  z-index: 10;
+/* Parpadeo continuo: en el pico el botón se hace transparente */
+@keyframes hero-btn-dorado {
+  0%, 100% {
+    background-color: rgba(11, 11, 13, 0.94);
+    box-shadow: 0 0 6px rgba(201, 162, 74, 0.15);
+    border-color: #6B5220;
+    color: #a68b45;
+  }
+  50% {
+    background-color: rgba(11, 11, 13, 0.45);
+    box-shadow: 0 0 18px rgba(201, 162, 74, 0.4), 0 0 32px rgba(201, 162, 74, 0.15);
+    border-color: #E6C77A;
+    color: #f0d89a;
+  }
 }
 
-/* Botón "Explorar tienda" debajo de Magia y bienestar */
+/* Botón "Explorar tienda" */
 .hero-section__btn-explorar {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 14%;
-  z-index: 12;
-  margin: 0 auto;
-  width: max-content;
-  max-width: 90%;
-  min-width: 200px;
+  top: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
   padding: 14px 32px;
+  min-width: 200px;
   font-size: 1.1rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
   color: #e5c07b;
-  background: rgba(11, 11, 13, 0.75);
+  background: rgba(11, 11, 13, 0.85);
   border: 2px solid #C9A24A;
   border-radius: 999px;
   cursor: pointer;
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
-  transition: color 0.2s ease, background-color 0.2s ease;
 }
 .hero-section__btn-explorar:hover {
   color: #f0d89a;
-  background-color: rgba(11, 11, 13, 0.9);
+  background-color: rgba(11, 11, 13, 0.95);
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: var(--gold-hover-shadow);
 }
 .hero-section__btn-explorar:active {
   color: #e5c07b;
+  transform: translateX(-50%) scale(0.98);
 }
-
 
 @media (max-width: 640px) {
   .hero-section {
@@ -599,12 +614,8 @@ button:active {
   .hero-nav__link {
     font-size: 0.9rem;
   }
-  .hero-section__zona-clic {
-    bottom: 16%;
-    height: 90px;
-  }
   .hero-section__btn-explorar {
-    bottom: 12%;
+    top: 8%;
     padding: 12px 24px;
     font-size: 1rem;
     min-width: 180px;
@@ -682,14 +693,37 @@ button:active {
 .btn-reservar-inicio {
   background: var(--gold-gradient) !important;
   background-image: none !important;
-  color: var(--maika-bg) !important;
-  border: 1px solid var(--gold-main) !important;
-  border-radius: 18px !important;
-  letter-spacing: 1.5px;
+  color: #0B0B0D !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  border: none !important;
+  border-radius: 20px !important;
+  letter-spacing: 0.5px;
+  padding: 12px 16px !important;
+  cursor: pointer;
+  width: 100%;
   transition: box-shadow var(--maika-transition) !important;
 }
 .btn-reservar-inicio:hover {
+  color: #0B0B0D !important;
   box-shadow: var(--gold-hover-shadow) !important;
+}
+
+/* Forzar que el texto de los botones de servicios se vea siempre (clase correcta: inicio-servicio-card) */
+.inicio-page .inicio-servicio-card .btn-reservar-inicio {
+  color: #0B0B0D !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+.inicio-page .inicio-servicio-card .btn-reservar-inicio span {
+  color: #0B0B0D !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: inline !important;
 }
 
 .btn-mas-vendidos {
@@ -752,13 +786,14 @@ button:active {
 .app-topbar {
   position: sticky;
   top: 0;
-  z-index: 100;
-  background: rgba(11, 11, 13, 0.95);
+  z-index: 1000;
+  background: #0B0B0D;
   backdrop-filter: blur(8px);
   padding-top: 12px;
   padding-bottom: 14px;
-  margin-bottom: 24px;
+  margin-bottom: 0;
   border-bottom: 1px solid var(--gold-main);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
 }
 
 .app-topbar .app-nav-link {
@@ -790,6 +825,7 @@ button:active {
   line-height: 1.2;
   display: inline-flex;
   align-items: center;
+  font-size: 12px !important;
 }
 
 /* Carrito y Favoritos a la derecha, misma altura que los enlaces de la izquierda */
@@ -928,25 +964,37 @@ button:active {
   box-shadow: var(--gold-hover-shadow);
 }
 
-.inicio-page .inicio-card-servicio {
-  width: min(220px, 100%);
+/* Título de servicio: altura fija para que las imágenes queden a la misma altura en las tres tarjetas */
+.inicio-page .inicio-servicio-titulo {
+  height: 52px;
+  min-height: 52px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.inicio-page .inicio-servicio-card {
+  width: min(240px, 100%);
   padding: clamp(12px, 2vw, 18px);
   min-height: 280px;
 }
 
-.inicio-page .inicio-card-servicio h3 {
+.inicio-page .inicio-servicio-card h3 {
   font-size: clamp(1rem, 1.5vw, 1.1rem);
   margin: 4px 0;
 }
 
-.inicio-page .inicio-card-servicio .precio {
+.inicio-page .inicio-servicio-card .precio {
   font-size: clamp(1.05rem, 1.8vw, 1.2rem);
 }
 
-.inicio-page .inicio-card-servicio button {
-  font-size: clamp(0.9rem, 1.4vw, 1rem);
-  padding: 10px 14px;
+.inicio-page .inicio-servicio-card button {
+  font-size: 16px !important;
+  padding: 12px 16px !important;
   min-height: 44px;
+  margin-top: auto;
+  color: #0B0B0D !important;
 }
 
 .inicio-cart-panel {
@@ -988,6 +1036,38 @@ button:active {
   min-height: 44px;
 }
 
+/* Bloques de texto en Inicio: mismo ancho y alineados */
+.inicio-bloques-texto {
+  text-align: center;
+  box-sizing: border-box;
+}
+.inicio-bloques-texto .inicio-card-texto {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 40px 0;
+  padding: 20px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+}
+.inicio-bloques-texto .inicio-testimonios {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 32px;
+}
+.inicio-bloques-texto .inicio-testimonios .testimonio-card {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 20px;
+  font-size: 16px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.95);
+}
+
 .testimonio-card {
   border: 1px solid var(--gold-main);
   color: var(--maika-text);
@@ -999,18 +1079,45 @@ button:active {
   box-shadow: var(--gold-hover-shadow);
 }
 
-.tienda-vista button {
+.tienda-vista button:not(.boton-cerrar-maika) {
   background: var(--maika-bg) !important;
   color: var(--gold-main) !important;
   border: 1px solid var(--gold-main) !important;
   border-radius: 16px !important;
   transition: box-shadow var(--maika-transition) !important;
 }
-.tienda-vista button:hover {
+.tienda-vista button:not(.boton-cerrar-maika):hover {
   box-shadow: var(--gold-hover-shadow) !important;
 }
 .tienda-vista button:disabled {
   opacity: 0.55;
+}
+
+/* Botón cerrar unificado (igual que Carrito): mismo borde dorado, cruz y tamaño en toda la app */
+.boton-cerrar-maika {
+  position: absolute !important;
+  right: 0 !important;
+  top: 0 !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  background: #0B0B0D !important;
+  border: 2px solid #C9A24A !important;
+  border-radius: 8px !important;
+  padding: 6px !important;
+  box-sizing: border-box !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+}
+.boton-cerrar-maika:hover {
+  box-shadow: 0 2px 8px rgba(201,162,74,0.4) !important;
+}
+.boton-cerrar-maika svg {
+  flex-shrink: 0;
 }
 
 @media (max-width: 900px) {
@@ -1022,21 +1129,55 @@ button:active {
     padding-top: 0 !important;
   }
 
-  .app-topbar,
+  /* Barra superior: en fila con botones en línea (no apilados), bien alineados */
+  .app-topbar {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px;
+  }
+  .app-topbar .app-nav-links {
+    width: auto !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+  .app-topbar .app-nav-links > * {
+    flex-shrink: 0;
+  }
+  .app-topbar button:not(.app-nav-link) {
+    width: auto !important;
+    font-size: 15px !important;
+    padding: 8px 12px !important;
+  }
+  .app-topbar__right {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+  /* En móvil, un poco más de espacio entre header y contenido */
+  .app-topbar + * {
+    margin-top: 16px !important;
+  }
+  .app-shell--full-bleed-top .app-topbar + * {
+    margin-top: 0 !important;
+  }
+
+  /* Barra inferior: se mantiene en columna */
   .app-bottombar {
     flex-direction: column;
     align-items: stretch !important;
     gap: 10px;
   }
-
-  .app-nav-links {
+  .app-bottombar .app-nav-links {
     width: 100%;
     display: flex !important;
     flex-wrap: wrap !important;
     gap: 12px !important;
   }
-
-  .app-topbar button:not(.app-nav-link),
   .app-bottombar button:not(.app-nav-link) {
     width: 100%;
     justify-content: center;

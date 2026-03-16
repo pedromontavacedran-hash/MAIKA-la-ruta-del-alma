@@ -9,9 +9,9 @@ import { Capacitor } from "@capacitor/core";
 import ModalUsuarios from "./components/ModalUsuarios";
 import EditUsuarioModal from "./components/EditUsuarioModal";
 import PedidoExitoModal from "./components/PedidoExitoModal";
-import VisitasCounter from "./components/VisitasCounter";
 import Layout from "./components/Layout";
 import NavPrincipal from "./components/NavPrincipal";
+import HeroParticles from "./components/HeroParticles";
 import { AppProvider, type AppContextValue } from "./context/AppContext";
 import InicioPage from "./pages/InicioPage";
 import TiendaPage from "./pages/TiendaPage";
@@ -36,6 +36,11 @@ import {
   UMBRAL_STOCK_BAJO_KEY,
   NOTA_PEDIDO_ENVIO_KEY,
   NOTA_PEDIDO_ENVIO_DEFAULT,
+  DESPLEGABLE_INICIO_KEY,
+  DESPLEGABLE_INICIO_DEFAULT,
+  SERVICIOS_INICIO_KEY,
+  SERVICIOS_INICIO_DEFAULT,
+  type ServicioInicio,
   CUPONES_DISPONIBLES,
   CUPONES_MAIKA_KEY,
   CATALOGO_VELAS_KEY,
@@ -153,6 +158,7 @@ function fechaPedidoSeguro(fecha: string): Date | null {
 
 export default function App() {
 const [pagina, setPagina] = useState<Pagina>("inicio");
+  const [legalDoc, setLegalDoc] = useState<"aviso-legal" | "politica-cookies" | "politica-privacidad" | "terminos-condiciones" | null>(null);
   const [cart, setCart] = useState<ItemCarrito[]>([]);
   const { notificacion, setNotificacion, mostrarNotificacion } = useNotificacion();
   const categorias = useCategorias();
@@ -229,7 +235,6 @@ const [pagina, setPagina] = useState<Pagina>("inicio");
     loadCategoryImage(categoriaSeleccionada);
   }, [pagina, categoriaSeleccionada, loadCategoryImage]);
   const [mostrarAvisoCookies, setMostrarAvisoCookies] = useState(false);
-  const [visitas, setVisitas] = useState(0);
   const [claveAdmin, setClaveAdmin] = useState("");
   const [accesoAdmin, setAccesoAdmin] = useState(false);
 
@@ -283,7 +288,10 @@ const [pagina, setPagina] = useState<Pagina>("inicio");
   });
   const [umbralStockBajo, setUmbralStockBajo] = useState(2);
   const [notaPedidoEnvio, setNotaPedidoEnvio] = useState(NOTA_PEDIDO_ENVIO_DEFAULT);
+  const [desplegableInicio, setDesplegableInicio] = useState(DESPLEGABLE_INICIO_DEFAULT);
+  const [serviciosInicio, setServiciosInicio] = useState<ServicioInicio[]>(SERVICIOS_INICIO_DEFAULT);
   const [categoriaTiendaAlAbrir, setCategoriaTiendaAlAbrir] = useState<string | null>(null);
+  const [busquedaTienda, setBusquedaTienda] = useState("");
   const [perfilCompraRapida, setPerfilCompraRapida] = useState<PerfilCompraRapida | null>(null);
 
   const abrirTiendaConCategoria = useCallback((categoria: string) => {
@@ -623,18 +631,6 @@ const [pagina, setPagina] = useState<Pagina>("inicio");
       }
     }
 
-    const visitasGuardadasRaw = localStorage.getItem("visitasMaika");
-    const visitasGuardadas = Number.parseInt(visitasGuardadasRaw || "0", 10);
-    const visitasBase = Number.isFinite(visitasGuardadas) ? visitasGuardadas : 0;
-
-    if (consentimientoCargado?.analiticas) {
-      const nuevasVisitas = visitasBase + 1;
-      setVisitas(nuevasVisitas);
-      localStorage.setItem("visitasMaika", String(nuevasVisitas));
-    } else {
-      setVisitas(visitasBase);
-    }
-
     const pedidosGuardados = localStorage.getItem("pedidosMaika");
     if (pedidosGuardados) {
       const pedidosCargados = JSON.parse(pedidosGuardados) as Pedido[];
@@ -657,6 +653,49 @@ const [pagina, setPagina] = useState<Pagina>("inicio");
     }
     const notaGuardada = localStorage.getItem(NOTA_PEDIDO_ENVIO_KEY);
     if (notaGuardada != null && notaGuardada !== "") setNotaPedidoEnvio(notaGuardada);
+    const desplegableGuardado = localStorage.getItem(DESPLEGABLE_INICIO_KEY);
+    if (desplegableGuardado) {
+      try {
+        const parsed = JSON.parse(desplegableGuardado);
+        const def = DESPLEGABLE_INICIO_DEFAULT[0];
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setDesplegableInicio(parsed.map((b: { titulo?: string; subtitulo?: string; numProductos?: number; inicio?: number }) => ({
+            titulo: typeof b.titulo === "string" ? b.titulo : def?.titulo ?? "",
+            subtitulo: typeof b.subtitulo === "string" ? b.subtitulo : def?.subtitulo ?? "",
+            inicio: Number.isFinite(b.inicio) && (b.inicio as number) >= 0 ? (b.inicio as number) : 0,
+            numProductos: Number.isFinite(b.numProductos) && (b.numProductos as number) >= 1 ? Math.min(20, (b.numProductos as number)) : 3,
+          })));
+        } else if (parsed && typeof parsed === "object" && !Array.isArray(parsed) && "titulo" in parsed) {
+          setDesplegableInicio([{
+            titulo: typeof parsed.titulo === "string" ? parsed.titulo : def?.titulo ?? "",
+            subtitulo: typeof parsed.subtitulo === "string" ? parsed.subtitulo : def?.subtitulo ?? "",
+            inicio: 0,
+            numProductos: Number.isFinite(parsed.numProductos) && (parsed.numProductos as number) >= 1 ? Math.min(20, (parsed.numProductos as number)) : 3,
+          }]);
+        }
+      } catch {
+        // ignorar
+      }
+    }
+    const serviciosGuardado = localStorage.getItem(SERVICIOS_INICIO_KEY);
+    if (serviciosGuardado) {
+      try {
+        const parsed = JSON.parse(serviciosGuardado) as ServicioInicio[];
+        if (Array.isArray(parsed) && parsed.length >= 3) {
+          const def = SERVICIOS_INICIO_DEFAULT;
+          setServiciosInicio(parsed.slice(0, 3).map((s, i) => ({
+            titulo: typeof s.titulo === "string" ? s.titulo : (def[i]?.titulo ?? ""),
+            imagen: typeof s.imagen === "string" ? s.imagen : (def[i]?.imagen ?? ""),
+            duracion: typeof s.duracion === "string" ? s.duracion : (def[i]?.duracion ?? ""),
+            precio: typeof s.precio === "string" ? s.precio : (def[i]?.precio ?? ""),
+            textoBoton: typeof s.textoBoton === "string" ? s.textoBoton : (def[i]?.textoBoton ?? ""),
+            urlWhatsApp: typeof s.urlWhatsApp === "string" ? s.urlWhatsApp : (def[i]?.urlWhatsApp ?? ""),
+          })));
+        }
+      } catch {
+        // ignorar
+      }
+    }
     if (!consentimientoCargado) {
       setMostrarAvisoCookies(true);
     }
@@ -686,6 +725,14 @@ const [pagina, setPagina] = useState<Pagina>("inicio");
     }
     localStorage.setItem("carritoMaika", JSON.stringify(cart));
   }, [cart]);
+
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (e.data === "cerrarLegal") setLegalDoc(null);
+    };
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, []);
 
   const totalItemsCarrito = useMemo(
     () =>
@@ -1752,7 +1799,14 @@ const [pagina, setPagina] = useState<Pagina>("inicio");
     setPedidoFacturaAbierto,
     pedidos,
     categoriaTiendaAlAbrir,
-    setCategoriaTiendaAlAbrir
+    setCategoriaTiendaAlAbrir,
+    busquedaTienda,
+    setBusquedaTienda,
+    desplegableInicio,
+    setDesplegableInicio,
+    serviciosInicio,
+    setServiciosInicio,
+    openLegal: setLegalDoc
   }), [
     setPagina, abrirTiendaConCategoria, velas, inciensos, figuras, kits, categoriasCatalogo, agregarAlCarrito,
     cart, total, totalItemsCarrito, precioItemCarrito, cambiarCantidad, volverATienda, vaciarCarrito, finalizarCarrito,
@@ -1761,7 +1815,9 @@ const [pagina, setPagina] = useState<Pagina>("inicio");
     numeroSeguimiento, buscarPedido, pedidoBuscado, accesoAdmin, busquedaPedido, renderCajaPedidos,
     pendientesAbierto, enviadosAbierto, entregadosAbierto,
     pedidosPendientesOrdenados, pedidosEnviadosOrdenados, pedidosEntregadosOrdenados,
-    setPedidoFacturaAbierto, pedidos, kits, categoriaTiendaAlAbrir, setCategoriaTiendaAlAbrir
+    setPedidoFacturaAbierto, pedidos, kits, categoriaTiendaAlAbrir, setCategoriaTiendaAlAbrir,
+    busquedaTienda, setBusquedaTienda,
+    desplegableInicio, setDesplegableInicio, serviciosInicio, setServiciosInicio, setLegalDoc
   ]);
 
   if (pagina === "editarCategorias") {
@@ -2075,6 +2131,32 @@ const [pagina, setPagina] = useState<Pagina>("inicio");
         esAppNativa={esAppNativa}
       />
 
+      {/* Pantalla legal (dentro de la app, sin abrir otra pestaña). La cruz de cierre está solo dentro del iframe. */}
+      {legalDoc && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 10000,
+            background: "#1b1745",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden"
+          }}
+        >
+          <iframe
+            title={legalDoc}
+            src={`/${legalDoc}.html`}
+            style={{
+              flex: 1,
+              width: "100%",
+              height: "100%",
+              border: "none"
+            }}
+          />
+        </div>
+      )}
+
       {/* Aviso cookies */}
       {mostrarAvisoCookies && (pagina === "inicio" || pagina === "tienda" || pagina === "carrito") && (
         <div className="cookie-banner" style={{
@@ -2095,7 +2177,8 @@ const [pagina, setPagina] = useState<Pagina>("inicio");
           <div style={{ color: "white", fontSize: 14, lineHeight: 1.45 }}>
             🍪 Usamos cookies necesarias para el funcionamiento de la tienda y, con tu permiso,
             cookies de preferencias, analítica y marketing.{" "}
-            <a href="/politica-cookies.html" target="_blank" rel="noopener noreferrer" style={{ color: "#C9A24A", textDecoration: "underline" }}>Política de Cookies</a>
+            <button type="button" onClick={() => setLegalDoc("politica-cookies")} style={{ color: "#C9A24A", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 0, fontSize: "inherit" }}>Política de Cookies</button>
+            {" "}Si has borrado los datos del sitio, es normal que vuelva a aparecer este aviso.
           </div>
 
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
@@ -2275,19 +2358,7 @@ const [pagina, setPagina] = useState<Pagina>("inicio");
               alt="Conecta con tu esencia - Magia y Bienestar para tu Alma"
               className="hero-section__img"
             />
-            <div
-              className="hero-section__zona-clic"
-              role="button"
-              tabIndex={0}
-              aria-label="Ir a tienda"
-              onClick={() => setPagina("tienda")}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  setPagina("tienda");
-                }
-              }}
-            />
+            <HeroParticles />
             <button
               type="button"
               className="hero-section__btn-explorar"
@@ -2303,7 +2374,8 @@ const [pagina, setPagina] = useState<Pagina>("inicio");
               maxWidth: 900,
               margin: "0 auto",
               width: "100%",
-              padding: "72px 20px 64px",
+              padding: "0 20px 64px",
+              marginTop: 0,
               boxSizing: "border-box",
               minHeight: "calc(100vh - 120px)",
               color: "rgba(255,255,255,0.95)"
@@ -2440,40 +2512,343 @@ const [pagina, setPagina] = useState<Pagina>("inicio");
                   📋 GESTIÓN DE USUARIOS
                 </button>
 
-  <button
-  className="btn-admin-limpio"
-  onClick={() => setPagina("editarCategorias")}
-  style={{
-    background: "#ff9800",
-    color: "white",
-    border: "none",
-    padding: "18px",
-    borderRadius: 14,
-    cursor: "pointer",
-    width: "100%",
-    fontWeight: "bold",
-    fontSize: 22
-  }}
->
-📁 EDITAR CATEGORÍAS
-</button>
-                <button
-                  className="btn-admin-limpio"
-                  onClick={() => setPagina("editarProductos")}
+  <details
                   style={{
-                    background: "#673ab7",
-                    color: "white",
-                    border: "none",
-                    padding: "18px",
+                    gridColumn: "1 / -1",
+                    marginBottom: 12,
+                    border: "2px solid #006064",
                     borderRadius: 14,
-                    cursor: "pointer",
-                    width: "100%",
-                    fontWeight: "bold",
-                    fontSize: 22
+                    overflow: "hidden",
+                    background: "rgba(0, 96, 100, 0.12)"
                   }}
                 >
-                  🛠️ EDICIÓN DE PRODUCTOS
-                </button>
+                  <summary
+                    style={{
+                      padding: "18px",
+                      cursor: "pointer",
+                      fontWeight: "bold",
+                      fontSize: 22,
+                      color: "white",
+                      background: "#006064",
+                      listStyle: "none",
+                      textAlign: "center"
+                    }}
+                  >
+                    🛒 EDICIÓN TIENDA
+                  </summary>
+                  <div style={{ padding: "0 18px 18px 18px", display: "flex", flexDirection: "column", gap: 12 }}>
+                    <button
+                      className="btn-admin-limpio"
+                      onClick={() => setPagina("editarCategorias")}
+                      style={{
+                        background: "#ff9800",
+                        color: "white",
+                        border: "none",
+                        padding: "18px",
+                        borderRadius: 14,
+                        cursor: "pointer",
+                        width: "100%",
+                        fontWeight: "bold",
+                        fontSize: 20
+                      }}
+                    >
+                      📁 Editar categorías
+                    </button>
+                    <button
+                      className="btn-admin-limpio"
+                      onClick={() => setPagina("editarProductos")}
+                      style={{
+                        background: "#673ab7",
+                        color: "white",
+                        border: "none",
+                        padding: "18px",
+                        borderRadius: 14,
+                        cursor: "pointer",
+                        width: "100%",
+                        fontWeight: "bold",
+                        fontSize: 20
+                      }}
+                    >
+                      🛠️ Edición de productos
+                    </button>
+                    <details style={{ border: "1px solid #C9A24A", borderRadius: 14, overflow: "hidden", background: "rgba(201,162,74,0.08)" }}>
+                      <summary
+                        style={{
+                          padding: "18px",
+                          cursor: "pointer",
+                          fontWeight: "bold",
+                          fontSize: 20,
+                          color: "white",
+                          background: "#C9A24A",
+                          listStyle: "none",
+                          textAlign: "center"
+                        }}
+                      >
+                        📂 Desplegable de la página de inicio
+                      </summary>
+                      <div style={{ padding: "12px 14px", background: "rgba(11,11,13,0.6)", borderTop: "1px solid #C9A24A" }}>
+                        <p style={{ color: "rgba(255,255,255,0.85)", fontSize: 13, marginBottom: 8 }}>Cada bloque es <strong style={{ color: "#C9A24A" }}>lo que tú quieras</strong>: algo novedoso, ofertas, ritual del mes, caja misteriosa… Título y subtítulo los pones tú; eliges desde qué producto empieza y cuántos mostrar. En subtítulo puedes usar <strong style={{ color: "#C9A24A" }}>{"{mes}"}</strong> y <strong style={{ color: "#C9A24A" }}>{"{año}"}</strong> para la fecha.</p>
+                        <details style={{ marginBottom: 12 }}>
+                          <summary style={{ color: "#C9A24A", cursor: "pointer", fontSize: 13, fontWeight: "bold" }}>¿De dónde salen los productos? Ver orden del catálogo</summary>
+                          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 12, marginTop: 8, marginBottom: 4 }}>Los productos salen del catálogo en este orden: <strong>velas</strong> → <strong>inciensos</strong> → <strong>figuras</strong> → <strong>kits</strong>. El número &quot;Desde producto&quot; es la posición (0 = el primero, 1 = el segundo…). Así sabes qué productos verá cada bloque:</p>
+                          <ul style={{ margin: 0, paddingLeft: 20, color: "rgba(255,255,255,0.85)", fontSize: 12, maxHeight: 120, overflowY: "auto" }}>
+                            {[...velas, ...inciensos, ...figuras, ...(kits ?? [])].map((p, i) => (
+                              <li key={`${p.categoria}-${p.id}`} style={{ marginBottom: 2 }}><strong style={{ color: "#C9A24A" }}>{i}</strong> – {p.nombre}</li>
+                            ))}
+                          </ul>
+                          {[...velas, ...inciensos, ...figuras, ...(kits ?? [])].length === 0 && (
+                            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 12 }}>No hay productos en el catálogo. Añade productos en Edición de productos / Inventario.</p>
+                          )}
+                        </details>
+                        <p style={{ color: "rgba(255,255,255,0.85)", fontSize: 12, marginBottom: 12 }}>Elige <strong style={{ color: "#C9A24A" }}>desde qué producto</strong> empieza el bloque y <strong style={{ color: "#C9A24A" }}>cuántos</strong> mostrar. Abajo ves los nombres que se verán en la página.</p>
+                        {desplegableInicio.map((bloque, idx) => (
+                          <div key={idx} style={{ marginBottom: 16, padding: 12, border: "1px solid rgba(201,162,74,0.5)", borderRadius: 10 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                              <span style={{ color: "#C9A24A", fontWeight: "bold" }}>Bloque {idx + 1}</span>
+                              {desplegableInicio.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const next = desplegableInicio.filter((_, i) => i !== idx);
+                                    setDesplegableInicio(next);
+                                    localStorage.setItem(DESPLEGABLE_INICIO_KEY, JSON.stringify(next));
+                                    mostrarNotificacion("Bloque eliminado", "normal");
+                                  }}
+                                  style={{ padding: "4px 10px", fontSize: 12, background: "rgba(200,80,80,0.3)", color: "#ff9999", border: "1px solid #cc6666", borderRadius: 8, cursor: "pointer" }}
+                                >
+                                  Eliminar bloque
+                                </button>
+                              )}
+                            </div>
+                            <div style={{ marginBottom: 8 }}>
+                              <label style={{ display: "block", color: "rgba(255,255,255,0.9)", fontSize: 12, marginBottom: 2 }}>Título</label>
+                              <input
+                                type="text"
+                                value={bloque.titulo}
+                                onChange={(e) => {
+                                  const next = desplegableInicio.slice();
+                                  next[idx] = { ...next[idx], titulo: e.target.value };
+                                  setDesplegableInicio(next);
+                                  localStorage.setItem(DESPLEGABLE_INICIO_KEY, JSON.stringify(next));
+                                }}
+                                placeholder="Ej: Lo nuevo, Ofertas, Lo que quieras destacar…"
+                                style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "2px solid #C9A24A", background: "#0B0B0D", color: "white", fontSize: 13, boxSizing: "border-box" }}
+                              />
+                            </div>
+                            <div style={{ marginBottom: 8 }}>
+                              <label style={{ display: "block", color: "rgba(255,255,255,0.9)", fontSize: 12, marginBottom: 2 }}>Subtítulo</label>
+                              <input
+                                type="text"
+                                value={bloque.subtitulo}
+                                onChange={(e) => {
+                                  const next = desplegableInicio.slice();
+                                  next[idx] = { ...next[idx], subtitulo: e.target.value };
+                                  setDesplegableInicio(next);
+                                  localStorage.setItem(DESPLEGABLE_INICIO_KEY, JSON.stringify(next));
+                                }}
+                                placeholder="Ej: Lunas de {mes} {año} – Ver productos"
+                                style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "2px solid #C9A24A", background: "#0B0B0D", color: "white", fontSize: 13, boxSizing: "border-box" }}
+                              />
+                            </div>
+                            {(() => {
+                              const listaCat = [...velas, ...inciensos, ...figuras, ...(kits ?? [])];
+                              const totalCat = listaCat.length;
+                              const inicioValido = totalCat > 0 ? Math.min(bloque.inicio, totalCat - 1) : 0;
+                              const mostrados = listaCat.slice(inicioValido, inicioValido + bloque.numProductos);
+                              return (
+                            <div>
+                            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 6 }}>
+                              <div style={{ flex: "1 1 200px" }}>
+                                <label style={{ display: "block", color: "rgba(255,255,255,0.9)", fontSize: 12, marginBottom: 2 }}>Empezar desde este producto</label>
+                                <select
+                                  value={inicioValido}
+                                  onChange={(e) => {
+                                    const v = Math.max(0, parseInt(e.target.value, 10) || 0);
+                                    const next = desplegableInicio.slice();
+                                    next[idx] = { ...next[idx], inicio: v };
+                                    setDesplegableInicio(next);
+                                    localStorage.setItem(DESPLEGABLE_INICIO_KEY, JSON.stringify(next));
+                                  }}
+                                  style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "2px solid #C9A24A", background: "#0B0B0D", color: "white", fontSize: 13, cursor: "pointer", boxSizing: "border-box" }}
+                                >
+                                  {listaCat.map((p, i) => (
+                                    <option key={`${p.categoria}-${p.id}`} value={i}>{p.nombre}</option>
+                                  ))}
+                                  {totalCat === 0 && (
+                                    <option value={0}>Sin productos en catálogo</option>
+                                  )}
+                                </select>
+                              </div>
+                              <div>
+                                <label style={{ display: "block", color: "rgba(255,255,255,0.9)", fontSize: 12, marginBottom: 2 }}>Nº productos</label>
+                                <select
+                                  value={bloque.numProductos}
+                                  onChange={(e) => {
+                                    const v = Math.min(20, Math.max(1, parseInt(e.target.value, 10)));
+                                    const next = desplegableInicio.slice();
+                                    next[idx] = { ...next[idx], numProductos: v };
+                                    setDesplegableInicio(next);
+                                    localStorage.setItem(DESPLEGABLE_INICIO_KEY, JSON.stringify(next));
+                                  }}
+                                  style={{ padding: "8px 10px", borderRadius: 6, border: "2px solid #C9A24A", background: "#0B0B0D", color: "#C9A24A", fontSize: 13, cursor: "pointer" }}
+                                >
+                                  {[1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20].map((n) => (
+                                    <option key={n} value={n}>{n}</option>
+                                  ))}
+                                </select>
+                              </div>
+                            </div>
+                            {mostrados.length > 0 && (
+                              <p style={{ color: "rgba(255,255,255,0.75)", fontSize: 11, marginTop: 4 }}>
+                                En la página se verán: <strong style={{ color: "#C9A24A" }}>{mostrados.map((p) => p.nombre).join(", ")}</strong>
+                              </p>
+                            )}
+                            </div>
+                              );
+                            })()}
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const listaCat = [...velas, ...inciensos, ...figuras, ...(kits ?? [])];
+                            const totalCat = listaCat.length;
+                            const ultimo = desplegableInicio[desplegableInicio.length - 1];
+                            const inicioSiguiente = ultimo ? ultimo.inicio + ultimo.numProductos : 0;
+                            const inicioNuevo = totalCat > 0 && inicioSiguiente < totalCat
+                              ? inicioSiguiente
+                              : 0;
+                            const next = [...desplegableInicio, { titulo: "Nuevo bloque", subtitulo: "Ver productos", inicio: inicioNuevo, numProductos: 3 }];
+                            setDesplegableInicio(next);
+                            localStorage.setItem(DESPLEGABLE_INICIO_KEY, JSON.stringify(next));
+                            mostrarNotificacion("Bloque añadido. Edita título y elige desde qué producto mostrar.", "normal");
+                          }}
+                          style={{ width: "100%", padding: "12px", marginTop: 8, background: "rgba(201,162,74,0.2)", color: "#C9A24A", border: "2px dashed #C9A24A", borderRadius: 10, cursor: "pointer", fontWeight: "bold", fontSize: 14 }}
+                        >
+                          ＋ Añadir otro bloque (lo que quieras: novedades, ofertas, etc.)
+                        </button>
+                      </div>
+                    </details>
+                    <details style={{ border: "1px solid #C9A24A", borderRadius: 14, overflow: "hidden", background: "rgba(201,162,74,0.08)" }}>
+                      <summary
+                        style={{
+                          padding: "18px",
+                          cursor: "pointer",
+                          fontWeight: "bold",
+                          fontSize: 20,
+                          color: "white",
+                          background: "#8B4513",
+                          listStyle: "none",
+                          textAlign: "center"
+                        }}
+                      >
+                        ✨ Servicios (modificar tarjetas de la página de inicio)
+                      </summary>
+                      <div style={{ padding: "12px 14px", background: "rgba(11,11,13,0.6)", borderTop: "1px solid #C9A24A" }}>
+                        <p style={{ color: "rgba(255,255,255,0.85)", fontSize: 13, marginBottom: 12 }}>Edita los 3 servicios que se muestran en la sección SERVICIOS de la página de inicio. La imagen es la ruta del archivo en <code style={{ color: "#C9A24A" }}>public/</code> (ej: /mi-imagen.jpg).</p>
+                        {serviciosInicio.map((s, idx) => (
+                          <div key={idx} style={{ marginBottom: 16, padding: 12, border: "1px solid rgba(201,162,74,0.4)", borderRadius: 10 }}>
+                            <div style={{ color: "#C9A24A", fontWeight: "bold", marginBottom: 8 }}>Servicio {idx + 1}</div>
+                            <div style={{ display: "grid", gap: 8 }}>
+                              <div>
+                                <label style={{ display: "block", color: "rgba(255,255,255,0.9)", fontSize: 12, marginBottom: 2 }}>Título</label>
+                                <input
+                                  type="text"
+                                  value={s.titulo}
+                                  onChange={(e) => {
+                                    const next = [...serviciosInicio];
+                                    next[idx] = { ...next[idx], titulo: e.target.value };
+                                    setServiciosInicio(next);
+                                    localStorage.setItem(SERVICIOS_INICIO_KEY, JSON.stringify(next));
+                                  }}
+                                  placeholder="Ej: 🔮 Tarot Evolutivo"
+                                  style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "2px solid #C9A24A", background: "#0B0B0D", color: "white", fontSize: 13, boxSizing: "border-box" }}
+                                />
+                              </div>
+                              <div>
+                                <label style={{ display: "block", color: "rgba(255,255,255,0.9)", fontSize: 12, marginBottom: 2 }}>Imagen (ruta)</label>
+                                <input
+                                  type="text"
+                                  value={s.imagen}
+                                  onChange={(e) => {
+                                    const next = [...serviciosInicio];
+                                    next[idx] = { ...next[idx], imagen: e.target.value };
+                                    setServiciosInicio(next);
+                                    localStorage.setItem(SERVICIOS_INICIO_KEY, JSON.stringify(next));
+                                  }}
+                                  placeholder="/tarot.jpg"
+                                  style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "2px solid #C9A24A", background: "#0B0B0D", color: "white", fontSize: 13, boxSizing: "border-box" }}
+                                />
+                              </div>
+                              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                                <div style={{ flex: "1 1 120px" }}>
+                                  <label style={{ display: "block", color: "rgba(255,255,255,0.9)", fontSize: 12, marginBottom: 2 }}>Duración</label>
+                                  <input
+                                    type="text"
+                                    value={s.duracion}
+                                    onChange={(e) => {
+                                      const next = [...serviciosInicio];
+                                      next[idx] = { ...next[idx], duracion: e.target.value };
+                                      setServiciosInicio(next);
+                                      localStorage.setItem(SERVICIOS_INICIO_KEY, JSON.stringify(next));
+                                    }}
+                                    placeholder="Sesión 60 min"
+                                    style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "2px solid #C9A24A", background: "#0B0B0D", color: "white", fontSize: 13, boxSizing: "border-box" }}
+                                  />
+                                </div>
+                                <div style={{ flex: "1 1 80px" }}>
+                                  <label style={{ display: "block", color: "rgba(255,255,255,0.9)", fontSize: 12, marginBottom: 2 }}>Precio</label>
+                                  <input
+                                    type="text"
+                                    value={s.precio}
+                                    onChange={(e) => {
+                                      const next = [...serviciosInicio];
+                                      next[idx] = { ...next[idx], precio: e.target.value };
+                                      setServiciosInicio(next);
+                                      localStorage.setItem(SERVICIOS_INICIO_KEY, JSON.stringify(next));
+                                    }}
+                                    placeholder="45€"
+                                    style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "2px solid #C9A24A", background: "#0B0B0D", color: "white", fontSize: 13, boxSizing: "border-box" }}
+                                  />
+                                </div>
+                              </div>
+                              <div>
+                                <label style={{ display: "block", color: "rgba(255,255,255,0.9)", fontSize: 12, marginBottom: 2 }}>Texto del botón</label>
+                                <input
+                                  type="text"
+                                  value={s.textoBoton}
+                                  onChange={(e) => {
+                                    const next = [...serviciosInicio];
+                                    next[idx] = { ...next[idx], textoBoton: e.target.value };
+                                    setServiciosInicio(next);
+                                    localStorage.setItem(SERVICIOS_INICIO_KEY, JSON.stringify(next));
+                                  }}
+                                  placeholder="Reservar Tarot"
+                                  style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "2px solid #C9A24A", background: "#0B0B0D", color: "white", fontSize: 13, boxSizing: "border-box" }}
+                                />
+                              </div>
+                              <div>
+                                <label style={{ display: "block", color: "rgba(255,255,255,0.9)", fontSize: 12, marginBottom: 2 }}>Enlace WhatsApp</label>
+                                <input
+                                  type="text"
+                                  value={s.urlWhatsApp}
+                                  onChange={(e) => {
+                                    const next = [...serviciosInicio];
+                                    next[idx] = { ...next[idx], urlWhatsApp: e.target.value };
+                                    setServiciosInicio(next);
+                                    localStorage.setItem(SERVICIOS_INICIO_KEY, JSON.stringify(next));
+                                  }}
+                                  placeholder="https://wa.me/..."
+                                  style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "2px solid #C9A24A", background: "#0B0B0D", color: "white", fontSize: 13, boxSizing: "border-box" }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </details>
+                  </div>
+                </details>
                 <button
                   className="btn-admin-limpio"
                   onClick={() => setPagina("inventario")}
@@ -2886,7 +3261,11 @@ const [pagina, setPagina] = useState<Pagina>("inicio");
       )}
 
       {/* CARRITO */}
-      {pagina === "carrito" && <CarritoPage />}
+      {pagina === "carrito" && (
+        <div style={{ maxWidth: 800, margin: "0 auto", width: "100%", padding: "0 20px 40px", boxSizing: "border-box", minHeight: "50vh" }}>
+          <CarritoPage />
+        </div>
+      )}
 
       {/* SEGUIMIENTO DE PEDIDOS */}
       {pagina === "seguimiento" && <SeguimientoPage />}
@@ -3515,11 +3894,6 @@ const [pagina, setPagina] = useState<Pagina>("inicio");
           setPagina("inicio");
         }}
       />
-
-      {!esAppNativa && pagina !== "tienda" && pagina !== "carrito" && (
-        <VisitasCounter visitas={visitas} />
-      )}
-
 
       <ModalUsuarios
         abierto={modalUsuariosAbierto}

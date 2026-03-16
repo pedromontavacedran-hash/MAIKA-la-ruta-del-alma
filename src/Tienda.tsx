@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import type { Producto } from "./App";
 import { INTENCIONES_OPCIONES } from "./types";
 import { useFavoritos } from "./hooks/useFavoritos";
+import BotonCerrar from "./components/BotonCerrar";
 
 export type CategoriaEntrada = { id: string; nombre: string };
 
@@ -22,6 +23,10 @@ interface Props {
   categoriaInicial?: string | null;
   /** Se llama una vez después de aplicar categoriaInicial para limpiar el estado en el padre. */
   onCategoriaInicialAplicada?: () => void;
+  /** Término de búsqueda desde el menú principal; se muestran resultados filtrados. */
+  busquedaInicial?: string;
+  /** Limpiar el término de búsqueda en el padre. */
+  onBusquedaInicialAplicada?: () => void;
 }
 
 function getProductosForCategoria(
@@ -75,9 +80,17 @@ const categoriasPorDefecto: CategoriaEntrada[] = [
   { id: "kits", nombre: "kits" }
 ];
 
-export default function Tienda({ velas, inciensos, figuras, kits = [], categoriasCatalogo = categoriasPorDefecto, cart = [], agregarAlCarrito, volver, categoriaInicial, onCategoriaInicialAplicada }: Props) {
+export default function Tienda({ velas, inciensos, figuras, kits = [], categoriasCatalogo = categoriasPorDefecto, cart = [], agregarAlCarrito, volver, categoriaInicial, onCategoriaInicialAplicada, busquedaInicial, onBusquedaInicialAplicada }: Props) {
   const [mostrarCategoria, setMostrarCategoria] = useState<string | null>(null);
   const [filtroIntencion, setFiltroIntencion] = useState<string>("");
+  const terminoBusqueda = (busquedaInicial ?? "").trim();
+  const todosProductos = [...velas, ...inciensos, ...figuras, ...kits];
+  const productosBusqueda = terminoBusqueda
+    ? todosProductos.filter((p) => {
+        const texto = `${p.nombre} ${p.descripcion ?? ""}`.toLowerCase();
+        return texto.includes(terminoBusqueda.toLowerCase());
+      })
+    : [];
   const fondoServicios = "#0B0B0D";
   const [lightboxImagen, setLightboxImagen] = useState<{ src: string; alt: string } | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -112,28 +125,12 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
           cursor: "pointer",
         }}
       >
-        <button
-          type="button"
-          onClick={(e) => { e.stopPropagation(); cerrarLightbox(); }}
-          aria-label="Cerrar"
-          style={{
-            position: "absolute",
-            top: 16,
-            right: 16,
-            zIndex: 10000,
-            width: 44,
-            height: 44,
-            borderRadius: "50%",
-            border: "2px solid #C9A24A",
-            background: "rgba(11,11,13,0.9)",
-            color: "#C9A24A",
-            fontSize: "1.5rem",
-            lineHeight: 1,
-            cursor: "pointer",
-          }}
-        >
-          ×
-        </button>
+        <BotonCerrar
+          onClick={(e) => { e?.stopPropagation(); cerrarLightbox(); }}
+          ariaLabel="Cerrar"
+          title="Cerrar"
+          style={{ top: 16, right: 16, zIndex: 10000 }}
+        />
         <img
           src={lightboxImagen.src}
           alt={lightboxImagen.alt}
@@ -179,26 +176,8 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
 
     return (
       <>
-      <div className="tienda-vista" style={{ padding: 40 }}>
-        <button
-          onClick={() => { setMostrarCategoria(null); setFiltroIntencion(""); }}
-          className="btn-volver-azul"
-          style={{
-            backgroundImage: "linear-gradient(rgba(10, 7, 25, 0.45), rgba(10, 7, 25, 0.45)), url('/fondo%20estrellado.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            color: "#C9A24A",
-            border: "2px solid #C9A24A",
-            borderRadius: "30px",
-            padding: "8px 20px",
-            cursor: "pointer",
-            fontWeight: "bold",
-            marginBottom: 30,
-          }}
-        >
-          ← Volver a Categorías
-        </button>
+      <div className="tienda-vista" style={{ padding: 40, position: "relative" }}>
+        <BotonCerrar onClick={() => { setMostrarCategoria(null); setFiltroIntencion(""); }} ariaLabel="Volver a categorías" title="Volver a categorías" />
 
         <h2 style={{ textAlign: "center", color: "#C9A24A", fontSize: "2rem", marginBottom: 30 }}>
           {titulo}
@@ -412,26 +391,65 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
 
   return (
     <>
-    <div className="tienda-vista" style={{ padding: 40 }}>
-      <button
-        className="btn-volver-azul"
-        onClick={volver}
-        style={{
-          backgroundImage: "linear-gradient(rgba(10, 7, 25, 0.45), rgba(10, 7, 25, 0.45)), url('/fondo%20estrellado.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          color: "#C9A24A",
-          border: "2px solid #C9A24A",
-          borderRadius: "30px",
-          padding: "8px 20px",
-          cursor: "pointer",
-          fontWeight: "bold",
-          marginBottom: 30,
-        }}
-      >
-        ← Volver al Inicio
-      </button>
+    <div className="tienda-vista" style={{ padding: 40, position: "relative" }}>
+      <BotonCerrar onClick={volver} ariaLabel="Volver al inicio" title="Volver al inicio" />
+
+      {terminoBusqueda && (
+        <div style={{ marginBottom: 44, background: fondoServicios, padding: "16px 12px", borderRadius: 22, border: "2px solid #C9A24A" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>
+            <h3 style={{ color: "#C9A24A", fontSize: "1.08rem", margin: 0 }}>
+              Resultados para &quot;{terminoBusqueda}&quot;
+            </h3>
+            {onBusquedaInicialAplicada && (
+              <button
+                type="button"
+                onClick={onBusquedaInicialAplicada}
+                style={{ padding: "6px 12px", borderRadius: 8, border: "1px solid #C9A24A", background: "transparent", color: "#C9A24A", cursor: "pointer", fontSize: 13 }}
+              >
+                Limpiar búsqueda
+              </button>
+            )}
+          </div>
+          {productosBusqueda.length === 0 ? (
+            <p style={{ color: "rgba(255,255,255,0.8)", textAlign: "center", margin: 20 }}>No hay productos que coincidan con tu búsqueda.</p>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 20 }}>
+              {productosBusqueda.map((prod) => {
+                const enCarrito = cantidadEnCarrito(Number(prod.id));
+                const disponibles = Math.max(0, Number(prod.stock) - enCarrito);
+                return (
+                  <div
+                    key={`busqueda-${prod.categoria}-${prod.id}`}
+                    style={{ border: "2px solid #C9A24A", padding: 20, borderRadius: 15, textAlign: "center", background: fondoServicios, opacity: disponibles === 0 ? 0.6 : 1, position: "relative" }}
+                  >
+                    <div
+                      role="button"
+                      onClick={(e) => { e.stopPropagation(); toggleFavorito(prod.id); }}
+                      style={{ position: "absolute", top: 10, left: 10, fontSize: "1.6rem", cursor: "pointer", zIndex: 2 }}
+                      title={isFavorito(prod.id) ? "Quitar de favoritos" : "Añadir a favoritos"}
+                    >
+                      {isFavorito(prod.id) ? "💛" : "🤍"}
+                    </div>
+                    <div style={{ marginBottom: 12, minHeight: 120, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <img src={getProductImageSrc(prod)} alt={prod.nombre} style={{ maxWidth: "100%", maxHeight: 140, objectFit: "contain", borderRadius: 10, border: "1px solid rgba(212,175,55,0.5)" }} onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                    </div>
+                    <h3 style={{ color: prod.nombreColor ?? "white" }}>{prod.nombre}</h3>
+                    <p style={{ color: "#C9A24A", fontSize: "1.2rem", margin: "10px 0" }}>{precioConDescuento(prod).toFixed(2)} €</p>
+                    <button
+                      type="button"
+                      onClick={() => { if (disponibles > 0) { agregarAlCarrito(prod); setRefreshKey((k) => k + 1); } }}
+                      disabled={disponibles === 0}
+                      style={{ padding: "10px 25px", borderRadius: 25, border: "2px solid #C9A24A", background: disponibles > 0 ? "#C9A24A" : "#666", color: disponibles > 0 ? "#1b1745" : "#ccc", cursor: disponibles > 0 ? "pointer" : "not-allowed", fontWeight: "bold", width: "100%" }}
+                    >
+                      {disponibles > 0 ? "Añadir al carrito" : "Sin stock"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* MÁS VENDIDOS */}
       <div key={`mas-vendidos-${refreshKey}`} style={{  // 👈 NUEVO: Key para actualizar esta sección

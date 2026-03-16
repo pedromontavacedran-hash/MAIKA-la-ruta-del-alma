@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import type { Producto, Pagina } from "../../types";
+import BotonCerrar from "../../components/BotonCerrar";
 
 export interface EditarProductosPageProps {
   setPagina: (p: Pagina) => void;
@@ -46,7 +47,8 @@ const panelStyle = {
   flexDirection: "column" as const,
   alignItems: "center" as const,
   justifyContent: "center" as const,
-  padding: 40
+  padding: 40,
+  position: "relative" as const
 };
 
 export default function EditarProductosPage(props: EditarProductosPageProps) {
@@ -101,6 +103,7 @@ export default function EditarProductosPage(props: EditarProductosPageProps) {
 
   return (
     <div style={panelStyle}>
+      <BotonCerrar onClick={() => setPagina("admin")} ariaLabel="Volver al panel" title="Cerrar" />
       <h2 style={{ fontSize: 38, marginBottom: 30 }}>Editar Productos</h2>
       <div className="categoria-edit-panel">
         <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Categoría</label>
@@ -289,16 +292,6 @@ export default function EditarProductosPage(props: EditarProductosPageProps) {
           mostrarNotificacion("Producto eliminado", "normal");
         }}>Eliminar producto</button>
       </div>
-      <button className="categoria-volver-btn" style={{
-        background: "#C9A24A",
-        color: "#1b1745",
-        border: "2px solid #C9A24A",
-        padding: "10px 20px",
-        borderRadius: 12,
-        cursor: "pointer",
-        fontWeight: "bold",
-        fontSize: 16
-      }} onClick={() => setPagina("admin")}>← Volver al panel</button>
     </div>
   );
 }

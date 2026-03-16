@@ -11,11 +11,10 @@ function precioConDescuento(p: Producto): number {
 }
 
 export default function InicioPage() {
-  const { setPagina, velas, inciensos, figuras, kits } = useApp();
+  const { setPagina, velas, inciensos, figuras, kits, desplegableInicio, serviciosInicio } = useApp();
 
-  const productosRitual = useMemo(() => {
-    const todos = [...velas, ...inciensos, ...figuras, ...(kits ?? [])];
-    return todos.slice(0, 3);
+  const todosProductos = useMemo(() => {
+    return [...velas, ...inciensos, ...figuras, ...(kits ?? [])];
   }, [velas, inciensos, figuras, kits]);
 
   const mesActual = MESES_ES[new Date().getMonth()];
@@ -23,15 +22,19 @@ export default function InicioPage() {
 
   return (
     <div className="inicio-page" style={{ textAlign: "center", color: "inherit" }}>
-      {productosRitual.length > 0 && (
-        <details className="inicio-desplegable-productos" style={{ marginBottom: 56 }}>
-          <summary className="inicio-desplegable-summary">
-            <span className="inicio-desplegable-titulo">🌙 Ritual del mes</span>
-            <span className="inicio-desplegable-sub">Lunas de {mesActual} {añoActual} – Ver productos</span>
-          </summary>
-          <div style={{ marginTop: 20, paddingTop: 8 }}>
-          <div style={{ display: "flex", justifyContent: "center", gap: 16, flexWrap: "wrap" }}>
-            {productosRitual.map((p) => (
+      {desplegableInicio.map((bloque, bloqueIdx) => {
+        const productosBloque = todosProductos.slice(bloque.inicio, bloque.inicio + bloque.numProductos);
+        const subtitulo = bloque.subtitulo.replace("{mes}", mesActual).replace("{año}", String(añoActual));
+        if (productosBloque.length === 0) return null;
+        return (
+          <details key={bloqueIdx} className="inicio-desplegable-productos" style={{ marginBottom: 32, marginTop: bloqueIdx === 0 ? 24 : 0 }}>
+            <summary className="inicio-desplegable-summary">
+              <span className="inicio-desplegable-titulo">{bloque.titulo}</span>
+              <span className="inicio-desplegable-sub">{subtitulo}</span>
+            </summary>
+            <div style={{ marginTop: 12, paddingTop: 4 }}>
+            <div style={{ display: "flex", justifyContent: "center", gap: 16, flexWrap: "wrap" }}>
+              {productosBloque.map((p) => (
               <div
                 key={`${p.categoria}-${p.id}`}
                 className="card"
@@ -72,86 +75,72 @@ export default function InicioPage() {
                   Ver en tienda
                 </button>
               </div>
-            ))}
-          </div>
-          </div>
-        </details>
-      )}
+              ))}
+            </div>
+            </div>
+          </details>
+        );
+      })}
 
-      <h2 id="inicio-servicios" className="inicio-seccion-titulo" style={{ fontSize: "clamp(22px, 3.5vw, 28px)", marginBottom: 24, color: "#C9A24A", fontWeight: "bold", textShadow: "0 0 16px rgba(212,175,55,0.25)", scrollMarginTop: 100 }}>🌟 SERVICIOS</h2>
-      <section style={{ display: "flex", justifyContent: "center", gap: 18, flexWrap: "wrap", marginBottom: 56 }} aria-label="Servicios">
-        <div className="card inicio-servicio-card" style={{ width: 240, padding: 18, display: "flex", flexDirection: "column", minHeight: 305 }}>
-          <h3 className="inicio-servicio-titulo" style={{ color: "#C9A24A", margin: "6px 0", fontSize: 18, textAlign: "center", minHeight: 52, display: "flex", flexDirection: "column", justifyContent: "center" }}>🔮 Tarot<br />Evolutivo</h3>
-          <img
-            src="/tarot%20evolutivo.jpg"
-            alt="Tarot Evolutivo"
-            style={{ width: "100%", height: 115, objectFit: "cover", borderRadius: 10, border: "1px solid gold", marginBottom: 8, display: "block" }}
-          />
-          <p style={{ color: "white", margin: "4px 0", fontSize: 16, textAlign: "center" }}>Sesión 60 min</p>
-          <p style={{ color: "#C9A24A", fontSize: 20, fontWeight: "bold", margin: "6px 0", textAlign: "center" }}>45€</p>
-          <button
-            className="btn-reservar-inicio"
-            onClick={() => window.open("https://wa.me/34673175547?text=Hola%20Maika%2C%20quiero%20reservar%20Tarot", "_blank")}
-            style={{ border: "none", padding: "12px 16px", borderRadius: 20, cursor: "pointer", width: "100%", fontWeight: "bold", fontSize: 16, marginTop: "auto" }}
-          >
-            Reservar
-          </button>
-        </div>
-        <div className="card inicio-servicio-card" style={{ width: 240, padding: 18, display: "flex", flexDirection: "column", minHeight: 305 }}>
-          <h3 className="inicio-servicio-titulo" style={{ color: "#C9A24A", margin: "6px 0", fontSize: 18, textAlign: "center", minHeight: 52, display: "flex", flexDirection: "column", justifyContent: "center" }}>✨ Limpieza Energética</h3>
-          <img
-            src="/limpieza%20energetica.jpg"
-            alt="Limpieza Energética"
-            style={{ width: "100%", height: 115, objectFit: "cover", borderRadius: 10, border: "1px solid gold", marginBottom: 8, display: "block" }}
-          />
-          <p style={{ color: "white", margin: "4px 0", fontSize: 16, textAlign: "center" }}>Sesión 45 min</p>
-          <p style={{ color: "#C9A24A", fontSize: 20, fontWeight: "bold", margin: "6px 0", textAlign: "center" }}>35€</p>
-          <button
-            className="btn-reservar-inicio"
-            onClick={() => window.open("https://wa.me/34673175547?text=Hola%20Maika%2C%20quiero%20reservar%20Limpieza", "_blank")}
-            style={{ border: "none", padding: "12px 16px", borderRadius: 20, cursor: "pointer", width: "100%", fontWeight: "bold", fontSize: 16, marginTop: "auto" }}
-          >
-            Reservar
-          </button>
-        </div>
-        <div className="card inicio-servicio-card" style={{ width: 240, padding: 18, display: "flex", flexDirection: "column", minHeight: 305 }}>
-          <h3 className="inicio-servicio-titulo" style={{ color: "#C9A24A", margin: "6px 0", fontSize: 18, textAlign: "center", minHeight: 52, display: "flex", flexDirection: "column", justifyContent: "center" }}>🕯️ Ritual Personalizado</h3>
-          <img
-            src="/ritual%20personalizado.jpg"
-            alt="Ritual Personalizado"
-            style={{ width: "100%", height: 115, objectFit: "cover", borderRadius: 10, border: "1px solid gold", marginBottom: 8, display: "block" }}
-          />
-          <p style={{ color: "white", margin: "4px 0", fontSize: 16, textAlign: "center" }}>Sesión 60 min</p>
-          <p style={{ color: "#C9A24A", fontSize: 20, fontWeight: "bold", margin: "6px 0", textAlign: "center" }}>50€</p>
-          <button
-            className="btn-reservar-inicio"
-            onClick={() => window.open("https://wa.me/34673175547?text=Hola%20Maika%2C%20quiero%20consultar%20Ritual", "_blank")}
-            style={{ border: "none", padding: "12px 16px", borderRadius: 20, cursor: "pointer", width: "100%", fontWeight: "bold", fontSize: 16, marginTop: "auto" }}
-          >
-            Reservar
-          </button>
-        </div>
+      <h2 id="inicio-servicios" className="inicio-seccion-titulo" style={{ fontSize: "clamp(22px, 3.5vw, 28px)", marginBottom: 20, color: "#C9A24A", fontWeight: "bold", textShadow: "0 0 16px rgba(212,175,55,0.25)", scrollMarginTop: 140 }}>🌟 SERVICIOS</h2>
+      <section style={{ display: "flex", justifyContent: "center", gap: 18, flexWrap: "wrap", marginBottom: 36 }} aria-label="Servicios">
+        {serviciosInicio.map((s, idx) => (
+          <div key={idx} className="card inicio-servicio-card" style={{ width: 240, padding: 18, display: "flex", flexDirection: "column", minHeight: 305 }}>
+            <h3 className="inicio-servicio-titulo" style={{ color: "#C9A24A", margin: "6px 0", fontSize: 18, textAlign: "center", minHeight: 52, display: "flex", flexDirection: "column", justifyContent: "center" }}>{s.titulo}</h3>
+            <img
+              src={s.imagen.startsWith("/") ? s.imagen : `/${s.imagen}`}
+              alt={s.titulo.replace(/[\u{1F300}-\u{1F9FF}]/gu, "").trim() || `Servicio ${idx + 1}`}
+              style={{ width: "100%", height: 115, objectFit: "cover", borderRadius: 10, border: "1px solid gold", marginBottom: 8, display: "block" }}
+            />
+            <p style={{ color: "white", margin: "4px 0", fontSize: 16, textAlign: "center" }}>{s.duracion}</p>
+            <p style={{ color: "#C9A24A", fontSize: 20, fontWeight: "bold", margin: "6px 0", textAlign: "center" }}>{s.precio}</p>
+            <a
+              href={s.urlWhatsApp}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "block",
+                width: "100%",
+                marginTop: "auto",
+                padding: "12px 16px",
+                background: "linear-gradient(135deg, #e5c07b, #C9A24A)",
+                color: "#0B0B0D",
+                fontSize: 16,
+                fontWeight: "bold",
+                textAlign: "center",
+                borderRadius: 20,
+                textDecoration: "none",
+                border: "1px solid #C9A24A",
+                cursor: "pointer",
+              }}
+            >
+              {s.textoBoton}
+            </a>
+          </div>
+        ))}
       </section>
 
-      <h2 id="inicio-empresa" className="inicio-seccion-titulo" style={{ fontSize: "clamp(22px, 3.5vw, 28px)", marginBottom: 16, color: "#C9A24A", fontWeight: "bold", textShadow: "0 0 16px rgba(212,175,55,0.25)", scrollMarginTop: 100 }}>🌙 Sobre Maika</h2>
-      <p className="card" style={{ maxWidth: 560, margin: "0 auto 40px", padding: 20, fontSize: 15, lineHeight: 1.6, color: "rgba(255,255,255,0.9)" }}>
-        Maika es tu espacio de magia y bienestar. Ofrecemos productos para rituales, velas, inciensos y figuras, además de servicios como tarot evolutivo, limpieza energética y rituales personalizados. Conecta con tu esencia.
-      </p>
-
-      <h2 id="inicio-envios" className="inicio-seccion-titulo" style={{ fontSize: "clamp(22px, 3.5vw, 28px)", marginBottom: 16, color: "#C9A24A", fontWeight: "bold", textShadow: "0 0 16px rgba(212,175,55,0.25)", scrollMarginTop: 100 }}>🚚 Envíos e información</h2>
-      <p className="card" style={{ maxWidth: 560, margin: "0 auto 40px", padding: 20, fontSize: 15, lineHeight: 1.6, color: "rgba(255,255,255,0.9)" }}>
-        Envíos a toda España. Plazos y condiciones según destino. Para consultas de envío, devoluciones o pedidos, escríbenos por WhatsApp.
-      </p>
-
-      <h2 className="inicio-seccion-titulo" style={{ fontSize: "clamp(22px, 3.5vw, 28px)", marginBottom: 20, color: "#C9A24A", fontWeight: "bold", textShadow: "0 0 16px rgba(212,175,55,0.25)" }}>💬 TESTIMONIOS</h2>
-      <section style={{ maxWidth: 620, margin: "0 auto 32px" }} aria-label="Testimonios">
-        <p className="card testimonio-card" style={{ marginBottom: 14, fontSize: 16, lineHeight: 1.55, color: "rgba(255,255,255,0.95)" }}>
-          "Sentí claridad y paz después de la primera consulta. ¡Recomendadísima!"
+      <div className="inicio-bloques-texto" style={{ maxWidth: 560, margin: "0 auto" }}>
+        <h2 id="inicio-empresa" className="inicio-seccion-titulo" style={{ fontSize: "clamp(22px, 3.5vw, 28px)", marginBottom: 16, color: "#C9A24A", fontWeight: "bold", textShadow: "0 0 16px rgba(212,175,55,0.25)", scrollMarginTop: 140 }}>🌙 Sobre Maika</h2>
+        <p className="card inicio-card-texto">
+          Maika es tu espacio de magia y bienestar. Ofrecemos productos para rituales, velas, inciensos y figuras, además de servicios como tarot evolutivo, limpieza energética y rituales personalizados. Conecta con tu esencia.
         </p>
-        <p className="card testimonio-card" style={{ fontSize: 16, lineHeight: 1.55, color: "rgba(255,255,255,0.95)" }}>
-          "Me ayudó a entender lo que estaba viviendo. Gracias Maika"
+
+        <h2 id="inicio-envios" className="inicio-seccion-titulo" style={{ fontSize: "clamp(22px, 3.5vw, 28px)", marginBottom: 16, color: "#C9A24A", fontWeight: "bold", textShadow: "0 0 16px rgba(212,175,55,0.25)", scrollMarginTop: 140, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}><span style={{ display: "inline-flex", alignItems: "center", transform: "scaleX(-1)" }}><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#C9A24A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13" /><polygon points="16 8 20 8 23 11 23 16 16 16 16 8" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></svg></span> Envíos e información</h2>
+        <p className="card inicio-card-texto">
+          Envíos a toda España. Plazos y condiciones según destino. Para consultas de envío, devoluciones o pedidos, escríbenos por WhatsApp.
         </p>
-      </section>
+
+        <h2 className="inicio-seccion-titulo" style={{ fontSize: "clamp(22px, 3.5vw, 28px)", marginBottom: 20, color: "#C9A24A", fontWeight: "bold", textShadow: "0 0 16px rgba(212,175,55,0.25)", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}><span style={{ display: "inline-flex", alignItems: "center" }}><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#C9A24A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: "middle" }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg></span> TESTIMONIOS</h2>
+        <section className="inicio-testimonios" aria-label="Testimonios">
+          <p className="card testimonio-card inicio-card-texto">
+            "Sentí claridad y paz después de la primera consulta. ¡Recomendadísima!"
+          </p>
+          <p className="card testimonio-card inicio-card-texto">
+            "Me ayudó a entender lo que estaba viviendo. Gracias Maika"
+          </p>
+        </section>
+      </div>
     </div>
   );
 }

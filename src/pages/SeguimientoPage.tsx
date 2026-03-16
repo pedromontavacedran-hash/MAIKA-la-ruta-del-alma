@@ -1,4 +1,5 @@
 import { useApp } from "../context/AppContext";
+import BotonCerrar from "../components/BotonCerrar";
 
 export default function SeguimientoPage() {
   const {
@@ -19,11 +20,18 @@ export default function SeguimientoPage() {
     pedidosPendientesOrdenados,
     pedidosEnviadosOrdenados,
     pedidosEntregadosOrdenados,
-    setPedidoFacturaAbierto
+    setPedidoFacturaAbierto,
+    setPagina
   } = useApp();
 
   return (
-    <div style={{ maxWidth: 600, margin: "0 auto" }}>
+    <div style={{ maxWidth: 600, margin: "0 auto", paddingTop: 32, position: "relative" }}>
+      <BotonCerrar
+        onClick={() => setPagina("inicio")}
+        ariaLabel="Cerrar seguimiento"
+        title="Cerrar"
+        style={{ right: 0, top: 8 }}
+      />
       <h2 style={{ textAlign: "center" }}>🔍 SEGUIMIENTO DE PEDIDOS</h2>
 
       <div style={{ display: "flex", gap: 10, marginBottom: 30 }}>
