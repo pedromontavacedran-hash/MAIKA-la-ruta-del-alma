@@ -1,5 +1,8 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { Producto, Pagina } from "../../types";
+import BotonCerrar from "../../components/BotonCerrar";
+import { THEME } from "../../config";
+import { isAdminAuthorized } from "../../utils/adminAuth";
 
 export interface NuevoProductoPageProps {
   setPagina: (p: Pagina) => void;
@@ -36,8 +39,8 @@ export interface NuevoProductoPageProps {
 
 const panelStyle = {
   minHeight: "100vh" as const,
-  background: "#0B0B0D",
-  color: "#C9A24A",
+  background: THEME.bg,
+  color: THEME.goldMain,
   display: "flex" as const,
   flexDirection: "column" as const,
   alignItems: "center" as const,
@@ -143,38 +146,49 @@ export default function NuevoProductoPage(props: NuevoProductoPageProps) {
   };
 
   return (
-    <div style={panelStyle}>
+    <div style={{ ...panelStyle, position: "relative" }}>
+      <BotonCerrar
+        onClick={() => {
+          if (isAdminAuthorized()) {
+            setPagina("admin");
+          } else {
+            setPagina("inicio");
+          }
+        }}
+        ariaLabel="Cerrar"
+        title="Cerrar"
+      />
       <h2 style={{ fontSize: 38, marginBottom: 30 }}>Añadir nuevo producto</h2>
       <div className="categoria-edit-panel">
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Categoría</label>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Categoría</label>
         <select className="categoria-select" value={categoriaNuevoProducto} onChange={(e) => setCategoriaNuevoProducto(e.target.value as "velas" | "inciensos" | "figuras")}>
           <option value="velas">Velas</option>
           <option value="inciensos">Inciensos</option>
           <option value="figuras">Figuras</option>
         </select>
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Nombre</label>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Nombre</label>
         <input type="text" className="categoria-text-input" value={nuevoProductoNombre} onChange={(e) => setNuevoProductoNombre(e.target.value)} placeholder="Nombre del producto" />
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Precio (€)</label>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Precio (€)</label>
         <input type="number" min={0} step={0.01} className="categoria-number-input" value={nuevoProductoPrecio} onChange={(e) => setNuevoProductoPrecio(e.target.value)} />
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Stock inicial</label>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Stock inicial</label>
         <input type="number" min={0} className="categoria-number-input" value={nuevoProductoStock} onChange={(e) => setNuevoProductoStock(Math.max(0, Math.floor(Number(e.target.value) || 0)))} />
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Descripción (opcional)</label>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Descripción (opcional)</label>
         <div style={{ gridColumn: "span 2", width: "100%" }}>
           <textarea className="categoria-text-input" value={nuevoProductoDescripcion} onChange={(e) => setNuevoProductoDescripcion(e.target.value)} placeholder="Descripción del producto" style={{ width: "100%", minWidth: 0 }} />
         </div>
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Vista previa</label>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Vista previa</label>
         <div style={{ display: "flex", alignItems: "center", gap: 15, marginTop: 10, marginBottom: 5 }}>
           <div style={{ fontSize: Number(nuevoProductoTamano) || 22, color: nuevoProductoColor, fontStyle: nuevoProductoEstilo === "italic" ? "italic" : "normal", fontWeight: nuevoProductoEstilo === "bold" ? "bold" : "normal" }}>
             {nuevoProductoNombre || "—"}
           </div>
         </div>
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Imagen</label>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Imagen</label>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <label className="categoria-file-label">
             {nuevoProductoNombreImagen || "Seleccionar imagen"}
@@ -187,16 +201,16 @@ export default function NuevoProductoPage(props: NuevoProductoPageProps) {
               reader.readAsDataURL(file);
             }} />
           </label>
-          {nuevoProductoImagen && <img src={nuevoProductoImagen} alt="Vista previa" style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 8, border: "2px solid gold" }} />}
+          {nuevoProductoImagen && <img src={nuevoProductoImagen} alt="Vista previa" style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 8, border: `2px solid ${THEME.goldMain}` }} />}
         </div>
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Color del texto</label>
-        <input type="color" value={nuevoProductoColor} onChange={(e) => setNuevoProductoColor(e.target.value)} style={{ width: 60, height: 60, border: "2px solid gold", borderRadius: 12, marginBottom: 18 }} />
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Color del texto</label>
+        <input type="color" value={nuevoProductoColor} onChange={(e) => setNuevoProductoColor(e.target.value)} style={{ width: 60, height: 60, border: `2px solid ${THEME.goldMain}`, borderRadius: 12, marginBottom: 18 }} />
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Tamaño del texto</label>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Tamaño del texto</label>
         <input type="number" min={12} max={48} className="categoria-number-input" value={nuevoProductoTamano === "0" ? "" : nuevoProductoTamano} onChange={(e) => setNuevoProductoTamano(e.target.value)} />
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Estilo del texto</label>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Estilo del texto</label>
         <select value={nuevoProductoEstilo} onChange={(e) => setNuevoProductoEstilo(e.target.value)} className="categoria-select" style={{ marginBottom: 20 }}>
           <option value="normal">Normal</option>
           <option value="italic">Cursiva</option>
@@ -204,20 +218,10 @@ export default function NuevoProductoPage(props: NuevoProductoPageProps) {
         </select>
 
         <div className="categoria-btn-group">
-          <button className="categoria-edit-btn" style={{ background: "#1565c0", color: "#C9A24A", border: "2px solid gold" }} onClick={crearProducto}>Crear producto</button>
-          <button className="categoria-edit-btn" style={{ background: "#7b2d3a", color: "#fff", border: "2px solid gold" }} onClick={cancelar}>Cancelar</button>
+          <button className="categoria-edit-btn" style={{ background: "#1565c0", color: THEME.goldMain, border: `2px solid ${THEME.goldMain}` }} onClick={crearProducto}>Crear producto</button>
+          <button className="categoria-edit-btn" style={{ background: "#7b2d3a", color: "#fff", border: `2px solid ${THEME.goldMain}` }} onClick={cancelar}>Cancelar</button>
         </div>
       </div>
-      <button className="categoria-volver-btn" style={{
-        background: "#C9A24A",
-        color: "#1b1745",
-        border: "2px solid #C9A24A",
-        padding: "10px 20px",
-        borderRadius: 12,
-        cursor: "pointer",
-        fontWeight: "bold",
-        fontSize: 16
-      }} onClick={() => setPagina("editarProductos")}>← Volver a Editar Productos</button>
     </div>
   );
 }

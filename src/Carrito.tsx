@@ -1,5 +1,6 @@
 import { type ItemCarrito } from "./App";
 import BotonCerrar from "./components/BotonCerrar";
+import { THEME } from "./config";
 
 interface Props {
   cart: ItemCarrito[];
@@ -31,17 +32,17 @@ export default function Carrito({
     return (
       <div className="carrito-vista" style={{ textAlign: "center", padding: 40, position: "relative" }}>
         <BotonCerrar onClick={volver} ariaLabel="Volver a tienda" title="Volver a tienda" />
-        <h2 style={{ color: "#C9A24A", fontSize: "2.1rem" }}>🛒 Carrito vacío</h2>
+        <h2 style={{ color: THEME.goldMain, fontSize: "2.1rem" }}>🛒 Carrito vacío</h2>
       </div>
     );
   }
 
   return (
-    <div className="carrito-vista" style={{ maxWidth: 800, margin: "0 auto", color: "#C9A24A", position: "relative", padding: 40 }}>
+    <div className="carrito-vista" style={{ maxWidth: 800, margin: "0 auto", color: THEME.goldMain, position: "relative", padding: 40 }}>
       <BotonCerrar onClick={volver} ariaLabel="Volver a tienda" title="Volver a tienda" />
       <h2 style={{ textAlign: "center", marginBottom: 30 }}>🛒 Tu carrito</h2>
       
-      <div style={{ background: "#0B0B0D", borderRadius: 20, padding: 20, marginBottom: 20 }}>
+      <div style={{ background: THEME.bg, borderRadius: 20, padding: 20, marginBottom: 20 }}>
         {cart.map(item => (
           <div
             key={`${item.id}-${item.cantidad}`}
@@ -56,9 +57,9 @@ export default function Carrito({
             }}
           >
             <div style={{ flex: 2 }}>
-              <strong style={{ color: "#C9A24A", fontSize: 18 }}>{item.nombre}</strong>
+              <strong style={{ color: THEME.goldMain, fontSize: 18 }}>{item.nombre}</strong>
               <p style={{ margin: "5px 0 0 0", color: "white" }}>{item.descripcion}</p>
-              <p style={{ margin: "5px 0 0 0", color: "#C9A24A" }}>{obtenerPrecioItem(item).toFixed(2)} €</p>
+              <p style={{ margin: "5px 0 0 0", color: THEME.goldMain }}>{obtenerPrecioItem(item).toFixed(2)} €</p>
             </div>
             
             <div style={{ display: "flex", alignItems: "center", gap: 15 }}>
@@ -67,7 +68,7 @@ export default function Carrito({
                 style={{
                   background: "transparent",
                   border: "1px solid gold",
-                  color: "#C9A24A",
+                  color: THEME.goldMain,
                   width: 30,
                   height: 30,
                   borderRadius: 15,
@@ -83,7 +84,7 @@ export default function Carrito({
                 style={{
                   background: "transparent",
                   border: "1px solid gold",
-                  color: "#C9A24A",
+                  color: THEME.goldMain,
                   width: 30,
                   height: 30,
                   borderRadius: 15,
@@ -93,7 +94,7 @@ export default function Carrito({
               >
                 +
               </button>
-              <span style={{ color: "#C9A24A", fontWeight: "bold", marginLeft: 10 }}>
+              <span style={{ color: THEME.goldMain, fontWeight: "bold", marginLeft: 10 }}>
                 {(obtenerPrecioItem(item) * item.cantidad).toFixed(2)} €
               </span>
             </div>
@@ -102,7 +103,7 @@ export default function Carrito({
       </div>
 
       <div style={{ 
-        background: "#0B0B0D", 
+        background: THEME.bg, 
         borderRadius: 20, 
         padding: 20,
         textAlign: "right"
@@ -114,7 +115,7 @@ export default function Carrito({
             padding: "10px 12px",
             borderRadius: 12,
             border: "1px solid gold",
-            background: "#0B0B0D",
+            background: THEME.bg,
             color: "white",
             fontSize: 14,
             fontWeight: "bold"
@@ -129,7 +130,7 @@ export default function Carrito({
         </p>
         <p style={{ fontSize: 18 }}>Subtotal: <strong>{total.toFixed(2)} €</strong></p>
         <p style={{ fontSize: 18 }}>Envío: <strong>{envioCalculado.toFixed(2)} €</strong></p>
-        <p style={{ fontSize: 24, color: "#C9A24A" }}>Total: <strong>{totalConEnvio.toFixed(2)} €</strong></p>
+        <p style={{ fontSize: 24, color: THEME.goldMain }}>Total: <strong>{totalConEnvio.toFixed(2)} €</strong></p>
       </div>
 
       <div style={{ display: "flex", gap: 10, marginTop: 20, flexWrap: "wrap" }}>
@@ -139,7 +140,7 @@ export default function Carrito({
             flex: 1,
             padding: "15px",
             borderRadius: 30,
-            border: "2px solid #C9A24A",
+            border: `2px solid ${THEME.goldMain}`,
             background: "transparent",
             color: "#fff",
             cursor: "pointer",
@@ -157,7 +158,7 @@ export default function Carrito({
             padding: "15px",
             borderRadius: 30,
             border: "none",
-            background: "#C9A24A",
+            background: THEME.goldMain,
             color: "#1b1745",
             cursor: "pointer",
             fontWeight: "bold",

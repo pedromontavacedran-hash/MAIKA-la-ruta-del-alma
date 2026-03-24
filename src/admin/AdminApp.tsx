@@ -41,11 +41,11 @@ const AdminApp: React.FC = () => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          background: "#0B0B0D"
+          background: "var(--maika-bg)"
         }}
       >
         <div>
-          <h1 style={{ margin: 0, fontSize: 24, color: "#C9A24A" }}>Panel de administración MAIKA</h1>
+          <h1 style={{ margin: 0, fontSize: 24, color: "var(--gold-main)" }}>Panel de administración MAIKA</h1>
           <p style={{ margin: 0, fontSize: 13, opacity: 0.85 }}>
             Gestión de tienda, pedidos, clientes y catálogo
           </p>
@@ -79,8 +79,8 @@ const AdminApp: React.FC = () => {
                 padding: "8px 14px",
                 borderRadius: 999,
                 border: isActive ? "2px solid gold" : "1px solid rgba(255, 215, 0, 0.4)",
-                background: isActive ? "#C9A24A" : "transparent",
-                color: isActive ? "#1b1745" : "#C9A24A",
+                background: isActive ? "var(--gold-main)" : "transparent",
+                color: isActive ? "#1b1745" : "var(--gold-main)",
                 cursor: "pointer",
                 fontSize: 14,
                 fontWeight: isActive ? 700 : 500,

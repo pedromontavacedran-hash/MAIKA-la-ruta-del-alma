@@ -1,6 +1,15 @@
 import { useState, useEffect } from "react";
 import type { Usuario } from "../App";
 import ModalConfirmacion from "../ModalConfirmacion";
+import BotonCerrar from "./BotonCerrar";
+import { THEME } from "../config";
+
+function normalizarTelefono(t: string): string {
+  const s = (t || "").replace(/\D/g, "").trim();
+  if (s.startsWith("0034") && s.length > 4) return s.slice(4);
+  if (s.startsWith("34") && s.length > 9) return s.slice(2);
+  return s;
+}
 
 interface ModalUsuariosProps {
   abierto: boolean;
@@ -10,6 +19,7 @@ interface ModalUsuariosProps {
   onEditUsuario?: (usuario: Usuario) => void;
   onUpdateUsuario?: (nuevosUsuarios: Usuario[]) => void;
   onDeleteUsuario?: (id: number | string) => void;
+  onRefreshUsuarios?: () => void;
 }
 
 export default function ModalUsuarios({
@@ -19,7 +29,8 @@ export default function ModalUsuarios({
   mostrarNotificacion,
   onEditUsuario,
   onUpdateUsuario,
-  onDeleteUsuario
+  onDeleteUsuario,
+  onRefreshUsuarios
 }: ModalUsuariosProps) {
   const [busqueda, setBusqueda] = useState("");
   const [filtroEstado, setFiltroEstado] = useState<"todos" | "verificados" | "pendientes">("todos");
@@ -32,12 +43,17 @@ export default function ModalUsuarios({
 
   if (!abierto) return null;
 
+  const busquedaNorm = busqueda.trim().toLowerCase();
+  const busquedaDigitos = busqueda.replace(/\D/g, "");
   const usuariosFiltrados = usuariosState
-    .filter((u: Usuario) =>
-      u.nombre?.toLowerCase().includes(busqueda.toLowerCase()) ||
-      u.email?.toLowerCase().includes(busqueda.toLowerCase()) ||
-      (u.telefono || "").includes(busqueda)
-    )
+    .filter((u: Usuario) => {
+      if (!busqueda.trim()) return true;
+      return (
+        u.nombre?.toLowerCase().includes(busquedaNorm) ||
+        u.email?.toLowerCase().includes(busquedaNorm) ||
+        (busquedaDigitos.length > 0 && (u.telefono || "").replace(/\D/g, "").includes(busquedaDigitos))
+      );
+    })
     .filter((u: Usuario) => {
       if (filtroEstado === "verificados") return !!u.verificado;
       if (filtroEstado === "pendientes") return !u.verificado;
@@ -59,7 +75,7 @@ export default function ModalUsuarios({
       const usuarioActual = localStorage.getItem("usuarioActual");
       if (usuarioActual) {
         const usuarioLogueado = JSON.parse(usuarioActual) as Usuario;
-        if (usuarioLogueado.id === usuario.id || usuarioLogueado.email.toLowerCase() === usuario.email.toLowerCase()) {
+        if (usuarioLogueado.id === usuario.id || (usuario.telefono && usuarioLogueado.telefono && normalizarTelefono(usuarioLogueado.telefono) === normalizarTelefono(usuario.telefono))) {
           localStorage.removeItem("usuarioActual");
           window.location.reload();
         }
@@ -89,7 +105,7 @@ export default function ModalUsuarios({
     const usuarioActual = localStorage.getItem("usuarioActual");
     if (usuarioActual) {
       const usuarioLogueado = JSON.parse(usuarioActual) as Usuario;
-      if (usuarioLogueado.id === usuario.id || usuarioLogueado.email.toLowerCase() === usuario.email.toLowerCase()) {
+      if (usuarioLogueado.id === usuario.id || (usuario.telefono && usuarioLogueado.telefono && normalizarTelefono(usuarioLogueado.telefono) === normalizarTelefono(usuario.telefono))) {
         const usuarioActualizado = nuevos.find(u => u.id === usuario.id);
         if (usuarioActualizado) {
           localStorage.setItem("usuarioActual", JSON.stringify(usuarioActualizado));
@@ -121,69 +137,47 @@ export default function ModalUsuarios({
   };
 
   return (
-    <div style={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: "rgba(0,0,0,0.95)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      zIndex: 10000,
-      backdropFilter: "blur(5px)"
-    }}>
-      <div style={{
-        background: "#0B0B0D",
-        border: "3px solid #C9A24A",
-        borderRadius: 34,
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: "rgba(0,0,0,0.95)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        paddingTop: 0,
+        zIndex: 10000,
+        backdropFilter: "blur(5px)"
+      }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="modal-usuarios-contenido" style={{
+        background: "transparent",
         padding: 40,
         width: "98%",
         maxWidth: 1500,
         maxHeight: "95vh",
         overflowY: "auto",
-        boxShadow: "0 0 50px rgba(212,175,55,0.3)"
-      }}>
-
+        position: "relative"
+      }} onClick={(e) => e.stopPropagation()}>
         {/* HEADER */}
         <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
           marginBottom: 25,
-          borderBottom: "2px solid #C9A24A",
+          borderBottom: `2px solid ${THEME.goldMain}`,
           paddingBottom: 15
         }}>
-          <div>
-            <h2 style={{ color: "#C9A24A", margin: 0, fontSize: 36 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+            <h2 style={{ color: THEME.goldMain, margin: 0, fontSize: 36 }}>
               👥 GESTIÓN DE USUARIOS
             </h2>
-            <p style={{ color: "white", margin: "8px 0 0", opacity: 0.9, fontSize: 18 }}>
-              Total: {usuariosState.length} usuarios | Verificados: {usuariosState.filter((u: Usuario) => u.verificado).length} | Pendientes: {usuariosState.filter((u: Usuario) => !u.verificado).length}
-            </p>
+            <BotonCerrar onClick={onClose} ariaLabel="Cerrar" title="Cerrar" style={{ marginRight: 4 }} />
           </div>
-          <button
-            onClick={onClose}
-            style={{
-              background: "transparent",
-              border: "2px solid #C9A24A",
-              color: "#C9A24A",
-              width: 56,
-              height: 56,
-              borderRadius: "50%",
-              cursor: "pointer",
-              fontSize: 28,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transition: "all 0.3s"
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.background = "#C9A24A"}
-            onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-          >
-            ✕
-          </button>
+          <p style={{ color: "white", margin: "8px 0 0", opacity: 0.9, fontSize: 18 }}>
+            Total: {usuariosState.length} usuarios | Verificados: {usuariosState.filter((u: Usuario) => u.verificado).length} | Pendientes: {usuariosState.filter((u: Usuario) => !u.verificado).length}
+          </p>
         </div>
 
         {/* FILTROS Y ACCIONES */}
@@ -197,15 +191,15 @@ export default function ModalUsuarios({
           <div style={{ flex: 1, minWidth: 250 }}>
             <input
               type="text"
-              placeholder="🔍 Buscar por nombre, email o teléfono..."
+              placeholder="🔍 Buscar por teléfono"
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               style={{
                 width: "100%",
                 padding: "16px 18px",
                 borderRadius: 14,
-                border: "2px solid #C9A24A",
-                background: "#0B0B0D",
+                border: `2px solid ${THEME.goldMain}`,
+                background: THEME.bg,
                 color: "white",
                 fontSize: 19,
                 outline: "none"
@@ -219,9 +213,9 @@ export default function ModalUsuarios({
             style={{
               padding: "16px 22px",
               borderRadius: 14,
-              border: "2px solid #C9A24A",
-              background: "#0B0B0D",
-              color: "#C9A24A",
+              border: `2px solid ${THEME.goldMain}`,
+              background: THEME.bg,
+              color: THEME.goldMain,
               cursor: "pointer",
               fontSize: 18,
               minWidth: 200
@@ -255,16 +249,21 @@ export default function ModalUsuarios({
           <button
             className="btn-azul-categoria"
             onClick={() => {
-              const usuariosLocal = JSON.parse(localStorage.getItem("usuarios") || "[]") as Usuario[];
-              setUsuariosState(usuariosLocal);
+              if (onRefreshUsuarios) {
+                onRefreshUsuarios();
+              } else {
+                const usuariosLocal = JSON.parse(localStorage.getItem("usuarios") || "[]") as Usuario[];
+                setUsuariosState(usuariosLocal);
+                onUpdateUsuario?.(usuariosLocal);
+              }
               mostrarNotificacion("🔄 Lista actualizada", "exito");
             }}
             style={{
               padding: "16px 24px",
               borderRadius: 14,
-              border: "2px solid #C9A24A",
+              border: `2px solid ${THEME.goldMain}`,
               background: "transparent",
-              color: "#C9A24A",
+              color: THEME.goldMain,
               cursor: "pointer",
               fontSize: 18,
               fontWeight: "bold"
@@ -279,9 +278,9 @@ export default function ModalUsuarios({
           <div style={{
             textAlign: "center",
             padding: 60,
-            background: "#0B0B0D",
+            background: THEME.bg,
             borderRadius: 20,
-            border: "2px dashed #C9A24A"
+            border: `2px dashed ${THEME.goldMain}`
           }}>
             <span style={{ fontSize: 48 }}>👥</span>
             <p style={{ color: "white", fontSize: 18, marginTop: 10 }}>
@@ -290,24 +289,31 @@ export default function ModalUsuarios({
           </div>
         ) : (
           <div style={{
-            background: "#0B0B0D",
+            background: THEME.bg,
             borderRadius: 20,
-            border: "2px solid #C9A24A",
+            border: `2px solid ${THEME.goldMain}`,
             overflow: "hidden"
           }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+              <colgroup>
+                <col style={{ width: 40 }} />
+                <col style={{ width: 160 }} />
+                <col style={{ width: 200 }} />
+                <col />
+                <col style={{ width: 320 }} />
+              </colgroup>
               <thead>
                 <tr style={{
-                  background: "#0B0B0D",
-                  borderBottom: "2px solid #C9A24A"
+                  background: THEME.bg,
+                  borderBottom: `2px solid ${THEME.goldMain}`,
+                  verticalAlign: "middle"
                 }}>
-                  <th style={{ padding: "18px", textAlign: "left", color: "#C9A24A", fontSize: 18 }}>#</th>
-                  <th style={{ padding: "18px", textAlign: "left", color: "#C9A24A", fontSize: 18 }}>Usuario</th>
-                  <th style={{ padding: "18px", textAlign: "left", color: "#C9A24A", fontSize: 18 }}>Contacto</th>
-                  <th style={{ padding: "18px", textAlign: "left", color: "#C9A24A", fontSize: 18 }}>Dirección</th>
-                  <th style={{ padding: "18px", textAlign: "left", color: "#C9A24A", fontSize: 18 }}>Estado</th>
-                  <th style={{ padding: "18px", textAlign: "left", color: "#C9A24A", fontSize: 18 }}>Pedidos</th>
-                  <th style={{ padding: "18px", textAlign: "left", color: "#C9A24A", fontSize: 18 }}>Acciones</th>
+                  <th style={{ padding: "12px 12px", textAlign: "left", color: THEME.goldMain, fontSize: 14, verticalAlign: "top" }}>#</th>
+                  <th style={{ padding: "12px 12px", textAlign: "left", color: THEME.goldMain, fontSize: 14, verticalAlign: "top" }}>Usuario</th>
+                  <th style={{ padding: "12px 12px 12px 28px", textAlign: "left", color: THEME.goldMain, fontSize: 14, verticalAlign: "top" }}>Contacto</th>
+                  <th style={{ padding: "12px 12px 12px 56px", textAlign: "left", color: THEME.goldMain, fontSize: 14, verticalAlign: "top" }}>Dirección</th>
+                  {/* Acciones: centrado con pelín a la derecha (paddingLeft 72px) — no tocar */}
+                  <th style={{ padding: "12px 12px 12px 72px", textAlign: "center", color: THEME.goldMain, fontSize: 14, minWidth: 320, position: "sticky", right: 0, background: THEME.bg, boxShadow: "-4px 0 8px rgba(0,0,0,0.3)", verticalAlign: "middle" }}>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -321,95 +327,72 @@ export default function ModalUsuarios({
                     onMouseEnter={(e) => e.currentTarget.style.background = "rgba(212,175,55,0.1)"}
                     onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
                   >
-                    <td style={{ padding: "18px", color: "#C9A24A", fontSize: 18 }}>{index + 1}</td>
+                    <td style={{ padding: "12px 12px", color: THEME.goldMain, fontSize: 14, verticalAlign: "top", textAlign: "left" }}>{index + 1}</td>
 
-                    <td style={{ padding: "18px" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <td style={{ padding: "12px 12px", verticalAlign: "top", textAlign: "left" }}>
+                      <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
                         <div style={{
-                          width: 52,
-                          height: 52,
+                          width: 36,
+                          height: 36,
+                          minWidth: 36,
+                          flexShrink: 0,
                           borderRadius: "50%",
-                          background: "linear-gradient(135deg, #E6C77A, #C9A24A, #8A6A2A)",
-                          color: "#0B0B0D",
+                          background: THEME.goldGradient,
+                          color: THEME.bg,
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                           fontWeight: "bold",
-                          fontSize: 22
+                          fontSize: 15
                         }}>
                           {usuario.nombre?.charAt(0).toUpperCase()}
                         </div>
-                        <div>
-                          <div style={{ color: "white", fontWeight: "bold", fontSize: 18 }}>{usuario.nombre}</div>
-                          <div style={{ color: "#C9A24A", fontSize: 13 }}>ID: {usuario.id}</div>
+                        <div style={{ minWidth: 0, flex: 1, lineHeight: 1.5, fontSize: 14 }}>
+                          <div style={{ color: "white", fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", height: 21 }}>{usuario.nombre}</div>
+                          <div style={{ color: THEME.goldMain, fontSize: 12, height: 18 }}>
+                            ID: {String(usuario.id).slice(-6)}
+                          </div>
                         </div>
                       </div>
                     </td>
 
-                    <td style={{ padding: "18px" }}>
-                      <div style={{ color: "white", fontSize: 17 }}>
-                        <div>📧 {usuario.email}</div>
-                        <div style={{ fontSize: 16, opacity: 0.9, marginTop: 4 }}>
-                          📞 {usuario.telefono || "No especificado"}
-                        </div>
+                    <td style={{ padding: "12px 12px 12px 28px", verticalAlign: "top", textAlign: "left" }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "22px 1fr", gap: "0 6px", alignItems: "start", color: "white", lineHeight: 1.5 }}>
+                        <span style={{ gridColumn: 1, textAlign: "center", fontSize: 14, height: 21, display: "flex", alignItems: "center", justifyContent: "center" }}>📧</span>
+                        <span style={{ gridColumn: 2, fontSize: 14, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 220, height: 21 }} title={usuario.email}>{usuario.email}</span>
+                        <span style={{ gridColumn: 1, textAlign: "center", fontSize: 12, opacity: 0.9, height: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>📞</span>
+                        <span style={{ gridColumn: 2, fontSize: 12, opacity: 0.9, height: 18 }}>{usuario.telefono || "—"}</span>
                       </div>
                     </td>
 
-                    <td style={{ padding: "18px" }}>
-                      <div style={{ color: "white", fontSize: 16 }}>
+                    <td style={{ padding: "12px 12px 12px 56px", verticalAlign: "top", textAlign: "left" }}>
+                      <div style={{ color: "white", fontSize: 14, lineHeight: 1.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", minWidth: 0, height: 21 }} title={usuario.direccion || ""}>
                         {usuario.direccion || "—"}
                       </div>
                     </td>
 
-                    <td style={{ padding: "18px" }}>
-                      <span style={{
-                        background: usuario.verificado ? "rgba(46,204,113,0.2)" : "rgba(255,68,68,0.2)",
-                        color: usuario.verificado ? "#2ecc71" : "#ff4444",
-                        padding: "8px 14px",
-                        borderRadius: 20,
-                        fontSize: 15,
-                        fontWeight: "bold",
-                        display: "inline-block"
-                      }}>
-                        {usuario.verificado ? "✅ Verificado" : "⏳ Pendiente"}
-                      </span>
-                    </td>
-
-                    <td style={{ padding: "18px" }}>
-                      <span style={{
-                        background: "rgba(212,175,55,0.1)",
-                        padding: "8px 14px",
-                        borderRadius: 20,
-                        color: "#C9A24A",
-                        fontWeight: "bold",
-                        fontSize: 15
-                      }}>
-                        {usuario.pedidos?.length || 0} pedidos
-                      </span>
-                    </td>
-
-                    <td style={{ padding: "18px" }}>
-                      <div style={{ display: "flex", gap: 10 }}>
+                    <td style={{ padding: "12px 12px", minWidth: 320, position: "sticky", right: 0, background: THEME.bg, boxShadow: "-4px 0 8px rgba(0,0,0,0.2)", verticalAlign: "middle" }}>
+                      <div style={{ display: "flex", gap: 8, flexWrap: "nowrap", justifyContent: "flex-end", alignItems: "center" }}>
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleVerificar(usuario);
                           }}
+                          title={usuario.verificado ? "Clic para desverificar" : "Clic para verificar"}
                           style={{
                             background: "transparent",
-                            border: `1px solid ${usuario.verificado ? "#ff4444" : "#2ecc71"}`,
-                            color: usuario.verificado ? "#ff4444" : "#2ecc71",
+                            border: usuario.verificado ? "1px solid #2ecc71" : `1px solid ${THEME.goldMain}`,
+                            color: usuario.verificado ? "#2ecc71" : THEME.goldMain,
                             padding: "8px 12px",
                             borderRadius: 10,
-                            cursor: "pointer",
                             fontSize: 14,
-                            fontWeight: "bold"
+                            fontWeight: 500,
+                            cursor: "pointer"
                           }}
-                          title={usuario.verificado ? "Desverificar" : "Verificar"}
                         >
-                          {usuario.verificado ? "❌" : "✅"}
+                          {usuario.verificado ? "✅" : "⏳"}
                         </button>
-
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -417,8 +400,8 @@ export default function ModalUsuarios({
                           }}
                           style={{
                             background: "transparent",
-                            border: "1px solid #C9A24A",
-                            color: "#C9A24A",
+                            border: `1px solid ${THEME.goldMain}`,
+                            color: THEME.goldMain,
                             padding: "8px 12px",
                             borderRadius: 10,
                             cursor: "pointer",
@@ -456,23 +439,26 @@ export default function ModalUsuarios({
           </div>
         )}
 
-        {/* PIE CON ESTADÍSTICAS */}
+        {/* PIE CON ESTADÍSTICAS (se actualiza al hacer clic en ✅/⏳) */}
         <div style={{
           marginTop: 20,
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          flexWrap: "wrap",
+          gap: 16,
           color: "white",
-          background: "#0B0B0D",
+          background: THEME.bg,
           padding: "18px 22px",
           borderRadius: 15,
-          border: "1px solid #C9A24A",
-          fontSize: 18
+          border: `1px solid ${THEME.goldMain}`,
+          fontSize: 18,
+          lineHeight: 1.4
         }}>
-          <div>📊 Mostrando {usuariosFiltrados.length} de {usuariosState.length} usuarios</div>
-          <div style={{ display: "flex", gap: 20 }}>
-            <span>✅ {usuariosState.filter((u: Usuario) => u.verificado).length} verificados</span>
-            <span>⏳ {usuariosState.filter((u: Usuario) => !u.verificado).length} pendientes</span>
+          <div style={{ flex: "1 1 auto", minWidth: 0 }}>📊 Mostrando {usuariosFiltrados.length} de {usuariosState.length} usuarios</div>
+          <div style={{ display: "flex", gap: 24, alignItems: "center", flexShrink: 0 }}>
+            <span>✅ Verificados: <strong>{usuariosState.filter((u: Usuario) => u.verificado).length}</strong></span>
+            <span>⏳ Pendientes: <strong>{usuariosState.filter((u: Usuario) => !u.verificado).length}</strong></span>
           </div>
         </div>
       </div>

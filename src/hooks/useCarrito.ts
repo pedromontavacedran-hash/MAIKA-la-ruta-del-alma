@@ -3,6 +3,8 @@ import { flushSync } from "react-dom";
 import type { Producto, ItemCarrito } from "../types";
 import { CARRITO_KEY } from "../config";
 import { precioSeguro, idSeguro } from "../utils/precio";
+import { getUsuarioId } from "../utils/usuarioId";
+import { guardarCarritoApi, obtenerCarritoApi } from "../services/apiCarrito";
 
 export type CatalogForCarrito = {
   precioItemCarrito: (item: Pick<ItemCarrito, "id" | "precio" | "nombre">) => number;
@@ -15,6 +17,10 @@ export type CatalogForCarrito = {
 };
 
 export type MostrarNotificacion = (mensaje: string, tipo: "normal" | "exito" | "error") => void;
+
+function hasToken() {
+  return !!localStorage.getItem("token");
+}
 
 export function useCarrito(catalog: CatalogForCarrito, mostrarNotificacion: MostrarNotificacion) {
   const [cart, setCart] = useState<ItemCarrito[]>([]);
@@ -44,11 +50,18 @@ export function useCarrito(catalog: CatalogForCarrito, mostrarNotificacion: Most
   );
 
   const carritoYaCargadoRef = useRef(false);
+  const cargadoBackendRef = useRef(false);
+  const lastSavedRef = useRef<string>("");
   useEffect(() => {
     if (carritoYaCargadoRef.current) return;
     carritoYaCargadoRef.current = true;
-    const carritoGuardado = localStorage.getItem(CARRITO_KEY);
-    if (carritoGuardado) {
+    const cargarLocal = () => {
+      const carritoGuardado = localStorage.getItem(CARRITO_KEY);
+      if (!carritoGuardado) {
+        setCart([]);
+        lastSavedRef.current = "[]";
+        return;
+      }
       try {
         const carritoParseado = JSON.parse(carritoGuardado) as ItemCarrito[];
         const carritoSeguro = Array.isArray(carritoParseado) ? carritoParseado : [];
@@ -61,20 +74,53 @@ export function useCarrito(catalog: CatalogForCarrito, mostrarNotificacion: Most
         if (originalSerializado !== normalizadoSerializado) {
           localStorage.setItem(CARRITO_KEY, normalizadoSerializado);
         }
+        lastSavedRef.current = normalizadoSerializado;
       } catch {
         localStorage.removeItem(CARRITO_KEY);
         setCart([]);
+        lastSavedRef.current = "[]";
       }
-    }
+    };
+    void (async () => {
+      if (!hasToken()) {
+        cargarLocal();
+        cargadoBackendRef.current = true;
+        return;
+      }
+      try {
+        const usuarioId = getUsuarioId();
+        const remoto = await obtenerCarritoApi(usuarioId);
+        const remotoSeguro = Array.isArray(remoto?.items) ? remoto.items : [];
+        const carritoNormalizado = remotoSeguro
+          .map((item) => normalizarItemCarrito(item))
+          .filter((item) => item.cantidad > 0);
+        setCart(carritoNormalizado);
+        const serializado = JSON.stringify(carritoNormalizado);
+        localStorage.setItem(CARRITO_KEY, serializado);
+        lastSavedRef.current = serializado;
+      } catch {
+        cargarLocal();
+      } finally {
+        cargadoBackendRef.current = true;
+      }
+    })();
   }, [normalizarItemCarrito]);
 
-  const esPrimeraEjecucionGuardarCarritoRef = useRef(true);
   useEffect(() => {
-    if (esPrimeraEjecucionGuardarCarritoRef.current) {
-      esPrimeraEjecucionGuardarCarritoRef.current = false;
-      return;
-    }
-    localStorage.setItem(CARRITO_KEY, JSON.stringify(cart));
+    if (!cargadoBackendRef.current) return;
+    const current = JSON.stringify(cart);
+    if (current === lastSavedRef.current) return;
+    const timeout = window.setTimeout(() => {
+      localStorage.setItem(CARRITO_KEY, current);
+      if (hasToken()) {
+        const usuarioId = getUsuarioId();
+        void guardarCarritoApi(usuarioId, cart).catch(() => {});
+      }
+      lastSavedRef.current = current;
+    }, 300);
+    return () => {
+      window.clearTimeout(timeout);
+    };
   }, [cart]);
 
   const totalItemsCarrito = useMemo(

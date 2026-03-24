@@ -1,3 +1,5 @@
+import { THEME } from "../config";
+
 interface VisitasCounterProps {
   visitas: number;
 }
@@ -13,7 +15,7 @@ export default function VisitasCounter({ visitas }: VisitasCounterProps) {
         display: "flex",
         alignItems: "center",
         gap: 8,
-        color: "#C9A24A",
+        color: THEME.goldMain,
         fontSize: 14,
       }}
     >

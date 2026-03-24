@@ -3,6 +3,7 @@
  * Usado en Carrito, Tienda, Favoritos, Cuenta, Editar Productos, etc.
  */
 import type { CSSProperties, MouseEvent } from "react";
+import { THEME } from "../config";
 
 const ICONO_CRUZ = (
   <svg width="2em" height="2em" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -19,8 +20,8 @@ export const estiloBotonCerrar: CSSProperties = {
   height: 40,
   minWidth: 40,
   minHeight: 40,
-  background: "#0B0B0D",
-  border: "2px solid #C9A24A",
+  background: THEME.bg,
+  border: `2px solid ${THEME.goldMain}`,
   borderRadius: 8,
   cursor: "pointer",
   padding: 6,

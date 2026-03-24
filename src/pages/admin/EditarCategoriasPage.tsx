@@ -1,5 +1,8 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { CategoriaEntrada, Pagina } from "../../types";
+import BotonCerrar from "../../components/BotonCerrar";
+import { THEME } from "../../config";
+import { isAdminAuthorized } from "../../utils/adminAuth";
 
 export interface EditarCategoriasPageProps {
   setPagina: (p: Pagina) => void;
@@ -30,8 +33,8 @@ export interface EditarCategoriasPageProps {
 
 const panelStyle = {
   minHeight: "100vh" as const,
-  background: "#0B0B0D",
-  color: "#C9A24A",
+  background: THEME.bg,
+  color: THEME.goldMain,
   display: "flex" as const,
   flexDirection: "column" as const,
   alignItems: "center" as const,
@@ -71,23 +74,34 @@ export default function EditarCategoriasPage(props: EditarCategoriasPageProps) {
 
   return (
     <div style={panelStyle}>
-      <h2 style={{ fontSize: 38, marginBottom: 30 }}>Editar Categorías</h2>
-      <div className="categoria-edit-panel">
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Nombre de la categoría</label>
+      <h2 style={{ fontSize: 38, margin: 0, marginBottom: 30 }}>Editar Categorías</h2>
+      <div className="categoria-edit-panel editar-categorias-panel" style={{ position: "relative" }}>
+        <BotonCerrar
+          onClick={() => {
+            if (isAdminAuthorized()) {
+              setPagina("admin");
+            } else {
+              setPagina("inicio");
+            }
+          }}
+          ariaLabel="Cerrar"
+          title="Cerrar"
+        />
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Nombre de la categoría</label>
         <select className="categoria-select" value={valorSelect} onChange={(e) => setCategoriaSeleccionada(e.target.value)}>
           {categoriasCatalogo.map((c) => (
             <option key={c.id} value={c.id}>{c.nombre.charAt(0).toUpperCase() + c.nombre.slice(1)}</option>
           ))}
         </select>
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Vista previa de la categoría</label>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Vista previa de la categoría</label>
         <div style={{ display: "flex", alignItems: "center", gap: 15, marginTop: 10, marginBottom: 25 }}>
           <div style={{ fontSize: Number(tamanoCategoria) || 22, color: colorCategoria, fontStyle: estiloTextoCategoria === "italic" ? "italic" : "normal", fontWeight: estiloTextoCategoria === "bold" ? "bold" : "normal" }}>
             {categoriasCatalogo.find((c) => c.id === categoriaSeleccionada)?.nombre ?? categoriaSeleccionada}
           </div>
         </div>
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Imagen</label>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Imagen</label>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <label className="categoria-file-label">
             {nombreImagenCategoria || "Seleccionar imagen"}
@@ -106,18 +120,18 @@ export default function EditarCategoriasPage(props: EditarCategoriasPageProps) {
             />
           </label>
           {previewCategoria && (
-            <img src={previewCategoria} alt="Vista previa" style={{ width: 70, height: 70, objectFit: "cover", borderRadius: 10, border: "2px solid #C9A24A" }} />
+            <img src={previewCategoria} alt="Vista previa" style={{ width: 70, height: 70, objectFit: "cover", borderRadius: 10, border: `2px solid ${THEME.goldMain}` }} />
           )}
         </div>
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Color</label>
-        <input type="color" value={colorCategoria} onChange={(e) => setColorCategoria(e.target.value)} style={{ width: 60, height: 60, border: "2px solid #C9A24A", borderRadius: 12, marginBottom: 18 }} />
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Color</label>
+        <input type="color" value={colorCategoria} onChange={(e) => setColorCategoria(e.target.value)} style={{ width: 60, height: 60, border: `2px solid ${THEME.goldMain}`, borderRadius: 12, marginBottom: 18 }} />
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Tamaño del texto</label>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Tamaño del texto</label>
         <input type="number" min={12} max={48} className="categoria-number-input" placeholder="Tamaño..." value={tamanoCategoria === "0" ? "" : tamanoCategoria} onChange={(e) => setTamanoCategoria(e.target.value)} />
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Estilo del texto</label>
-        <select value={estiloTextoCategoria} onChange={(e) => setEstiloTextoCategoria(e.target.value)} style={{ padding: 10, borderRadius: 10, border: "2px solid #C9A24A", background: "#0B0B0D", color: "#C9A24A", fontSize: 16, marginBottom: 20 }}>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Estilo del texto</label>
+        <select value={estiloTextoCategoria} onChange={(e) => setEstiloTextoCategoria(e.target.value)} style={{ padding: 10, borderRadius: 10, border: `2px solid ${THEME.goldMain}`, background: THEME.bg, color: THEME.goldMain, fontSize: 16, marginBottom: 20 }}>
           <option value="normal">Normal</option>
           <option value="italic">Cursiva</option>
           <option value="bold">Negrita</option>
@@ -132,10 +146,14 @@ export default function EditarCategoriasPage(props: EditarCategoriasPageProps) {
             localStorage.setItem(CATEGORIA_IMAGENES_KEY, JSON.stringify(map));
           } catch { /* ignore */ }
           mostrarNotificacion("✅ Categoría guardada", "exito");
-          setPagina("admin");
+          if (isAdminAuthorized()) {
+            setPagina("admin");
+          } else {
+            setPagina("inicio");
+          }
         }}>Guardar</button>
 
-        <button className="categoria-edit-btn" style={{ background: "#1565c0", color: "#C9A24A", border: "2px solid #C9A24A" }} onClick={() => {
+        <button className="categoria-edit-btn" style={{ background: "#1565c0", color: THEME.goldMain, border: `2px solid ${THEME.goldMain}` }} onClick={() => {
           setCategoriaARenombrar(categoriaSeleccionada);
           setNuevaCategoriaNombre(categoriasCatalogo.find((c) => c.id === categoriaSeleccionada)?.nombre ?? categoriaSeleccionada);
           setNuevaCategoriaImagen(previewCategoria);
@@ -146,7 +164,7 @@ export default function EditarCategoriasPage(props: EditarCategoriasPageProps) {
           setPagina("nuevaCategoria");
         }}>Renombrar categoría</button>
 
-        <button className="categoria-edit-btn" style={{ background: "#1565c0", color: "#C9A24A", border: "2px solid #C9A24A" }} onClick={() => {
+        <button className="categoria-edit-btn" style={{ background: "#1565c0", color: THEME.goldMain, border: `2px solid ${THEME.goldMain}` }} onClick={() => {
           setCategoriaARenombrar(null);
           setNuevaCategoriaNombre("");
           setNuevaCategoriaImagen(null);
@@ -157,7 +175,7 @@ export default function EditarCategoriasPage(props: EditarCategoriasPageProps) {
           setPagina("nuevaCategoria");
         }}>Añadir categoría</button>
 
-        <button className="categoria-edit-btn" style={{ background: "#7b2d3a", color: "#fff", border: "2px solid #C9A24A" }} onClick={() => {
+        <button className="categoria-edit-btn" style={{ background: "#7b2d3a", color: "#fff", border: `2px solid ${THEME.goldMain}` }} onClick={() => {
           const id = categoriaSeleccionada;
           const nombre = categoriasCatalogo.find((c) => c.id === id)?.nombre ?? id;
           if (!window.confirm(`¿Eliminar la categoría "${nombre}"?`)) return;
@@ -167,16 +185,6 @@ export default function EditarCategoriasPage(props: EditarCategoriasPageProps) {
           mostrarNotificacion("Categoría eliminada", "normal");
         }}>Eliminar categoría</button>
       </div>
-      <button className="categoria-volver-btn" style={{
-        background: "#C9A24A",
-        color: "#1b1745",
-        border: "2px solid #C9A24A",
-        padding: "10px 20px",
-        borderRadius: 12,
-        cursor: "pointer",
-        fontWeight: "bold",
-        fontSize: 16
-      }} onClick={() => setPagina("admin")}>← Volver al panel</button>
     </div>
   );
 }

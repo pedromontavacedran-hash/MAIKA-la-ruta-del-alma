@@ -14,15 +14,15 @@
 }
 
 .notificacion {
-  background: #0B0B0D;
-  border: 1px solid var(--gold-main, #C9A24A);
-  color: var(--gold-main, #C9A24A);
+  background: var(--maika-bg);
+  border: 1px solid var(--gold-main);
+  color: var(--gold-main);
   padding: 20px 35px;
   border-radius: 50px;
   font-weight: bold;
   font-size: 1.3rem;
   text-align: center;
-  box-shadow: 0 0 12px var(--gold-glow, rgba(201,162,74,0.35));
+  box-shadow: 0 0 12px var(--gold-glow);
   animation: slideDown 0.4s ease, fadeOut 0.4s ease 2.6s forwards;
   max-width: 450px;
   width: 90%;

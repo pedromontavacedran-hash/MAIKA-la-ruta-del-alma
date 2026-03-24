@@ -1,5 +1,6 @@
 import type { EditUsuarioForm } from "../App";
-import type { Dispatch, SetStateAction } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
+import { THEME } from "../config";
 
 interface EditUsuarioModalProps {
   abierto: boolean;
@@ -14,8 +15,8 @@ const editModalInputStyle: React.CSSProperties = {
   padding: 20,
   marginBottom: 16,
   borderRadius: 10,
-  border: "2px solid #C9A24A",
-  background: "#0B0B0D",
+  border: `2px solid ${THEME.goldMain}`,
+  background: THEME.bg,
   color: "white",
   fontSize: 20,
   outline: "none"
@@ -28,6 +29,7 @@ export default function EditUsuarioModal({
   onClose,
   onSave
 }: EditUsuarioModalProps) {
+  const [mostrarPassword, setMostrarPassword] = useState(false);
   if (!abierto || !editUsuarioForm) return null;
 
   return (
@@ -44,8 +46,8 @@ export default function EditUsuarioModal({
       zIndex: 11000
     }}>
       <div style={{
-        background: "#0B0B0D",
-        border: "3px solid #C9A24A",
+        background: THEME.bg,
+        border: `3px solid ${THEME.goldMain}`,
         borderRadius: 20,
         padding: 36,
         width: "98%",
@@ -53,80 +55,101 @@ export default function EditUsuarioModal({
         maxHeight: "96vh",
         overflowY: "auto"
       }}>
-        <h3 style={{ color: "#C9A24A", marginBottom: 28, fontSize: 34 }}>✏️ Editar usuario</h3>
+        <h3 style={{ color: THEME.goldMain, marginBottom: 28, fontSize: 34 }}>✏️ Editar usuario</h3>
 
-        <input
-          type="text"
-          placeholder="Nombre"
-          value={editUsuarioForm.nombre}
-          onChange={(e) => setEditUsuarioForm({ ...editUsuarioForm, nombre: e.target.value })}
-          style={editModalInputStyle}
-        />
-
-        <input
-          type="email"
-          placeholder="Email"
-          value={editUsuarioForm.email}
-          onChange={(e) => setEditUsuarioForm({ ...editUsuarioForm, email: e.target.value })}
-          style={editModalInputStyle}
-        />
-
-        <input
-          type="tel"
-          placeholder="Teléfono"
-          value={editUsuarioForm.telefono}
-          onChange={(e) =>
-            setEditUsuarioForm({
-              ...editUsuarioForm,
-              telefono: e.target.value.replace(/\D/g, "").slice(0, 9)
-            })
-          }
-          inputMode="numeric"
-          maxLength={9}
-          style={editModalInputStyle}
-        />
-
-        <input
-          type="password"
-          placeholder="Contraseña"
-          value={editUsuarioForm.password}
-          onChange={(e) => setEditUsuarioForm({ ...editUsuarioForm, password: e.target.value })}
-          style={editModalInputStyle}
-        />
-
-        <input
-          type="text"
-          placeholder="Calle"
-          value={editUsuarioForm.calle}
-          onChange={(e) => setEditUsuarioForm({ ...editUsuarioForm, calle: e.target.value })}
-          style={editModalInputStyle}
-        />
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 12 }}>
           <input
             type="text"
-            placeholder="Número"
-            value={editUsuarioForm.numero}
-            onChange={(e) => setEditUsuarioForm({ ...editUsuarioForm, numero: e.target.value })}
+            placeholder="Nombre y apellidos"
+            value={editUsuarioForm.nombre}
+            onChange={(e) => setEditUsuarioForm({ ...editUsuarioForm, nombre: e.target.value })}
             style={editModalInputStyle}
           />
           <input
             type="text"
-            placeholder="Bloque"
-            value={editUsuarioForm.bloque}
-            onChange={(e) => setEditUsuarioForm({ ...editUsuarioForm, bloque: e.target.value })}
+            placeholder="DNI"
+            value={editUsuarioForm.dni || ""}
+            onChange={(e) => setEditUsuarioForm({ ...editUsuarioForm, dni: e.target.value.toUpperCase() })}
+            style={{ ...editModalInputStyle, textTransform: "uppercase" }}
+          />
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 12 }}>
+          <input
+            type="email"
+            placeholder="Email"
+            value={editUsuarioForm.email}
+            onChange={(e) => setEditUsuarioForm({ ...editUsuarioForm, email: e.target.value })}
+            style={editModalInputStyle}
+          />
+          <input
+            type="tel"
+            placeholder="Teléfono"
+            value={editUsuarioForm.telefono}
+            onChange={(e) =>
+              setEditUsuarioForm({
+                ...editUsuarioForm,
+                telefono: e.target.value.replace(/\D/g, "").slice(0, 9)
+              })
+            }
+            inputMode="numeric"
+            maxLength={9}
             style={editModalInputStyle}
           />
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div style={{ position: "relative", marginBottom: 16 }}>
+          <input
+            type={mostrarPassword ? "text" : "password"}
+            placeholder="Contraseña"
+            value={editUsuarioForm.password}
+            onChange={(e) => setEditUsuarioForm({ ...editUsuarioForm, password: e.target.value })}
+            style={{ ...editModalInputStyle, marginBottom: 0, paddingRight: 56 }}
+          />
+          <button
+            type="button"
+            onClick={() => setMostrarPassword((v) => !v)}
+            aria-label={mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+            title={mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+            style={{
+              position: "absolute",
+              right: 12,
+              top: "50%",
+              transform: "translateY(-50%)",
+              background: "transparent",
+              border: "none",
+              color: THEME.goldMain,
+              cursor: "pointer",
+              fontSize: 18,
+              lineHeight: 1
+            }}
+          >
+            {mostrarPassword ? "🙈" : "👁️"}
+          </button>
+        </div>
+
+        <div style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 22, margin: "6px 0 16px" }}>
+          Editar dirección
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 90px", gap: 12 }}>
           <input
             type="text"
-            placeholder="Escalera"
-            value={editUsuarioForm.escalera}
-            onChange={(e) => setEditUsuarioForm({ ...editUsuarioForm, escalera: e.target.value })}
+            placeholder="Calle"
+            value={editUsuarioForm.calle}
+            onChange={(e) => setEditUsuarioForm({ ...editUsuarioForm, calle: e.target.value })}
             style={editModalInputStyle}
           />
+          <input
+            type="text"
+            placeholder="Nº"
+            value={editUsuarioForm.numero}
+            onChange={(e) => setEditUsuarioForm({ ...editUsuarioForm, numero: e.target.value })}
+            style={editModalInputStyle}
+          />
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12 }}>
           <input
             type="text"
             placeholder="Piso"
@@ -134,9 +157,6 @@ export default function EditUsuarioModal({
             onChange={(e) => setEditUsuarioForm({ ...editUsuarioForm, piso: e.target.value })}
             style={editModalInputStyle}
           />
-        </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           <input
             type="text"
             placeholder="Puerta"
@@ -146,7 +166,24 @@ export default function EditUsuarioModal({
           />
           <input
             type="text"
-            placeholder="C.P."
+            placeholder="Bloque"
+            value={editUsuarioForm.bloque}
+            onChange={(e) => setEditUsuarioForm({ ...editUsuarioForm, bloque: e.target.value })}
+            style={editModalInputStyle}
+          />
+          <input
+            type="text"
+            placeholder="Escalera"
+            value={editUsuarioForm.escalera}
+            onChange={(e) => setEditUsuarioForm({ ...editUsuarioForm, escalera: e.target.value })}
+            style={editModalInputStyle}
+          />
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "110px 1fr", gap: 12 }}>
+          <input
+            type="text"
+            placeholder="C.P. *"
             value={editUsuarioForm.cp}
             onChange={(e) =>
               setEditUsuarioForm({
@@ -156,6 +193,13 @@ export default function EditUsuarioModal({
             }
             inputMode="numeric"
             maxLength={5}
+            style={editModalInputStyle}
+          />
+          <input
+            type="text"
+            placeholder="Población"
+            value={editUsuarioForm.poblacion}
+            onChange={(e) => setEditUsuarioForm({ ...editUsuarioForm, poblacion: e.target.value })}
             style={editModalInputStyle}
           />
         </div>
@@ -170,30 +214,12 @@ export default function EditUsuarioModal({
           />
           <input
             type="text"
-            placeholder="Población"
-            value={editUsuarioForm.poblacion}
-            onChange={(e) => setEditUsuarioForm({ ...editUsuarioForm, poblacion: e.target.value })}
-            style={editModalInputStyle}
-          />
-        </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}>
-          <input
-            type="text"
             placeholder="País"
             value={editUsuarioForm.pais}
             onChange={(e) => setEditUsuarioForm({ ...editUsuarioForm, pais: e.target.value })}
             style={editModalInputStyle}
           />
         </div>
-
-        <input
-          type="text"
-          placeholder="Dirección completa (autogenerada)"
-          value={`${editUsuarioForm.calle}${editUsuarioForm.numero ? `, Nº ${editUsuarioForm.numero}` : ""}${editUsuarioForm.bloque ? `, Bloque ${editUsuarioForm.bloque}` : ""}${editUsuarioForm.escalera ? `, Esc. ${editUsuarioForm.escalera}` : ""}${editUsuarioForm.piso ? `, Piso ${editUsuarioForm.piso}` : ""}${editUsuarioForm.puerta ? `, Puerta ${editUsuarioForm.puerta}` : ""}`}
-          readOnly
-          style={editModalInputStyle}
-        />
 
         <label style={{ display: "flex", alignItems: "center", gap: 12, color: "white", marginBottom: 24, fontSize: 19 }}>
           <input
@@ -210,9 +236,9 @@ export default function EditUsuarioModal({
             onClick={onClose}
             style={{
               flex: 1,
-              background: "#0B0B0D",
-              color: "#C9A24A",
-              border: "2px solid #C9A24A",
+              background: THEME.bg,
+              color: THEME.goldMain,
+              border: `2px solid ${THEME.goldMain}`,
               borderRadius: 12,
               padding: "16px 18px",
               cursor: "pointer",
@@ -227,9 +253,9 @@ export default function EditUsuarioModal({
             onClick={onSave}
             style={{
               flex: 1,
-              background: "#0B0B0D",
-              color: "#C9A24A",
-              border: "2px solid #C9A24A",
+              background: THEME.bg,
+              color: THEME.goldMain,
+              border: `2px solid ${THEME.goldMain}`,
               borderRadius: 12,
               padding: "16px 18px",
               cursor: "pointer",

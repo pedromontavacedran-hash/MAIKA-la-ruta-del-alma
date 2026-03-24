@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, useMemo, type ReactNode } from "react";
 import { useApp } from "../context/AppContext";
 import type { Pagina } from "../types";
 import type { Producto } from "../types";
+import { THEME } from "../config";
+import { isAdminAuthorized, setAdminAuthorization } from "../utils/adminAuth";
 
 /** Orden: 1 Tienda, 2 Servicios, 3 Productos, 4 Sobre Maika, 5 Contacto, 6 Envíos, 7 Legal */
 const MENU_INICIO_OPCIONES = [
@@ -18,6 +20,7 @@ const CAT_LABEL: Record<string, string> = { velas: "Velas", inciensos: "Incienso
 interface NavPrincipalProps {
   pagina: Pagina;
   setPagina: (p: Pagina) => void;
+  onPrefetchPagina?: (p: Pagina) => void;
   onTerminarCompra: () => void;
   esAppNativa: boolean;
 }
@@ -91,19 +94,27 @@ const linkStyle = (active: boolean, size = 16) => ({
 export default function NavPrincipal({
   pagina,
   setPagina,
+  onPrefetchPagina,
   onTerminarCompra: _onTerminarCompra,
   esAppNativa
 }: NavPrincipalProps) {
   const { cart, accesoAdmin, velas, inciensos, figuras, kits, abrirTiendaConCategoria, setBusquedaTienda, openLegal } = useApp();
+  const esAdmin = isAdminAuthorized();
   const totalItemsCarrito = cart.reduce((sum, item) => sum + (Number(item.cantidad) || 0), 0);
   const [inicioMenuAbierto, setInicioMenuAbierto] = useState(false);
   const [productosDesplegableAbierto, setProductosDesplegableAbierto] = useState(false);
   const [legalDesplegableAbierto, setLegalDesplegableAbierto] = useState(false);
   const [textoBusqueda, setTextoBusqueda] = useState("");
+  const [modalAdminAbierto, setModalAdminAbierto] = useState(false);
+  const [claveAdminInput, setClaveAdminInput] = useState("");
+  const [errorClaveAdmin, setErrorClaveAdmin] = useState(false);
+  const adminClicksRef = useRef(0);
+  const adminClicksTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inicioMenuRef = useRef<HTMLDivElement>(null);
   const inicioDropdownRef = useRef<HTMLDivElement>(null);
 
   const irABuscarEnTienda = () => {
+    onPrefetchPagina?.("tienda");
     setBusquedaTienda(textoBusqueda.trim());
     setPagina("tienda");
     setInicioMenuAbierto(false);
@@ -120,7 +131,7 @@ export default function NavPrincipal({
   const itemMenuInicio = {
     display: "block" as const,
     width: "100%" as const,
-    padding: "8px 0",
+    padding: "14px 0",
     border: "none",
     borderRadius: 0,
     background: "none",
@@ -130,7 +141,6 @@ export default function NavPrincipal({
     fontSize: 17,
     textAlign: "left" as const
   };
-  const lineaSeparadora = { border: "none" as const, borderTop: "1px solid rgba(201,162,74,0.35)", margin: "4px 0", padding: 0 };
   const btnProductoLista = {
     display: "block" as const,
     width: "100%" as const,
@@ -186,7 +196,10 @@ export default function NavPrincipal({
   }, [inicioMenuAbierto]);
 
   const onOpcionInicio = (opcion: (typeof MENU_INICIO_OPCIONES)[number]) => {
-    if (opcion.accion === "tienda") setPagina("tienda");
+    if (opcion.accion === "tienda") {
+      onPrefetchPagina?.("tienda");
+      setPagina("tienda");
+    }
     else if (opcion.accion === "anchor" && opcion.anchor) {
       const anchorId = opcion.anchor;
       setPagina("inicio");
@@ -211,6 +224,7 @@ export default function NavPrincipal({
 
   const NavLink = ({
     onClick,
+    onMouseEnter,
     active,
     children,
     className = "",
@@ -218,6 +232,7 @@ export default function NavPrincipal({
     title
   }: {
     onClick: () => void;
+    onMouseEnter?: () => void;
     active: boolean;
     children: ReactNode;
     className?: string;
@@ -227,6 +242,7 @@ export default function NavPrincipal({
     <button
       type="button"
       onClick={onClick}
+      onMouseEnter={onMouseEnter}
       style={{ ...linkStyle(active), display: "inline-flex", alignItems: "center" }}
       className={`app-nav-link ${className}`.trim()}
       aria-label={ariaLabel}
@@ -236,8 +252,53 @@ export default function NavPrincipal({
     </button>
   );
 
+  const solicitarAccesoAdmin = () => {
+    setClaveAdminInput("");
+    setErrorClaveAdmin(false);
+    setModalAdminAbierto(true);
+  };
+
+  const confirmarAccesoAdmin = () => {
+    if (claveAdminInput === "maika123") {
+      setAdminAuthorization();
+      window.location.reload();
+      return;
+    }
+    setErrorClaveAdmin(true);
+  };
+
+  const registrarClickLogoAdmin = () => {
+    adminClicksRef.current += 1;
+    if (adminClicksTimerRef.current) {
+      window.clearTimeout(adminClicksTimerRef.current);
+    }
+    adminClicksTimerRef.current = setTimeout(() => {
+      adminClicksRef.current = 0;
+      adminClicksTimerRef.current = null;
+    }, 1800);
+    if (adminClicksRef.current >= 5) {
+      adminClicksRef.current = 0;
+      if (adminClicksTimerRef.current) {
+        window.clearTimeout(adminClicksTimerRef.current);
+        adminClicksTimerRef.current = null;
+      }
+      solicitarAccesoAdmin();
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (adminClicksTimerRef.current) {
+        window.clearTimeout(adminClicksTimerRef.current);
+      }
+    };
+  }, []);
+
   const logoCuadrado = (
-    <div style={{ background: "#E6C77A", padding: 10, borderRadius: 8, width: 100, height: 100, minWidth: 100, minHeight: 100, display: "flex", alignItems: "center", justifyContent: "center", boxSizing: "border-box" }}>
+    <div
+      onClick={registrarClickLogoAdmin}
+      style={{ background: "#E6C77A", padding: 6, borderRadius: 8, width: 78, height: 78, minWidth: 78, minHeight: 78, display: "flex", alignItems: "center", justifyContent: "center", boxSizing: "border-box", marginTop: -22 }}
+    >
       <img src="/logotipo.jpg" alt="Maika" style={{ maxWidth: "100%", maxHeight: "100%", width: "auto", height: "auto", objectFit: "contain" }} />
     </div>
   );
@@ -252,26 +313,39 @@ export default function NavPrincipal({
         left: 0,
         right: 0,
         zIndex: 1100,
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "flex-end",
-        flexWrap: "wrap",
-        gap: 20,
-        paddingBottom: 16,
-        paddingTop: 8,
-        paddingLeft: 20,
-        paddingRight: 20,
+        height: 100,
+        minHeight: 100,
+        boxSizing: "border-box",
+        overflow: "visible",
         borderBottom: "2px solid rgba(229, 192, 123, 0.35)",
-        background: "#0B0B0D"
+        background: THEME.bg
       }}
     >
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          flexWrap: "nowrap",
+          gap: 20,
+          paddingTop: 10,
+          paddingBottom: 10,
+          paddingLeft: 20,
+          paddingRight: 20,
+          minHeight: 100,
+          height: 100,
+          boxSizing: "border-box",
+          overflowX: "auto",
+          overflowY: "visible"
+        }}
+      >
       {pagina !== "tienda" && (
-        <div ref={inicioMenuRef} style={{ position: "relative", display: "flex", alignItems: "flex-end" }}>
+        <div ref={inicioMenuRef} style={{ position: "relative", display: "flex", alignItems: "center" }}>
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); setInicioMenuAbierto((v) => !v); }}
-            style={{ ...linkStyle(pagina === "inicio"), display: "inline-flex", alignItems: "center" }}
-            className="app-nav-link"
+            style={{ ...linkStyle(pagina === "inicio"), display: "inline-flex", alignItems: "center", border: "none", boxShadow: "none", outline: "none", marginTop: 14, marginLeft: -14 }}
+            className="app-nav-link app-nav-link--menu-hamburger"
             aria-expanded={inicioMenuAbierto}
             aria-haspopup="true"
             aria-label="Menú"
@@ -282,22 +356,33 @@ export default function NavPrincipal({
         </div>
       )}
       {logoCuadrado}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flex: 1, flexWrap: "wrap", gap: 20, minWidth: 0 }}>
-      <nav className="app-nav-links" style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
-        {!esAppNativa && (
-          <NavLink onClick={() => setPagina("admin")} active={pagina === "admin"}>
-            {iconAdmin} <span className="app-nav-admin-label">ADMIN</span>
-          </NavLink>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flex: 1, flexWrap: "nowrap", gap: 20, minWidth: 0, flexShrink: 0 }}>
+      <nav className="app-nav-links" style={{ display: "flex", gap: 12, flexWrap: "nowrap", alignItems: "center", flexShrink: 0 }}>
+        {!esAppNativa && esAdmin && (
+          <span style={{ display: "inline-flex", marginTop: 14 }}>
+            <NavLink
+              onClick={() => {
+                if (isAdminAuthorized()) {
+                  setPagina("admin");
+                }
+              }}
+              onMouseEnter={() => onPrefetchPagina?.("admin")}
+              active={pagina === "admin"}
+            >
+              {iconAdmin} <span className="app-nav-admin-label">ADMIN</span>
+            </NavLink>
+          </span>
         )}
       </nav>
 
       <div className="app-topbar__right app-topbar__right--btns-aligned">
-        <NavLink onClick={() => setPagina("cuenta")} active={pagina === "cuenta"} aria-label="Mi Cuenta" title="Mi Cuenta" className="app-nav-link--right">
+        <NavLink onClick={() => setPagina("cuenta")} onMouseEnter={() => onPrefetchPagina?.("cuenta")} active={pagina === "cuenta"} aria-label="Mi Cuenta" title="Mi Cuenta" className="app-nav-link--right">
           {iconPersona}
         </NavLink>
         <button
           type="button"
           onClick={() => setPagina("carrito")}
+          onMouseEnter={() => onPrefetchPagina?.("carrito")}
           className="app-nav-link app-nav-link--carrito app-nav-link--right"
           style={{ ...linkStyle(false), color: gold }}
           aria-label={totalItemsCarrito > 0 ? `Carrito: ${totalItemsCarrito} artículo${totalItemsCarrito === 1 ? "" : "s"}` : "Carrito"}
@@ -332,6 +417,7 @@ export default function NavPrincipal({
         )}
       </div>
       </div>
+      </div>
     </div>
     {inicioMenuAbierto && pagina !== "tienda" && (
       <div
@@ -339,16 +425,16 @@ export default function NavPrincipal({
         className="app-inicio-dropdown app-inicio-dropdown--overlay"
         style={{
           position: "fixed",
-          top: 110,
+          top: 98,
           left: 0,
           zIndex: 1100,
           width: "100%",
           maxWidth: "min(50vw, 420px)",
           padding: "16px 20px",
-          background: "#0B0B0D",
+          background: THEME.bg,
           borderBottom: "2px solid rgba(229, 192, 123, 0.35)",
           boxSizing: "border-box",
-          maxHeight: "min(75vh, 520px)",
+          maxHeight: "min(90vh, 720px)",
           overflowY: "auto",
           boxShadow: "0 8px 32px rgba(0,0,0,0.5)"
         }}
@@ -356,29 +442,33 @@ export default function NavPrincipal({
         <div style={{ display: "flex", justifyContent: "flex-end", width: "100%", marginBottom: 4, marginRight: -16 }}>
           <button
             type="button"
+            className="app-inicio-dropdown__close"
             onClick={(e) => { e.stopPropagation(); setInicioMenuAbierto(false); }}
-            style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", padding: 8, display: "inline-flex", alignItems: "center", marginRight: -8 }}
+            style={{ background: "none", border: "none", boxShadow: "none", outline: "none", color: "#fff", cursor: "pointer", padding: 8, display: "inline-flex", alignItems: "center", marginRight: -8 }}
             aria-label="Cerrar menú"
             title="Cerrar"
           >
             <span style={{ fontSize: "1.75rem", lineHeight: 1, display: "inline-flex" }}>{iconCerrar}</span>
           </button>
         </div>
-        <hr style={lineaSeparadora} />
         <div style={{ marginBottom: 10 }}>
           <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
             <input
               type="search"
               placeholder="Buscar en tienda..."
               value={textoBusqueda}
-              onChange={(e) => setTextoBusqueda(e.target.value)}
+              onFocus={() => onPrefetchPagina?.("tienda")}
+              onChange={(e) => {
+                onPrefetchPagina?.("tienda");
+                setTextoBusqueda(e.target.value);
+              }}
               onKeyDown={(e) => { if (e.key === "Enter") irABuscarEnTienda(); }}
               style={{
                 flex: 1,
                 padding: "8px 10px",
                 borderRadius: 8,
                 border: "2px solid rgba(201,162,74,0.5)",
-                background: "#0B0B0D",
+                background: THEME.bg,
                 color: "white",
                 fontSize: 14
               }}
@@ -389,8 +479,8 @@ export default function NavPrincipal({
               style={{
                 padding: "8px 12px",
                 borderRadius: 8,
-                border: "2px solid #C9A24A",
-                background: "#C9A24A",
+                border: `2px solid ${THEME.goldMain}`,
+                background: THEME.goldMain,
                 color: "#1b1745",
                 cursor: "pointer",
                 fontWeight: "bold",
@@ -401,20 +491,17 @@ export default function NavPrincipal({
             </button>
           </div>
         </div>
-        <hr style={lineaSeparadora} />
         {MENU_INICIO_OPCIONES.slice(0, 2).map((opcion) => (
-          <div key={opcion.id}>
+          <div key={opcion.id} style={{ marginBottom: 6 }}>
             <button type="button" onClick={() => onOpcionInicio(opcion)} style={itemMenuInicio}>
               {opcion.label}
             </button>
-            <hr style={lineaSeparadora} />
           </div>
         ))}
-        <div>
+        <div style={{ marginBottom: 6 }}>
           <button type="button" onClick={(e) => { e.stopPropagation(); setProductosDesplegableAbierto((v) => !v); }} style={itemMenuInicio}>
             Productos
           </button>
-          <hr style={lineaSeparadora} />
         </div>
         {productosDesplegableAbierto && (
           <div style={{ maxHeight: 280, overflowY: "auto", marginBottom: 6, paddingLeft: 4, borderLeft: "2px solid rgba(201,162,74,0.3)" }}>
@@ -423,9 +510,9 @@ export default function NavPrincipal({
               if (productos.length === 0) return null;
               return (
                 <div key={catId} style={{ marginBottom: 10 }}>
-                  <div style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 14, marginBottom: 4 }}>{CAT_LABEL[catId]}</div>
+                  <div style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 14, marginBottom: 4 }}>{CAT_LABEL[catId]}</div>
                   {productos.map((p) => (
-                    <button key={`${catId}-${p.id}`} type="button" onClick={() => { abrirTiendaConCategoria(catId); setPagina("tienda"); setInicioMenuAbierto(false); }} style={btnProductoLista}>
+                    <button key={`${catId}-${p.id}`} type="button" onMouseEnter={() => onPrefetchPagina?.("tienda")} onClick={() => { abrirTiendaConCategoria(catId); setPagina("tienda"); setInicioMenuAbierto(false); }} style={btnProductoLista}>
                       {p.nombre}
                     </button>
                   ))}
@@ -435,18 +522,16 @@ export default function NavPrincipal({
           </div>
         )}
         {MENU_INICIO_OPCIONES.slice(2).map((opcion) => (
-          <div key={opcion.id}>
+          <div key={opcion.id} style={{ marginBottom: 6 }}>
             <button type="button" onClick={() => onOpcionInicio(opcion)} style={itemMenuInicio}>
               {opcion.label}
             </button>
-            <hr style={lineaSeparadora} />
           </div>
         ))}
-        <div>
+        <div style={{ marginBottom: 6 }}>
           <button type="button" onClick={(e) => { e.stopPropagation(); setLegalDesplegableAbierto((v) => !v); }} style={itemMenuInicio}>
             Legal
           </button>
-          <hr style={lineaSeparadora} />
         </div>
         {legalDesplegableAbierto && (
           <div style={{ marginBottom: 6, paddingLeft: 4, borderLeft: "2px solid rgba(201,162,74,0.3)" }}>
@@ -462,6 +547,94 @@ export default function NavPrincipal({
             ))}
           </div>
         )}
+      </div>
+    )}
+    {modalAdminAbierto && (
+      <div
+        onClick={() => setModalAdminAbierto(false)}
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 2500,
+          background: "rgba(0,0,0,0.55)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 16
+        }}
+      >
+        <div
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            width: "100%",
+            maxWidth: 360,
+            background: THEME.bg,
+            border: `2px solid ${THEME.goldMain}`,
+            borderRadius: 14,
+            padding: 16,
+            color: "white"
+          }}
+        >
+          <h3 style={{ margin: "0 0 12px", color: THEME.goldMain, textAlign: "center" }}>Acceso admin</h3>
+          <input
+            type="password"
+            placeholder="Introduce contraseña"
+            value={claveAdminInput}
+            onChange={(e) => {
+              setClaveAdminInput(e.target.value);
+              if (errorClaveAdmin) setErrorClaveAdmin(false);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") confirmarAccesoAdmin();
+            }}
+            autoFocus
+            style={{
+              width: "100%",
+              padding: "10px 12px",
+              borderRadius: 10,
+              border: `2px solid ${errorClaveAdmin ? "#ff4d4d" : THEME.goldMain}`,
+              background: "transparent",
+              color: "white",
+              boxSizing: "border-box"
+            }}
+          />
+          {errorClaveAdmin && (
+            <p style={{ margin: "8px 0 0", color: "#ff8a8a", fontSize: 13 }}>Contraseña incorrecta</p>
+          )}
+          <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
+            <button
+              type="button"
+              onClick={() => setModalAdminAbierto(false)}
+              style={{
+                flex: 1,
+                padding: "10px 12px",
+                borderRadius: 10,
+                border: `1px solid ${THEME.goldMain}`,
+                background: "transparent",
+                color: THEME.goldMain,
+                cursor: "pointer"
+              }}
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={confirmarAccesoAdmin}
+              style={{
+                flex: 1,
+                padding: "10px 12px",
+                borderRadius: 10,
+                border: "none",
+                background: THEME.goldMain,
+                color: "#1b1745",
+                fontWeight: "bold",
+                cursor: "pointer"
+              }}
+            >
+              Entrar
+            </button>
+          </div>
+        </div>
       </div>
     )}
     <div style={{ height: 150, minHeight: 150 }} aria-hidden="true" />

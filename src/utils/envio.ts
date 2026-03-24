@@ -3,7 +3,10 @@
  * Envío gratis si subtotal >= 50 € o si no hay provincia; si no, 4.90 €.
  */
 export function calcularEnvio(provincia: string | undefined, subtotal: number): number {
-  if (!provincia?.trim()) return 0;
+  // Mantener coherencia con el cálculo del carrito:
+  // Envío gratis si subtotal >= 50 €, si no => 4.90 €.
+  // Si aún no se ha rellenado la provincia en checkout, asumimos el envío estándar.
   if (subtotal >= 50) return 0;
+  if (!provincia?.trim()) return 4.9;
   return 4.9;
 }

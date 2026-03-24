@@ -1,3 +1,5 @@
+import { THEME } from "../config";
+
 interface PedidoExitoModalProps {
   abierto: boolean;
   numeroPedido: string | null;
@@ -25,14 +27,14 @@ export default function PedidoExitoModal({
       zIndex: 10000
     }}>
       <div style={{
-        background: "#0B0B0D",
-        border: "3px solid #C9A24A",
+        background: THEME.bg,
+        border: `3px solid ${THEME.goldMain}`,
         borderRadius: 30,
         padding: 40,
         textAlign: "center",
         maxWidth: 400
       }}>
-        <h2 style={{ color: "#C9A24A", marginBottom: 20 }}>✅ PEDIDO REALIZADO</h2>
+        <h2 style={{ color: THEME.goldMain, marginBottom: 20 }}>✅ PEDIDO REALIZADO</h2>
         <p style={{ color: "#F5E6C8", marginBottom: 20 }}>
           Tu pedido <strong>{numeroPedido}</strong> ha sido enviado por WhatsApp
         </p>
@@ -48,7 +50,7 @@ export default function PedidoExitoModal({
             padding: "12px 30px",
             borderRadius: 25,
             border: "none",
-            background: "#C9A24A",
+            background: THEME.goldMain,
             color: "#1b1745",
             fontWeight: "bold",
             cursor: "pointer"

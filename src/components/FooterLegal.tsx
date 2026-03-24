@@ -2,7 +2,7 @@ import { useApp } from "../context/AppContext";
 
 export default function FooterLegal() {
   const { openLegal } = useApp();
-  const linkStyle = { color: "#C9A24A", margin: "0 8px", background: "none", border: "none", cursor: "pointer", fontSize: "inherit", padding: 0, textDecoration: "underline" };
+  const linkStyle = { color: "var(--gold-main)", margin: "0 8px", background: "none", border: "none", cursor: "pointer", fontSize: "inherit", padding: 0, textDecoration: "underline" };
   return (
     <footer
       style={{

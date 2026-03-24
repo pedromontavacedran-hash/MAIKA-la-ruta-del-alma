@@ -2,6 +2,9 @@ import { useState, useCallback, useRef } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import type { Producto, Pagina, IntencionProducto } from "../../types";
 import { INTENCIONES_OPCIONES } from "../../types";
+import BotonCerrar from "../../components/BotonCerrar";
+import { THEME } from "../../config";
+import { isAdminAuthorized } from "../../utils/adminAuth";
 
 type CategoriaCatalogo = "velas" | "inciensos" | "figuras" | "kits";
 
@@ -28,18 +31,18 @@ export interface InventarioPageProps {
 
 const panelStyle: React.CSSProperties = {
   minHeight: "100vh",
-  background: "#0B0B0D",
-  color: "#C9A24A",
+  background: THEME.bg,
+  color: THEME.goldMain,
   padding: 24,
   boxSizing: "border-box"
 };
 
 const summaryStyle: React.CSSProperties = {
-  color: "#C9A24A",
+  color: THEME.goldMain,
   fontWeight: "bold",
   fontSize: 20,
   cursor: "pointer",
-  border: "2px solid #C9A24A",
+  border: `2px solid ${THEME.goldMain}`,
   borderRadius: 12,
   padding: "14px 18px",
   background: "rgba(201, 162, 74, 0.08)",
@@ -55,9 +58,9 @@ const inputModalStyle: React.CSSProperties = {
   width: "100%",
   padding: "14px 16px",
   borderRadius: 10,
-  border: "2px solid #C9A24A",
-  background: "#0B0B0D",
-  color: "#C9A24A",
+  border: `2px solid ${THEME.goldMain}`,
+  background: THEME.bg,
+  color: THEME.goldMain,
   fontSize: 17,
   boxSizing: "border-box",
   minHeight: 48
@@ -263,12 +266,12 @@ export default function InventarioPage(props: InventarioPageProps) {
             <col style={{ width: "14%" }} />
           </colgroup>
           <thead>
-            <tr style={{ borderBottom: "2px solid #C9A24A" }}>
-              <th style={{ textAlign: "left", padding: "12px", color: "#C9A24A", fontSize: 16 }}>Producto</th>
-              <th style={{ textAlign: "right", padding: "12px", color: "#C9A24A", fontSize: 16 }}>Precio coste</th>
-              <th style={{ textAlign: "right", padding: "12px", color: "#C9A24A", fontSize: 16 }}>Precio venta</th>
-              <th style={{ textAlign: "right", padding: "12px", color: "#C9A24A", fontSize: 16 }}>Existencias</th>
-              <th style={{ padding: "12px", color: "#C9A24A", textAlign: "center", fontSize: 16 }}></th>
+            <tr style={{ borderBottom: `2px solid ${THEME.goldMain}` }}>
+              <th style={{ textAlign: "left", padding: "12px", color: THEME.goldMain, fontSize: 16 }}>Producto</th>
+              <th style={{ textAlign: "right", padding: "12px", color: THEME.goldMain, fontSize: 16 }}>Precio coste</th>
+              <th style={{ textAlign: "right", padding: "12px", color: THEME.goldMain, fontSize: 16 }}>Precio venta</th>
+              <th style={{ textAlign: "right", padding: "12px", color: THEME.goldMain, fontSize: 16 }}>Existencias</th>
+              <th style={{ padding: "12px", color: THEME.goldMain, textAlign: "center", fontSize: 16 }}></th>
             </tr>
           </thead>
           <tbody>
@@ -288,15 +291,16 @@ export default function InventarioPage(props: InventarioPageProps) {
                   <td style={{ padding: "10px 12px", textAlign: "right", color: "rgba(255,255,255,0.9)", fontWeight: "bold" }}>
                     {precioCoste > 0 ? `${precioCoste.toFixed(2)} €` : "—"}
                   </td>
-                  <td style={{ padding: "10px 12px", textAlign: "right", color: "#C9A24A", fontWeight: "bold" }}>
+                  <td style={{ padding: "10px 12px", textAlign: "right", color: THEME.goldMain, fontWeight: "bold" }}>
                     {precioVenta.toFixed(2)} €
                     {dto > 0 && <span style={{ fontSize: 12, opacity: 0.9, marginLeft: 4 }}>(−{dto}%)</span>}
                   </td>
                   <td
+                    title={isBajo ? "Stock bajo" : undefined}
                     style={{
                       padding: "10px 12px",
                       textAlign: "right",
-                      color: isBajo ? "#C9A24A" : "#C9A24A",
+                      color: THEME.goldMain,
                       fontWeight: "bold"
                     }}
                   >
@@ -310,9 +314,9 @@ export default function InventarioPage(props: InventarioPageProps) {
                         style={{
                           padding: "6px 14px",
                           borderRadius: 8,
-                          border: "2px solid #C9A24A",
+                          border: `2px solid ${THEME.goldMain}`,
                           background: "rgba(201, 162, 74, 0.15)",
-                          color: "#C9A24A",
+                          color: THEME.goldMain,
                           fontSize: 13,
                           cursor: "pointer",
                           fontWeight: "bold"
@@ -348,30 +352,25 @@ export default function InventarioPage(props: InventarioPageProps) {
   }
 
   return (
-    <div style={panelStyle}>
+    <div className="inventario-page" style={{ ...panelStyle, position: "relative" }}>
+      <BotonCerrar
+        onClick={() => {
+          if (isAdminAuthorized()) {
+            setPagina("admin");
+          } else {
+            setPagina("inicio");
+          }
+        }}
+        ariaLabel="Cerrar"
+        title="Cerrar"
+      />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 24 }}>
-        <button
-          type="button"
-          onClick={() => setPagina("admin")}
-          style={{
-            background: "#C9A24A",
-            border: "2px solid #C9A24A",
-            color: "#1b1745",
-            padding: "10px 20px",
-            borderRadius: 12,
-            cursor: "pointer",
-            fontWeight: "bold",
-            fontSize: 16
-          }}
-        >
-          ← Volver al Admin
-        </button>
         <button
           type="button"
           onClick={() => setPagina("tienda")}
           style={{
-            background: "#C9A24A",
-            border: "2px solid #C9A24A",
+            background: THEME.goldMain,
+            border: `2px solid ${THEME.goldMain}`,
             color: "#1b1745",
             padding: "10px 20px",
             borderRadius: 12,
@@ -384,7 +383,7 @@ export default function InventarioPage(props: InventarioPageProps) {
         </button>
       </div>
 
-      <h2 style={{ fontSize: 28, marginBottom: 8, color: "#C9A24A" }}>📦 Inventario</h2>
+      <h2 style={{ fontSize: 28, marginBottom: 8, color: THEME.goldMain }}>📦 Inventario</h2>
       <p style={{ color: "rgba(255,255,255,0.85)", marginBottom: 8, fontSize: 15 }}>
         Elige una categoría. Pulsa Modificar en una fila para editar precio coste, precio venta y existencias.
       </p>
@@ -402,7 +401,7 @@ export default function InventarioPage(props: InventarioPageProps) {
         return conStockBajo > 0 ? (
           <div style={{ marginBottom: 24 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-              <span style={{ color: "#C9A24A", fontSize: 14, fontWeight: "bold" }}>
+              <span style={{ color: THEME.goldMain, fontSize: 14, fontWeight: "bold" }}>
                 ⚠️ {conStockBajo} {conStockBajo === 1 ? "producto con stock bajo" : "productos con stock bajo"}
               </span>
               <button
@@ -411,9 +410,9 @@ export default function InventarioPage(props: InventarioPageProps) {
                 style={{
                   padding: "6px 12px",
                   borderRadius: 8,
-                  border: "2px solid #C9A24A",
+                  border: `2px solid ${THEME.goldMain}`,
                   background: "rgba(255, 170, 0, 0.15)",
-                  color: "#C9A24A",
+                  color: THEME.goldMain,
                   fontSize: 13,
                   cursor: "pointer",
                   fontWeight: "bold"
@@ -426,11 +425,11 @@ export default function InventarioPage(props: InventarioPageProps) {
               <div style={{ marginTop: 14, overflowX: "auto" }}>
                 <table style={{ width: "100%", minWidth: 320, borderCollapse: "collapse", fontSize: 14, border: "1px solid rgba(212,175,55,0.4)", borderRadius: 10, overflow: "hidden" }}>
                   <thead>
-                    <tr style={{ borderBottom: "2px solid #C9A24A", background: "rgba(201, 162, 74, 0.15)" }}>
-                      <th style={{ textAlign: "left", padding: "10px 12px", color: "#C9A24A", fontSize: 13 }}>Producto</th>
-                      <th style={{ textAlign: "left", padding: "10px 12px", color: "#C9A24A", fontSize: 13 }}>Categoría</th>
-                      <th style={{ textAlign: "right", padding: "10px 12px", color: "#C9A24A", fontSize: 13 }}>Existencias</th>
-                      <th style={{ padding: "10px 12px", color: "#C9A24A", fontSize: 13, textAlign: "center", width: 90 }}></th>
+                    <tr style={{ borderBottom: `2px solid ${THEME.goldMain}`, background: "rgba(201, 162, 74, 0.15)" }}>
+                      <th style={{ textAlign: "left", padding: "10px 12px", color: THEME.goldMain, fontSize: 13 }}>Producto</th>
+                      <th style={{ textAlign: "left", padding: "10px 12px", color: THEME.goldMain, fontSize: 13 }}>Categoría</th>
+                      <th style={{ textAlign: "right", padding: "10px 12px", color: THEME.goldMain, fontSize: 13 }}>Existencias</th>
+                      <th style={{ padding: "10px 12px", color: THEME.goldMain, fontSize: 13, textAlign: "center", width: 90 }}></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -453,10 +452,10 @@ export default function InventarioPage(props: InventarioPageProps) {
                         onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
                       >
                         <td style={{ padding: "10px 12px", color: "white" }}>{item.nombre}</td>
-                        <td style={{ padding: "10px 12px", color: "#C9A24A", opacity: 0.95 }}>{item.categoria}</td>
-                        <td style={{ padding: "10px 12px", textAlign: "right", color: "#C9A24A", fontWeight: "bold" }}>{item.stock} uds</td>
+                        <td style={{ padding: "10px 12px", color: THEME.goldMain, opacity: 0.95 }}>{item.categoria}</td>
+                        <td style={{ padding: "10px 12px", textAlign: "right", color: THEME.goldMain, fontWeight: "bold" }}>{item.stock} uds</td>
                         <td style={{ padding: "8px", textAlign: "center" }}>
-                          <span style={{ fontSize: 12, color: "#C9A24A", opacity: 0.9 }}>Modificar →</span>
+                          <span style={{ fontSize: 12, color: THEME.goldMain, opacity: 0.9 }}>Modificar →</span>
                         </td>
                       </tr>
                     ))}
@@ -505,9 +504,9 @@ export default function InventarioPage(props: InventarioPageProps) {
                   style={{
                     padding: "8px 16px",
                     borderRadius: 8,
-                    border: "2px solid #C9A24A",
+                    border: `2px solid ${THEME.goldMain}`,
                     background: "rgba(201, 162, 74, 0.2)",
-                    color: "#C9A24A",
+                    color: THEME.goldMain,
                     fontSize: 14,
                     cursor: "pointer",
                     fontWeight: "bold"
@@ -552,8 +551,8 @@ export default function InventarioPage(props: InventarioPageProps) {
         >
           <div
             style={{
-              background: "#0B0B0D",
-              border: "2px solid #C9A24A",
+              background: THEME.bg,
+              border: `2px solid ${THEME.goldMain}`,
               borderRadius: 20,
               padding: 32,
               maxWidth: 520,
@@ -561,9 +560,9 @@ export default function InventarioPage(props: InventarioPageProps) {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ color: "#C9A24A", fontWeight: "bold", marginBottom: 16, fontSize: 22 }}>Modificar datos</div>
+            <div style={{ color: THEME.goldMain, fontWeight: "bold", marginBottom: 16, fontSize: 22 }}>Modificar datos</div>
 
-            <label style={{ display: "block", color: "#C9A24A", marginBottom: 6, fontSize: 16 }}>Producto</label>
+            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, fontSize: 16 }}>Producto</label>
             <input
               ref={refNombre}
               type="text"
@@ -580,7 +579,7 @@ export default function InventarioPage(props: InventarioPageProps) {
               autoFocus
             />
 
-            <label style={{ display: "block", color: "#C9A24A", marginBottom: 6, marginTop: 14, fontSize: 16 }}>Precio coste (IVA incl.) €</label>
+            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, marginTop: 14, fontSize: 16 }}>Precio coste (IVA incl.) €</label>
             <input
               ref={refCoste}
               type="number"
@@ -597,7 +596,7 @@ export default function InventarioPage(props: InventarioPageProps) {
               style={inputModalStyle}
             />
 
-            <label style={{ display: "block", color: "#C9A24A", marginBottom: 6, marginTop: 14, fontSize: 16 }}>Precio venta (IVA incl.) €</label>
+            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, marginTop: 14, fontSize: 16 }}>Precio venta (IVA incl.) €</label>
             <input
               ref={refPrecio}
               type="number"
@@ -614,7 +613,7 @@ export default function InventarioPage(props: InventarioPageProps) {
               style={inputModalStyle}
             />
 
-            <label style={{ display: "block", color: "#C9A24A", marginBottom: 6, marginTop: 14, fontSize: 16 }}>Descuento % (0-100, opcional)</label>
+            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, marginTop: 14, fontSize: 16 }}>Descuento % (0-100, opcional)</label>
             <input
               type="number"
               min={0}
@@ -626,7 +625,7 @@ export default function InventarioPage(props: InventarioPageProps) {
               style={inputModalStyle}
             />
 
-            <label style={{ display: "block", color: "#C9A24A", marginBottom: 6, marginTop: 14, fontSize: 16 }}>Existencias</label>
+            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, marginTop: 14, fontSize: 16 }}>Existencias</label>
             <input
               ref={refStock}
               type="number"
@@ -648,7 +647,7 @@ export default function InventarioPage(props: InventarioPageProps) {
               style={inputModalStyle}
             />
 
-            <label style={{ display: "block", color: "#C9A24A", marginBottom: 6, marginTop: 14, fontSize: 16 }}>Intención</label>
+            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, marginTop: 14, fontSize: 16 }}>Intención</label>
             <select
               value={editarIntencion}
               onChange={(e) => setEditarIntencion((e.target.value || "") as IntencionProducto | "")}
@@ -659,7 +658,7 @@ export default function InventarioPage(props: InventarioPageProps) {
               ))}
             </select>
 
-            <label style={{ display: "block", color: "#C9A24A", marginBottom: 6, marginTop: 14, fontSize: 16 }}>Para qué sirve (opcional)</label>
+            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, marginTop: 14, fontSize: 16 }}>Para qué sirve (opcional)</label>
             <input
               type="text"
               value={editarParaQueSirve}
@@ -668,7 +667,7 @@ export default function InventarioPage(props: InventarioPageProps) {
               style={inputModalStyle}
             />
 
-            <label style={{ display: "block", color: "#C9A24A", marginBottom: 6, marginTop: 14, fontSize: 16 }}>Cómo usarlo (opcional)</label>
+            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, marginTop: 14, fontSize: 16 }}>Cómo usarlo (opcional)</label>
             <textarea
               value={editarComoUsar}
               onChange={(e) => setEditarComoUsar(e.target.value)}
@@ -696,9 +695,9 @@ export default function InventarioPage(props: InventarioPageProps) {
                   minWidth: 80,
                   padding: "10px",
                   borderRadius: 8,
-                  border: "2px solid #C9A24A",
+                  border: `2px solid ${THEME.goldMain}`,
                   background: "transparent",
-                  color: "#C9A24A",
+                  color: THEME.goldMain,
                   cursor: "pointer",
                   fontWeight: "bold"
                 }}
@@ -735,7 +734,7 @@ export default function InventarioPage(props: InventarioPageProps) {
                   padding: "10px",
                   borderRadius: 8,
                   border: "none",
-                  background: "#C9A24A",
+                  background: THEME.goldMain,
                   color: "#1b1745",
                   cursor: "pointer",
                   fontWeight: "bold"
@@ -764,8 +763,8 @@ export default function InventarioPage(props: InventarioPageProps) {
         >
           <div
             style={{
-              background: "#0B0B0D",
-              border: "2px solid #C9A24A",
+              background: THEME.bg,
+              border: `2px solid ${THEME.goldMain}`,
               borderRadius: 20,
               padding: 32,
               maxWidth: 520,
@@ -773,9 +772,9 @@ export default function InventarioPage(props: InventarioPageProps) {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ color: "#C9A24A", fontWeight: "bold", marginBottom: 12, fontSize: 22 }}>Eliminar producto</div>
+            <div style={{ color: THEME.goldMain, fontWeight: "bold", marginBottom: 12, fontSize: 22 }}>Eliminar producto</div>
             <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 15, marginBottom: 20, lineHeight: 1.5 }}>
-              ¿Eliminar <strong style={{ color: "#C9A24A" }}>{pendienteEliminar.nombre}</strong> del catálogo?
+              ¿Eliminar <strong style={{ color: THEME.goldMain }}>{pendienteEliminar.nombre}</strong> del catálogo?
             </p>
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
               <button
@@ -784,9 +783,9 @@ export default function InventarioPage(props: InventarioPageProps) {
                 style={{
                   padding: "10px 20px",
                   borderRadius: 8,
-                  border: "2px solid #C9A24A",
+                  border: `2px solid ${THEME.goldMain}`,
                   background: "transparent",
-                  color: "#C9A24A",
+                  color: THEME.goldMain,
                   cursor: "pointer",
                   fontWeight: "bold"
                 }}
@@ -835,8 +834,8 @@ export default function InventarioPage(props: InventarioPageProps) {
         >
           <div
             style={{
-              background: "#0B0B0D",
-              border: "2px solid #C9A24A",
+              background: THEME.bg,
+              border: `2px solid ${THEME.goldMain}`,
               borderRadius: 20,
               padding: 32,
               maxWidth: 520,
@@ -844,9 +843,9 @@ export default function InventarioPage(props: InventarioPageProps) {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ color: "#C9A24A", fontWeight: "bold", marginBottom: 16, fontSize: 22 }}>Nuevo producto</div>
+            <div style={{ color: THEME.goldMain, fontWeight: "bold", marginBottom: 16, fontSize: 22 }}>Nuevo producto</div>
 
-            <label style={{ display: "block", color: "#C9A24A", marginBottom: 6, fontSize: 16 }}>Producto</label>
+            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, fontSize: 16 }}>Producto</label>
             <input
               ref={refNombre}
               type="text"
@@ -863,7 +862,7 @@ export default function InventarioPage(props: InventarioPageProps) {
               autoFocus
             />
 
-            <label style={{ display: "block", color: "#C9A24A", marginBottom: 6, marginTop: 14, fontSize: 16 }}>Precio coste (IVA incl.) €</label>
+            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, marginTop: 14, fontSize: 16 }}>Precio coste (IVA incl.) €</label>
             <input
               ref={refCoste}
               type="number"
@@ -880,7 +879,7 @@ export default function InventarioPage(props: InventarioPageProps) {
               style={inputModalStyle}
             />
 
-            <label style={{ display: "block", color: "#C9A24A", marginBottom: 6, marginTop: 14, fontSize: 16 }}>Precio venta (IVA incl.) €</label>
+            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, marginTop: 14, fontSize: 16 }}>Precio venta (IVA incl.) €</label>
             <input
               ref={refPrecio}
               type="number"
@@ -897,7 +896,7 @@ export default function InventarioPage(props: InventarioPageProps) {
               style={inputModalStyle}
             />
 
-            <label style={{ display: "block", color: "#C9A24A", marginBottom: 6, marginTop: 14, fontSize: 16 }}>Descuento % (0-100, opcional)</label>
+            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, marginTop: 14, fontSize: 16 }}>Descuento % (0-100, opcional)</label>
             <input
               type="number"
               min={0}
@@ -909,7 +908,7 @@ export default function InventarioPage(props: InventarioPageProps) {
               style={inputModalStyle}
             />
 
-            <label style={{ display: "block", color: "#C9A24A", marginBottom: 6, marginTop: 14, fontSize: 16 }}>Existencias</label>
+            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, marginTop: 14, fontSize: 16 }}>Existencias</label>
             <input
               ref={refStock}
               type="number"
@@ -929,7 +928,7 @@ export default function InventarioPage(props: InventarioPageProps) {
               style={inputModalStyle}
             />
 
-            <label style={{ display: "block", color: "#C9A24A", marginBottom: 6, marginTop: 14, fontSize: 16 }}>Intención</label>
+            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, marginTop: 14, fontSize: 16 }}>Intención</label>
             <select
               value={editarIntencion}
               onChange={(e) => setEditarIntencion((e.target.value || "") as IntencionProducto | "")}
@@ -940,7 +939,7 @@ export default function InventarioPage(props: InventarioPageProps) {
               ))}
             </select>
 
-            <label style={{ display: "block", color: "#C9A24A", marginBottom: 6, marginTop: 14, fontSize: 16 }}>Para qué sirve (opcional)</label>
+            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, marginTop: 14, fontSize: 16 }}>Para qué sirve (opcional)</label>
             <input
               type="text"
               value={editarParaQueSirve}
@@ -949,7 +948,7 @@ export default function InventarioPage(props: InventarioPageProps) {
               style={inputModalStyle}
             />
 
-            <label style={{ display: "block", color: "#C9A24A", marginBottom: 6, marginTop: 14, fontSize: 16 }}>Cómo usarlo (opcional)</label>
+            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, marginTop: 14, fontSize: 16 }}>Cómo usarlo (opcional)</label>
             <textarea
               value={editarComoUsar}
               onChange={(e) => setEditarComoUsar(e.target.value)}
@@ -976,9 +975,9 @@ export default function InventarioPage(props: InventarioPageProps) {
                   flex: 1,
                   padding: "10px",
                   borderRadius: 8,
-                  border: "2px solid #C9A24A",
+                  border: `2px solid ${THEME.goldMain}`,
                   background: "transparent",
-                  color: "#C9A24A",
+                  color: THEME.goldMain,
                   cursor: "pointer",
                   fontWeight: "bold"
                 }}
@@ -999,7 +998,7 @@ export default function InventarioPage(props: InventarioPageProps) {
                   padding: "10px",
                   borderRadius: 8,
                   border: "none",
-                  background: "#C9A24A",
+                  background: THEME.goldMain,
                   color: "#1b1745",
                   cursor: "pointer",
                   fontWeight: "bold"

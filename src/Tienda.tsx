@@ -3,6 +3,7 @@ import type { Producto } from "./App";
 import { INTENCIONES_OPCIONES } from "./types";
 import { useFavoritos } from "./hooks/useFavoritos";
 import BotonCerrar from "./components/BotonCerrar";
+import { THEME } from "./config";
 
 export type CategoriaEntrada = { id: string; nombre: string };
 
@@ -91,7 +92,7 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
         return texto.includes(terminoBusqueda.toLowerCase());
       })
     : [];
-  const fondoServicios = "#0B0B0D";
+  const fondoServicios = THEME.bg;
   const [lightboxImagen, setLightboxImagen] = useState<{ src: string; alt: string } | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const { isFavorito, toggleFavorito } = useFavoritos();
@@ -179,20 +180,20 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
       <div className="tienda-vista" style={{ padding: 40, position: "relative" }}>
         <BotonCerrar onClick={() => { setMostrarCategoria(null); setFiltroIntencion(""); }} ariaLabel="Volver a categorías" title="Volver a categorías" />
 
-        <h2 style={{ textAlign: "center", color: "#C9A24A", fontSize: "2rem", marginBottom: 30 }}>
+        <h2 style={{ textAlign: "center", color: THEME.goldMain, fontSize: "2rem", marginBottom: 30 }}>
           {titulo}
         </h2>
 
         <div style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <span style={{ color: "#C9A24A", fontSize: 14 }}>Filtrar por intención:</span>
+          <span style={{ color: THEME.goldMain, fontSize: 14 }}>Filtrar por intención:</span>
           <select
             value={filtroIntencion}
             onChange={(e) => setFiltroIntencion(e.target.value)}
             style={{
               padding: "8px 12px",
               borderRadius: 10,
-              border: "2px solid #C9A24A",
-              background: "#0B0B0D",
+              border: `2px solid ${THEME.goldMain}`,
+              background: THEME.bg,
               color: "white",
               fontSize: 14,
               minWidth: 180
@@ -222,7 +223,7 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
             <div
               key={`${prod.id}-${prod.stock}-${enCarrito}-${refreshKey}`}
               style={{
-                border: "2px solid #C9A24A",
+                border: `2px solid ${THEME.goldMain}`,
                 padding: 20,
                 borderRadius: 15,
                 textAlign: "center",
@@ -289,7 +290,7 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
                   position: "absolute",
                   top: 10,
                   right: 10,
-                  background: "#C9A24A",
+                  background: THEME.goldMain,
                   color: "#1b1745",
                   padding: "4px 10px",
                   borderRadius: 15,
@@ -308,7 +309,7 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
               }}>
                 {prod.nombre}
               </h3>
-              <p style={{ color: "#C9A24A", fontSize: "1.2rem", margin: "10px 0" }}>
+              <p style={{ color: THEME.goldMain, fontSize: "1.2rem", margin: "10px 0" }}>
                 {prod.descuentoPorcentaje != null && prod.descuentoPorcentaje > 0 && (
                   <span style={{ textDecoration: "line-through", opacity: 0.8, marginRight: 8 }}>
                     {Number(prod.precio).toFixed(2)} €
@@ -331,7 +332,7 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
                 </p>
               )}
 
-              <div style={{ marginBottom: 15, fontSize: "0.8rem", color: disponibles > 5 ? "#4caf50" : disponibles > 0 ? "#C9A24A" : "#ff4444" }}>
+              <div style={{ marginBottom: 15, fontSize: "0.8rem", color: disponibles > 5 ? "#4caf50" : disponibles > 0 ? THEME.goldMain : "#ff4444" }}>
                 {disponibles > 0 ? (
                   <>
                     <span>📦 {disponibles} disponibles</span>
@@ -346,7 +347,7 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
                       <div style={{
                         width: `${Math.min((disponibles / 20) * 100, 100)}%`,
                         height: "100%",
-                        background: disponibles > 5 ? "#4caf50" : "#C9A24A",
+                        background: disponibles > 5 ? "#4caf50" : THEME.goldMain,
                         borderRadius: 2
                       }} />
                     </div>
@@ -368,12 +369,12 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
   disabled={disponibles === 0}
   style={{
     background: disponibles > 0 ? "#1565c0" : "#666",
-    border: "2px solid #C9A24A",
+    border: `2px solid ${THEME.goldMain}`,
     padding: "10px 25px",
     borderRadius: 25,
     cursor: disponibles > 0 ? "pointer" : "not-allowed",
     fontWeight: "bold",
-    color: disponibles > 0 ? "#C9A24A" : "#ccc",
+    color: disponibles > 0 ? THEME.goldMain : "#ccc",
     width: "100%"
   }}
 >
@@ -395,16 +396,16 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
       <BotonCerrar onClick={volver} ariaLabel="Volver al inicio" title="Volver al inicio" />
 
       {terminoBusqueda && (
-        <div style={{ marginBottom: 44, background: fondoServicios, padding: "16px 12px", borderRadius: 22, border: "2px solid #C9A24A" }}>
+        <div style={{ marginBottom: 44, background: fondoServicios, padding: "16px 12px", borderRadius: 22, border: `2px solid ${THEME.goldMain}` }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>
-            <h3 style={{ color: "#C9A24A", fontSize: "1.08rem", margin: 0 }}>
+            <h3 style={{ color: THEME.goldMain, fontSize: "1.08rem", margin: 0 }}>
               Resultados para &quot;{terminoBusqueda}&quot;
             </h3>
             {onBusquedaInicialAplicada && (
               <button
                 type="button"
                 onClick={onBusquedaInicialAplicada}
-                style={{ padding: "6px 12px", borderRadius: 8, border: "1px solid #C9A24A", background: "transparent", color: "#C9A24A", cursor: "pointer", fontSize: 13 }}
+                style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${THEME.goldMain}`, background: "transparent", color: THEME.goldMain, cursor: "pointer", fontSize: 13 }}
               >
                 Limpiar búsqueda
               </button>
@@ -420,7 +421,7 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
                 return (
                   <div
                     key={`busqueda-${prod.categoria}-${prod.id}`}
-                    style={{ border: "2px solid #C9A24A", padding: 20, borderRadius: 15, textAlign: "center", background: fondoServicios, opacity: disponibles === 0 ? 0.6 : 1, position: "relative" }}
+                    style={{ border: `2px solid ${THEME.goldMain}`, padding: 20, borderRadius: 15, textAlign: "center", background: fondoServicios, opacity: disponibles === 0 ? 0.6 : 1, position: "relative" }}
                   >
                     <div
                       role="button"
@@ -434,12 +435,12 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
                       <img src={getProductImageSrc(prod)} alt={prod.nombre} style={{ maxWidth: "100%", maxHeight: 140, objectFit: "contain", borderRadius: 10, border: "1px solid rgba(212,175,55,0.5)" }} onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
                     </div>
                     <h3 style={{ color: prod.nombreColor ?? "white" }}>{prod.nombre}</h3>
-                    <p style={{ color: "#C9A24A", fontSize: "1.2rem", margin: "10px 0" }}>{precioConDescuento(prod).toFixed(2)} €</p>
+                    <p style={{ color: THEME.goldMain, fontSize: "1.2rem", margin: "10px 0" }}>{precioConDescuento(prod).toFixed(2)} €</p>
                     <button
                       type="button"
                       onClick={() => { if (disponibles > 0) { agregarAlCarrito(prod); setRefreshKey((k) => k + 1); } }}
                       disabled={disponibles === 0}
-                      style={{ padding: "10px 25px", borderRadius: 25, border: "2px solid #C9A24A", background: disponibles > 0 ? "#C9A24A" : "#666", color: disponibles > 0 ? "#1b1745" : "#ccc", cursor: disponibles > 0 ? "pointer" : "not-allowed", fontWeight: "bold", width: "100%" }}
+                      style={{ padding: "10px 25px", borderRadius: 25, border: `2px solid ${THEME.goldMain}`, background: disponibles > 0 ? THEME.goldMain : "#666", color: disponibles > 0 ? "#1b1745" : "#ccc", cursor: disponibles > 0 ? "pointer" : "not-allowed", fontWeight: "bold", width: "100%" }}
                     >
                       {disponibles > 0 ? "Añadir al carrito" : "Sin stock"}
                     </button>
@@ -457,11 +458,11 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
         background: fondoServicios,
         padding: "16px 12px",
         borderRadius: 22,
-        border: "2px solid #C9A24A"
+        border: `2px solid ${THEME.goldMain}`
       }}>
         <h3 style={{
           textAlign: "center",
-          color: "#C9A24A",
+          color: THEME.goldMain,
           fontSize: "1.08rem",
           marginBottom: 14,
           display: "flex",
@@ -484,7 +485,7 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
             background: fondoServicios,
             borderRadius: 16,
             padding: "10px",
-            border: "2px solid #C9A24A",
+            border: `2px solid ${THEME.goldMain}`,
             position: "relative",
           }}>
             <div
@@ -525,7 +526,7 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
             </div>
             <div style={{ fontSize: "1.7rem", textAlign: "center", marginBottom: 6 }}>🕯️</div>
             <h4 style={{
-              color: velas.find(v => v.id === 1)?.nombreColor ?? "#C9A24A",
+              color: velas.find(v => v.id === 1)?.nombreColor ?? THEME.goldMain,
               textAlign: "center",
               fontSize: velas.find(v => v.id === 1)?.nombreTamano ? `${velas.find(v => v.id === 1)!.nombreTamano}px` : "1.06rem",
               fontWeight: "bold",
@@ -539,7 +540,7 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
               La favorita para limpiezas
             </p>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
-              <span style={{ color: "#C9A24A", fontWeight: "bold", fontSize: "0.85rem" }}>12.50€</span>
+              <span style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: "0.85rem" }}>12.50€</span>
               <button
                 type="button"
                 className={`btn-mas-vendidos ${velas.find(v => v.id === 1)?.stock ? "btn-anadir-dorado" : ""}`}
@@ -551,7 +552,7 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
                   }
                 }}
                 style={{
-                  background: velas.find(v => v.id === 1)?.stock ? "#C9A24A" : "#666",
+                  background: velas.find(v => v.id === 1)?.stock ? THEME.goldMain : "#666",
                   border: "none",
                   padding: "8px 14px",
                   borderRadius: 20,
@@ -571,7 +572,7 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
             background: fondoServicios,
             borderRadius: 16,
             padding: "10px",
-            border: "2px solid #C9A24A",
+            border: `2px solid ${THEME.goldMain}`,
             position: "relative",
           }}>
             <div
@@ -612,7 +613,7 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
             </div>
             <div style={{ fontSize: "1.7rem", textAlign: "center", marginBottom: 6 }}>🌿</div>
             <h4 style={{
-              color: inciensos.find(i => i.id === 101)?.nombreColor ?? "#C9A24A",
+              color: inciensos.find(i => i.id === 101)?.nombreColor ?? THEME.goldMain,
               textAlign: "center",
               fontSize: inciensos.find(i => i.id === 101)?.nombreTamano ? `${inciensos.find(i => i.id === 101)!.nombreTamano}px` : "1.06rem",
               fontWeight: "bold",
@@ -626,7 +627,7 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
               Conexión espiritual
             </p>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
-              <span style={{ color: "#C9A24A", fontWeight: "bold", fontSize: "0.85rem" }}>6.50€</span>
+              <span style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: "0.85rem" }}>6.50€</span>
               <button
                 type="button"
                 className={`btn-mas-vendidos ${inciensos.find(i => i.id === 101)?.stock ? "btn-anadir-dorado" : ""}`}
@@ -638,7 +639,7 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
                   }
                 }}
                 style={{
-                  background: inciensos.find(i => i.id === 101)?.stock ? "#C9A24A" : "#666",
+                  background: inciensos.find(i => i.id === 101)?.stock ? THEME.goldMain : "#666",
                   border: "none",
                   padding: "8px 14px",
                   borderRadius: 20,
@@ -658,7 +659,7 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
             background: fondoServicios,
             borderRadius: 16,
             padding: "10px",
-            border: "2px solid #C9A24A",
+            border: `2px solid ${THEME.goldMain}`,
             position: "relative",
           }}>
             <div
@@ -699,7 +700,7 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
             </div>
             <div style={{ fontSize: "1.7rem", textAlign: "center", marginBottom: 6 }}>🪷</div>
             <h4 style={{
-              color: figuras.find(f => f.id === 201)?.nombreColor ?? "#C9A24A",
+              color: figuras.find(f => f.id === 201)?.nombreColor ?? THEME.goldMain,
               textAlign: "center",
               fontSize: figuras.find(f => f.id === 201)?.nombreTamano ? `${figuras.find(f => f.id === 201)!.nombreTamano}px` : "1.06rem",
               fontWeight: "bold",
@@ -713,7 +714,7 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
               Prosperidad
             </p>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
-              <span style={{ color: "#C9A24A", fontWeight: "bold", fontSize: "0.85rem" }}>35.00€</span>
+              <span style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: "0.85rem" }}>35.00€</span>
               <button
                 type="button"
                 className={`btn-mas-vendidos ${figuras.find(f => f.id === 201)?.stock ? "btn-anadir-dorado" : ""}`}
@@ -725,7 +726,7 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
                   }
                 }}
                 style={{
-                  background: figuras.find(f => f.id === 201)?.stock ? "#C9A24A" : "#666",
+                  background: figuras.find(f => f.id === 201)?.stock ? THEME.goldMain : "#666",
                   border: "none",
                   padding: "8px 14px",
                   borderRadius: 20,
@@ -743,7 +744,7 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
       </div>
 
       {/* CATEGORÍAS (sincronizadas con Editar Categorías) */}
-      <h2 style={{ textAlign: "center", color: "#C9A24A", fontSize: "2rem", marginBottom: 30 }}>
+      <h2 style={{ textAlign: "center", color: THEME.goldMain, fontSize: "2rem", marginBottom: 30 }}>
         Categorías
       </h2>
 
@@ -766,7 +767,7 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
                 background: fondoServicios,
                 borderRadius: 20,
                 padding: 30,
-                border: "2px solid #C9A24A",
+                border: `2px solid ${THEME.goldMain}`,
                 textAlign: "center",
               }}
             >
@@ -782,10 +783,10 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
                   onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                 />
               </div>
-              <h2 style={{ color: "#C9A24A" }}>{getEmoji(categoria.id)} {nombreDisplay}</h2>
+              <h2 style={{ color: THEME.goldMain }}>{getEmoji(categoria.id)} {nombreDisplay}</h2>
               <p style={{ color: "white" }}>{productosCat.length} productos</p>
               <div style={{
-                background: "#C9A24A",
+                background: THEME.goldMain,
                 color: "#1b1745",
                 padding: "8px 20px",
                 borderRadius: 20,

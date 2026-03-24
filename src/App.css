@@ -1,3 +1,22 @@
+.checkout-mini-placeholder::placeholder {
+  font-size: 12px;
+}
+
+.checkout-direccion-grid {
+  grid-template-columns: minmax(340px, 3.4fr) minmax(64px, 0.7fr) minmax(64px, 0.7fr) minmax(64px, 0.7fr);
+  column-gap: 8px;
+  row-gap: 8px;
+}
+
+@media (max-width: 760px) {
+  .checkout-direccion-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .checkout-direccion-grid > :first-child {
+    grid-column: 1 / -1;
+  }
+}
 /* ========== MAIKA — Paleta dorada reutilizable ========== */
 :root {
   /* Fondo general */
@@ -15,7 +34,7 @@
   --maika-gold-dark: var(--gold-dark);
   --maika-glow: var(--gold-glow);
   --maika-gradient: linear-gradient(135deg, var(--gold-light), var(--gold-main), var(--gold-dark));
-  --gold-gradient: linear-gradient(135deg, #E6C77A, #C9A24A, #8A6A2A);
+  --gold-gradient: linear-gradient(135deg, var(--gold-light), var(--gold-main), var(--gold-dark));
 
   /* Texto y efectos suaves (elegante, sin exagerar) */
   --maika-text: #F5E6C8;
@@ -48,30 +67,30 @@
 /* Barras de desplazamiento */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(201, 162, 74, 0.5) #0B0B0D;
+  scrollbar-color: rgba(201, 162, 74, 0.5) var(--maika-bg);
 }
 *::-webkit-scrollbar {
   width: 12px;
   height: 12px;
 }
 *::-webkit-scrollbar-track {
-  background: #0B0B0D;
+  background: var(--maika-bg);
 }
 *::-webkit-scrollbar-thumb {
   background: rgba(201, 162, 74, 0.5);
   border-radius: 6px;
-  border: 2px solid #0B0B0D;
+  border: 2px solid var(--maika-bg);
 }
 *::-webkit-scrollbar-thumb:hover {
   background: rgba(230, 199, 122, 0.7);
 }
 *::-webkit-scrollbar-corner {
-  background: #0B0B0D;
+  background: var(--maika-bg);
 }
 
 body {
   font-family: 'Arial', sans-serif;
-  background-color: #0B0B0D;
+  background-color: var(--maika-bg);
   color: var(--maika-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -266,7 +285,7 @@ nav button:hover {
   font-style: italic;
   margin: 20px 0;
   padding: 10px 20px;
-  border-left: 4px solid #C9A24A;
+  border-left: 4px solid var(--gold-main);
   background: rgba(11, 11, 13, 0.8);
   color: #F5E6C8;
 }
@@ -377,12 +396,19 @@ button:active {
   .app-inicio-dropdown {
     min-width: min(280px, calc(100vw - 24px)) !important;
     max-width: calc(100vw - 24px) !important;
-    max-height: min(75vh, 520px) !important;
+    max-height: min(90vh, 720px) !important;
     overflow-y: auto !important;
   }
   .app-inicio-dropdown button {
     min-height: 44px !important;
     padding: 12px 14px !important;
+  }
+  .app-inicio-dropdown__close {
+    min-height: 0 !important;
+    padding: 8px !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
   }
   .app-inicio-dropdown a {
     min-height: 44px;
@@ -487,7 +513,7 @@ button:active {
   min-height: 100vh;
   min-height: 100dvh;
   overflow: hidden;
-  background: #0B0B0D;
+  background: var(--maika-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -581,7 +607,7 @@ button:active {
   font-size: 1.1rem;
   color: #e5c07b;
   background: rgba(11, 11, 13, 0.85);
-  border: 2px solid #C9A24A;
+  border: 2px solid var(--gold-main);
   border-radius: 999px;
   cursor: pointer;
   box-sizing: border-box;
@@ -693,7 +719,7 @@ button:active {
 .btn-reservar-inicio {
   background: var(--gold-gradient) !important;
   background-image: none !important;
-  color: #0B0B0D !important;
+  color: var(--maika-bg) !important;
   font-size: 16px !important;
   font-weight: bold !important;
   border: none !important;
@@ -705,20 +731,20 @@ button:active {
   transition: box-shadow var(--maika-transition) !important;
 }
 .btn-reservar-inicio:hover {
-  color: #0B0B0D !important;
+  color: var(--maika-bg) !important;
   box-shadow: var(--gold-hover-shadow) !important;
 }
 
 /* Forzar que el texto de los botones de servicios se vea siempre (clase correcta: inicio-servicio-card) */
 .inicio-page .inicio-servicio-card .btn-reservar-inicio {
-  color: #0B0B0D !important;
+  color: var(--maika-bg) !important;
   font-size: 16px !important;
   font-weight: bold !important;
   opacity: 1 !important;
   visibility: visible !important;
 }
 .inicio-page .inicio-servicio-card .btn-reservar-inicio span {
-  color: #0B0B0D !important;
+  color: var(--maika-bg) !important;
   font-size: 16px !important;
   font-weight: bold !important;
   opacity: 1 !important;
@@ -787,13 +813,25 @@ button:active {
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: #0B0B0D;
+  background: var(--maika-bg);
   backdrop-filter: blur(8px);
   padding-top: 12px;
   padding-bottom: 14px;
   margin-bottom: 0;
   border-bottom: 1px solid var(--gold-main);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+/* Barra superior fija: misma altura y una sola fila al hacer zoom */
+.app-topbar.app-topbar--hero-style {
+  flex-wrap: nowrap !important;
+  min-height: 100px !important;
+  height: 100px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  box-sizing: border-box !important;
+}
+.app-topbar.app-topbar--hero-style .app-nav-links {
+  flex-wrap: nowrap !important;
 }
 
 .app-topbar .app-nav-link {
@@ -803,6 +841,27 @@ button:active {
 }
 .app-topbar .app-nav-link:hover {
   color: #f0d89a;
+}
+/* Menú hamburguesa: sin bordes ni caja, solo icono + desplegable */
+.app-topbar .app-nav-link--menu-hamburger,
+.app-topbar .app-nav-link--menu-hamburger:hover,
+.app-topbar .app-nav-link--menu-hamburger:focus {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  min-height: 0 !important;
+  padding: 6px 4px !important;
+  transform: translateY(10px) !important;
+}
+/* Cerrar del desplegable menú: sin borde ni caja */
+.app-inicio-dropdown__close,
+.app-inicio-dropdown__close:hover,
+.app-inicio-dropdown__close:focus {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
 }
 /* En la barra (página inicio, etc.): el enlace del panel debe decir siempre ADMIN, mismo color que el resto */
 .app-topbar .app-nav-admin-label {
@@ -994,7 +1053,7 @@ button:active {
   padding: 12px 16px !important;
   min-height: 44px;
   margin-top: auto;
-  color: #0B0B0D !important;
+  color: var(--maika-bg) !important;
 }
 
 .inicio-cart-panel {
@@ -1093,7 +1152,7 @@ button:active {
   opacity: 0.55;
 }
 
-/* Botón cerrar unificado (igual que Carrito): mismo borde dorado, cruz y tamaño en toda la app */
+/* Diseño cruz de cierre (Tienda): mismo aspecto en toda la app (Carrito, Cuenta, Favoritos, Admin, etc.). Solo posición puede variar por contexto. */
 .boton-cerrar-maika {
   position: absolute !important;
   right: 0 !important;
@@ -1102,8 +1161,8 @@ button:active {
   height: 40px !important;
   min-width: 40px !important;
   min-height: 40px !important;
-  background: #0B0B0D !important;
-  border: 2px solid #C9A24A !important;
+  background: var(--maika-bg) !important;
+  border: 2px solid var(--gold-main) !important;
   border-radius: 8px !important;
   padding: 6px !important;
   box-sizing: border-box !important;
@@ -1112,12 +1171,33 @@ button:active {
   align-items: center !important;
   justify-content: center !important;
   cursor: pointer !important;
+  /* Evitar que otros estilos de botón (nav, cards, etc.) afecten al diseño de la cruz */
+  background-image: none !important;
+  font: inherit !important;
 }
 .boton-cerrar-maika:hover {
   box-shadow: 0 2px 8px rgba(201,162,74,0.4) !important;
 }
 .boton-cerrar-maika svg {
   flex-shrink: 0;
+}
+/* Excepciones solo de posición (el diseño de la cruz no cambia): */
+.editar-categorias-panel .boton-cerrar-maika {
+  top: -80px !important;
+  right: 16px !important;
+}
+.modal-usuarios-contenido .boton-cerrar-maika {
+  top: 44px !important;
+  right: 28px !important;
+}
+.inventario-page .boton-cerrar-maika,
+.cupones-promocionales-page .boton-cerrar-maika {
+  top: 24px !important;
+  right: 24px !important;
+}
+.panel-admin-contenido .boton-cerrar-maika {
+  top: -88px !important;
+  right: 16px !important;
 }
 
 @media (max-width: 900px) {
@@ -1135,6 +1215,12 @@ button:active {
     flex-wrap: wrap !important;
     align-items: center !important;
     gap: 8px;
+  }
+  .app-topbar.app-topbar--hero-style {
+    flex-wrap: nowrap !important;
+  }
+  .app-topbar.app-topbar--hero-style .app-nav-links {
+    flex-wrap: nowrap !important;
   }
   .app-topbar .app-nav-links {
     width: auto !important;

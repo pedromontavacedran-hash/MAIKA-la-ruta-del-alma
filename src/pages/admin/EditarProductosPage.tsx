@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import type { Producto, Pagina } from "../../types";
 import BotonCerrar from "../../components/BotonCerrar";
+import { THEME } from "../../config";
+import { isAdminAuthorized } from "../../utils/adminAuth";
 
 export interface EditarProductosPageProps {
   setPagina: (p: Pagina) => void;
@@ -41,8 +43,8 @@ export interface EditarProductosPageProps {
 
 const panelStyle = {
   minHeight: "100vh" as const,
-  background: "#0B0B0D",
-  color: "#C9A24A",
+  background: THEME.bg,
+  color: THEME.goldMain,
   display: "flex" as const,
   flexDirection: "column" as const,
   alignItems: "center" as const,
@@ -103,10 +105,20 @@ export default function EditarProductosPage(props: EditarProductosPageProps) {
 
   return (
     <div style={panelStyle}>
-      <BotonCerrar onClick={() => setPagina("admin")} ariaLabel="Volver al panel" title="Cerrar" />
       <h2 style={{ fontSize: 38, marginBottom: 30 }}>Editar Productos</h2>
-      <div className="categoria-edit-panel">
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Categoría</label>
+      <div className="categoria-edit-panel editar-categorias-panel" style={{ position: "relative" }}>
+        <BotonCerrar
+          onClick={() => {
+            if (isAdminAuthorized()) {
+              setPagina("admin");
+            } else {
+              setPagina("inicio");
+            }
+          }}
+          ariaLabel="Volver al panel"
+          title="Cerrar"
+        />
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Categoría</label>
         <select
           className="categoria-select"
           value={categoriaEditarProductos}
@@ -131,7 +143,7 @@ export default function EditarProductosPage(props: EditarProductosPageProps) {
           <option value="figuras">Figuras</option>
         </select>
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Nombre del producto</label>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Nombre del producto</label>
         <select
           className="categoria-select"
           value={valorSelect}
@@ -153,14 +165,14 @@ export default function EditarProductosPage(props: EditarProductosPageProps) {
           ))}
         </select>
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Vista previa del producto</label>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Vista previa del producto</label>
         <div style={{ display: "flex", alignItems: "center", gap: 15, marginTop: 10, marginBottom: 25 }}>
           <div style={{ fontSize: Number(tamanoProducto) || 22, color: colorProducto, fontStyle: estiloTextoProducto === "italic" ? "italic" : "normal", fontWeight: estiloTextoProducto === "bold" ? "bold" : "normal" }}>
             {productoActual?.nombre ?? "—"}
           </div>
         </div>
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Imagen</label>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Imagen</label>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <label className="categoria-file-label">
             {nombreImagenProducto || "Seleccionar imagen"}
@@ -173,23 +185,23 @@ export default function EditarProductosPage(props: EditarProductosPageProps) {
               reader.readAsDataURL(file);
             }} />
           </label>
-          {previewProducto && <img src={previewProducto} alt="Vista previa" style={{ width: 70, height: 70, objectFit: "cover", borderRadius: 10, border: "2px solid #C9A24A" }} />}
+          {previewProducto && <img src={previewProducto} alt="Vista previa" style={{ width: 70, height: 70, objectFit: "cover", borderRadius: 10, border: `2px solid ${THEME.goldMain}` }} />}
         </div>
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Color</label>
-        <input type="color" value={colorProducto} onChange={(e) => setColorProducto(e.target.value)} style={{ width: 60, height: 60, border: "2px solid #C9A24A", borderRadius: 12, marginBottom: 18 }} />
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Color</label>
+        <input type="color" value={colorProducto} onChange={(e) => setColorProducto(e.target.value)} style={{ width: 60, height: 60, border: `2px solid ${THEME.goldMain}`, borderRadius: 12, marginBottom: 18 }} />
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Tamaño del texto</label>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Tamaño del texto</label>
         <input type="number" min={12} max={48} className="categoria-number-input" placeholder="Tamaño..." value={tamanoProducto === "0" ? "" : tamanoProducto} onChange={(e) => setTamanoProducto(e.target.value)} />
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Estilo del texto</label>
-        <select value={estiloTextoProducto} onChange={(e) => setEstiloTextoProducto(e.target.value)} style={{ padding: 10, borderRadius: 10, border: "2px solid #C9A24A", background: "#0B0B0D", color: "#C9A24A", fontSize: 16, marginBottom: 20 }}>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Estilo del texto</label>
+        <select value={estiloTextoProducto} onChange={(e) => setEstiloTextoProducto(e.target.value)} style={{ padding: 10, borderRadius: 10, border: `2px solid ${THEME.goldMain}`, background: THEME.bg, color: THEME.goldMain, fontSize: 16, marginBottom: 20 }}>
           <option value="normal">Normal</option>
           <option value="italic">Cursiva</option>
           <option value="bold">Negrita</option>
         </select>
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Stock (existencias)</label>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Stock (existencias)</label>
         <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginBottom: 16 }}>
           <input
             type="number"
@@ -201,8 +213,8 @@ export default function EditarProductosPage(props: EditarProductosPageProps) {
           />
           <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 14 }}>unidades</span>
         </div>
-        <div style={{ marginBottom: 20, padding: 12, background: "rgba(212,175,55,0.12)", borderRadius: 12, border: "1px solid #C9A24A" }}>
-          <div style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 16, marginBottom: 8 }}>Reponer stock (tras compra a proveedor)</div>
+        <div style={{ marginBottom: 20, padding: 12, background: "rgba(212,175,55,0.12)", borderRadius: 12, border: `1px solid ${THEME.goldMain}` }}>
+          <div style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 16, marginBottom: 8 }}>Reponer stock (tras compra a proveedor)</div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <input
               type="number"
@@ -210,7 +222,7 @@ export default function EditarProductosPage(props: EditarProductosPageProps) {
               placeholder="Unidades recibidas"
               value={unidadesReponer}
               onChange={(e) => setUnidadesReponer(e.target.value)}
-              style={{ width: 140, padding: 8, borderRadius: 8, border: "2px solid #C9A24A", background: "#0B0B0D", color: "#C9A24A" }}
+              style={{ width: 140, padding: 8, borderRadius: 8, border: `2px solid ${THEME.goldMain}`, background: THEME.bg, color: THEME.goldMain }}
             />
             <button
               type="button"
@@ -228,7 +240,7 @@ export default function EditarProductosPage(props: EditarProductosPageProps) {
                 else setFiguras((prev) => prev.map((p) => (p.id === prod.id ? updated : p)));
                 mostrarNotificacion(`✅ Stock actualizado: ${nuevoStock} unidades`, "exito");
               }}
-              style={{ padding: "8px 16px", borderRadius: 8, background: "#C9A24A", color: "#1b1745", border: "none", fontWeight: "bold", cursor: "pointer" }}
+              style={{ padding: "8px 16px", borderRadius: 8, background: THEME.goldMain, color: "#1b1745", border: "none", fontWeight: "bold", cursor: "pointer" }}
             >
               Añadir al stock
             </button>
@@ -251,10 +263,14 @@ export default function EditarProductosPage(props: EditarProductosPageProps) {
           else if (prod.categoria === "inciensos") setInciensos((prev) => prev.map((p) => (p.id === prod.id ? updated : p)));
           else setFiguras((prev) => prev.map((p) => (p.id === prod.id ? updated : p)));
           mostrarNotificacion("✅ Producto guardado. Los cambios se verán en la tienda.", "exito");
-          setPagina("admin");
+          if (isAdminAuthorized()) {
+            setPagina("admin");
+          } else {
+            setPagina("inicio");
+          }
         }}>Guardar</button>
 
-        <button className="categoria-edit-btn" style={{ background: "#1565c0", color: "#C9A24A", border: "2px solid #C9A24A" }} onClick={() => {
+        <button className="categoria-edit-btn" style={{ background: "#1565c0", color: THEME.goldMain, border: `2px solid ${THEME.goldMain}` }} onClick={() => {
           const prod = getProductoByValue(valorSelect);
           if (!prod) return;
           const nuevo = prompt("Nuevo nombre del producto", prod.nombre);
@@ -267,7 +283,7 @@ export default function EditarProductosPage(props: EditarProductosPageProps) {
           mostrarNotificacion("✏️ Producto renombrado", "exito");
         }}>Renombrar producto</button>
 
-        <button className="categoria-edit-btn" style={{ background: "#1565c0", color: "#C9A24A", border: "2px solid #C9A24A" }} onClick={() => {
+        <button className="categoria-edit-btn" style={{ background: "#1565c0", color: THEME.goldMain, border: `2px solid ${THEME.goldMain}` }} onClick={() => {
           setCategoriaNuevoProducto(categoriaEditarProductos);
           setNuevoProductoNombre("");
           setNuevoProductoPrecio("10");
@@ -281,7 +297,7 @@ export default function EditarProductosPage(props: EditarProductosPageProps) {
           setPagina("nuevoProducto");
         }}>Añadir producto</button>
 
-        <button className="categoria-edit-btn" style={{ background: "#7b2d3a", color: "#fff", border: "2px solid #C9A24A" }} onClick={() => {
+        <button className="categoria-edit-btn" style={{ background: "#7b2d3a", color: "#fff", border: `2px solid ${THEME.goldMain}` }} onClick={() => {
           const prod = getProductoByValue(valorSelect);
           if (!prod) return;
           if (!window.confirm(`¿Eliminar el producto "${prod.nombre}"?`)) return;

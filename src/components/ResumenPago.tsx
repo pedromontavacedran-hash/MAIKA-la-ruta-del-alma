@@ -1,4 +1,5 @@
 import type { CuponAplicado } from "../types";
+import { THEME } from "../config";
 
 export default function ResumenPago({
   total,
@@ -32,12 +33,12 @@ export default function ResumenPago({
         alignItems: "center",
         gap: 16,
         padding: destacar ? "10px 0" : "6px 0",
-        borderBottom: destacar ? "2px solid #C9A24A" : "1px solid rgba(201,162,74,0.2)",
+        borderBottom: destacar ? `2px solid ${THEME.goldMain}` : "1px solid rgba(201,162,74,0.2)",
         marginBottom: destacar ? 0 : 4
       }}
     >
       <span style={{ color: "white", opacity: destacar ? 1 : 0.9 }}>{label}</span>
-      <span style={{ color: destacar ? "#C9A24A" : "white", fontWeight: destacar ? "bold" : "normal", fontSize: destacar ? 18 : 14 }}>
+      <span style={{ color: destacar ? THEME.goldMain : "white", fontWeight: destacar ? "bold" : "normal", fontSize: destacar ? 18 : 14 }}>
         {valor}
       </span>
     </div>

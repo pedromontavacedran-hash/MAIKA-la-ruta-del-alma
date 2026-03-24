@@ -2,6 +2,7 @@ import { useApp } from "../context/AppContext";
 import { useFavoritos } from "../hooks/useFavoritos";
 import type { Producto } from "../types";
 import BotonCerrar from "../components/BotonCerrar";
+import { THEME } from "../config";
 
 export default function FavoritosPage() {
   const { setPagina, velas, inciensos, figuras, agregarAlCarrito } = useApp();
@@ -15,7 +16,7 @@ export default function FavoritosPage() {
     favoritos.includes(prod.id)
   );
 
-  const fondoServicios = "#0B0B0D";
+  const fondoServicios = THEME.bg;
 
   /** Precio con descuento aplicado (igual que en Tienda e Inventario). */
   function precioConDescuento(p: Producto): number {
@@ -40,14 +41,14 @@ export default function FavoritosPage() {
     <div className="tienda-vista" style={{ padding: 40, position: "relative" }}>
       <BotonCerrar onClick={() => setPagina("tienda")} ariaLabel="Volver a la tienda" title="Volver a la tienda" />
 
-      <h2 style={{ textAlign: "center", color: "#C9A24A", fontSize: "2rem", marginBottom: 30 }}>
+      <h2 style={{ textAlign: "center", color: THEME.goldMain, fontSize: "2rem", marginBottom: 30 }}>
         Mis Favoritos 💛
       </h2>
 
       {productosFavoritos.length === 0 ? (
         <div style={{
-          background: "#0B0B0D",
-          border: "2px solid #C9A24A",
+          background: THEME.bg,
+          border: `2px solid ${THEME.goldMain}`,
           borderRadius: 20,
           padding: 40,
           textAlign: "center",
@@ -60,7 +61,7 @@ export default function FavoritosPage() {
           <button
             onClick={() => setPagina("tienda")}
             style={{
-              background: "#C9A24A",
+              background: THEME.goldMain,
               color: "#1b1745",
               border: "none",
               borderRadius: "30px",
@@ -85,7 +86,7 @@ export default function FavoritosPage() {
             <div
               key={prod.id}
               style={{
-                border: "2px solid #C9A24A",
+                border: `2px solid ${THEME.goldMain}`,
                 padding: 20,
                 borderRadius: 15,
                 textAlign: "center",
@@ -158,7 +159,7 @@ export default function FavoritosPage() {
               }}>
                 {prod.nombre}
               </h3>
-              <p style={{ color: "#C9A24A", fontSize: "1.2rem", margin: "10px 0" }}>
+              <p style={{ color: THEME.goldMain, fontSize: "1.2rem", margin: "10px 0" }}>
                 {prod.descuentoPorcentaje != null && prod.descuentoPorcentaje > 0 && (
                   <span style={{ textDecoration: "line-through", opacity: 0.8, marginRight: 8 }}>
                     {Number(prod.precio).toFixed(2)} €
@@ -170,7 +171,7 @@ export default function FavoritosPage() {
                 )}
               </p>
 
-              <div style={{ marginBottom: 15, fontSize: "0.8rem", color: prod.stock > 5 ? "#4caf50" : prod.stock > 0 ? "#C9A24A" : "#ff4444" }}>
+              <div style={{ marginBottom: 15, fontSize: "0.8rem", color: prod.stock > 5 ? "#4caf50" : prod.stock > 0 ? THEME.goldMain : "#ff4444" }}>
                 {prod.stock > 0 ? (
                   <span>📦 {prod.stock} disponibles</span>
                 ) : (
@@ -189,12 +190,12 @@ export default function FavoritosPage() {
                 disabled={prod.stock === 0}
                 style={{
                   background: prod.stock > 0 ? "#1565c0" : "#666",
-                  border: "2px solid #C9A24A",
+                  border: `2px solid ${THEME.goldMain}`,
                   padding: "10px 25px",
                   borderRadius: 25,
                   cursor: prod.stock > 0 ? "pointer" : "not-allowed",
                   fontWeight: "bold",
-                  color: prod.stock > 0 ? "#C9A24A" : "#ccc",
+                  color: prod.stock > 0 ? THEME.goldMain : "#ccc",
                   width: "100%"
                 }}
               >

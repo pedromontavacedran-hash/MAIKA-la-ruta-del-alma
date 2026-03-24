@@ -13,7 +13,7 @@ export default function Layout({ children, pulseStyle, fullBleedTop }: LayoutPro
     <div
       className={`app-shell${fullBleedTop ? " app-shell--full-bleed-top" : ""}`}
       style={{
-        backgroundColor: "#0B0B0D",
+        backgroundColor: "var(--maika-bg)",
         minHeight: "100vh",
         padding: 20,
         color: "#F5E6C8",

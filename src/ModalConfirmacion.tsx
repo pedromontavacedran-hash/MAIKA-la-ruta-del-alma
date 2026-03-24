@@ -1,3 +1,5 @@
+import { THEME } from "./config";
+
 interface ModalConfirmacionProps {
   abierto: boolean;
   mensaje: string;
@@ -23,22 +25,26 @@ export default function ModalConfirmacion({
   if (!abierto) return null;
 
   return (
-    <div style={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      width: "100%",
-      height: "100%",
-      backgroundColor: "rgba(0, 0, 0, 0.7)",
-      backdropFilter: "blur(5px)",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      zIndex
-    }}>
-      <div style={{
-        background: "#0B0B0D",
-        border: "3px solid gold",
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        backgroundColor: "rgba(0, 0, 0, 0.7)",
+        backdropFilter: "blur(5px)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex
+      }}
+      onClick={onCancelar}
+    >
+      <div
+        style={{
+        background: THEME.bg,
+        border: `3px solid ${THEME.goldMain}`,
         borderRadius: 30,
         padding: "30px 40px",
         maxWidth: 400,
@@ -49,7 +55,7 @@ export default function ModalConfirmacion({
         {/* Icono decorativo */}
         <div style={{ fontSize: "3rem", marginBottom: 10 }}>🕯️</div>
         
-        <h3 style={{ color: "#C9A24A", fontSize: "1.5rem", marginBottom: 15 }}>
+        <h3 style={{ color: THEME.goldMain, fontSize: "1.5rem", marginBottom: 15 }}>
           ¿Estás segura?
         </h3>
         
@@ -63,11 +69,12 @@ export default function ModalConfirmacion({
           justifyContent: "center"
         }}>
           <button
-            onClick={onCancelar}
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onCancelar(); }}
             style={{
               background: "transparent",
-              border: "2px solid gold",
-              color: "#C9A24A",
+              border: `2px solid ${THEME.goldMain}`,
+              color: THEME.goldMain,
               padding: "12px 25px",
               borderRadius: 30,
               cursor: "pointer",
@@ -87,7 +94,8 @@ export default function ModalConfirmacion({
           </button>
           
           <button
-            onClick={onConfirmar}
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onConfirmar(); }}
             style={{
               background: "#ff4444",
               border: "none",

@@ -11,7 +11,7 @@
   pointer-events: none;
   z-index: -1;
   overflow: hidden;
-  background: #0B0B0D;
+  background: var(--maika-bg);
 }
 
 .fondo-estrellado-constelaciones {
@@ -25,7 +25,7 @@
 .estrella-dorada {
   position: absolute;
   border-radius: 50%;
-  background: var(--gold-main, #C9A24A);
+  background: var(--gold-main);
   transform: translate(-50%, -50%);
   animation: parpadear-estrella 5s ease-in-out infinite;
   box-shadow: 0 0 6px var(--gold-glow);

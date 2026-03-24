@@ -1,5 +1,8 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { CategoriaEntrada, Pagina } from "../../types";
+import BotonCerrar from "../../components/BotonCerrar";
+import { THEME } from "../../config";
+import { isAdminAuthorized } from "../../utils/adminAuth";
 
 export interface NuevaCategoriaPageProps {
   setPagina: (p: Pagina) => void;
@@ -32,8 +35,8 @@ export interface NuevaCategoriaPageProps {
 
 const panelStyle = {
   minHeight: "100vh" as const,
-  background: "#0B0B0D",
-  color: "#C9A24A",
+  background: THEME.bg,
+  color: THEME.goldMain,
   display: "flex" as const,
   flexDirection: "column" as const,
   alignItems: "center" as const,
@@ -146,20 +149,31 @@ export default function NuevaCategoriaPage(props: NuevaCategoriaPageProps) {
   };
 
   return (
-    <div style={panelStyle}>
+    <div style={{ ...panelStyle, position: "relative" }}>
+      <BotonCerrar
+        onClick={() => {
+          if (isAdminAuthorized()) {
+            setPagina("admin");
+          } else {
+            setPagina("inicio");
+          }
+        }}
+        ariaLabel="Cerrar"
+        title="Cerrar"
+      />
       <h2 style={{ fontSize: 38, marginBottom: 30 }}>{esRenombrar ? "Renombrar categoría" : "Añadir nueva categoría"}</h2>
       <div className="categoria-edit-panel">
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Nombre de la categoría</label>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Nombre de la categoría</label>
         <input type="text" className="categoria-text-input" value={nuevaCategoriaNombre} onChange={(e) => setNuevaCategoriaNombre(e.target.value)} placeholder="Ej: velas, inciensos, figuras..." />
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Vista previa</label>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Vista previa</label>
         <div style={{ display: "flex", alignItems: "center", gap: 15, marginTop: 10, marginBottom: 5 }}>
           <div style={{ fontSize: Number(nuevaCategoriaTamano) || 22, color: nuevaCategoriaColor, fontStyle: nuevaCategoriaEstilo === "italic" ? "italic" : "normal", fontWeight: nuevaCategoriaEstilo === "bold" ? "bold" : "normal" }}>
             {nuevaCategoriaNombre || "—"}
           </div>
         </div>
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Imagen (opcional)</label>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Imagen (opcional)</label>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <label className="categoria-file-label">
             {nuevaCategoriaNombreImagen || "Seleccionar imagen"}
@@ -172,16 +186,16 @@ export default function NuevaCategoriaPage(props: NuevaCategoriaPageProps) {
               reader.readAsDataURL(file);
             }} />
           </label>
-          {nuevaCategoriaImagen && <img src={nuevaCategoriaImagen} alt="Vista previa" style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 8, border: "2px solid #C9A24A" }} />}
+          {nuevaCategoriaImagen && <img src={nuevaCategoriaImagen} alt="Vista previa" style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 8, border: `2px solid ${THEME.goldMain}` }} />}
         </div>
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Color del texto</label>
-        <input type="color" value={nuevaCategoriaColor} onChange={(e) => setNuevaCategoriaColor(e.target.value)} style={{ width: 60, height: 60, border: "2px solid #C9A24A", borderRadius: 12, marginBottom: 18 }} />
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Color del texto</label>
+        <input type="color" value={nuevaCategoriaColor} onChange={(e) => setNuevaCategoriaColor(e.target.value)} style={{ width: 60, height: 60, border: `2px solid ${THEME.goldMain}`, borderRadius: 12, marginBottom: 18 }} />
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Tamaño del texto</label>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Tamaño del texto</label>
         <input type="number" min={12} max={48} className="categoria-number-input" value={nuevaCategoriaTamano === "0" ? "" : nuevaCategoriaTamano} onChange={(e) => setNuevaCategoriaTamano(e.target.value)} />
 
-        <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Estilo del texto</label>
+        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Estilo del texto</label>
         <select value={nuevaCategoriaEstilo} onChange={(e) => setNuevaCategoriaEstilo(e.target.value)} className="categoria-select" style={{ marginBottom: 20 }}>
           <option value="normal">Normal</option>
           <option value="italic">Cursiva</option>
@@ -189,22 +203,12 @@ export default function NuevaCategoriaPage(props: NuevaCategoriaPageProps) {
         </select>
 
         <div className="categoria-btn-group">
-          <button className="categoria-edit-btn" style={{ background: "#1565c0", color: "#C9A24A", border: "2px solid #C9A24A" }} onClick={guardarCategoria}>
+          <button className="categoria-edit-btn" style={{ background: "#1565c0", color: THEME.goldMain, border: `2px solid ${THEME.goldMain}` }} onClick={guardarCategoria}>
             {esRenombrar ? "Guardar nombre" : "Crear categoría"}
           </button>
-          <button className="categoria-edit-btn" style={{ background: "#7b2d3a", color: "#fff", border: "2px solid #C9A24A" }} onClick={cancelar}>Cancelar</button>
+          <button className="categoria-edit-btn" style={{ background: "#7b2d3a", color: "#fff", border: `2px solid ${THEME.goldMain}` }} onClick={cancelar}>Cancelar</button>
         </div>
       </div>
-      <button className="categoria-volver-btn" style={{
-        background: "#C9A24A",
-        color: "#1b1745",
-        border: "2px solid #C9A24A",
-        padding: "10px 20px",
-        borderRadius: 12,
-        cursor: "pointer",
-        fontWeight: "bold",
-        fontSize: 16
-      }} onClick={() => setPagina("editarCategorias")}>← Volver a Editar Categorías</button>
     </div>
   );
 }

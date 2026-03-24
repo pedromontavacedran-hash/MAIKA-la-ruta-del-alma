@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react";
 import { useApp } from "../context/AppContext";
 import type { Pedido } from "../types";
+import BotonCerrar from "../components/BotonCerrar";
+import { THEME } from "../config";
+import { isAdminAuthorized } from "../utils/adminAuth";
 
 const MESES_ES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
@@ -77,38 +80,44 @@ export default function ContabilidadPage() {
 
   if (!accesoAdmin) {
     return (
-      <div style={{ maxWidth: 500, margin: "0 auto", textAlign: "center", padding: 40 }}>
-        <p style={{ color: "#C9A24A", marginBottom: 20 }}>Solo administradores pueden acceder a Contabilidad.</p>
-        <button
-          type="button"
-          onClick={() => setPagina("admin")}
-          style={{
-            background: "#C9A24A",
-            color: "#1b1745",
-            border: "2px solid #C9A24A",
-            padding: "12px 24px",
-            borderRadius: 12,
-            cursor: "pointer",
-            fontWeight: "bold",
-            fontSize: 16
+      <div style={{ maxWidth: 500, margin: "0 auto", textAlign: "center", padding: 40, position: "relative" }}>
+        <BotonCerrar
+          onClick={() => {
+            if (isAdminAuthorized()) {
+              setPagina("admin");
+            } else {
+              setPagina("inicio");
+            }
           }}
-        >
-          ← Volver al panel
-        </button>
+          ariaLabel="Cerrar"
+          title="Cerrar"
+        />
+        <p style={{ color: THEME.goldMain, marginBottom: 20 }}>Solo administradores pueden acceder a Contabilidad.</p>
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 16px" }}>
-      <h2 style={{ textAlign: "center", color: "#C9A24A", marginBottom: 8 }}>📅 CONTABILIDAD</h2>
+    <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 16px", position: "relative" }}>
+      <BotonCerrar
+        onClick={() => {
+          if (isAdminAuthorized()) {
+            setPagina("admin");
+          } else {
+            setPagina("inicio");
+          }
+        }}
+        ariaLabel="Cerrar"
+        title="Cerrar"
+      />
+      <h2 style={{ textAlign: "center", color: THEME.goldMain, marginBottom: 8 }}>📅 CONTABILIDAD</h2>
       <p style={{ textAlign: "center", color: "rgba(255,255,255,0.85)", marginBottom: 24, fontSize: 14 }}>
         Resumen por año y mes para llevar las ventas
       </p>
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 24 }}>
         <div style={{ flex: "1 1 140px", minWidth: 120 }}>
-          <label style={{ display: "block", color: "#C9A24A", marginBottom: 6, fontSize: 14 }}>Año</label>
+          <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, fontSize: 14 }}>Año</label>
           <select
             value={añoSeleccionado}
             onChange={(e) => {
@@ -120,7 +129,7 @@ export default function ContabilidadPage() {
               padding: 12,
               borderRadius: 10,
               border: "2px solid gold",
-              background: "#0B0B0D",
+              background: THEME.bg,
               color: "white",
               fontSize: 16
             }}
@@ -132,7 +141,7 @@ export default function ContabilidadPage() {
           </select>
         </div>
         <div style={{ flex: "1 1 180px", minWidth: 140 }}>
-          <label style={{ display: "block", color: "#C9A24A", marginBottom: 6, fontSize: 14 }}>Mes</label>
+          <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, fontSize: 14 }}>Mes</label>
           <select
             value={mesSeleccionado}
             onChange={(e) => setMesSeleccionado(e.target.value)}
@@ -142,7 +151,7 @@ export default function ContabilidadPage() {
               padding: 12,
               borderRadius: 10,
               border: "2px solid gold",
-              background: "#0B0B0D",
+              background: THEME.bg,
               color: "white",
               fontSize: 16,
               opacity: añoSeleccionado ? 1 : 0.7
@@ -163,27 +172,27 @@ export default function ContabilidadPage() {
         return (
           <div key={`contabilidad-${añoSeleccionado}-${mesSeleccionado}`}>
             <div style={{
-              background: "#0B0B0D",
+              background: THEME.bg,
               border: "2px solid gold",
               borderRadius: 12,
               padding: 16,
               marginBottom: 20
             }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-                <strong style={{ color: "#C9A24A", fontSize: 18 }}>
+                <strong style={{ color: THEME.goldMain, fontSize: 18 }}>
                   {mesSeleccionado
                     ? `${MESES_ES[parseInt(mesSeleccionado, 10) - 1]} ${añoSeleccionado}`
                     : `Año ${añoSeleccionado} (todo el año)`}
                 </strong>
                 <div style={{ color: "white", fontSize: 16 }}>
                   <span style={{ marginRight: 16 }}>{n} pedidos</span>
-                  <span style={{ color: "#C9A24A", fontWeight: "bold" }}>Total: {total.toFixed(2)} €</span>
+                  <span style={{ color: THEME.goldMain, fontWeight: "bold" }}>Total: {total.toFixed(2)} €</span>
                 </div>
               </div>
             </div>
 
             <div style={{
-              background: "#0B0B0D",
+              background: THEME.bg,
               border: "2px solid gold",
               borderRadius: 12,
               overflow: "hidden",
@@ -192,12 +201,12 @@ export default function ContabilidadPage() {
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", color: "#fff" }}>
                   <thead>
-                    <tr style={{ background: "#0B0B0D", borderBottom: "2px solid #C9A24A" }}>
-                      <th style={{ padding: "12px 10px", textAlign: "left", color: "#C9A24A" }}>Fecha</th>
-                      <th style={{ padding: "12px 10px", textAlign: "left", color: "#C9A24A" }}>Nº pedido</th>
-                      <th style={{ padding: "12px 10px", textAlign: "left", color: "#C9A24A" }}>Cliente</th>
-                      <th style={{ padding: "12px 10px", textAlign: "right", color: "#C9A24A" }}>Total</th>
-                      <th style={{ padding: "12px 10px", width: 100, color: "#C9A24A" }}></th>
+                    <tr style={{ background: THEME.bg, borderBottom: `2px solid ${THEME.goldMain}` }}>
+                      <th style={{ padding: "12px 10px", textAlign: "left", color: THEME.goldMain }}>Fecha</th>
+                      <th style={{ padding: "12px 10px", textAlign: "left", color: THEME.goldMain }}>Nº pedido</th>
+                      <th style={{ padding: "12px 10px", textAlign: "left", color: THEME.goldMain }}>Cliente</th>
+                      <th style={{ padding: "12px 10px", textAlign: "right", color: THEME.goldMain }}>Total</th>
+                      <th style={{ padding: "12px 10px", width: 100, color: THEME.goldMain }}></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -211,7 +220,7 @@ export default function ContabilidadPage() {
                       lista.map((p, idx) => (
                       <tr key={`${p.numero}-${idx}`} style={{ borderBottom: "1px solid rgba(212,175,55,0.3)" }}>
                         <td style={{ padding: "10px" }}>{p.fecha}</td>
-                        <td style={{ padding: "10px", fontWeight: "bold", color: "#C9A24A" }}>{p.numero}</td>
+                        <td style={{ padding: "10px", fontWeight: "bold", color: THEME.goldMain }}>{p.numero}</td>
                         <td style={{ padding: "10px" }}>{p.cliente?.nombreApellidos ?? "—"}</td>
                         <td style={{ padding: "10px", textAlign: "right" }}>{p.total?.toFixed(2)} €</td>
                         <td style={{ padding: "8px" }}>
@@ -223,7 +232,7 @@ export default function ContabilidadPage() {
                               borderRadius: 8,
                               border: "1px solid gold",
                               background: "rgba(212,175,55,0.15)",
-                              color: "#C9A24A",
+                              color: THEME.goldMain,
                               cursor: "pointer",
                               fontWeight: "bold",
                               fontSize: 12
@@ -241,7 +250,7 @@ export default function ContabilidadPage() {
             </div>
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 24 }}>
-              <strong style={{ color: "#C9A24A", fontSize: 18 }}>Total del periodo: {total.toFixed(2)} €</strong>
+              <strong style={{ color: THEME.goldMain, fontSize: 18 }}>Total del periodo: {total.toFixed(2)} €</strong>
               <button
                 type="button"
                 onClick={() => {
@@ -255,7 +264,7 @@ export default function ContabilidadPage() {
                   borderRadius: 10,
                   border: "2px solid gold",
                   background: "rgba(212,175,55,0.2)",
-                  color: "#C9A24A",
+                  color: THEME.goldMain,
                   cursor: "pointer",
                   fontWeight: "bold",
                   fontSize: 14
@@ -267,25 +276,6 @@ export default function ContabilidadPage() {
           </div>
         );
       })()}
-
-      <div style={{ textAlign: "center" }}>
-        <button
-          type="button"
-          onClick={() => setPagina("admin")}
-          style={{
-            background: "#C9A24A",
-            color: "#1b1745",
-            border: "2px solid #C9A24A",
-            padding: "12px 24px",
-            borderRadius: 12,
-            cursor: "pointer",
-            fontWeight: "bold",
-            fontSize: 16
-          }}
-        >
-          ← Volver al panel
-        </button>
-      </div>
     </div>
   );
 }

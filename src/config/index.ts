@@ -75,6 +75,13 @@ export const CUPONES_DISPONIBLES: Record<string, { tipo: "porcentaje" | "envio_g
   ENVIOGRATIS: { tipo: "envio_gratis", valor: 0 }
 };
 
+/**
+ * API key de Google Places para autocompletado de direcciones en checkout.
+ * Si está definida y no vacía, se usa Google Places; si no, se usan Nominatim + Photon (gratis).
+ * Para desactivar Google Places: borra esta variable en .env o déjala vacía.
+ */
+export const GOOGLE_PLACES_API_KEY = (typeof import.meta !== "undefined" && (import.meta as { env?: Record<string, string> }).env?.VITE_GOOGLE_PLACES_API_KEY) || "";
+
 /** Paleta dorada reutilizable (alineada con App.css) — usar en estilos inline cuando haga falta. */
 export const THEME = {
   bg: "#0B0B0D",

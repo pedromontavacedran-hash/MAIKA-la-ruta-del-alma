@@ -51,10 +51,20 @@ export interface ItemCarrito extends Producto {
 }
 
 export interface Cliente {
+  /** Nombre de pila del cliente (ej. "MARÍA CARMEN") */
+  nombre?: string;
+  /** Apellidos del cliente (ej. "GARCÍA LÓPEZ") */
+  apellidos?: string;
+  /** Nombre completo histórico (para pedidos antiguos) */
   nombreApellidos: string;
   email: string;
+  dni?: string;
   telefono?: string;
   direccion?: string;
+  /** Tipo de vía: Calle, Avenida, Plaza, etc. */
+  tipoVia?: string;
+  /** Nombre de la vía (sin el tipo): ej. "Joan Vilanova i Abril". */
+  nombreVia?: string;
   calle?: string;
   numero?: string;
   bloque?: string;
@@ -69,10 +79,26 @@ export interface Cliente {
   notas?: string;
 }
 
+export interface DireccionUsuario {
+  id: string;
+  alias: string;
+  calle: string;
+  numero: string;
+  bloque?: string;
+  escalera?: string;
+  piso?: string;
+  puerta?: string;
+  cp: string;
+  poblacion: string;
+  provincia: string;
+  pais: string;
+}
+
 export interface Usuario {
   id: number | string;
   nombre: string;
   email: string;
+  dni?: string;
   telefono?: string;
   direccion?: string;
   calle?: string;
@@ -86,6 +112,8 @@ export interface Usuario {
   cp?: string;
   poblacion?: string;
   provincia?: string;
+  direcciones?: DireccionUsuario[];
+  direccionPredeterminadaId?: string;
   password?: string;
   verificado?: boolean;
   pedidos?: Pedido[];
@@ -117,6 +145,7 @@ export interface EditUsuarioForm {
   id: number | string;
   nombre: string;
   email: string;
+  dni?: string;
   telefono: string;
   password: string;
   calle: string;
@@ -136,6 +165,7 @@ export interface EditUsuarioForm {
 export interface Pedido {
   numero: string;
   fecha: string;
+  usuarioId?: string;
   cliente: Cliente;
   items: ItemCarrito[];
   subtotal: number;
