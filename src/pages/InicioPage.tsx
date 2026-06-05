@@ -11,7 +11,7 @@ function precioConDescuento(p: Producto): number {
 }
 
 export default function InicioPage() {
-  const { setPagina, velas, inciensos, figuras, kits } = useApp();
+  const { abrirTiendaConCategoria, velas, inciensos, figuras, kits } = useApp();
 
   const productosRitual = useMemo(() => {
     const todos = [...velas, ...inciensos, ...figuras, ...(kits ?? [])];
@@ -56,7 +56,7 @@ export default function InicioPage() {
                 <p style={{ color: "white", fontSize: 18, fontWeight: "bold", margin: "4px 0" }}>{precioConDescuento(p).toFixed(2)} €</p>
                 <button
                   type="button"
-                  onClick={() => setPagina("tienda")}
+                  onClick={() => abrirTiendaConCategoria(p.categoria)}
                   style={{
                     marginTop: 8,
                     padding: "10px 16px",

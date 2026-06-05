@@ -10,9 +10,11 @@ export interface EditarProductosPageProps {
   setInciensos: Dispatch<SetStateAction<Producto[]>>;
   figuras: Producto[];
   setFiguras: Dispatch<SetStateAction<Producto[]>>;
+  kits: Producto[];
+  setKits: Dispatch<SetStateAction<Producto[]>>;
   getProductoByValue: (value: string) => Producto | undefined;
-  categoriaEditarProductos: "velas" | "inciensos" | "figuras";
-  setCategoriaEditarProductos: Dispatch<SetStateAction<"velas" | "inciensos" | "figuras">>;
+  categoriaEditarProductos: Producto["categoria"];
+  setCategoriaEditarProductos: Dispatch<SetStateAction<Producto["categoria"]>>;
   productoSeleccionado: string;
   setProductoSeleccionado: Dispatch<SetStateAction<string>>;
   previewProducto: string | null;
@@ -25,7 +27,7 @@ export interface EditarProductosPageProps {
   setTamanoProducto: Dispatch<SetStateAction<string>>;
   estiloTextoProducto: string;
   setEstiloTextoProducto: Dispatch<SetStateAction<string>>;
-  setCategoriaNuevoProducto: Dispatch<SetStateAction<"velas" | "inciensos" | "figuras">>;
+  setCategoriaNuevoProducto: Dispatch<SetStateAction<Producto["categoria"]>>;
   setNuevoProductoNombre: Dispatch<SetStateAction<string>>;
   setNuevoProductoPrecio: Dispatch<SetStateAction<string>>;
   setNuevoProductoStock: Dispatch<SetStateAction<number>>;
@@ -58,6 +60,8 @@ export default function EditarProductosPage(props: EditarProductosPageProps) {
     setInciensos,
     figuras,
     setFiguras,
+    kits,
+    setKits,
     getProductoByValue,
     categoriaEditarProductos,
     setCategoriaEditarProductos,
@@ -86,7 +90,14 @@ export default function EditarProductosPage(props: EditarProductosPageProps) {
     mostrarNotificacion
   } = props;
 
-  const listaActual = categoriaEditarProductos === "velas" ? velas : categoriaEditarProductos === "inciensos" ? inciensos : figuras;
+  const listaActual =
+    categoriaEditarProductos === "velas"
+      ? velas
+      : categoriaEditarProductos === "inciensos"
+        ? inciensos
+        : categoriaEditarProductos === "figuras"
+          ? figuras
+          : kits;
   const productosDeLaCategoria = listaActual.map((p) => ({ value: `${categoriaEditarProductos}-${p.id}`, nombre: p.nombre, categoria: categoriaEditarProductos }));
   const valorSelect = productosDeLaCategoria.some((p) => p.value === productoSeleccionado) ? productoSeleccionado : productosDeLaCategoria[0]?.value ?? "";
   const productoActual = productosDeLaCategoria.find((p) => p.value === valorSelect);
@@ -108,9 +119,9 @@ export default function EditarProductosPage(props: EditarProductosPageProps) {
           className="categoria-select"
           value={categoriaEditarProductos}
           onChange={(e) => {
-            const cat = e.target.value as "velas" | "inciensos" | "figuras";
+            const cat = e.target.value as Producto["categoria"];
             setCategoriaEditarProductos(cat);
-            const list = cat === "velas" ? velas : cat === "inciensos" ? inciensos : figuras;
+            const list = cat === "velas" ? velas : cat === "inciensos" ? inciensos : cat === "figuras" ? figuras : kits;
             const val = list[0] ? `${cat}-${list[0].id}` : "";
             setProductoSeleccionado(val);
             const prod = list[0] ? getProductoByValue(val) : undefined;
@@ -126,6 +137,7 @@ export default function EditarProductosPage(props: EditarProductosPageProps) {
           <option value="velas">Velas</option>
           <option value="inciensos">Inciensos</option>
           <option value="figuras">Figuras</option>
+          <option value="kits">Kits</option>
         </select>
 
         <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Nombre del producto</label>
@@ -222,7 +234,8 @@ export default function EditarProductosPage(props: EditarProductosPageProps) {
                 const updated = { ...prod, stock: nuevoStock };
                 if (prod.categoria === "velas") setVelas((prev) => prev.map((p) => (p.id === prod.id ? updated : p)));
                 else if (prod.categoria === "inciensos") setInciensos((prev) => prev.map((p) => (p.id === prod.id ? updated : p)));
-                else setFiguras((prev) => prev.map((p) => (p.id === prod.id ? updated : p)));
+                else if (prod.categoria === "figuras") setFiguras((prev) => prev.map((p) => (p.id === prod.id ? updated : p)));
+                else setKits((prev) => prev.map((p) => (p.id === prod.id ? updated : p)));
                 mostrarNotificacion(`✅ Stock actualizado: ${nuevoStock} unidades`, "exito");
               }}
               style={{ padding: "8px 16px", borderRadius: 8, background: "#C9A24A", color: "#1b1745", border: "none", fontWeight: "bold", cursor: "pointer" }}
@@ -246,7 +259,8 @@ export default function EditarProductosPage(props: EditarProductosPageProps) {
           };
           if (prod.categoria === "velas") setVelas((prev) => prev.map((p) => (p.id === prod.id ? updated : p)));
           else if (prod.categoria === "inciensos") setInciensos((prev) => prev.map((p) => (p.id === prod.id ? updated : p)));
-          else setFiguras((prev) => prev.map((p) => (p.id === prod.id ? updated : p)));
+          else if (prod.categoria === "figuras") setFiguras((prev) => prev.map((p) => (p.id === prod.id ? updated : p)));
+          else setKits((prev) => prev.map((p) => (p.id === prod.id ? updated : p)));
           mostrarNotificacion("✅ Producto guardado. Los cambios se verán en la tienda.", "exito");
           setPagina("admin");
         }}>Guardar</button>
@@ -259,7 +273,8 @@ export default function EditarProductosPage(props: EditarProductosPageProps) {
           const updated = { ...prod, nombre: nuevo.trim() };
           if (prod.categoria === "velas") setVelas((prev) => prev.map((p) => (p.id === prod.id ? updated : p)));
           else if (prod.categoria === "inciensos") setInciensos((prev) => prev.map((p) => (p.id === prod.id ? updated : p)));
-          else setFiguras((prev) => prev.map((p) => (p.id === prod.id ? updated : p)));
+          else if (prod.categoria === "figuras") setFiguras((prev) => prev.map((p) => (p.id === prod.id ? updated : p)));
+          else setKits((prev) => prev.map((p) => (p.id === prod.id ? updated : p)));
           setProductoSeleccionado(`${prod.categoria}-${prod.id}`);
           mostrarNotificacion("✏️ Producto renombrado", "exito");
         }}>Renombrar producto</button>
@@ -284,7 +299,8 @@ export default function EditarProductosPage(props: EditarProductosPageProps) {
           if (!window.confirm(`¿Eliminar el producto "${prod.nombre}"?`)) return;
           if (prod.categoria === "velas") setVelas((prev) => prev.filter((p) => p.id !== prod.id));
           else if (prod.categoria === "inciensos") setInciensos((prev) => prev.filter((p) => p.id !== prod.id));
-          else setFiguras((prev) => prev.filter((p) => p.id !== prod.id));
+          else if (prod.categoria === "figuras") setFiguras((prev) => prev.filter((p) => p.id !== prod.id));
+          else setKits((prev) => prev.filter((p) => p.id !== prod.id));
           setProductoSeleccionado("");
           mostrarNotificacion("Producto eliminado", "normal");
         }}>Eliminar producto</button>

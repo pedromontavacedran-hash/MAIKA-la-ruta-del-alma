@@ -3,11 +3,11 @@ import { useFavoritos } from "../hooks/useFavoritos";
 import type { Producto } from "../types";
 
 export default function FavoritosPage() {
-  const { setPagina, velas, inciensos, figuras, agregarAlCarrito } = useApp();
+  const { setPagina, velas, inciensos, figuras, kits, agregarAlCarrito } = useApp();
   const { favoritos, toggleFavorito } = useFavoritos();
 
   // Todos los productos disponibles en el catálogo
-  const todosLosProductos = [...velas, ...inciensos, ...figuras];
+  const todosLosProductos = [...velas, ...inciensos, ...figuras, ...kits];
 
   // Filtrar los productos que están en favoritos
   const productosFavoritos = todosLosProductos.filter((prod) =>

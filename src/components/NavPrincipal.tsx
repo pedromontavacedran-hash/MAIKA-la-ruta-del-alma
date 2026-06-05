@@ -70,7 +70,7 @@ const linkStyle = (active: boolean, size = 16) => ({
 export default function NavPrincipal({
   pagina,
   setPagina,
-  onTerminarCompra: _onTerminarCompra,
+  onTerminarCompra,
   esAppNativa
 }: NavPrincipalProps) {
   const { cart, accesoAdmin, velas, inciensos, figuras, kits, abrirTiendaConCategoria } = useApp();
@@ -295,7 +295,13 @@ export default function NavPrincipal({
       <div className="app-topbar__right app-topbar__right--btns-aligned">
         <button
           type="button"
-          onClick={() => setPagina("carrito")}
+          onClick={() => {
+            if (pagina === "carrito" && totalItemsCarrito > 0) {
+              onTerminarCompra();
+              return;
+            }
+            setPagina("carrito");
+          }}
           className="app-nav-link app-nav-link--carrito app-nav-link--right"
           style={{ ...linkStyle(false), color: gold }}
         >
