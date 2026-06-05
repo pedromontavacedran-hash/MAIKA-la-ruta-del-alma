@@ -205,7 +205,7 @@ const [pagina, setPagina] = useState<Pagina>("inicio");
     normalizarItemCarrito
   } = catalogo;
 
-  const [categoriaEditarProductos, setCategoriaEditarProductos] = useState<"velas" | "inciensos" | "figuras">("velas");
+  const [categoriaEditarProductos, setCategoriaEditarProductos] = useState<Producto["categoria"]>("velas");
   const [productoSeleccionado, setProductoSeleccionado] = useState<string>("");
   const [previewProducto, setPreviewProducto] = useState<string | null>(null);
   const [nombreImagenProducto, setNombreImagenProducto] = useState("");
@@ -213,7 +213,7 @@ const [pagina, setPagina] = useState<Pagina>("inicio");
   const [tamanoProducto, setTamanoProducto] = useState<string>("22");
   const [estiloTextoProducto, setEstiloTextoProducto] = useState<string>("normal");
 
-  const [categoriaNuevoProducto, setCategoriaNuevoProducto] = useState<"velas" | "inciensos" | "figuras">("velas");
+  const [categoriaNuevoProducto, setCategoriaNuevoProducto] = useState<Producto["categoria"]>("velas");
   const [nuevoProductoNombre, setNuevoProductoNombre] = useState("");
   const [nuevoProductoPrecio, setNuevoProductoPrecio] = useState("10");
   const [nuevoProductoStock, setNuevoProductoStock] = useState(5);
@@ -1838,6 +1838,8 @@ const [pagina, setPagina] = useState<Pagina>("inicio");
         setInciensos={setInciensos}
         figuras={figuras}
         setFiguras={setFiguras}
+        kits={kits}
+        setKits={setKits}
         getProductoByValue={getProductoByValue}
         categoriaEditarProductos={categoriaEditarProductos}
         setCategoriaEditarProductos={setCategoriaEditarProductos}
@@ -2032,6 +2034,8 @@ const [pagina, setPagina] = useState<Pagina>("inicio");
         setInciensos={setInciensos}
         figuras={figuras}
         setFiguras={setFiguras}
+        kits={kits}
+        setKits={setKits}
         categoriaNuevoProducto={categoriaNuevoProducto}
         setCategoriaNuevoProducto={setCategoriaNuevoProducto}
         nuevoProductoNombre={nuevoProductoNombre}

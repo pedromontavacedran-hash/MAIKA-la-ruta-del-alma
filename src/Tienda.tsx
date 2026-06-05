@@ -159,7 +159,7 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
 
   useEffect(() => {
     setRefreshKey(prev => prev + 1);
-  }, [velas, inciensos, figuras, categoriasCatalogo, cart]);
+  }, [velas, inciensos, figuras, kits, categoriasCatalogo, cart]);
 
   useEffect(() => {
     if (!lightboxImagen) return;

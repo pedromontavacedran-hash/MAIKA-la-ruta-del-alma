@@ -9,8 +9,10 @@ export interface NuevoProductoPageProps {
   setInciensos: Dispatch<SetStateAction<Producto[]>>;
   figuras: Producto[];
   setFiguras: Dispatch<SetStateAction<Producto[]>>;
-  categoriaNuevoProducto: "velas" | "inciensos" | "figuras";
-  setCategoriaNuevoProducto: Dispatch<SetStateAction<"velas" | "inciensos" | "figuras">>;
+  kits: Producto[];
+  setKits: Dispatch<SetStateAction<Producto[]>>;
+  categoriaNuevoProducto: Producto["categoria"];
+  setCategoriaNuevoProducto: Dispatch<SetStateAction<Producto["categoria"]>>;
   nuevoProductoNombre: string;
   setNuevoProductoNombre: Dispatch<SetStateAction<string>>;
   nuevoProductoPrecio: string;
@@ -30,7 +32,7 @@ export interface NuevoProductoPageProps {
   nuevoProductoEstilo: string;
   setNuevoProductoEstilo: Dispatch<SetStateAction<string>>;
   setProductoSeleccionado: Dispatch<SetStateAction<string>>;
-  setCategoriaEditarProductos: Dispatch<SetStateAction<"velas" | "inciensos" | "figuras">>;
+  setCategoriaEditarProductos: Dispatch<SetStateAction<Producto["categoria"]>>;
   mostrarNotificacion: (msg: string, tipo: "normal" | "exito" | "error") => void;
 }
 
@@ -54,6 +56,8 @@ export default function NuevoProductoPage(props: NuevoProductoPageProps) {
     setInciensos,
     figuras,
     setFiguras,
+    kits,
+    setKits,
     categoriaNuevoProducto,
     setCategoriaNuevoProducto,
     nuevoProductoNombre,
@@ -95,7 +99,8 @@ export default function NuevoProductoPage(props: NuevoProductoPageProps) {
     let nuevoId: number;
     if (cat === "velas") nuevoId = velas.length > 0 ? Math.max(...velas.map((p) => p.id)) + 1 : 1;
     else if (cat === "inciensos") nuevoId = inciensos.length > 0 ? Math.max(...inciensos.map((p) => p.id)) + 1 : 101;
-    else nuevoId = figuras.length > 0 ? Math.max(...figuras.map((p) => p.id)) + 1 : 201;
+    else if (cat === "figuras") nuevoId = figuras.length > 0 ? Math.max(...figuras.map((p) => p.id)) + 1 : 201;
+    else nuevoId = kits.length > 0 ? Math.max(...kits.map((p) => p.id)) + 1 : 301;
 
     const nuevoProducto: Producto = {
       id: nuevoId,
@@ -112,7 +117,8 @@ export default function NuevoProductoPage(props: NuevoProductoPageProps) {
 
     if (cat === "velas") setVelas((prev) => [...prev, nuevoProducto]);
     else if (cat === "inciensos") setInciensos((prev) => [...prev, nuevoProducto]);
-    else setFiguras((prev) => [...prev, nuevoProducto]);
+    else if (cat === "figuras") setFiguras((prev) => [...prev, nuevoProducto]);
+    else setKits((prev) => [...prev, nuevoProducto]);
 
     setProductoSeleccionado(`${cat}-${nuevoId}`);
     setCategoriaEditarProductos(cat);
@@ -147,10 +153,11 @@ export default function NuevoProductoPage(props: NuevoProductoPageProps) {
       <h2 style={{ fontSize: 38, marginBottom: 30 }}>Añadir nuevo producto</h2>
       <div className="categoria-edit-panel">
         <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Categoría</label>
-        <select className="categoria-select" value={categoriaNuevoProducto} onChange={(e) => setCategoriaNuevoProducto(e.target.value as "velas" | "inciensos" | "figuras")}>
+        <select className="categoria-select" value={categoriaNuevoProducto} onChange={(e) => setCategoriaNuevoProducto(e.target.value as Producto["categoria"])}>
           <option value="velas">Velas</option>
           <option value="inciensos">Inciensos</option>
           <option value="figuras">Figuras</option>
+          <option value="kits">Kits</option>
         </select>
 
         <label style={{ color: "#C9A24A", fontWeight: "bold", fontSize: 20 }}>Nombre</label>
