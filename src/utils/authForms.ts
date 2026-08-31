@@ -16,7 +16,7 @@ export function crearFormAuthRegistroDesdeAcceso(telefono: string): AuthForm {
     cp: "",
     provincia: "",
     poblacion: "",
-    pais: "España",
+    pais: "",
     confirmPassword: "",
     codigoVerificacion: "",
     codigoIngresado: "",

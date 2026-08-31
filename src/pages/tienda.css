@@ -1,0 +1,742 @@
+/* Módulo extraído de App.css (líneas 4215–4852). Tienda lightbox, cerrar modal global, carrito layout (hasta fin bloque carrito) */
+
+.tienda-entrada-hero {
+  position: relative;
+  isolation: isolate;
+  animation:
+    tiendaEntradaHero 420ms cubic-bezier(0.22, 1, 0.36, 1) both,
+    tiendaAuraViva 4.8s cubic-bezier(0.4, 0, 0.2, 1) 420ms infinite;
+  transform-origin: center top;
+  will-change: opacity, transform, filter;
+}
+
+.tienda-entrada-hero::before {
+  content: "";
+  position: absolute;
+  inset: -28px -22px;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 32px;
+  background:
+    radial-gradient(circle at 50% 12%, rgba(232, 210, 138, 0.18), transparent 34%),
+    radial-gradient(ellipse 82% 58% at 50% 45%, rgba(212, 175, 55, 0.10), transparent 70%);
+  filter: blur(18px);
+  opacity: 0;
+  animation: tiendaAuraDoradaViva 4.8s cubic-bezier(0.4, 0, 0.2, 1) 420ms infinite;
+}
+
+@keyframes tiendaEntradaHero {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes tiendaAuraViva {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+    filter: brightness(1) saturate(1);
+  }
+  50% {
+    transform: translateY(-1px) scale(1.015);
+    filter: brightness(1.08) saturate(1.06);
+  }
+}
+
+@keyframes tiendaAuraDoradaViva {
+  0%,
+  100% {
+    opacity: 0.18;
+    transform: scale(0.99);
+  }
+  50% {
+    opacity: 0.34;
+    transform: scale(1.025);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tienda-entrada-hero,
+  .tienda-entrada-hero::before {
+    animation: none;
+  }
+}
+
+.maika-fly-to-cart {
+  position: fixed;
+  z-index: 10050;
+  width: 84px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #d4af37, #f1d27a);
+  color: #1b1745;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 10px 28px rgba(212, 175, 55, 0.35);
+  pointer-events: none;
+  opacity: 0.96;
+  transform: translate(0, 0) scale(1);
+  transition: transform 0.95s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.95s ease;
+  will-change: transform, opacity;
+}
+
+.maika-cart-pulse {
+  animation: maika-cart-pulse 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes maika-cart-pulse {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .maika-fly-to-cart,
+  .maika-cart-pulse {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* BOTÓN CERRAR GLOBAL (todos los modales) */
+.boton-cerrar-modal,
+.boton-cerrar-modal--discreto {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+  box-sizing: border-box;
+  box-shadow: none;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  font-size: 16px;
+  line-height: 1;
+  font: inherit;
+  transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease, opacity 0.18s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.boton-cerrar-modal:hover:not(:disabled),
+.boton-cerrar-modal--discreto:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: scale(1.08);
+}
+
+.boton-cerrar-modal:focus-visible:not(:disabled),
+.boton-cerrar-modal--discreto:focus-visible:not(:disabled) {
+  outline: 2px solid rgba(255, 255, 255, 0.45);
+  outline-offset: 2px;
+}
+
+.boton-cerrar-modal:disabled,
+.boton-cerrar-modal--discreto:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Tienda a pantalla completa: cruz fija al viewport (sin depender del padre) */
+.boton-cerrar-modal--viewport,
+.boton-cerrar-modal--viewport.boton-cerrar-modal--discreto {
+  position: fixed !important;
+  /*
+    Esquina izquierda: a la derecha compite con cuenta / carrito / favoritos de la barra (~100px).
+    Misma fila vertical bajo la barra; z-index por debajo de modales 10000 y del wa-float 9999.
+  */
+  top: calc(var(--app-topbar-stack) + 10px) !important;
+  left: max(12px, env(safe-area-inset-left, 0px)) !important;
+  right: auto !important;
+  z-index: 9500;
+  pointer-events: auto;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.tienda-lightbox-overlay .boton-cerrar-modal,
+.tienda-lightbox-overlay .boton-cerrar-modal--discreto {
+  z-index: 2;
+}
+
+/* Mi Cuenta: cruz en flujo (flex); no absolute */
+.cuenta-maika-page .boton-cerrar-modal,
+.cuenta-maika-page .boton-cerrar-modal--discreto {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  flex-shrink: 0;
+}
+
+/* Mi Cuenta y restablecer contraseña: ocultar barra de scroll; el scroll del documento sigue funcionando. */
+html.cuenta-maika-sin-scrollbar,
+body.cuenta-maika-sin-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html.cuenta-maika-sin-scrollbar::-webkit-scrollbar,
+body.cuenta-maika-sin-scrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+
+@media (max-width: 900px) {
+  /*
+    Inicio (solo /, clase app-shell--full-bleed-top): sin padding-top en __content; el hero va bajo el header.
+    Tienda, carrito, cuenta, etc.: solo la reserva exacta bajo la nav fija (sin heredar “hueco tipo hero”).
+  */
+  .app-shell:not(.app-shell--full-bleed-top):not(.app-shell--inventario-admin) .app-shell__content {
+    padding-top: 0 !important;
+  }
+  .app-shell.app-shell--full-bleed-top:not(.app-shell--inventario-admin) .app-shell__content {
+    padding-top: 0 !important;
+  }
+
+  .app-shell {
+    padding: 14px !important;
+    background-attachment: scroll !important;
+  }
+  .app-shell--full-bleed-top {
+    padding-top: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  /* /lectura, /horoscopos: el padding horizontal del shell no debe dejar franjas del --maika-bg a los lados. */
+  .app-shell.app-shell--full-bleed-x:not(.app-shell--inventario-admin) {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  /*
+    Sin padding-top en el shell en tienda / carrito / cuenta / etc.:
+    el `padding: 14px` de arriba dejaba una franja vacía (hueco “tipo hero”) porque la nav es fixed
+    y la reserva bajo la barra va en `.page-top-spacing` dentro de las rutas.
+  */
+  .app-shell:not(.app-shell--full-bleed-top):not(.app-shell--inventario-admin) {
+    padding-top: 0 !important;
+  }
+
+  /* Barra superior: en fila con botones en línea (no apilados), bien alineados */
+  .app-topbar {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px;
+  }
+  .app-topbar.app-topbar--hero-style {
+    flex-wrap: nowrap !important;
+  }
+  .app-topbar.app-topbar--hero-style .app-nav-links {
+    flex-wrap: nowrap !important;
+  }
+  .app-topbar .app-nav-links {
+    width: auto !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+  .app-topbar .app-nav-links > * {
+    flex-shrink: 0;
+  }
+  .app-topbar button:not(.app-nav-link) {
+    width: auto !important;
+    font-size: 15px !important;
+    padding: 8px 12px !important;
+  }
+  .app-topbar__right {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+  /*
+    La barra hero es position:fixed. En ≤768px la reserva bajo la nav la aportan las rutas (p. ej. `.page-top-spacing`);
+    un margin-top extra empujaba la tienda (y el bloque bajo el hero) más abajo que la imagen
+    «Conecta con tu esencia» en inicio, donde full-bleed anulaba este margen.
+  */
+  .app-topbar + *,
+  .app-shell--full-bleed-top .app-topbar + * {
+    margin-top: 0 !important;
+  }
+
+  /* Barra inferior: se mantiene en columna */
+  .app-bottombar {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 10px;
+  }
+  .app-bottombar .app-nav-links {
+    width: 100%;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+  }
+  .app-bottombar button:not(.app-nav-link) {
+    width: 100%;
+    justify-content: center;
+    font-size: 16px !important;
+    padding: 10px 14px !important;
+  }
+
+  .hero-title {
+    font-size: 30px !important;
+    line-height: 1.2;
+    white-space: normal !important;
+  }
+
+  .boton-tienda-hover {
+    min-width: 0 !important;
+    width: 100% !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+
+  .tienda-vista,
+  .carrito-vista {
+    padding: 16px !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Cabecera carrito: contraste para la cruz de cierre sobre fondo estrellado */
+.carrito-vista--con-banda-superior {
+  position: relative;
+}
+
+.carrito-vista__banda-superior {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 110px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), transparent);
+  z-index: 0;
+}
+
+.carrito-vista__cabecera {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.carrito-vista__cabecera > h2 {
+  margin: 0;
+  min-width: 0;
+}
+
+/* Misma idea que .cuenta-maika-page: la cruz va en la rejilla de cabecera, no anclada al viewport.
+   Los top/right !important de antes desplazaban el botón bajo la barra sticky y el clic fallaba. */
+.carrito-vista__cabecera .boton-cerrar-modal,
+.carrito-vista__cabecera .boton-cerrar-modal--discreto {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  margin-left: auto;
+  align-self: center;
+  z-index: 2;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.carrito-vista--con-banda-superior .carrito-layout__grid {
+  position: relative;
+  z-index: 1;
+}
+
+/* Carrito: dos columnas escritorio, una columna móvil */
+.carrito-layout__grid {
+  display: grid;
+  grid-template-columns: 2.5fr 1fr;
+  gap: 30px;
+  align-items: start;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 16px 18px;
+  border-radius: 22px;
+  background: rgba(8, 6, 20, 0.28);
+  box-shadow:
+    0 0 0 1px rgba(212, 175, 55, 0.08),
+    0 0 56px rgba(88, 70, 140, 0.16),
+    0 22px 48px rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+@media (max-width: 768px) {
+  .carrito-layout__grid {
+    padding: 12px 10px;
+    border-radius: 16px;
+    box-shadow:
+      0 0 0 1px rgba(212, 175, 55, 0.06),
+      0 12px 32px rgba(0, 0, 0, 0.28);
+  }
+}
+
+.carrito-layout__productos {
+  min-width: 0;
+  margin-top: 0;
+}
+
+.carrito-layout__resumen {
+  position: sticky;
+  top: 20px;
+  height: fit-content;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-sizing: border-box;
+}
+
+/* Tarjeta resumen carrito (misma familia que checkout) */
+.maika-card {
+  background: linear-gradient(180deg, #1e1b4b 0%, #221f5a 100%);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 16px;
+  box-sizing: border-box;
+}
+
+.carrito-resumen {
+  width: 300px;
+  max-width: 100%;
+  padding: 16px;
+}
+
+/* Resumen lateral: menos “bloque azul” aislado, más continuidad con la columna principal */
+.carrito-layout__resumen .maika-card {
+  background: linear-gradient(180deg, rgba(34, 30, 72, 0.94) 0%, rgba(22, 18, 52, 0.97) 100%);
+  border-color: rgba(200, 180, 120, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Aviso envío gratis / falta para gratis: integrado con la tarjeta */
+.carrito-resumen-envio {
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(168, 148, 210, 0.28) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: rgba(255, 255, 255, 0.94) !important;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.carrito-resumen > * {
+  margin-bottom: 10px;
+}
+
+.carrito-resumen > *:last-child {
+  margin-bottom: 0;
+}
+
+.maika-resumen {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.carrito-resumen__acciones {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.carrito-resumen__fila-botones {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.maika-btn-primary {
+  flex: 2;
+  min-width: 160px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, #d4af37, #f1d27a);
+  color: #000;
+  box-shadow: 0 6px 18px rgba(212, 175, 55, 0.25);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.maika-btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.38);
+}
+
+.maika-btn-secondary {
+  flex: 1;
+  min-width: 120px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.maika-btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(212, 175, 55, 0.55);
+}
+
+.carrito-btn-principal {
+  width: 100%;
+  margin: 0;
+  background: linear-gradient(180deg, rgba(52, 220, 140, 0.22) 0%, rgba(0, 200, 120, 0.16) 100%);
+  border: 1px solid rgba(0, 200, 120, 0.45);
+  color: #00e090;
+  border-radius: 10px;
+  padding: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  box-sizing: border-box;
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.28),
+    0 0 20px rgba(0, 200, 120, 0.2);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+
+.carrito-btn-principal:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(58, 235, 150, 0.3) 0%, rgba(0, 200, 120, 0.22) 100%);
+  border-color: rgba(100, 235, 170, 0.6);
+  color: #b0ffd9;
+  transform: translateY(-1px);
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.32),
+    0 0 28px rgba(0, 220, 140, 0.28);
+}
+
+.carrito-btn-principal:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  color: rgba(0, 200, 120, 0.45);
+  border-color: rgba(0, 200, 120, 0.2);
+  background: rgba(0, 200, 120, 0.06);
+}
+
+.checkout-texto-ayuda {
+  display: block;
+  margin: 10px 0 0;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* Separador bajo cada ítem: ver línea acotada en Carrito.tsx (no borde a todo el ancho de la columna) */
+.carrito-layout__producto-fila {
+  padding-top: 10px;
+  padding-bottom: 4px;
+}
+
+/* Fila producto: escritorio en fila; móvil en columna para que +/− no choquen con títulos en 2+ líneas */
+.carrito-producto-fila__cuerpo {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: nowrap;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.carrito-producto-fila__info {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.carrito-producto-fila__nombre {
+  display: block;
+  color: var(--gold-main);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.carrito-producto-fila__desc {
+  margin: 6px 0 0;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 14px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.carrito-producto-fila__control-precio {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.carrito-producto-fila__qty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.carrito-producto-fila__btn-qty {
+  background: transparent;
+  border: 1px solid var(--gold-main);
+  color: var(--gold-main);
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  min-height: 30px;
+  padding: 0;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease, filter 0.1s ease;
+}
+
+.app-shell .carrito-producto-fila__btn-qty:hover:not(:disabled) {
+  background: rgba(201, 162, 74, 0.14);
+  border-color: var(--gold-light);
+}
+
+.app-shell .carrito-producto-fila__btn-qty:active:not(:disabled) {
+  transform: scale(0.9);
+  filter: brightness(1.08);
+}
+
+.carrito-producto-fila__cantidad {
+  color: #fff;
+  font-size: 16px;
+  min-width: 1.5ch;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.carrito-producto-fila__subtotal {
+  color: var(--gold-main);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.carrito-producto-fila__sep {
+  max-width: min(600px, 100%);
+  margin-top: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 768px) {
+  .carrito-vista__cabecera {
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .carrito-vista__cabecera > h2 {
+    margin: 0;
+    min-width: 0;
+    text-align: left !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Solo cabecera: icono carrito + título, más legible en móvil */
+    font-size: clamp(1.52rem, 6.8vw, 2.28rem) !important;
+    line-height: 1.25;
+    padding-top: 2px;
+  }
+
+  .carrito-vista__cabecera .boton-cerrar-modal,
+  .carrito-vista__cabecera .boton-cerrar-modal--discreto {
+    transform: none;
+    min-width: 30px;
+    min-height: 30px;
+    width: 30px;
+    height: 30px;
+    font-size: 15px;
+  }
+
+  .carrito-layout__grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .carrito-layout__resumen {
+    position: static;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .carrito-producto-fila__cuerpo {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .carrito-producto-fila__control-precio {
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding-top: 2px;
+    box-sizing: border-box;
+  }
+
+  .carrito-producto-fila__btn-qty {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    border-radius: 18px;
+    font-size: 19px;
+  }
+}
+

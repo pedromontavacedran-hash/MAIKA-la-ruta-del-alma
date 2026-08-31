@@ -1,18 +1,27 @@
 import { useState, useCallback, useRef } from "react";
+import ProductoForm from "../../components/admin/ProductoForm";
+import {
+  putAdminProductoApi,
+  postAdminProductoApi,
+  deleteAdminProductoApi,
+  aplicarCatalogoActivoEnEstado
+} from "../../services/apiAdminProductos";
 import type { Dispatch, SetStateAction } from "react";
 import type { Producto, Pagina, IntencionProducto } from "../../types";
 import { INTENCIONES_OPCIONES } from "../../types";
-import BotonCerrar from "../../components/BotonCerrar";
+import AdminPageNav from "../../components/admin/AdminPageNav";
 import { THEME } from "../../config";
 import { isAdminAuthorized } from "../../utils/adminAuth";
+import { notificarExito } from "../../utils/ui/notificaciones";
 
-type CategoriaCatalogo = "velas" | "inciensos" | "figuras" | "kits";
+type CategoriaCatalogo = "velas" | "inciensos" | "figuras" | "kits" | "joyas";
 
 const CATEGORIAS: { id: CategoriaCatalogo; nombre: string; emoji: string }[] = [
   { id: "velas", nombre: "Velas", emoji: "🕯️" },
   { id: "inciensos", nombre: "Inciensos", emoji: "🌿" },
   { id: "figuras", nombre: "Figuras", emoji: "🪷" },
-  { id: "kits", nombre: "Kits", emoji: "📦" }
+  { id: "kits", nombre: "Kits", emoji: "📦" },
+  { id: "joyas", nombre: "Joyería del alma", emoji: "✨" }
 ];
 
 export interface InventarioPageProps {
@@ -25,34 +34,11 @@ export interface InventarioPageProps {
   setFiguras: Dispatch<SetStateAction<Producto[]>>;
   kits: Producto[];
   setKits: Dispatch<SetStateAction<Producto[]>>;
+  joyas: Producto[];
+  setJoyas: Dispatch<SetStateAction<Producto[]>>;
   umbralStockBajo: number;
   mostrarNotificacion: (msg: string, tipo: "normal" | "exito" | "error") => void;
 }
-
-const panelStyle: React.CSSProperties = {
-  minHeight: "100vh",
-  background: THEME.bg,
-  color: THEME.goldMain,
-  padding: 24,
-  boxSizing: "border-box"
-};
-
-const summaryStyle: React.CSSProperties = {
-  color: THEME.goldMain,
-  fontWeight: "bold",
-  fontSize: 20,
-  cursor: "pointer",
-  border: `2px solid ${THEME.goldMain}`,
-  borderRadius: 12,
-  padding: "14px 18px",
-  background: "rgba(201, 162, 74, 0.08)",
-  listStyle: "none",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  flexWrap: "wrap",
-  gap: 8
-};
 
 const inputModalStyle: React.CSSProperties = {
   width: "100%",
@@ -66,6 +52,91 @@ const inputModalStyle: React.CSSProperties = {
   minHeight: 48
 };
 
+/** Lista solo lectura + acciones; la edición es solo en `ProductoForm` (modal inventario). */
+type InventarioListaProductosProps = {
+  categoria: CategoriaCatalogo;
+  productos: Producto[];
+  umbralStockBajo: number;
+  abrirModalEditar: (categoria: CategoriaCatalogo, p: Producto) => void;
+  solicitarEliminar: (categoria: CategoriaCatalogo, id: number, nombre: string) => void;
+};
+
+function InventarioListaProductos({
+  categoria,
+  productos,
+  umbralStockBajo,
+  abrirModalEditar,
+  solicitarEliminar
+}: InventarioListaProductosProps) {
+  return (
+    <div className="inventario-lista-compacta" style={{ marginTop: 8 }}>
+      <div className="inventario-fila-grid inventario-lista-compacta__cabecera" aria-hidden>
+        <span>Producto</span>
+        <span>Precio venta</span>
+        <span>Stock</span>
+        <span className="inventario-lista-compacta__cab-act" />
+      </div>
+      {productos.map((p) => {
+        const key = `${categoria}-${p.id}`;
+        const precioNum = Number(p.precio);
+        const precioBase = Number.isFinite(precioNum) ? precioNum : 0;
+        const dto = p.descuentoPorcentaje != null ? Math.min(100, Math.max(0, Number(p.descuentoPorcentaje))) : 0;
+        const precioVenta = dto > 0 ? Math.round(precioBase * (1 - dto / 100) * 100) / 100 : precioBase;
+        const stockActual = Math.floor(Number(p.stock) || 0);
+        const isBajo = stockActual <= umbralStockBajo;
+        const desc = String(p.descripcion ?? "").trim();
+        return (
+          <article key={key} className="inventario-fila-producto">
+            <div className="inventario-fila-grid inventario-fila-producto__main">
+              <button
+                type="button"
+                className="inventario-fila-nombre"
+                title="Editar producto"
+                onClick={() => abrirModalEditar(categoria, p)}
+              >
+                <span className="inventario-fila-nombre__txt">{p.nombre}</span>
+              </button>
+              <div className="inventario-fila-precio" title={dto > 0 ? `Base ${precioBase.toFixed(2)} €` : undefined}>
+                <span className="inventario-fila-precio__valor">{precioVenta.toFixed(2)} €</span>
+                {dto > 0 && <span className="inventario-fila-precio__dto">−{dto}%</span>}
+              </div>
+              <div
+                className={`inventario-fila-stock${isBajo ? " inventario-fila-stock--bajo" : ""}`}
+                title={isBajo ? "Stock bajo — pulsa el nombre o ✏️ para editar" : "Pulsa el nombre o ✏️ para editar"}
+              >
+                {stockActual}
+              </div>
+              <div className="inventario-fila-acciones">
+                <button
+                  type="button"
+                  className="inventario-fila-ico inventario-fila-ico--editar"
+                  onClick={() => abrirModalEditar(categoria, p)}
+                  aria-label={`Modificar ${p.nombre}`}
+                >
+                  ✏️
+                </button>
+                <button
+                  type="button"
+                  className="inventario-fila-ico inventario-fila-ico--eliminar"
+                  onClick={() => solicitarEliminar(categoria, p.id, p.nombre)}
+                  aria-label={`Eliminar ${p.nombre}`}
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+            {desc ? (
+              <p className="inventario-fila-producto__desc">{desc}</p>
+            ) : (
+              <p className="inventario-fila-producto__desc inventario-fila-producto__desc--vacio">Sin descripción</p>
+            )}
+          </article>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function InventarioPage(props: InventarioPageProps) {
   const {
     setPagina,
@@ -77,6 +148,8 @@ export default function InventarioPage(props: InventarioPageProps) {
     setFiguras,
     kits,
     setKits,
+    joyas,
+    setJoyas,
     umbralStockBajo,
     mostrarNotificacion
   } = props;
@@ -98,19 +171,45 @@ export default function InventarioPage(props: InventarioPageProps) {
   const [editarIntencion, setEditarIntencion] = useState<IntencionProducto | "">("");
   const [editarParaQueSirve, setEditarParaQueSirve] = useState("");
   const [editarComoUsar, setEditarComoUsar] = useState("");
+  const [editarDescripcion, setEditarDescripcion] = useState("");
+  const [editarPreviewTienda, setEditarPreviewTienda] = useState<string | null>(null);
+  const [editarNombreArchivoTienda, setEditarNombreArchivoTienda] = useState("");
+  const [editarTamano, setEditarTamano] = useState("22");
+  const [editarColor, setEditarColor] = useState("#ffffff");
+  const [editarEstilo, setEditarEstilo] = useState("normal");
   const refNombre = useRef<HTMLInputElement>(null);
   const refCoste = useRef<HTMLInputElement>(null);
   const refPrecio = useRef<HTMLInputElement>(null);
   const refStock = useRef<HTMLInputElement>(null);
+  const guardandoRef = useRef(false);
+  /** Valor del input «stock objetivo» por fila (`categoria-id`); al guardar se fija esa cantidad en servidor. */
+
+  const limpiarCamposEdicionModal = useCallback(() => {
+    setEditarNombre("");
+    setEditarCoste("");
+    setEditarPrecio("");
+    setEditarDescuento("");
+    setEditarStock("");
+    setEditarIntencion("");
+    setEditarParaQueSirve("");
+    setEditarComoUsar("");
+    setEditarDescripcion("");
+    setEditarPreviewTienda(null);
+    setEditarNombreArchivoTienda("");
+    setEditarTamano("22");
+    setEditarColor("#ffffff");
+    setEditarEstilo("normal");
+  }, []);
 
   const getProductosByCategoria = useCallback(
     (cat: CategoriaCatalogo): Producto[] => {
       if (cat === "velas") return velas;
       if (cat === "inciensos") return inciensos;
       if (cat === "figuras") return figuras;
-      return kits;
+      if (cat === "kits") return kits;
+      return joyas;
     },
-    [velas, inciensos, figuras, kits]
+    [velas, inciensos, figuras, kits, joyas]
   );
 
   const abrirModalEditar = useCallback(
@@ -126,12 +225,18 @@ export default function InventarioPage(props: InventarioPageProps) {
       setEditarIntencion((p.intencion as IntencionProducto) || "");
       setEditarParaQueSirve(p.paraQueSirve ?? "");
       setEditarComoUsar(p.comoUsar ?? "");
+      setEditarDescripcion(p.descripcion ?? "");
+      setEditarPreviewTienda(p.imagen && String(p.imagen).trim() ? p.imagen : null);
+      setEditarNombreArchivoTienda("");
+      setEditarTamano(String(p.nombreTamano ?? 22));
+      setEditarColor(p.nombreColor ?? "#ffffff");
+      setEditarEstilo(p.nombreEstilo ?? "normal");
     },
     []
   );
 
   const actualizarDatos = useCallback(
-    (
+    async (
       categoria: CategoriaCatalogo,
       id: number,
       nombre: string,
@@ -143,41 +248,89 @@ export default function InventarioPage(props: InventarioPageProps) {
       paraQueSirve?: string,
       comoUsar?: string
     ) => {
+      if (guardandoRef.current) return;
+      const list =
+        categoria === "velas" ? velas : categoria === "inciensos" ? inciensos : categoria === "figuras" ? figuras : categoria === "kits" ? kits : joyas;
+      const p = list.find((x) => x.id === id);
+      if (!p) {
+        mostrarNotificacion("Producto no encontrado", "error");
+        return;
+      }
       const nombreFinal = String(nombre ?? "").trim() || "Sin nombre";
       const costeFinal = Number.isFinite(coste) && coste >= 0 ? coste : 0;
       const precioFinal = Number.isFinite(precio) && precio >= 0 ? precio : 0;
       const stockFinal = Math.max(0, Math.floor(Number(stock)) || 0);
-      const dto = descuentoPorcentaje != null ? Math.min(100, Math.max(0, Number(descuentoPorcentaje))) : undefined;
-      const actualizado = {
+      const dtoNum =
+        descuentoPorcentaje != null && Number.isFinite(descuentoPorcentaje)
+          ? Math.min(100, Math.max(0, Number(descuentoPorcentaje)))
+          : null;
+
+      const imagenFinal =
+        editarPreviewTienda && editarPreviewTienda.startsWith("data:") ? editarPreviewTienda : p.imagen ?? "";
+      const estiloTienda =
+        editarEstilo === "italic" || editarEstilo === "bold" ? editarEstilo : "normal";
+
+      const patch: Record<string, unknown> = {
+        categoria,
         nombre: nombreFinal,
-        precioCosteIvaIncluido: costeFinal,
         precio: precioFinal,
         stock: stockFinal,
-        ...(dto !== undefined && dto > 0 ? { descuentoPorcentaje: dto } : { descuentoPorcentaje: undefined }),
-        ...(intencion !== undefined ? { intencion: intencion || undefined } : {}),
-        ...(paraQueSirve !== undefined ? { paraQueSirve: String(paraQueSirve ?? "").trim() || undefined } : {}),
-        ...(comoUsar !== undefined ? { comoUsar: String(comoUsar ?? "").trim() || undefined } : {})
+        imagen: imagenFinal,
+        descripcion: editarDescripcion.trim(),
+        activo: true,
+        precioCosteIvaIncluido: costeFinal,
+        descuentoPorcentaje: dtoNum !== null && dtoNum > 0 ? dtoNum : null,
+        intencion: intencion && String(intencion).trim() ? intencion : null,
+        paraQueSirve: String(paraQueSirve ?? "").trim() || null,
+        comoUsar: String(comoUsar ?? "").trim() || null,
+        nombreTamano: Number(editarTamano) || 22,
+        nombreColor: editarColor,
+        nombreEstilo: estiloTienda
       };
-      if (categoria === "velas") setVelas((prev) => prev.map((p) => (p.id === id ? { ...p, ...actualizado } : p)));
-      else if (categoria === "inciensos") setInciensos((prev) => prev.map((p) => (p.id === id ? { ...p, ...actualizado } : p)));
-      else if (categoria === "figuras") setFiguras((prev) => prev.map((p) => (p.id === id ? { ...p, ...actualizado } : p)));
-      else setKits((prev) => prev.map((p) => (p.id === id ? { ...p, ...actualizado } : p)));
-      setModalEditar(null);
-      setEditarNombre("");
-      setEditarCoste("");
-      setEditarPrecio("");
-      setEditarDescuento("");
-      setEditarStock("");
-      setEditarIntencion("");
-      setEditarParaQueSirve("");
-      setEditarComoUsar("");
-      mostrarNotificacion("Datos actualizados", "exito");
+
+      guardandoRef.current = true;
+      try {
+        await putAdminProductoApi(id, patch);
+        try {
+          await aplicarCatalogoActivoEnEstado(setVelas, setInciensos, setFiguras, setKits, setJoyas);
+        } catch (e2) {
+          mostrarNotificacion(
+            e2 instanceof Error ? `Guardado, pero al refrescar: ${e2.message}` : "Guardado; error al refrescar catálogo",
+            "error"
+          );
+        }
+        setModalEditar(null);
+        limpiarCamposEdicionModal();
+        notificarExito(mostrarNotificacion, "Datos guardados en el servidor");
+      } catch (e) {
+        mostrarNotificacion(e instanceof Error ? e.message : "Error al guardar", "error");
+      } finally {
+        guardandoRef.current = false;
+      }
     },
-    [setVelas, setInciensos, setFiguras, setKits, mostrarNotificacion]
+    [
+      velas,
+      inciensos,
+      figuras,
+      kits,
+      joyas,
+      setVelas,
+      setInciensos,
+      setFiguras,
+      setKits,
+      setJoyas,
+      mostrarNotificacion,
+      editarDescripcion,
+      editarPreviewTienda,
+      editarTamano,
+      editarColor,
+      editarEstilo,
+      limpiarCamposEdicionModal
+    ]
   );
 
   const crearProducto = useCallback(
-    (
+    async (
       categoria: CategoriaCatalogo,
       nombre: string,
       coste: number,
@@ -188,244 +341,190 @@ export default function InventarioPage(props: InventarioPageProps) {
       paraQueSirve?: string,
       comoUsar?: string
     ) => {
+      if (guardandoRef.current) return;
       const nombreFinal = String(nombre ?? "").trim() || "Sin nombre";
       const costeFinal = Number.isFinite(coste) && coste >= 0 ? coste : 0;
       const precioFinal = Number.isFinite(precio) && precio >= 0 ? precio : 0;
       const stockFinal = Math.max(0, Math.floor(Number(stock)) || 0);
-      const dto = descuentoPorcentaje != null && descuentoPorcentaje > 0 ? Math.min(100, Math.max(0, Number(descuentoPorcentaje))) : undefined;
-      const list = categoria === "velas" ? velas : categoria === "inciensos" ? inciensos : categoria === "figuras" ? figuras : kits;
-      const newId = list.length > 0 ? Math.max(...list.map((p) => p.id)) + 1 : 1;
-      const nuevo: Producto = {
-        id: newId,
+      const dto =
+        descuentoPorcentaje != null && descuentoPorcentaje > 0
+          ? Math.min(100, Math.max(0, Number(descuentoPorcentaje)))
+          : undefined;
+      const body: Record<string, unknown> = {
+        categoria,
         nombre: nombreFinal,
         precio: precioFinal,
-        ...(dto != null && dto > 0 ? { descuentoPorcentaje: dto } : {}),
-        precioCosteIvaIncluido: costeFinal,
         stock: stockFinal,
-        imagen: `/${categoria}-${newId}.jpg`,
-        categoria,
+        imagen: "",
         descripcion: "",
-        ...(intencion ? { intencion } : {}),
-        ...(paraQueSirve?.trim() ? { paraQueSirve: paraQueSirve.trim() } : {}),
-        ...(comoUsar?.trim() ? { comoUsar: comoUsar.trim() } : {})
+        activo: true,
+        precioCosteIvaIncluido: costeFinal
       };
-      if (categoria === "velas") setVelas((prev) => [...prev, nuevo]);
-      else if (categoria === "inciensos") setInciensos((prev) => [...prev, nuevo]);
-      else if (categoria === "figuras") setFiguras((prev) => [...prev, nuevo]);
-      else setKits((prev) => [...prev, nuevo]);
-      setModalNuevo(null);
-      setEditarNombre("");
-      setEditarCoste("");
-      setEditarPrecio("");
-      setEditarDescuento("");
-      setEditarStock("");
-      setEditarIntencion("");
-      setEditarParaQueSirve("");
-      setEditarComoUsar("");
-      mostrarNotificacion("Producto añadido", "exito");
+      if (dto != null && dto > 0) body.descuentoPorcentaje = dto;
+      if (intencion) body.intencion = intencion;
+      if (paraQueSirve?.trim()) body.paraQueSirve = paraQueSirve.trim();
+      if (comoUsar?.trim()) body.comoUsar = comoUsar.trim();
+
+      guardandoRef.current = true;
+      try {
+        await postAdminProductoApi(body);
+        try {
+          await aplicarCatalogoActivoEnEstado(setVelas, setInciensos, setFiguras, setKits, setJoyas);
+        } catch (e2) {
+          mostrarNotificacion(
+            e2 instanceof Error ? `Creado, pero al refrescar: ${e2.message}` : "Creado; error al refrescar catálogo",
+            "error"
+          );
+        }
+        setModalNuevo(null);
+        limpiarCamposEdicionModal();
+        notificarExito(mostrarNotificacion, "Producto añadido en el servidor");
+      } catch (e) {
+        mostrarNotificacion(e instanceof Error ? e.message : "Error al crear producto", "error");
+      } finally {
+        guardandoRef.current = false;
+      }
     },
-    [velas, inciensos, figuras, kits, setVelas, setInciensos, setFiguras, setKits, mostrarNotificacion]
+    [setVelas, setInciensos, setFiguras, setKits, setJoyas, mostrarNotificacion, limpiarCamposEdicionModal]
   );
 
   const solicitarEliminar = useCallback((categoria: CategoriaCatalogo, id: number, nombre: string) => {
     setPendienteEliminar({ categoria, id, nombre });
   }, []);
 
-  const ejecutarEliminacion = useCallback(() => {
-    if (!pendienteEliminar) return;
-    const { categoria, id } = pendienteEliminar;
-    if (categoria === "velas") setVelas((prev) => prev.filter((p) => p.id !== id));
-    else if (categoria === "inciensos") setInciensos((prev) => prev.filter((p) => p.id !== id));
-    else if (categoria === "figuras") setFiguras((prev) => prev.filter((p) => p.id !== id));
-    else setKits((prev) => prev.filter((p) => p.id !== id));
-    setModalEditar(null);
-    setEditarNombre("");
-    setEditarCoste("");
-    setEditarPrecio("");
-    setEditarDescuento("");
-    setEditarStock("");
-    setPendienteEliminar(null);
-    mostrarNotificacion("Producto eliminado", "normal");
-  }, [pendienteEliminar, setVelas, setInciensos, setFiguras, setKits, mostrarNotificacion]);
-
-  function TablaProductos({
-    categoria,
-    productos
-  }: {
-    categoria: CategoriaCatalogo;
-    productos: Producto[];
-  }) {
-    return (
-      <div style={{ overflowX: "auto", marginTop: 12 }}>
-        <table style={{ width: "100%", minWidth: 640, borderCollapse: "collapse", fontSize: 15, tableLayout: "fixed" }}>
-          <colgroup>
-            <col style={{ width: "32%" }} />
-            <col style={{ width: "20%" }} />
-            <col style={{ width: "20%" }} />
-            <col style={{ width: "14%" }} />
-            <col style={{ width: "14%" }} />
-          </colgroup>
-          <thead>
-            <tr style={{ borderBottom: `2px solid ${THEME.goldMain}` }}>
-              <th style={{ textAlign: "left", padding: "12px", color: THEME.goldMain, fontSize: 16 }}>Producto</th>
-              <th style={{ textAlign: "right", padding: "12px", color: THEME.goldMain, fontSize: 16 }}>Precio coste</th>
-              <th style={{ textAlign: "right", padding: "12px", color: THEME.goldMain, fontSize: 16 }}>Precio venta</th>
-              <th style={{ textAlign: "right", padding: "12px", color: THEME.goldMain, fontSize: 16 }}>Existencias</th>
-              <th style={{ padding: "12px", color: THEME.goldMain, textAlign: "center", fontSize: 16 }}></th>
-            </tr>
-          </thead>
-          <tbody>
-            {productos.map((p) => {
-              const key = `${categoria}-${p.id}`;
-              const costeNum = Number(p.precioCosteIvaIncluido);
-              const precioCoste = Number.isFinite(costeNum) ? costeNum : 0;
-              const precioNum = Number(p.precio);
-              const precioBase = Number.isFinite(precioNum) ? precioNum : 0;
-              const dto = p.descuentoPorcentaje != null ? Math.min(100, Math.max(0, Number(p.descuentoPorcentaje))) : 0;
-              const precioVenta = dto > 0 ? Math.round(precioBase * (1 - dto / 100) * 100) / 100 : precioBase;
-              const stockActual = Number(p.stock);
-              const isBajo = stockActual <= umbralStockBajo;
-              return (
-                <tr key={key} style={{ borderBottom: "1px solid rgba(212,175,55,0.3)" }}>
-                  <td style={{ padding: "10px 12px", color: "white", overflow: "hidden", textOverflow: "ellipsis" }}>{p.nombre}</td>
-                  <td style={{ padding: "10px 12px", textAlign: "right", color: "rgba(255,255,255,0.9)", fontWeight: "bold" }}>
-                    {precioCoste > 0 ? `${precioCoste.toFixed(2)} €` : "—"}
-                  </td>
-                  <td style={{ padding: "10px 12px", textAlign: "right", color: THEME.goldMain, fontWeight: "bold" }}>
-                    {precioVenta.toFixed(2)} €
-                    {dto > 0 && <span style={{ fontSize: 12, opacity: 0.9, marginLeft: 4 }}>(−{dto}%)</span>}
-                  </td>
-                  <td
-                    title={isBajo ? "Stock bajo" : undefined}
-                    style={{
-                      padding: "10px 12px",
-                      textAlign: "right",
-                      color: THEME.goldMain,
-                      fontWeight: "bold"
-                    }}
-                  >
-                    {stockActual}
-                  </td>
-                  <td style={{ padding: "10px 12px", textAlign: "center" }}>
-                    <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
-                      <button
-                        type="button"
-                        onClick={() => abrirModalEditar(categoria, p)}
-                        style={{
-                          padding: "6px 14px",
-                          borderRadius: 8,
-                          border: `2px solid ${THEME.goldMain}`,
-                          background: "rgba(201, 162, 74, 0.15)",
-                          color: THEME.goldMain,
-                          fontSize: 13,
-                          cursor: "pointer",
-                          fontWeight: "bold"
-                        }}
-                      >
-                        Modificar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => solicitarEliminar(categoria, p.id, p.nombre)}
-                        style={{
-                          padding: "6px 14px",
-                          borderRadius: 8,
-                          border: "2px solid #e57373",
-                          background: "rgba(229, 115, 115, 0.15)",
-                          color: "#e57373",
-                          fontSize: 13,
-                          cursor: "pointer",
-                          fontWeight: "bold"
-                        }}
-                      >
-                        Eliminar
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    );
-  }
+  const ejecutarEliminacion = useCallback(async () => {
+    if (!pendienteEliminar || guardandoRef.current) return;
+    const { id } = pendienteEliminar;
+    guardandoRef.current = true;
+    try {
+      await deleteAdminProductoApi(id);
+      try {
+        await aplicarCatalogoActivoEnEstado(setVelas, setInciensos, setFiguras, setKits, setJoyas);
+      } catch (e2) {
+        mostrarNotificacion(
+          e2 instanceof Error ? `Baja aplicada, pero al refrescar: ${e2.message}` : "Baja aplicada; error al refrescar catálogo",
+          "error"
+        );
+      }
+      setModalEditar(null);
+      limpiarCamposEdicionModal();
+      setPendienteEliminar(null);
+      mostrarNotificacion("Producto dado de baja en el servidor", "normal");
+    } catch (e) {
+      mostrarNotificacion(e instanceof Error ? e.message : "Error al eliminar", "error");
+    } finally {
+      guardandoRef.current = false;
+    }
+  }, [pendienteEliminar, setVelas, setInciensos, setFiguras, setKits, setJoyas, mostrarNotificacion, limpiarCamposEdicionModal]);
 
   return (
-    <div className="inventario-page" style={{ ...panelStyle, position: "relative" }}>
-      <BotonCerrar
-        onClick={() => {
+    <div className="inventario-page admin-layout admin-dashboard-bloque">
+      <AdminPageNav
+        varianteVolver="gold"
+        onVolver={() => {
           if (isAdminAuthorized()) {
             setPagina("admin");
           } else {
             setPagina("inicio");
           }
         }}
-        ariaLabel="Cerrar"
-        title="Cerrar"
       />
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 24 }}>
+      <header
+        className="admin-inventario-header"
+        style={{
+          marginBottom: 18,
+          borderBottom: `1px solid color-mix(in srgb, ${THEME.goldMain} 22%, transparent)`,
+          paddingBottom: 10
+        }}
+      >
+        <h2 className="admin-panel-categoria-titulo inventario-titulo-bloque">📦 Inventario</h2>
         <button
           type="button"
+          className="btn-admin-limpio admin-btn-inventario-tienda"
           onClick={() => setPagina("tienda")}
-          style={{
-            background: THEME.goldMain,
-            border: `2px solid ${THEME.goldMain}`,
-            color: "#1b1745",
-            padding: "10px 20px",
-            borderRadius: 12,
-            cursor: "pointer",
-            fontWeight: "bold",
-            fontSize: 16
-          }}
         >
           Ir a tienda →
         </button>
-      </div>
-
-      <h2 style={{ fontSize: 28, marginBottom: 8, color: THEME.goldMain }}>📦 Inventario</h2>
-      <p style={{ color: "rgba(255,255,255,0.85)", marginBottom: 8, fontSize: 15 }}>
-        Elige una categoría. Pulsa Modificar en una fila para editar precio coste, precio venta y existencias.
-      </p>
-      <p style={{ color: "rgba(212,175,55,0.85)", marginBottom: 8, fontSize: 14, fontStyle: "italic" }}>
-        IVA incluido
-      </p>
+      </header>
+      <p className="admin-inventario-linea-contexto">Gestión de productos por categoría</p>
+      <p className="admin-inventario-nota-iva admin-inventario-nota-iva--discreta">IVA incluido</p>
+      <details
+        className="inventario-info-details"
+        style={{ marginTop: 4, marginBottom: 8, color: "rgba(255,255,255,0.78)", fontSize: 13, lineHeight: 1.45 }}
+      >
+        <summary
+          style={{
+            cursor: "pointer",
+            color: `color-mix(in srgb, ${THEME.goldMain} 72%, transparent)`,
+            fontWeight: 500,
+            fontSize: 12,
+            letterSpacing: "0.02em",
+            userSelect: "none",
+            listStyle: "none"
+          }}
+        >
+          ℹ️ Información
+        </summary>
+        <div
+          style={{
+            marginTop: 10,
+            paddingLeft: 10,
+            borderLeft: `2px solid rgba(212,175,55,0.3)`
+          }}
+        >
+          <p style={{ margin: 0, color: "rgba(255,255,255,0.82)" }}>
+            Elige una categoría. Pulsa el <strong>nombre</strong> o <strong>✏️</strong> para abrir el editor (nombre, precio, stock, descripción) y <strong>Aplicar</strong> en el modal. El coste y el descuento del catálogo no se muestran ahí pero se conservan al guardar. <strong>🗑️</strong> elimina el producto (con confirmación).
+          </p>
+        </div>
+      </details>
       {(() => {
         const listaBajo: { nombre: string; categoria: string; categoriaId: CategoriaCatalogo; stock: number; product: Producto }[] = [
           ...velas.filter((p) => (p.stock ?? 0) <= umbralStockBajo).map((p) => ({ nombre: p.nombre, categoria: "Velas", categoriaId: "velas" as CategoriaCatalogo, stock: p.stock ?? 0, product: p })),
           ...inciensos.filter((p) => (p.stock ?? 0) <= umbralStockBajo).map((p) => ({ nombre: p.nombre, categoria: "Inciensos", categoriaId: "inciensos" as CategoriaCatalogo, stock: p.stock ?? 0, product: p })),
           ...figuras.filter((p) => (p.stock ?? 0) <= umbralStockBajo).map((p) => ({ nombre: p.nombre, categoria: "Figuras", categoriaId: "figuras" as CategoriaCatalogo, stock: p.stock ?? 0, product: p })),
-          ...kits.filter((p) => (p.stock ?? 0) <= umbralStockBajo).map((p) => ({ nombre: p.nombre, categoria: "Kits", categoriaId: "kits" as CategoriaCatalogo, stock: p.stock ?? 0, product: p }))
+          ...kits.filter((p) => (p.stock ?? 0) <= umbralStockBajo).map((p) => ({ nombre: p.nombre, categoria: "Kits", categoriaId: "kits" as CategoriaCatalogo, stock: p.stock ?? 0, product: p })),
+          ...joyas.filter((p) => (p.stock ?? 0) <= umbralStockBajo).map((p) => ({ nombre: p.nombre, categoria: "Joyería del alma", categoriaId: "joyas" as CategoriaCatalogo, stock: p.stock ?? 0, product: p }))
         ];
         const conStockBajo = listaBajo.length;
         return conStockBajo > 0 ? (
-          <div style={{ marginBottom: 24 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-              <span style={{ color: THEME.goldMain, fontSize: 14, fontWeight: "bold" }}>
-                ⚠️ {conStockBajo} {conStockBajo === 1 ? "producto con stock bajo" : "productos con stock bajo"}
+          <div className="admin-inventario-stock-bajo-bloque">
+            <p className="admin-inventario-stock-bajo-linea admin-inventario-stock-bajo-linea--compacta">
+              <span className="admin-inventario-stock-bajo-etiqueta">
+                ⚠️ {conStockBajo}{" "}
+                {conStockBajo === 1 ? "producto con stock bajo" : "productos con stock bajo"}
+              </span>
+              <span className="admin-inventario-stock-bajo-sep" aria-hidden>
+                {" "}
+                —{" "}
               </span>
               <button
                 type="button"
+                className="admin-inventario-link-accion"
                 onClick={() => setMostrarListadoStockBajo((v) => !v)}
-                style={{
-                  padding: "6px 12px",
-                  borderRadius: 8,
-                  border: `2px solid ${THEME.goldMain}`,
-                  background: "rgba(255, 170, 0, 0.15)",
-                  color: THEME.goldMain,
-                  fontSize: 13,
-                  cursor: "pointer",
-                  fontWeight: "bold"
-                }}
               >
-                {mostrarListadoStockBajo ? "Ocultar" : "Ver cuáles"}
+                {mostrarListadoStockBajo ? "ocultar" : "ver"}
               </button>
-            </div>
+            </p>
             {mostrarListadoStockBajo && (
-              <div style={{ marginTop: 14, overflowX: "auto" }}>
-                <table style={{ width: "100%", minWidth: 320, borderCollapse: "collapse", fontSize: 14, border: "1px solid rgba(212,175,55,0.4)", borderRadius: 10, overflow: "hidden" }}>
+              <div style={{ marginTop: 10, overflowX: "auto" }}>
+                <table
+                  style={{
+                    width: "100%",
+                    minWidth: 320,
+                    borderCollapse: "collapse",
+                    fontSize: 14,
+                    border: `1px solid color-mix(in srgb, ${THEME.goldMain} 22%, transparent)`,
+                    borderRadius: 10,
+                    overflow: "hidden"
+                  }}
+                >
                   <thead>
-                    <tr style={{ borderBottom: `2px solid ${THEME.goldMain}`, background: "rgba(201, 162, 74, 0.15)" }}>
+                    <tr
+                      style={{
+                        borderBottom: `1px solid color-mix(in srgb, ${THEME.goldMain} 30%, transparent)`,
+                        background: "rgba(201, 162, 74, 0.08)"
+                      }}
+                    >
                       <th style={{ textAlign: "left", padding: "10px 12px", color: THEME.goldMain, fontSize: 13 }}>Producto</th>
                       <th style={{ textAlign: "left", padding: "10px 12px", color: THEME.goldMain, fontSize: 13 }}>Categoría</th>
                       <th style={{ textAlign: "right", padding: "10px 12px", color: THEME.goldMain, fontSize: 13 }}>Existencias</th>
@@ -464,41 +563,37 @@ export default function InventarioPage(props: InventarioPageProps) {
               </div>
             )}
           </div>
-        ) : (
-          <div style={{ marginBottom: 24 }} />
-        );
+        ) : null;
       })()}
 
+      <div className="admin-inventario-categorias">
       {CATEGORIAS.map(({ id, nombre, emoji }) => {
         const productos = getProductosByCategoria(id);
         return (
           <details
             key={id}
             open={categoriaAbierta === id}
-            style={{ marginBottom: 14 }}
+            className="admin-inventario-categoria"
           >
             <summary
-              style={summaryStyle}
+              className="btn-admin-limpio admin-btn admin-btn--blue admin-summary-btn"
               onClick={(e) => { e.preventDefault(); setCategoriaAbierta((c) => (c === id ? null : id)); }}
             >
               <span>
                 {emoji} {nombre}
               </span>
-              <span style={{ fontSize: 16, opacity: 0.9 }}>
+              <span style={{ fontSize: 13, opacity: 0.88, fontWeight: 600 }}>
                 {productos.length} {productos.length === 1 ? "producto" : "productos"}
               </span>
             </summary>
-            <div style={{ padding: "12px 4px 4px 4px" }}>
+            <div className="admin-accordion-content admin-inventario-categoria-body">
               <div style={{ marginBottom: 10 }}>
                 <button
                   type="button"
                   onClick={() => {
                     setModalEditar(null);
                     setModalNuevo(id);
-                    setEditarNombre("");
-                    setEditarCoste("");
-                    setEditarPrecio("");
-                    setEditarDescuento("");
+                    limpiarCamposEdicionModal();
                     setEditarStock("0");
                   }}
                   style={{
@@ -518,12 +613,19 @@ export default function InventarioPage(props: InventarioPageProps) {
               {productos.length === 0 ? (
                 <p style={{ color: "rgba(255,255,255,0.7)", fontStyle: "italic" }}>Sin productos en esta categoría.</p>
               ) : (
-                <TablaProductos categoria={id} productos={productos} />
+                <InventarioListaProductos
+                  categoria={id}
+                  productos={productos}
+                  umbralStockBajo={umbralStockBajo}
+                  abrirModalEditar={abrirModalEditar}
+                  solicitarEliminar={solicitarEliminar}
+                />
               )}
             </div>
           </details>
         );
       })}
+      </div>
 
       {modalEditar && (
         <div
@@ -531,217 +633,125 @@ export default function InventarioPage(props: InventarioPageProps) {
             position: "fixed",
             inset: 0,
             background: "rgba(0,0,0,0.6)",
+            backdropFilter: "blur(4px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             zIndex: 1000,
-            padding: 20
+            padding: 10
           }}
           onClick={() => {
             setModalEditar(null);
             setModalNuevo(null);
-            setEditarNombre("");
-            setEditarCoste("");
-            setEditarPrecio("");
-            setEditarStock("");
-            setEditarIntencion("");
-            setEditarParaQueSirve("");
-            setEditarComoUsar("");
+            limpiarCamposEdicionModal();
           }}
         >
           <div
+            className="inventario-modal-editar inventario-modal-editar--con-form editar-productos-page"
             style={{
               background: THEME.bg,
               border: `2px solid ${THEME.goldMain}`,
-              borderRadius: 20,
-              padding: 32,
-              maxWidth: 520,
-              width: "100%"
+              borderRadius: 14,
+              width: "100%",
+              boxSizing: "border-box"
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ color: THEME.goldMain, fontWeight: "bold", marginBottom: 16, fontSize: 22 }}>Modificar datos</div>
-
-            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, fontSize: 16 }}>Producto</label>
-            <input
-              ref={refNombre}
-              type="text"
-              value={editarNombre}
-              onChange={(e) => setEditarNombre(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  refCoste.current?.focus();
-                }
+            <header
+              className="inventario-modal-editar__header"
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "space-between",
+                gap: 8,
+                flexShrink: 0,
+                borderBottom: `1px solid color-mix(in srgb, ${THEME.goldMain} 20%, transparent)`
               }}
-              placeholder="Nombre del producto"
-              style={inputModalStyle}
-              autoFocus
-            />
-
-            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, marginTop: 14, fontSize: 16 }}>Precio coste (IVA incl.) €</label>
-            <input
-              ref={refCoste}
-              type="number"
-              min={0}
-              step={0.01}
-              value={editarCoste}
-              onChange={(e) => setEditarCoste(e.target.value.replace(",", "."))}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  refPrecio.current?.focus();
-                }
-              }}
-              style={inputModalStyle}
-            />
-
-            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, marginTop: 14, fontSize: 16 }}>Precio venta (IVA incl.) €</label>
-            <input
-              ref={refPrecio}
-              type="number"
-              min={0}
-              step={0.01}
-              value={editarPrecio}
-              onChange={(e) => setEditarPrecio(e.target.value.replace(",", "."))}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  refStock.current?.focus();
-                }
-              }}
-              style={inputModalStyle}
-            />
-
-            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, marginTop: 14, fontSize: 16 }}>Descuento % (0-100, opcional)</label>
-            <input
-              type="number"
-              min={0}
-              max={100}
-              step={1}
-              placeholder="0"
-              value={editarDescuento}
-              onChange={(e) => setEditarDescuento(e.target.value.replace(",", "."))}
-              style={inputModalStyle}
-            />
-
-            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, marginTop: 14, fontSize: 16 }}>Existencias</label>
-            <input
-              ref={refStock}
-              type="number"
-              min={0}
-              value={editarStock}
-              onChange={(e) => setEditarStock(e.target.value.replace(/[^\d]/g, ""))}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  if (modalEditar) {
-                    const coste = parseFloat(editarCoste.replace(",", "."));
-                    const precio = parseFloat(editarPrecio.replace(",", "."));
-                    const stock = parseInt(editarStock, 10);
-                    const dto = editarDescuento.trim() === "" ? undefined : parseFloat(editarDescuento.replace(",", "."));
-                    actualizarDatos(modalEditar.categoria, modalEditar.id, editarNombre, coste, precio, stock, dto, editarIntencion, editarParaQueSirve, editarComoUsar);
-                  }
-                }
-              }}
-              style={inputModalStyle}
-            />
-
-            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, marginTop: 14, fontSize: 16 }}>Intención</label>
-            <select
-              value={editarIntencion}
-              onChange={(e) => setEditarIntencion((e.target.value || "") as IntencionProducto | "")}
-              style={inputModalStyle}
             >
-              {INTENCIONES_OPCIONES.map((opt) => (
-                <option key={opt.value || "vacio"} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-
-            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, marginTop: 14, fontSize: 16 }}>Para qué sirve (opcional)</label>
-            <input
-              type="text"
-              value={editarParaQueSirve}
-              onChange={(e) => setEditarParaQueSirve(e.target.value)}
-              placeholder="Ej: Protección del hogar"
-              style={inputModalStyle}
-            />
-
-            <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, marginTop: 14, fontSize: 16 }}>Cómo usarlo (opcional)</label>
-            <textarea
-              value={editarComoUsar}
-              onChange={(e) => setEditarComoUsar(e.target.value)}
-              placeholder="Ej: Encender en luna creciente..."
-              rows={3}
-              style={{ ...inputModalStyle, resize: "vertical", minHeight: 72 }}
-            />
-
-            <div style={{ display: "flex", gap: 12, marginTop: 28, flexWrap: "wrap" }}>
+              <div style={{ flex: "1 1 auto", minWidth: 0 }}>
+                <div
+                  style={{
+                    fontSize: "clamp(0.95rem, 2.4vw, 1.1rem)",
+                    fontWeight: 800,
+                    color: THEME.goldMain,
+                    letterSpacing: "0.04em",
+                    textTransform: "uppercase"
+                  }}
+                >
+                  Modificar producto
+                </div>
+                <div style={{ marginTop: 3, fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.9)", lineHeight: 1.3 }}>
+                  {(editarNombre || modalEditar.nombre || "").trim() || "—"}
+                </div>
+              </div>
               <button
                 type="button"
+                className="inventario-modal-btn-cerrar"
+                aria-label="Cerrar"
                 onClick={() => {
                   setModalEditar(null);
-                  setEditarNombre("");
-                  setEditarCoste("");
-                  setEditarPrecio("");
-                  setEditarDescuento("");
-                  setEditarStock("");
-                  setEditarIntencion("");
-                  setEditarParaQueSirve("");
-                  setEditarComoUsar("");
-                }}
-                style={{
-                  flex: 1,
-                  minWidth: 80,
-                  padding: "10px",
-                  borderRadius: 8,
-                  border: `2px solid ${THEME.goldMain}`,
-                  background: "transparent",
-                  color: THEME.goldMain,
-                  cursor: "pointer",
-                  fontWeight: "bold"
+                  limpiarCamposEdicionModal();
                 }}
               >
-                Cancelar
+                ×
               </button>
-              <button
-                type="button"
-                onClick={() => modalEditar && solicitarEliminar(modalEditar.categoria, modalEditar.id, editarNombre || modalEditar.nombre)}
-                style={{
-                  padding: "10px",
-                  borderRadius: 8,
-                  border: "2px solid #e57373",
-                  background: "rgba(229, 115, 115, 0.15)",
-                  color: "#e57373",
-                  cursor: "pointer",
-                  fontWeight: "bold"
+            </header>
+
+            <div className="inventario-modal-editar__body-scroll">
+              <ProductoForm
+                key={`${modalEditar.categoria}-${modalEditar.id}`}
+                modo="inventario"
+                idPrefix={`inv-${modalEditar.id}`}
+                className="producto-form--inventario-modal"
+                categoria={modalEditar.categoria}
+                nombre={editarNombre}
+                onNombreChange={setEditarNombre}
+                precio={editarPrecio}
+                onPrecioChange={(v) => setEditarPrecio(v.replace(",", "."))}
+                descripcion={editarDescripcion}
+                onDescripcionChange={setEditarDescripcion}
+                previewImagen={editarPreviewTienda}
+                nombreArchivoImagen={editarNombreArchivoTienda}
+                onSeleccionarImagen={(file, dataUrl) => {
+                  setEditarNombreArchivoTienda(file.name);
+                  setEditarPreviewTienda(dataUrl);
                 }}
-              >
-                Eliminar
-              </button>
-              <button
-                type="button"
-                onClick={() => {
+                color={editarColor}
+                onColorChange={setEditarColor}
+                tamanoTexto={editarTamano}
+                onTamanoTextoChange={setEditarTamano}
+                estiloTexto={editarEstilo}
+                onEstiloTextoChange={setEditarEstilo}
+                textoVistaPreviaNombre={editarNombre}
+                stockStr={editarStock}
+                onStockStrChange={(v) => setEditarStock(v.replace(/[^\d]/g, ""))}
+                etiquetaBotonPrincipal="Aplicar"
+                onPrincipal={() => {
                   const coste = parseFloat(editarCoste.replace(",", "."));
                   const precio = parseFloat(editarPrecio.replace(",", "."));
                   const stock = parseInt(editarStock, 10);
                   const dto = editarDescuento.trim() === "" ? undefined : parseFloat(editarDescuento.replace(",", "."));
-                  actualizarDatos(modalEditar!.categoria, modalEditar!.id, editarNombre, coste, precio, stock, dto, editarIntencion, editarParaQueSirve, editarComoUsar);
+                  void actualizarDatos(
+                    modalEditar.categoria,
+                    modalEditar.id,
+                    editarNombre,
+                    coste,
+                    precio,
+                    stock,
+                    dto,
+                    editarIntencion,
+                    editarParaQueSirve,
+                    editarComoUsar
+                  );
                 }}
-                style={{
-                  flex: 1,
-                  minWidth: 80,
-                  padding: "10px",
-                  borderRadius: 8,
-                  border: "none",
-                  background: THEME.goldMain,
-                  color: "#1b1745",
-                  cursor: "pointer",
-                  fontWeight: "bold"
+                onCancelar={() => {
+                  setModalEditar(null);
+                  limpiarCamposEdicionModal();
                 }}
-              >
-                Aplicar
-              </button>
+                onEliminar={() =>
+                  solicitarEliminar(modalEditar.categoria, modalEditar.id, editarNombre || modalEditar.nombre)
+                }
+              />
             </div>
           </div>
         </div>

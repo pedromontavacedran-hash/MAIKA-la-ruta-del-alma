@@ -1,0 +1,356 @@
+/* Módulo extraído de App.css (líneas 336–654). Mi cuenta (página / modal) */
+
+/* ========== Mi Cuenta (mismo lenguaje que modal checkout) ========== */
+.cuenta-maika-page {
+  position: relative;
+  /* Oscurece ligeramente el centro: el formulario gana contraste sin tocar la tarjeta */
+  background-image: radial-gradient(
+    ellipse 92% 80% at 50% 34%,
+    rgba(3, 2, 12, 0.52) 0%,
+    rgba(5, 4, 16, 0.24) 50%,
+    transparent 70%
+  );
+  background-repeat: no-repeat;
+  background-size: 100% 115%;
+}
+
+.cuenta-maika-close-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  padding-top: 16px;
+  padding-right: 8px;
+  padding-bottom: 16px;
+  min-height: 44px;
+}
+
+.cuenta-maika-tabs {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.cuenta-maika-tab {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 12px;
+  font-size: 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  box-sizing: border-box;
+  cursor: pointer;
+  border: 1px solid rgba(188, 168, 118, 0.34);
+  background: rgba(28, 22, 56, 0.52);
+  color: rgba(238, 220, 175, 0.68);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition:
+    color 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.18s ease,
+    opacity 0.2s ease;
+}
+
+.cuenta-maika-tab:hover:not(:disabled):not(.cuenta-maika-tab--active) {
+  color: rgba(244, 228, 190, 0.88);
+  border-color: rgba(212, 175, 55, 0.42);
+  background: rgba(40, 32, 78, 0.58);
+}
+
+.cuenta-maika-tab--active {
+  background: var(--gold-gradient);
+  color: var(--maika-bg);
+  border-color: rgba(248, 236, 188, 0.55);
+  font-weight: 700;
+  box-shadow:
+    0 0 18px rgba(232, 210, 150, 0.16),
+    0 6px 18px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.38);
+}
+
+.cuenta-maika-tab:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.cuenta-maika-tab:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+}
+
+.cuenta-maika-auth-heading {
+  text-align: center;
+  color: var(--gold-main);
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.maika-page-header .cuenta-maika-auth-heading {
+  margin: 0;
+  text-align: left;
+}
+
+.cuenta-maika-page .cuenta-maika-tabs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 100%;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.cuenta-maika-card {
+  /* Luz arriba (más clara) → profundidad abajo; el bloque “emite” en lugar de absorber */
+  background: linear-gradient(
+    168deg,
+    rgba(72, 62, 140, 0.52) 0%,
+    rgba(48, 42, 108, 0.82) 18%,
+    rgba(28, 24, 72, 0.94) 52%,
+    rgba(8, 6, 22, 0.98) 100%
+  );
+  border: 1px solid rgba(200, 182, 130, 0.36);
+  border-radius: 18px;
+  box-shadow:
+    0 0 0 1px rgba(150, 128, 210, 0.2),
+    0 0 60px rgba(92, 72, 165, 0.3),
+    0 0 64px rgba(212, 175, 55, 0.034),
+    0 32px 64px rgba(0, 0, 0, 0.48),
+    0 14px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -28px 56px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.cuenta-maika-card input::placeholder,
+.cuenta-maika-card textarea::placeholder {
+  color: rgba(255, 255, 255, 0.32);
+}
+
+.cuenta-maika-card input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+.cuenta-maika-card textarea,
+.cuenta-maika-card select {
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+/* Campos editables: un escalón por encima del panel, borde más legible */
+.cuenta-maika-card input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not(:disabled),
+.cuenta-maika-card textarea:not(:disabled),
+.cuenta-maika-card select:not(:disabled) {
+  background: rgba(255, 255, 255, 0.09) !important;
+  border-color: rgba(212, 175, 55, 0.45) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.cuenta-maika-card input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):hover:not(:disabled):not(:focus),
+.cuenta-maika-card textarea:hover:not(:disabled):not(:focus),
+.cuenta-maika-card select:hover:not(:disabled):not(:focus) {
+  border-color: rgba(232, 210, 150, 0.52) !important;
+}
+
+.cuenta-maika-card input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):focus,
+.cuenta-maika-card textarea:focus,
+.cuenta-maika-card select:focus {
+  border-color: var(--gold-light) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 0 2px rgba(232, 210, 150, 0.44),
+    0 0 12px rgba(232, 210, 150, 0.1);
+  outline: none;
+}
+
+.cuenta-maika-card .checkout-boton-finalizar {
+  background: linear-gradient(168deg, #fff8dc 0%, var(--gold-cta-mid) 36%, #5c3d12 100%) !important;
+  border: 1px solid rgba(255, 252, 230, 0.52) !important;
+  color: #050308 !important;
+  box-shadow:
+    0 22px 48px rgba(0, 0, 0, 0.58),
+    0 10px 28px rgba(0, 0, 0, 0.42),
+    0 0 26px rgba(212, 175, 55, 0.14),
+    inset 0 2px 0 rgba(255, 255, 255, 0.4),
+    0 5px 0 rgba(0, 0, 0, 0.42) !important;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    filter 0.18s ease;
+}
+
+.cuenta-maika-card .checkout-boton-finalizar:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow:
+    0 26px 54px rgba(0, 0, 0, 0.55),
+    0 12px 32px rgba(0, 0, 0, 0.4),
+    0 0 34px rgba(232, 210, 150, 0.2),
+    inset 0 2px 0 rgba(255, 255, 255, 0.42),
+    0 6px 0 rgba(0, 0, 0, 0.38) !important;
+}
+
+.cuenta-maika-card .checkout-boton-finalizar:active:not(:disabled) {
+  transform: translateY(0);
+  filter: brightness(0.98);
+  box-shadow:
+    0 5px 16px rgba(0, 0, 0, 0.38),
+    inset 0 2px 6px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+}
+
+.cuenta-maika-card .checkout-boton-finalizar:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: saturate(0.75);
+}
+
+.cuenta-maika-pedido-card {
+  background: linear-gradient(180deg, rgba(30, 27, 75, 0.94) 0%, rgba(34, 31, 90, 0.97) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  border-radius: 16px;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.18);
+}
+
+.cuenta-maika-hint {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+}
+
+.cuenta-maika-primary-btn {
+  box-shadow: 0 6px 18px rgba(212, 175, 55, 0.22);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.cuenta-maika-primary-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(212, 175, 55, 0.32);
+}
+
+.checkout-contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  align-items: start;
+}
+
+@media (max-width: 600px) {
+  .checkout-contact-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.checkout-direccion-grid {
+  /* Dirección prioritaria; nº / piso / puerta más compactos */
+  grid-template-columns: minmax(200px, 6.5fr) minmax(52px, 0.48fr) minmax(52px, 0.48fr) minmax(52px, 0.48fr);
+  column-gap: 8px;
+  row-gap: 8px;
+  align-items: stretch;
+}
+
+/* nº / piso / puerta: un pelín más pequeños que la calle */
+.checkout-direccion-grid > input.checkout-direccion-campo-mini {
+  font-size: 13px;
+  padding: 6px 8px;
+  line-height: 1.25;
+}
+
+/* nº / piso / puerta: caja alineada */
+.checkout-direccion-grid > input {
+  box-sizing: border-box;
+}
+
+.checkout-direccion-grid > input.checkout-mini-placeholder::placeholder {
+  font-size: 11px;
+}
+
+.checkout-modal-footer-block {
+  margin-top: auto;
+  flex-shrink: 0;
+  width: 100%;
+  padding-top: 10px;
+  padding-bottom: 2px;
+  /* Aire y un velo claro en la franja inferior (resumen + CTA) */
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.045) 55%,
+    rgba(212, 175, 55, 0.06) 100%
+  );
+  border-radius: 0 0 12px 12px;
+}
+
+.campana-pack-modal-card {
+  width: min(560px, 100%);
+}
+
+.campana-pack-modal-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-right: 2px;
+}
+
+@media (max-width: 600px) {
+  .campana-pack-modal-card {
+    width: 100%;
+    max-width: none;
+    max-height: calc(100dvh - 8px);
+    padding: 34px 10px 10px;
+    border-radius: 12px;
+  }
+
+  .campana-pack-modal-image {
+    height: clamp(220px, 40vh, 320px);
+    max-height: none !important;
+  }
+
+  .campana-pack-modal-descripcion {
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .campana-pack-modal-espiritual {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .checkout-direccion-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.72fr) minmax(0, 0.72fr);
+  }
+
+  .checkout-direccion-grid > :first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/*
+ * Mi cuenta y restablecer contraseña: el scroll vertical real en escritorio vive en `.app-shell__routes-grow` (no en `html/body`).
+ * Si el bloque de ruta supera el área útil aunque sea unos píxeles, Chromium muestra barra a la derecha del viewport.
+ * Misma solución que panel admin: barra oculta; la rueda/táctil sigue pudiendo desplazar si el contenido es largo.
+ */
+.app-shell:not(.app-shell--tienda-shell-scroll)
+  .app-shell__routes-grow:has(.cuenta-maika-page),
+.app-shell:not(.app-shell--tienda-shell-scroll)
+  .app-shell__routes-grow:has(.reset-password-maika-page) {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.app-shell:not(.app-shell--tienda-shell-scroll)
+  .app-shell__routes-grow:has(.cuenta-maika-page)::-webkit-scrollbar,
+.app-shell:not(.app-shell--tienda-shell-scroll)
+  .app-shell__routes-grow:has(.reset-password-maika-page)::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  background: transparent;
+}

@@ -1,8 +1,11 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { CategoriaEntrada, Pagina } from "../../types";
-import BotonCerrar from "../../components/BotonCerrar";
+import AdminPageNav from "../../components/admin/AdminPageNav";
 import { THEME } from "../../config";
 import { isAdminAuthorized } from "../../utils/adminAuth";
+import { notificarError, notificarExito } from "../../utils/ui/notificaciones";
+import { redimensionarImagenADataUrl } from "../../utils/redimensionarImagen";
+import { postAdminCategoriaApi, putAdminCategoriaApi } from "../../services/apiCategorias";
 
 export interface NuevaCategoriaPageProps {
   setPagina: (p: Pagina) => void;
@@ -30,18 +33,16 @@ export interface NuevaCategoriaPageProps {
   setColorCategoria: Dispatch<SetStateAction<string>>;
   setEstiloTextoCategoria: Dispatch<SetStateAction<string>>;
   mostrarNotificacion: (msg: string, tipo: "normal" | "exito" | "error") => void;
-  CATEGORIA_IMAGENES_KEY: string;
 }
 
 const panelStyle = {
-  minHeight: "100vh" as const,
+  minHeight: "calc(100svh - var(--app-topbar-stack))" as const,
   background: THEME.bg,
   color: THEME.goldMain,
   display: "flex" as const,
   flexDirection: "column" as const,
   alignItems: "center" as const,
-  justifyContent: "center" as const,
-  padding: 40
+  justifyContent: "flex-start" as const
 };
 
 export default function NuevaCategoriaPage(props: NuevaCategoriaPageProps) {
@@ -69,8 +70,7 @@ export default function NuevaCategoriaPage(props: NuevaCategoriaPageProps) {
     setTamanoCategoria,
     setColorCategoria,
     setEstiloTextoCategoria,
-    mostrarNotificacion,
-    CATEGORIA_IMAGENES_KEY
+    mostrarNotificacion
   } = props;
 
   const esRenombrar = categoriaARenombrar !== null;
@@ -79,54 +79,56 @@ export default function NuevaCategoriaPage(props: NuevaCategoriaPageProps) {
     const nombre = nuevaCategoriaNombre.trim();
     const nombreNorm = nombre.toLowerCase();
     if (!nombre) {
-      mostrarNotificacion("Escribe el nombre de la categoría", "error");
+      notificarError(mostrarNotificacion, "Escribe el nombre de la categoría");
       return;
     }
     if (esRenombrar) {
       if (!categoriaARenombrar) return;
       if (categoriasCatalogo.some((c) => c.nombre.toLowerCase() === nombreNorm && c.id !== categoriaARenombrar)) {
-        mostrarNotificacion("❌ Ya existe una categoría con ese nombre", "error");
+        notificarError(mostrarNotificacion, "❌ Ya existe una categoría con ese nombre");
         return;
       }
-      setCategoriasCatalogo((prev) => prev.map((c) => (c.id === categoriaARenombrar ? { ...c, nombre: nombreNorm } : c)));
-      setCategoriaSeleccionada(categoriaARenombrar);
-      setPreviewCategoria(nuevaCategoriaImagen);
-      setNombreImagenCategoria(nuevaCategoriaNombreImagen);
-      setTamanoCategoria(nuevaCategoriaTamano);
-      setColorCategoria(nuevaCategoriaColor);
-      setEstiloTextoCategoria(nuevaCategoriaEstilo);
-      if (nuevaCategoriaImagen) {
+      void (async () => {
         try {
-          const raw = localStorage.getItem(CATEGORIA_IMAGENES_KEY);
-          const map = raw ? (JSON.parse(raw) as Record<string, string>) : {};
-          map[categoriaARenombrar] = nuevaCategoriaImagen;
-          localStorage.setItem(CATEGORIA_IMAGENES_KEY, JSON.stringify(map));
-        } catch { /* ignore */ }
-      }
-      mostrarNotificacion("✏️ Categoría renombrada", "exito");
-    } else {
-      if (categoriasCatalogo.some((c) => c.nombre.toLowerCase() === nombreNorm)) {
-        mostrarNotificacion("❌ La categoría ya existe", "error");
-        return;
-      }
-      const nuevoId = nombreNorm.replace(/\s+/g, "-");
-      setCategoriasCatalogo((prev) => [...prev, { id: nuevoId, nombre: nombreNorm }]);
-      setCategoriaSeleccionada(nuevoId);
-      setPreviewCategoria(nuevaCategoriaImagen);
-      setNombreImagenCategoria(nuevaCategoriaNombreImagen);
-      setTamanoCategoria(nuevaCategoriaTamano);
-      setColorCategoria(nuevaCategoriaColor);
-      setEstiloTextoCategoria(nuevaCategoriaEstilo);
-      if (nuevaCategoriaImagen) {
-        try {
-          const raw = localStorage.getItem(CATEGORIA_IMAGENES_KEY);
-          const map = raw ? (JSON.parse(raw) as Record<string, string>) : {};
-          map[nuevoId] = nuevaCategoriaImagen;
-          localStorage.setItem(CATEGORIA_IMAGENES_KEY, JSON.stringify(map));
-        } catch { /* ignore */ }
-      }
-      mostrarNotificacion("✅ Categoría añadida", "exito");
+          const actualizada = await putAdminCategoriaApi(categoriaARenombrar, nombreNorm, nuevaCategoriaImagen);
+          setCategoriasCatalogo((prev) => prev.map((c) => (c.id === categoriaARenombrar ? actualizada : c)));
+          setCategoriaSeleccionada(categoriaARenombrar);
+          setPreviewCategoria(actualizada.imagen ?? null);
+          setNombreImagenCategoria(nuevaCategoriaNombreImagen);
+          setTamanoCategoria(nuevaCategoriaTamano);
+          setColorCategoria(nuevaCategoriaColor);
+          setEstiloTextoCategoria(nuevaCategoriaEstilo);
+          notificarExito(mostrarNotificacion, "✏️ Categoría renombrada");
+          limpiarYVolver();
+        } catch (e) {
+          notificarError(mostrarNotificacion, e instanceof Error ? e.message : "No se pudo renombrar la categoría");
+        }
+      })();
+      return;
     }
+    if (categoriasCatalogo.some((c) => c.nombre.toLowerCase() === nombreNorm)) {
+      notificarError(mostrarNotificacion, "❌ La categoría ya existe");
+      return;
+    }
+    void (async () => {
+      try {
+        const creada = await postAdminCategoriaApi(nombreNorm, nuevaCategoriaImagen);
+        setCategoriasCatalogo((prev) => [...prev, creada]);
+        setCategoriaSeleccionada(creada.id);
+        setPreviewCategoria(creada.imagen ?? null);
+        setNombreImagenCategoria(nuevaCategoriaNombreImagen);
+        setTamanoCategoria(nuevaCategoriaTamano);
+        setColorCategoria(nuevaCategoriaColor);
+        setEstiloTextoCategoria(nuevaCategoriaEstilo);
+        notificarExito(mostrarNotificacion, "✅ Categoría añadida");
+        limpiarYVolver();
+      } catch (e) {
+        notificarError(mostrarNotificacion, e instanceof Error ? e.message : "No se pudo crear la categoría");
+      }
+    })();
+  };
+
+  const limpiarYVolver = () => {
     setPagina("editarCategorias");
     setCategoriaARenombrar(null);
     setNuevaCategoriaNombre("");
@@ -149,19 +151,17 @@ export default function NuevaCategoriaPage(props: NuevaCategoriaPageProps) {
   };
 
   return (
-    <div style={{ ...panelStyle, position: "relative" }}>
-      <BotonCerrar
-        onClick={() => {
+    <div className="admin-container" style={{ ...panelStyle }}>
+      <AdminPageNav
+        onVolver={() => {
           if (isAdminAuthorized()) {
             setPagina("admin");
           } else {
             setPagina("inicio");
           }
         }}
-        ariaLabel="Cerrar"
-        title="Cerrar"
       />
-      <h2 style={{ fontSize: 38, marginBottom: 30 }}>{esRenombrar ? "Renombrar categoría" : "Añadir nueva categoría"}</h2>
+      <h2 className="admin-page-heading" style={{ fontSize: 38 }}>{esRenombrar ? "Renombrar categoría" : "Añadir nueva categoría"}</h2>
       <div className="categoria-edit-panel">
         <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Nombre de la categoría</label>
         <input type="text" className="categoria-text-input" value={nuevaCategoriaNombre} onChange={(e) => setNuevaCategoriaNombre(e.target.value)} placeholder="Ej: velas, inciensos, figuras..." />
@@ -181,9 +181,7 @@ export default function NuevaCategoriaPage(props: NuevaCategoriaPageProps) {
               const file = e.target.files?.[0];
               if (!file) return;
               setNuevaCategoriaNombreImagen(file.name);
-              const reader = new FileReader();
-              reader.onload = (event) => setNuevaCategoriaImagen(event.target?.result as string);
-              reader.readAsDataURL(file);
+              void redimensionarImagenADataUrl(file).then(setNuevaCategoriaImagen);
             }} />
           </label>
           {nuevaCategoriaImagen && <img src={nuevaCategoriaImagen} alt="Vista previa" style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 8, border: `2px solid ${THEME.goldMain}` }} />}

@@ -38,3 +38,10 @@ export const KITS_INICIALES: Producto[] = [
   { id: 301, nombre: "Kit Luna Nueva", precio: 29.9, stock: 10, imagen: "/kit-luna-nueva.jpg", categoria: "kits", descripcion: "Vela blanca, incienso ruda y figura protección. Ideal para ritual de inicio." },
   { id: 302, nombre: "Kit Protección Hogar", precio: 24.5, stock: 8, imagen: "/kit-proteccion.jpg", categoria: "kits", descripcion: "Vela negra, incienso palo santo. Limpieza y protección." },
 ];
+
+/**
+ * Sin productos semilla: "Joyería del alma" arranca vacía a propósito (no se inventan
+ * productos/precios/materiales). El admin da de alta las piezas reales desde
+ * Inventario / Nuevo producto, con id >= 401 (rango reservado, ver restarStockCatalogo.ts).
+ */
+export const JOYAS_INICIALES: Producto[] = [];

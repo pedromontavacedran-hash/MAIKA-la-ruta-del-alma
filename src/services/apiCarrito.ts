@@ -1,12 +1,11 @@
 import type { ItemCarrito } from "../types";
 
-const API_URL = (import.meta.env.VITE_API_URL as string | undefined)?.trim() || "http://localhost:3001";
-const TOKEN_KEY = "token";
+import { getApiBaseUrl } from "../config/apiBaseUrl";
+import { buildOptionalAuthHeaders } from "../services/apiAuth";
+import { fetchMaikaApi } from "../utils/fetchMaikaApi";
 
 function authHeaders() {
-  const token = localStorage.getItem(TOKEN_KEY);
-  if (!token) return {};
-  return { Authorization: `Bearer ${token}` };
+  return buildOptionalAuthHeaders();
 }
 
 type CarritoResponse = {
@@ -16,7 +15,7 @@ type CarritoResponse = {
 };
 
 export async function obtenerCarritoApi(usuarioId: string): Promise<CarritoResponse> {
-  const res = await fetch(`${API_URL}/carrito/${encodeURIComponent(usuarioId)}`, {
+  const res = await fetchMaikaApi(`${getApiBaseUrl()}/carrito/${encodeURIComponent(usuarioId)}`, {
     headers: { ...authHeaders() }
   });
   if (!res.ok) throw new Error(`Error al obtener carrito (${res.status})`);
@@ -24,7 +23,7 @@ export async function obtenerCarritoApi(usuarioId: string): Promise<CarritoRespo
 }
 
 export async function guardarCarritoApi(usuarioId: string, items: ItemCarrito[]): Promise<CarritoResponse> {
-  const res = await fetch(`${API_URL}/carrito/${encodeURIComponent(usuarioId)}`, {
+  const res = await fetchMaikaApi(`${getApiBaseUrl()}/carrito/${encodeURIComponent(usuarioId)}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ items })

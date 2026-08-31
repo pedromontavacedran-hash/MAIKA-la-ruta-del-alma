@@ -1,4 +1,6 @@
 import type { ItemCarrito, Pedido } from "../../types";
+import { textoDireccionVistaAdmin } from "../../utils/pedidos/direccionPedidoVista";
+import ModalBase from "../ModalBase";
 
 type Props = {
   pedido: Pedido | null;
@@ -15,57 +17,26 @@ export default function PedidoModal({
   goldColor,
   notaPedidoEnvio
 }: Props) {
-  if (!pedido) return null;
-
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: "rgba(0,0,0,0.9)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 10001,
-        padding: 20
+    <ModalBase
+      abierto={!!pedido}
+      onClose={onClose}
+      zIndex={10035}
+      maxWidth="520px"
+      styleCard={{
+        background: bgColor,
+        border: `3px solid ${goldColor}`,
+        borderRadius: 20,
+        padding: 24,
+        width: "100%",
+        maxHeight: "85vh",
+        overflowY: "auto",
+        color: "#fff"
       }}
-      onClick={onClose}
     >
-      <div
-        style={{
-          background: bgColor,
-          border: `3px solid ${goldColor}`,
-          borderRadius: 20,
-          padding: 24,
-          maxWidth: 520,
-          width: "100%",
-          maxHeight: "85vh",
-          overflowY: "auto",
-          color: "#fff"
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <h2 style={{ color: goldColor, margin: 0 }}>📄 Factura / Pedido {pedido.numero}</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              background: "transparent",
-              border: `2px solid ${goldColor}`,
-              color: goldColor,
-              borderRadius: 10,
-              padding: "8px 14px",
-              cursor: "pointer",
-              fontWeight: "bold"
-            }}
-          >
-            Cerrar
-          </button>
-        </div>
+      {pedido ? (
+        <>
+        <h2 style={{ color: goldColor, margin: "0 0 16px", paddingRight: 28 }}>📄 Factura / Pedido {pedido.numero}</h2>
 
         <p style={{ margin: "0 0 4px", color: "rgba(255,255,255,0.9)" }}><strong>Fecha:</strong> {pedido.fecha}</p>
         <p style={{ margin: "0 0 12px", color: "rgba(255,255,255,0.9)" }}>
@@ -80,19 +51,34 @@ export default function PedidoModal({
           </span>
         </p>
 
-        <div style={{ background: bgColor, padding: 12, borderRadius: 10, marginBottom: 12, border: `1px solid ${goldColor}` }}>
-          <p style={{ color: goldColor, margin: "0 0 6px", fontWeight: "bold" }}>Cliente</p>
-          <p style={{ margin: "0 0 2px" }}>{pedido.cliente?.nombreApellidos}</p>
-          {pedido.cliente?.email && <p style={{ margin: "0 0 2px" }}>{pedido.cliente.email}</p>}
-          {pedido.cliente?.telefono && <p style={{ margin: "0 0 2px" }}>{pedido.cliente.telefono}</p>}
-          {(pedido.cliente?.direccion || pedido.cliente?.calle) && (
-            <p style={{ margin: "4px 0 0" }}>
-              {pedido.cliente.direccion || [pedido.cliente.calle, pedido.cliente.numero].filter(Boolean).join(" ")}
-              {pedido.cliente.cp || pedido.cliente.poblacion ? ` — ${[pedido.cliente.cp, pedido.cliente.poblacion].filter(Boolean).join(" ")}` : ""}
-              {pedido.cliente.provincia ? `, ${pedido.cliente.provincia}` : ""}
-            </p>
-          )}
-        </div>
+        {(() => {
+          const dirLinea = textoDireccionVistaAdmin(pedido);
+          return (
+            <>
+              {dirLinea ? (
+                <div
+                  style={{
+                    background: bgColor,
+                    padding: 12,
+                    borderRadius: 10,
+                    marginBottom: 12,
+                    border: `1px solid ${goldColor}`
+                  }}
+                >
+                  <p style={{ color: goldColor, margin: "0 0 6px", fontWeight: "bold" }}>Dirección de envío</p>
+                  <p style={{ margin: 0, fontSize: 15, lineHeight: 1.45 }}>{dirLinea}</p>
+                </div>
+              ) : null}
+
+              <div style={{ background: bgColor, padding: 12, borderRadius: 10, marginBottom: 12, border: `1px solid ${goldColor}` }}>
+                <p style={{ color: goldColor, margin: "0 0 6px", fontWeight: "bold" }}>Cliente</p>
+                <p style={{ margin: "0 0 2px" }}>{pedido.cliente?.nombreApellidos}</p>
+                {pedido.cliente?.email && <p style={{ margin: "0 0 2px" }}>{pedido.cliente.email}</p>}
+                {pedido.cliente?.telefono && <p style={{ margin: "0 0 2px" }}>{pedido.cliente.telefono}</p>}
+              </div>
+            </>
+          );
+        })()}
 
         <div style={{ background: bgColor, padding: 12, borderRadius: 10, marginBottom: 12, border: `1px solid ${goldColor}` }}>
           <p style={{ color: goldColor, margin: "0 0 8px", fontWeight: "bold" }}>Detalle</p>
@@ -126,7 +112,8 @@ export default function PedidoModal({
             <p style={{ margin: 0, color: "rgba(255,255,255,0.95)", fontSize: 14, whiteSpace: "pre-wrap" }}>{notaPedidoEnvio.trim()}</p>
           </div>
         )}
-      </div>
-    </div>
+        </>
+      ) : null}
+    </ModalBase>
   );
 }

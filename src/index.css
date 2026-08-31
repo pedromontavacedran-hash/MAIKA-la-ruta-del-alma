@@ -4,6 +4,11 @@
   box-sizing: border-box;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
+  /* `svh` evita reflow cuando la UI del navegador mueve el viewport; `dvh` sí cambia y “tira” del layout. */
+  min-height: 100vh;
+  min-height: 100svh;
 }

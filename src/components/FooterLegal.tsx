@@ -1,10 +1,11 @@
-import { useApp } from "../context/AppContext";
+import { Link } from "react-router-dom";
+import { PATH_BY_PAGINA } from "@/app/routing/routeMaps";
 
 export default function FooterLegal() {
-  const { openLegal } = useApp();
   const linkStyle = { color: "var(--gold-main)", margin: "0 8px", background: "none", border: "none", cursor: "pointer", fontSize: "inherit", padding: 0, textDecoration: "underline" };
   return (
     <footer
+      data-maika="footer-main"
       style={{
         display: "block",
         marginTop: 48,
@@ -18,22 +19,21 @@ export default function FooterLegal() {
         maxWidth: "95%"
       }}
     >
-      <button type="button" style={linkStyle} onClick={() => openLegal("aviso-legal")}>
+      <Link to={PATH_BY_PAGINA.legalAviso} style={linkStyle}>
         Aviso Legal
-      </button>
+      </Link>
       ·
-      <button type="button" style={linkStyle} onClick={() => openLegal("politica-cookies")}>
+      <Link to={PATH_BY_PAGINA.legalCookies} style={linkStyle}>
         Política de Cookies
-      </button>
+      </Link>
       ·
-      <button type="button" style={linkStyle} onClick={() => openLegal("politica-privacidad")}>
+      <Link to={PATH_BY_PAGINA.legalPrivacidad} style={linkStyle}>
         Política de Privacidad
-      </button>
+      </Link>
       ·
-      <button type="button" style={linkStyle} onClick={() => openLegal("terminos-condiciones")}>
+      <Link to={PATH_BY_PAGINA.legalTerminos} style={linkStyle}>
         Términos y Condiciones
-      </button>
+      </Link>
     </footer>
   );
 }
-

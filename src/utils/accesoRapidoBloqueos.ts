@@ -4,8 +4,6 @@ const ACCESO_RAPIDO_EMAIL_BLOQUEO_MS = 5 * 60 * 1000;
 const MAIKA_BLOQUEO_SEGURIDAD_KEY_PREFIX = "maika_bloqueo_acceso_seguridad_";
 const ACCESO_RAPIDO_SEGURIDAD_BLOQUEO_MS = 5 * 60 * 1000;
 
-export const SESSION_LOGIN_TRAS_ACCESO_RAPIDO = "maika_login_tras_acceso_rapido";
-
 function bloqueoEmailAccesoRapidoKey(tel9: string) {
   return `${MAIKA_BLOQUEO_EMAIL_KEY_PREFIX}${tel9}`;
 }

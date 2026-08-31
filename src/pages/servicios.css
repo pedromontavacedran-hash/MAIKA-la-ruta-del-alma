@@ -1,0 +1,302 @@
+/* Módulo extraído de App.css (líneas 2150–2425). Servicios */
+
+/*
+ * Escritorio (≥900px, mismo corte que el resto de este archivo): tras compactar tarjetas/bloque
+ * la página ya cabe en pantalla, así que se quita la barra de scroll de `.app-shell__routes-grow`
+ * (el scroll real de escritorio en toda la app, ver layout-shell.css). Clase puesta/quitada solo
+ * por ServiciosPage, así que no afecta a ninguna otra ruta. En móvil no se toca: las 3 tarjetas
+ * apiladas siguen sin caber en una pantalla y necesitan poder desplazarse.
+ */
+@media (min-width: 900px) {
+  html.servicios-no-scroll .app-shell__routes-grow {
+    overflow-y: hidden !important;
+  }
+
+  /*
+   * Con la página compactada, en pantallas más altas de lo habitual sobra hueco debajo del CTA
+   * final. Centrado vertical clásico con flex (el wrapper de ruta ya es flex-column con altura
+   * mínima de pantalla, ver `buildScreenStyle` en AppRoutes.tsx): reparte ese hueco arriba/abajo
+   * en vez de dejarlo todo pegado al fondo.
+   */
+  html.servicios-no-scroll .servicios-page {
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+}
+
+/* ——— Página /servicios: sección completa (intro + tarjetas + cierre) ——— */
+.servicios-page {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  /* El aire bajo la nav lo aportan `__content` + `.page-top-spacing`; aquí solo padding inferior y laterales vía intro/bloques */
+  min-height: 0;
+  padding: 0 0 clamp(20px, 4vh, 48px);
+  background:
+    radial-gradient(ellipse 110% 65% at 50% -5%, rgba(78, 62, 118, 0.26) 0%, transparent 52%),
+    radial-gradient(ellipse 90% 45% at 50% 105%, rgba(36, 28, 62, 0.2) 0%, transparent 55%);
+}
+
+@media (min-width: 900px) {
+  .servicios-page {
+    padding: 0 0 clamp(14px, 2.4vh, 30px);
+  }
+}
+
+.servicios-page__intro {
+  max-width: 560px;
+  margin: 0 auto clamp(20px, 3.6vw, 32px);
+  padding: clamp(4px, 1.5vw, 12px) clamp(12px, 3vw, 20px) 0;
+}
+
+.servicios-page__titulo {
+  margin: 0 0 clamp(6px, 1.2vw, 10px);
+  font-size: clamp(1.6rem, 4.2vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--gold-main);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  line-height: 1.15;
+  scroll-margin-top: calc(var(--app-topbar-stack) + 12px);
+}
+
+.servicios-page__subtitulo {
+  margin: 0;
+  font-size: clamp(1rem, 2.4vw, 1.2rem);
+  line-height: 1.5;
+  color: var(--maika-text-soft);
+  font-weight: 400;
+}
+
+.servicios-page .inicio-servicios-bloque.servicios-page__bloque-tarjetas {
+  margin: clamp(6px, 1.4vw, 12px) auto clamp(24px, 4vw, 36px);
+  padding: clamp(14px, 2vw, 20px) clamp(14px, 2.4vw, 24px);
+  max-width: min(1020px, 98vw);
+  border-radius: 28px;
+  /* Presencia media: agrupa con peso sin carga pesada */
+  background: linear-gradient(165deg, rgba(14, 11, 26, 0.3) 0%, rgba(6, 5, 12, 0.18) 100%);
+  border: 1px solid rgba(175, 155, 105, 0.14);
+  box-shadow:
+    0 10px 36px rgba(0, 0, 0, 0.14),
+    0 0 44px rgba(88, 60, 140, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  backdrop-filter: blur(14px) saturate(1.06);
+  -webkit-backdrop-filter: blur(14px) saturate(1.06);
+}
+
+@media (min-width: 900px) {
+  .servicios-page .inicio-servicios-bloque.servicios-page__bloque-tarjetas {
+    margin: clamp(6px, 1vw, 10px) auto clamp(20px, 3vw, 32px);
+    padding: clamp(14px, 1.8vw, 20px) clamp(18px, 2.6vw, 28px);
+  }
+}
+
+/* Una fila en desktop, centrado; móvil: columna (sin “pirámide”) */
+.servicios-page .inicio-servicios-bloque__grid--servicios {
+  display: grid !important;
+  width: 100%;
+  max-width: 880px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  gap: clamp(10px, 1.8vw, 16px) !important;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  align-items: stretch;
+}
+
+@media (min-width: 900px) {
+  .servicios-page .inicio-servicios-bloque__grid--servicios {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    max-width: min(900px, 100%);
+    gap: clamp(12px, 1.6vw, 18px) !important;
+    justify-items: stretch;
+  }
+}
+
+/* Tarjetas página /servicios: aire interno + hover muy suave */
+.servicios-page .inicio-servicio-card--pagina-servicios {
+  width: min(320px, 100%) !important;
+  max-width: 100%;
+  padding: clamp(10px, 1.6vw, 14px) clamp(10px, 1.6vw, 14px) !important;
+  gap: clamp(6px, 1.2vw, 10px);
+  box-sizing: border-box;
+  transition:
+    transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.24s ease,
+    border-color 0.24s ease,
+    filter 0.24s ease;
+}
+
+@media (min-width: 900px) {
+  .servicios-page .inicio-servicio-card--pagina-servicios {
+    width: 100% !important;
+  }
+}
+
+.servicios-page .inicio-servicio-card--pagina-servicios .inicio-servicio-titulo {
+  margin: 0 !important;
+}
+
+.servicios-page .inicio-servicio-card--pagina-servicios .inicio-servicio-card__frase {
+  margin: 0 !important;
+}
+
+.servicios-page .inicio-servicio-card--pagina-servicios img {
+  margin: 0 !important;
+  border-color: rgba(212, 175, 55, 0.38) !important;
+}
+
+.servicios-page .inicio-servicio-card--pagina-servicios .inicio-servicio-duracion,
+.servicios-page .inicio-servicio-card--pagina-servicios .inicio-servicio-precio-linea {
+  margin: 0 !important;
+}
+
+.servicios-page .inicio-servicio-card--pagina-servicios > a[href] {
+  margin-top: auto !important;
+}
+
+.servicios-page .inicio-servicio-card--pagina-servicios:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.03);
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.16),
+    0 0 32px rgba(248, 236, 188, 0.16),
+    0 0 48px rgba(232, 200, 120, 0.1),
+    inset 0 0 0 1px rgba(255, 248, 220, 0.06) !important;
+  border-color: rgba(232, 210, 150, 0.45) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .servicios-page .inicio-servicio-card--pagina-servicios:hover {
+    transform: none;
+    filter: none;
+  }
+}
+
+.servicios-page__cierre {
+  max-width: 440px;
+  margin: 0 auto 0;
+  padding: clamp(2px, 1vw, 6px) clamp(16px, 4vw, 24px) 0;
+}
+
+.servicios-page__cierre-texto {
+  margin: 0 0 clamp(10px, 2vw, 16px);
+  font-size: clamp(0.95rem, 2vw, 1.05rem);
+  line-height: 1.45;
+  color: rgba(245, 240, 255, 0.82);
+}
+
+.servicios-page__cierre-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 10px 24px;
+  border-radius: 24px;
+  font-size: clamp(16px, 1.9vw, 17px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  color: var(--maika-bg) !important;
+  background: var(--gold-gradient);
+  border: 1px solid var(--gold-main);
+  box-sizing: border-box;
+  box-shadow:
+    0 0 28px rgba(248, 236, 188, 0.22),
+    0 10px 28px rgba(0, 0, 0, 0.22);
+  transition: box-shadow 0.22s ease, filter 0.22s ease, transform 0.22s ease;
+}
+
+.servicios-page__cierre-cta:hover {
+  box-shadow:
+    var(--gold-hover-shadow),
+    0 0 36px rgba(248, 236, 188, 0.28);
+  filter: brightness(1.07);
+  transform: translateY(-1px);
+}
+
+.btn-reservar-inicio {
+  background: var(--gold-gradient) !important;
+  background-image: none !important;
+  color: var(--maika-bg) !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  border: none !important;
+  border-radius: 20px !important;
+  letter-spacing: 0.5px;
+  padding: 12px 16px !important;
+  cursor: pointer;
+  width: 100%;
+  transition:
+    box-shadow 0.2s ease,
+    filter 0.2s ease !important;
+}
+.btn-reservar-inicio:hover {
+  color: var(--maika-bg) !important;
+  box-shadow: var(--gold-hover-shadow) !important;
+  filter: brightness(1.06);
+}
+
+/* Forzar que el texto de los botones de servicios se vea siempre (clase correcta: inicio-servicio-card) */
+.inicio-page .inicio-servicio-card .btn-reservar-inicio {
+  color: var(--maika-bg) !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+.inicio-page .inicio-servicio-card .btn-reservar-inicio span {
+  color: var(--maika-bg) !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: inline !important;
+}
+
+.btn-mas-vendidos {
+  background-image: none !important;
+}
+
+.tienda-vista .btn-anadir-dorado {
+  background: var(--gold-gradient) !important;
+  background-image: none !important;
+  color: var(--maika-bg) !important;
+  border: 1px solid var(--gold-main) !important;
+  border-radius: 16px !important;
+  transition: box-shadow var(--maika-transition) !important;
+}
+.tienda-vista .btn-anadir-dorado:hover {
+  box-shadow: var(--gold-hover-shadow) !important;
+}
+
+.btn-volver-azul,
+.tienda-vista .btn-volver-azul,
+.carrito-vista .btn-volver-azul {
+  background: var(--maika-bg) !important;
+  background-image: none !important;
+  color: var(--gold-main) !important;
+  border: 1px solid var(--gold-main) !important;
+  border-radius: 18px !important;
+  transition: box-shadow var(--maika-transition) !important;
+}
+.btn-volver-azul:hover,
+.tienda-vista .btn-volver-azul:hover,
+.carrito-vista .btn-volver-azul:hover {
+  box-shadow: var(--gold-hover-shadow) !important;
+}
+
+.btn-azul-categoria {
+  background: var(--maika-bg) !important;
+  background-image: none !important;
+  color: var(--gold-main) !important;
+  border: 1px solid var(--gold-main) !important;
+  border-radius: 18px !important;
+  transition: box-shadow var(--maika-transition) !important;
+}
+.btn-azul-categoria:hover {
+  box-shadow: var(--gold-hover-shadow) !important;
+}
+

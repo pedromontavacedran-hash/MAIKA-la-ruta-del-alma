@@ -1,12 +1,8 @@
 import Notificacion from "../../Notificacion";
-
-type NotificacionData = {
-  mensaje: string;
-  tipo?: "normal" | "exito" | "error";
-};
+import type { NotificacionMaikaEstado } from "../../hooks/useNotificacion";
 
 type Props = {
-  notificacion: NotificacionData | null;
+  notificacion: NotificacionMaikaEstado | null;
   onClose: () => void;
 };
 
@@ -25,7 +21,12 @@ export default function NotificacionOverlay({ notificacion, onClose }: Props) {
         maxWidth: 400
       }}
     >
-      <Notificacion mensaje={notificacion.mensaje} tipo={notificacion.tipo} onClose={onClose} />
+      <Notificacion
+        key={notificacion.avisoKey}
+        mensaje={notificacion.mensaje}
+        tipo={notificacion.tipo}
+        onClose={onClose}
+      />
     </div>
   );
 }

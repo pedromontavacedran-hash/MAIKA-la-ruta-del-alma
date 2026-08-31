@@ -1,6 +1,9 @@
+import BotonCerrar from "./BotonCerrar";
+
 type AvisoTelefonoCheckout = {
   encontrado: boolean;
   texto: string;
+  origen?: "local";
 };
 
 type Props = {
@@ -8,6 +11,7 @@ type Props = {
   aviso: AvisoTelefonoCheckout | null;
   onClose: () => void;
   onContinuarInvitado: () => void;
+  onCambiarDatos: () => void;
   onIniciarSesion: () => void;
   goldColor: string;
 };
@@ -17,6 +21,7 @@ export default function CheckoutTelefonoAviso({
   aviso,
   onClose,
   onContinuarInvitado,
+  onCambiarDatos,
   onIniciarSesion,
   goldColor
 }: Props) {
@@ -37,8 +42,8 @@ export default function CheckoutTelefonoAviso({
       }}
     >
       <div
+        className="maika-anchor"
         style={{
-          position: "relative",
           pointerEvents: "auto",
           width: "100%",
           maxWidth: 560,
@@ -51,57 +56,25 @@ export default function CheckoutTelefonoAviso({
           textAlign: "center"
         }}
       >
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Cerrar aviso"
-          title="Cerrar"
-          style={{
-            position: "absolute",
-            top: 6,
-            right: 8,
-            background: "transparent",
-            border: "none",
-            color: goldColor,
-            fontSize: 28,
-            cursor: "pointer",
-            fontWeight: "bold",
-            lineHeight: 1,
-            width: 34,
-            height: 34
-          }}
-        >
-          ×
-        </button>
+        <BotonCerrar onClick={onClose} ariaLabel="Cerrar aviso" title="Cerrar" />
         <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 6 }}>
-          {aviso.encontrado ? "✅ Usuario registrado" : "ℹ️ Teléfono no encontrado"}
+          {aviso.encontrado ? "✅ Datos encontrados" : "ℹ️ Teléfono no encontrado"}
         </div>
         <div style={{ opacity: 0.95, fontWeight: 600 }}>{aviso.texto}</div>
+        {aviso.origen === "local" ? (
+          <div style={{ marginTop: 8, fontSize: 12, color: "rgba(255,255,255,0.72)" }}>
+            Solo se usan datos guardados en este dispositivo.
+          </div>
+        ) : null}
 
         {aviso.encontrado && (
-          <div style={{ display: "flex", gap: 12, marginTop: 14 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 10, marginTop: 14 }}>
             <button
               type="button"
               onClick={onContinuarInvitado}
               style={{
-                flex: 1,
-                padding: "10px 10px",
-                borderRadius: 12,
-                border: `2px solid ${goldColor}`,
-                background: "transparent",
-                color: goldColor,
-                cursor: "pointer",
-                fontWeight: "bold"
-              }}
-            >
-              Continuar como invitado
-            </button>
-            <button
-              type="button"
-              onClick={onIniciarSesion}
-              style={{
-                flex: 1,
-                padding: "10px 10px",
+                width: "100%",
+                padding: "11px 10px",
                 borderRadius: 12,
                 border: "none",
                 background: goldColor,
@@ -110,8 +83,42 @@ export default function CheckoutTelefonoAviso({
                 fontWeight: "bold"
               }}
             >
-              Iniciar sesión
+              Continuar sin usar datos guardados
             </button>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                type="button"
+                onClick={onCambiarDatos}
+                style={{
+                  flex: 1,
+                  padding: "10px 10px",
+                  borderRadius: 12,
+                  border: `2px solid ${goldColor}`,
+                  background: "transparent",
+                  color: goldColor,
+                  cursor: "pointer",
+                  fontWeight: "bold"
+                }}
+              >
+                Cambiar datos
+              </button>
+              <button
+                type="button"
+                onClick={onIniciarSesion}
+                style={{
+                  flex: 1,
+                  padding: "10px 10px",
+                  borderRadius: 12,
+                  border: `1px solid rgba(255,255,255,0.22)`,
+                  background: "rgba(255,255,255,0.06)",
+                  color: "rgba(255,255,255,0.92)",
+                  cursor: "pointer",
+                  fontWeight: "bold"
+                }}
+              >
+                Iniciar sesión
+              </button>
+            </div>
           </div>
         )}
       </div>

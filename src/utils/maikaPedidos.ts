@@ -129,7 +129,7 @@ export function sumarPedidoAlCarrito(
     nextMap.set(idNum, {
       id: idNum,
       nombre: (existing?.nombre || prod.nombre) as string,
-      precio: existing?.precio ?? Number(prod.precio) ?? 0,
+      precio: existing?.precio ?? (Number(prod.precio) || 0),
       cantidad: cantidadFinal
     } as ItemCarrito);
   }

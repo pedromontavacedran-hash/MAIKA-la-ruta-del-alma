@@ -6,7 +6,8 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  /** No lintar salidas de build (Vite, Gradle/Capacitor). */
+  globalIgnores(['dist', 'dist-electron', 'android/**', '**/build/**']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -18,6 +19,26 @@ export default defineConfig([
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
+    },
+    rules: {
+      // El proyecto es grande y legacy; estas reglas del plugin React marcan patrones habituales.
+      // Ir bajándolas a error conforme se refactorice (hooks condicionales sí conviene corregir en código).
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/static-components': 'warn',
+      'react-hooks/immutability': 'warn',
+      'react-hooks/purity': 'warn',
+      /** Patrón establecido en el código (refs tipo “mirror” en render); migrar a effects debajo por fases. */
+      'react-hooks/refs': 'warn',
+      /** Lazy loaders exportan helpers junto a componentes; Fast Refresh sigue usable. */
+      'react-refresh/only-export-components': 'warn',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
     },
   },
 ])

@@ -2,6 +2,8 @@
  * Constantes y configuración de la aplicación Maika.
  */
 
+import { CHECKOUT_CONFIG } from "./checkoutConfig";
+
 export const EMAILJS_CONFIG = {
   PUBLIC_KEY: "Z-4fOHeB2ph9ZNZIH",
   SERVICE_ID: "service_m0olcbz",
@@ -14,14 +16,18 @@ export const COOKIE_CONSENT_VERSION = 1;
 export const DEMO_ACTIVO_KEY = "maikaDemoActivoV1";
 export const DEMO_CATALOGO_KEY = "maikaDemoCatalogoV1";
 export const QUICK_CHECKOUT_KEY = "maikaQuickCheckoutV1";
+/** Persistir preferencia “recordar datos de invitado” en este dispositivo. */
+export const RECORDAR_DATOS_INVITADO_KEY = "maika_recordar_datos_invitado";
 
 export const CATALOGO_VELAS_KEY = "maikaCatalogoVelas";
 export const CATALOGO_INCIENSOS_KEY = "maikaCatalogoInciensos";
 export const CATALOGO_FIGURAS_KEY = "maikaCatalogoFiguras";
 export const CATALOGO_KITS_KEY = "maikaCatalogoKits";
+export const CATALOGO_JOYAS_KEY = "maikaCatalogoJoyas";
 /** Clave en localStorage del carrito. */
 export const CARRITO_KEY = "carritoMaika";
-export const CATEGORIA_IMAGENES_KEY = "maikaCategoriaImagenes";
+/** Carrito modificado sin JWT; al iniciar sesión se fusiona con el servidor (evita duplicar al cerrar sesión). */
+export const GUEST_CART_PENDING_KEY = "maika_guest_cart_pending";
 export const UMBRAL_STOCK_BAJO_KEY = "maikaUmbralStockBajo";
 
 /** Clave en localStorage para la nota que se muestra en factura/pedido y puede usarse en email o etiqueta de envío. */
@@ -52,6 +58,8 @@ export const SERVICIOS_INICIO_KEY = "maikaServiciosInicio";
 /** Un servicio mostrado en la sección SERVICIOS de Inicio. */
 export type ServicioInicio = {
   titulo: string;
+  /** Mini frase bajo el título (beneficio / para quién es). Opcional. */
+  fraseBreve?: string;
   imagen: string;
   duracion: string;
   precio: string;
@@ -61,9 +69,32 @@ export type ServicioInicio = {
 
 /** Valores por defecto de los 3 servicios de la página de inicio. */
 export const SERVICIOS_INICIO_DEFAULT: ServicioInicio[] = [
-  { titulo: "🔮 Tarot Evolutivo", imagen: "/tarot%20evolutivo.jpg", duracion: "Sesión 60 min", precio: "45€", textoBoton: "Reservar Tarot", urlWhatsApp: "https://wa.me/34673175547?text=Hola%20Maika%2C%20quiero%20reservar%20Tarot" },
-  { titulo: "✨ Limpieza Energética", imagen: "/limpieza%20energetica.jpg", duracion: "Sesión 45 min", precio: "35€", textoBoton: "Reservar Limpieza", urlWhatsApp: "https://wa.me/34673175547?text=Hola%20Maika%2C%20quiero%20reservar%20Limpieza" },
-  { titulo: "🕯️ Ritual Personalizado", imagen: "/ritual%20personalizado.jpg", duracion: "Sesión 60 min", precio: "50€", textoBoton: "Reservar Ritual", urlWhatsApp: "https://wa.me/34673175547?text=Hola%20Maika%2C%20quiero%20consultar%20Ritual" },
+  {
+    titulo: "🔮 Tarot Evolutivo",
+    fraseBreve: "Para entender tu momento actual",
+    imagen: "/tarot%20evolutivo.jpg",
+    duracion: "Sesión 60 min",
+    precio: "45€",
+    textoBoton: "Reservar Tarot",
+    urlWhatsApp: `https://wa.me/${CHECKOUT_CONFIG.whatsappNumber}?text=Hola%20Maika%2C%20quiero%20reservar%20Tarot`
+  },
+  {
+    titulo: "✨ Limpieza Energética",
+    imagen: "/limpieza%20energetica.jpg",
+    duracion: "Sesión 45 min",
+    precio: "35€",
+    textoBoton: "Reservar Limpieza",
+    urlWhatsApp: `https://wa.me/${CHECKOUT_CONFIG.whatsappNumber}?text=Hola%20Maika%2C%20quiero%20reservar%20Limpieza`
+  },
+  {
+    titulo: "🕯️ Ritual Personalizado",
+    fraseBreve: "Para un trabajo más profundo",
+    imagen: "/ritual%20personalizado.jpg",
+    duracion: "Sesión 60 min",
+    precio: "50€",
+    textoBoton: "Reservar Ritual",
+    urlWhatsApp: `https://wa.me/${CHECKOUT_CONFIG.whatsappNumber}?text=Hola%20Maika%2C%20quiero%20consultar%20Ritual`
+  }
 ];
 
 /** Clave en localStorage donde tú guardas los códigos promocionales (los puedes cambiar desde Admin). */
@@ -84,12 +115,28 @@ export const GOOGLE_PLACES_API_KEY = (typeof import.meta !== "undefined" && (imp
 
 /** Paleta dorada reutilizable (alineada con App.css) — usar en estilos inline cuando haga falta. */
 export const THEME = {
-  bg: "#0B0B0D",
-  goldMain: "#C9A24A",
-  goldLight: "#E6C77A",
-  goldDark: "#8A6A2A",
-  goldGlow: "rgba(201,162,74,0.35)",
-  goldGradient: "linear-gradient(135deg, #E6C77A, #C9A24A, #8A6A2A)",
-  goldHoverShadow: "0 0 12px rgba(201,162,74,0.35)",
+  bg: "#08060f",
+  goldMain: "#c6a85a",
+  goldLight: "#e8d28a",
+  goldDark: "#8f6e28",
+  goldGlow: "rgba(232,210,138,0.38)",
+  goldGradient: "linear-gradient(135deg, #f8ecbc, #e0c068, #8f6e28)",
+  goldHoverShadow: "0 0 20px rgba(248,236,188,0.2), 0 0 44px rgba(200,165,80,0.14)",
   text: "#F5E6C8"
 } as const;
+
+/** Ruta bajo `public/` respetando `base` de Vite (subcarpetas / Capacitor). */
+function maikaPublicUrl(pathSegments: string): string {
+  const env = typeof import.meta !== "undefined" ? (import.meta as ImportMeta).env : undefined;
+  const base = env?.BASE_URL != null && String(env.BASE_URL) !== "" ? String(env.BASE_URL) : "/";
+  const clean = pathSegments.replace(/^\/+/, "");
+  return base.endsWith("/") ? `${base}${clean}` : `${base}/${clean}`;
+}
+
+/** Logo principal actualizado en `public/logos/logo web lila fuerte.png`. */
+const MAIKA_LOGO_CACHE_BUSTER = "20260421-1";
+export const MAIKA_LOGO_PUBLIC_URL = maikaPublicUrl(`logos/logo%20web%20lila%20fuerte.png?v=${MAIKA_LOGO_CACHE_BUSTER}`);
+
+/** Se mantiene el alias legacy, pero apuntando al logo nuevo para evitar volver al antiguo. */
+export const MAIKA_LOGO_LEGACY_PUBLIC_URL = MAIKA_LOGO_PUBLIC_URL;
+export const MAIKA_LOGO_SIN_FONDO_PUBLIC_URL = MAIKA_LOGO_PUBLIC_URL;

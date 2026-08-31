@@ -1,5 +1,6 @@
+import { MAIKA_AUTH_USER_SNAPSHOT_KEY } from "../services/apiAuth";
+
 const USUARIO_ID_KEY = "maika_usuario_id";
-const AUTH_USER_KEY = "maika_auth_user";
 
 function generarUsuarioId() {
   const seed = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
@@ -8,7 +9,7 @@ function generarUsuarioId() {
 
 export function getUsuarioId() {
   try {
-    const authRaw = localStorage.getItem(AUTH_USER_KEY);
+    const authRaw = localStorage.getItem(MAIKA_AUTH_USER_SNAPSHOT_KEY);
     if (authRaw) {
       const auth = JSON.parse(authRaw) as { id?: string | number };
       if (auth?.id !== undefined && auth?.id !== null && String(auth.id).trim()) {

@@ -1,0 +1,23 @@
+.maika-sueno-row-voz {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.maika-sueno-row-voz label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: rgba(245, 230, 163, 0.9);
+  cursor: pointer;
+  user-select: none;
+}
+
+.maika-sueno-row-voz input[type="checkbox"] {
+  accent-color: #d4af37;
+  width: 16px;
+  height: 16px;
+}

@@ -1,5 +1,7 @@
+/* Fast refresh: el hook useApp debe vivir junto al provider en este módulo. */
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, type ReactNode } from "react";
-import type { Producto, ItemCarrito, Usuario, CategoriaEntrada, Pagina, Pedido } from "../types";
+import type { Producto, ItemCarrito, Usuario, CategoriaEntrada, SubcategoriaEntrada, Pagina, Pedido } from "../types";
 import type { PerfilCompraRapida } from "../types";
 
 export interface AppContextValue {
@@ -11,17 +13,25 @@ export interface AppContextValue {
   inciensos: Producto[];
   figuras: Producto[];
   kits: Producto[];
+  joyas: Producto[];
   categoriasCatalogo: CategoriaEntrada[];
-  agregarAlCarrito: (p: Producto) => void;
+  subcategoriasCatalogo: SubcategoriaEntrada[];
+  agregarAlCarrito: (p: Producto, opts?: { silenciarNotificacion?: boolean; mensajeExito?: string }) => boolean;
   // Carrito
   cart: ItemCarrito[];
   total: number;
   totalItemsCarrito: number;
   precioItemCarrito: (item: ItemCarrito) => number;
   cambiarCantidad: (id: number, inc: number) => void;
+  eliminarProductoCarrito: (id: number) => void;
   volverATienda: () => void;
   vaciarCarrito: () => void;
   finalizarCarrito: () => void;
+  /** GET catálogo + quita líneas sin stock / recorta cantidades; en entrada a `/carrito` y antes de finalizar. */
+  sincronizarCarritoAlEntrarVista: () => Promise<void>;
+  /** `true` tras 4xx de servidor en checkout (p. ej. stock); desactiva finalizar en carrito y modal. */
+  checkoutHayRechazoServidor: boolean;
+  procesandoPagoCheckout: boolean;
   envioPreview: number;
   totalPreview: number;
   generarNumeroPedido: () => string;
@@ -72,8 +82,10 @@ export interface AppContextValue {
   /** Servicios de la página de inicio (nombre, imagen, duración, precio, botón, WhatsApp). Editable desde Admin. */
   serviciosInicio: import("../config").ServicioInicio[];
   setServiciosInicio: (v: import("../config").ServicioInicio[]) => void;
-  /** Abre la pantalla legal dentro de la app (aviso legal, cookies, privacidad, términos). */
-  openLegal: (doc: "aviso-legal" | "politica-cookies" | "politica-privacidad" | "terminos-condiciones") => void;
+  /** Toasts de la app (errores, éxito). */
+  mostrarNotificacion: (mensaje: string, tipo: "normal" | "exito" | "error") => void;
+  /** Sesión validada y carrito coherente (evita parpadeo 0→N mientras se hidrata JWT). */
+  sesionCarritoLista: boolean;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);

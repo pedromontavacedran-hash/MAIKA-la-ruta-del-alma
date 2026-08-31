@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import "./Notificacion.css";
 
 interface NotificacionProps {
@@ -11,20 +11,31 @@ interface NotificacionProps {
 export default function Notificacion({ 
   mensaje, 
   tipo = "normal", 
-  duration = 3000, 
+  duration = 5000, 
   onClose 
 }: NotificacionProps) {
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  const raw = mensaje ?? "";
+  const mensajeLimpio = tipo === "exito" ? raw.replace(/^[\s✅✔]+/, "").trimStart() : raw;
+
   useEffect(() => {
     const timer = setTimeout(() => {
-      onClose();
+      onCloseRef.current();
     }, duration);
 
     return () => clearTimeout(timer);
-  }, [duration, onClose]);
+  }, [duration]);
 
   return (
     <div className={`notificacion ${tipo}`}>
-      {mensaje}
+      {tipo === "exito" ? (
+        <span className="notificacion__marca-exito" aria-hidden>
+          ✓
+        </span>
+      ) : null}
+      {mensajeLimpio}
     </div>
   );
 }

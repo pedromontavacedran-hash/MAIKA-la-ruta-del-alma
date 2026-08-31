@@ -1,25 +1,31 @@
+import type { CSSProperties } from "react";
 import { type ItemCarrito } from "./App";
 import BotonCerrar from "./components/BotonCerrar";
 import { THEME } from "./config";
 
 interface Props {
   cart: ItemCarrito[];
-  total: number;
   obtenerPrecioItem: (item: ItemCarrito) => number;
   cambiarCantidad: (id: number, incremento: number) => void;
+  eliminarProducto: (id: number) => void;
   volver: () => void;
   finalizar: () => void;
   vaciar: () => void;
+  /** Rechazo 4xx en checkout (p. ej. stock): mismo bloqueo que el paso de pago del modal. */
+  checkoutHayRechazoServidor?: boolean;
+  procesandoPagoCheckout?: boolean;
 }
 
-export default function Carrito({ 
-  cart, 
-  total: _total,
+export default function Carrito({
+  cart,
   obtenerPrecioItem,
-  cambiarCantidad, 
-  volver, 
-  finalizar, 
-  vaciar 
+  cambiarCantidad,
+  eliminarProducto,
+  volver,
+  finalizar,
+  vaciar,
+  checkoutHayRechazoServidor = false,
+  procesandoPagoCheckout = false
 }: Props) {
   const UMBRAL_ENVIO_GRATIS = 50;
   const ENVIO_BASE = 4.9;
@@ -27,151 +33,198 @@ export default function Carrito({
   const faltaParaEnvioGratis = Math.max(0, UMBRAL_ENVIO_GRATIS - total);
   const envioCalculado = total >= UMBRAL_ENVIO_GRATIS ? 0 : ENVIO_BASE;
   const totalConEnvio = total + envioCalculado;
+  const finalizarDeshabilitado = checkoutHayRechazoServidor || procesandoPagoCheckout;
+  const estiloRechazoServidor: CSSProperties | undefined = checkoutHayRechazoServidor
+    ? {
+        background: "#5a5a5a",
+        border: "1px solid #666",
+        color: "rgba(255,255,255,0.88)",
+        opacity: 0.92,
+        cursor: "not-allowed",
+        boxShadow: "none"
+      }
+    : undefined;
 
   if (cart.length === 0) {
     return (
-      <div className="carrito-vista" style={{ textAlign: "center", padding: 40, position: "relative" }}>
-        <BotonCerrar onClick={volver} ariaLabel="Volver a tienda" title="Volver a tienda" />
-        <h2 style={{ color: THEME.goldMain, fontSize: "2.1rem" }}>🛒 Carrito vacío</h2>
+      <div
+        className="carrito-vista carrito-vista--con-banda-superior maika-anchor maika-page-content maika-page-content--wide"
+        style={{ textAlign: "center", padding: 40 }}
+      >
+        <div className="carrito-vista__banda-superior" aria-hidden />
+        <div className="carrito-vista__cabecera maika-page-header">
+          <h2 className="maika-page-title" style={{ fontSize: "2.1rem", position: "relative", zIndex: 1 }}>🛒 Carrito vacío</h2>
+          <BotonCerrar
+            variante="discreto"
+            onClick={volver}
+            ariaLabel="Volver a tienda"
+            title="Volver a tienda"
+          />
+        </div>
+        <div className="maika-page-subheader" aria-hidden />
       </div>
     );
   }
 
   return (
-    <div className="carrito-vista" style={{ maxWidth: 800, margin: "0 auto", color: THEME.goldMain, position: "relative", padding: 40 }}>
-      <BotonCerrar onClick={volver} ariaLabel="Volver a tienda" title="Volver a tienda" />
-      <h2 style={{ textAlign: "center", marginBottom: 30 }}>🛒 Tu carrito</h2>
-      
-      <div style={{ background: THEME.bg, borderRadius: 20, padding: 20, marginBottom: 20 }}>
-        {cart.map(item => (
-          <div
-            key={`${item.id}-${item.cantidad}`}
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: 10,
-              padding: "15px 0",
-              borderBottom: "1px solid rgba(255,215,0,0.3)"
-            }}
-          >
-            <div style={{ flex: 2 }}>
-              <strong style={{ color: THEME.goldMain, fontSize: 18 }}>{item.nombre}</strong>
-              <p style={{ margin: "5px 0 0 0", color: "white" }}>{item.descripcion}</p>
-              <p style={{ margin: "5px 0 0 0", color: THEME.goldMain }}>{obtenerPrecioItem(item).toFixed(2)} €</p>
+    <div
+      className="carrito-vista carrito-vista--con-banda-superior maika-anchor maika-page-content maika-page-content--wide"
+      style={{ color: THEME.goldMain, margin: "0 auto", maxWidth: 1440, padding: "20px", boxSizing: "border-box", width: "100%" }}
+    >
+      <div className="carrito-vista__banda-superior" aria-hidden />
+      <div className="carrito-vista__cabecera maika-page-header">
+        <h2 className="maika-page-title" style={{ position: "relative", zIndex: 1 }}>🛒 Tu carrito</h2>
+        <BotonCerrar
+          variante="discreto"
+          onClick={volver}
+          ariaLabel="Volver a tienda"
+          title="Volver a tienda"
+        />
+      </div>
+      <div className="maika-page-subheader" aria-hidden />
+
+      <div className="maika-page-body">
+      <div className="carrito-layout__grid">
+        <div className="carrito-layout__productos">
+          {cart.map((item, index) => (
+            <div
+              key={`${item.id}-${item.cantidad}`}
+              className="carrito-layout__producto-fila"
+              style={{ marginBottom: index < cart.length - 1 ? 20 : 0 }}
+            >
+              <div className="carrito-producto-fila__cuerpo">
+                <div className="carrito-producto-fila__info">
+                  <strong className="carrito-producto-fila__nombre">{item.nombre}</strong>
+                  {item.descripcion?.trim() ? (
+                    <p className="carrito-producto-fila__desc">{item.descripcion.trim()}</p>
+                  ) : null}
+                </div>
+                <div className="carrito-producto-fila__control-precio">
+                  <div className="carrito-producto-fila__qty">
+                    <button
+                      type="button"
+                      className="carrito-producto-fila__btn-qty"
+                      onClick={() => cambiarCantidad(Number(item.id), -1)}
+                      aria-label="Quitar una unidad"
+                    >
+                      −
+                    </button>
+                    <span className="carrito-producto-fila__cantidad">{item.cantidad}</span>
+                    <button
+                      type="button"
+                      className="carrito-producto-fila__btn-qty"
+                      onClick={() => cambiarCantidad(Number(item.id), 1)}
+                      aria-label="Añadir una unidad"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <span className="carrito-producto-fila__subtotal">
+                    {(obtenerPrecioItem(item) * item.cantidad).toFixed(2)} €
+                  </span>
+                  <button
+                    type="button"
+                    className="maika-btn-secondary"
+                    onClick={() => eliminarProducto(Number(item.id))}
+                    style={{
+                      padding: "6px 10px",
+                      borderColor: "rgba(180, 48, 48, 0.75)",
+                      color: "#ffd6d6"
+                    }}
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+              {index < cart.length - 1 ? <div className="carrito-producto-fila__sep" aria-hidden /> : null}
             </div>
-            
-            <div style={{ display: "flex", alignItems: "center", gap: 15 }}>
-              <button
-                onClick={() => cambiarCantidad(Number(item.id), -1)}
-                style={{
-                  background: "transparent",
-                  border: "1px solid gold",
-                  color: THEME.goldMain,
-                  width: 30,
-                  height: 30,
-                  borderRadius: 15,
-                  cursor: "pointer",
-                  fontSize: 18
-                }}
-              >
-                −
-              </button>
-              <span style={{ color: "white", fontSize: 16 }}>{item.cantidad}</span>
-              <button
-                onClick={() => cambiarCantidad(Number(item.id), 1)}
-                style={{
-                  background: "transparent",
-                  border: "1px solid gold",
-                  color: THEME.goldMain,
-                  width: 30,
-                  height: 30,
-                  borderRadius: 15,
-                  cursor: "pointer",
-                  fontSize: 18
-                }}
-              >
-                +
-              </button>
-              <span style={{ color: THEME.goldMain, fontWeight: "bold", marginLeft: 10 }}>
-                {(obtenerPrecioItem(item) * item.cantidad).toFixed(2)} €
-              </span>
+          ))}
+        </div>
+
+        <aside className="carrito-layout__resumen">
+          <div className="maika-card carrito-resumen">
+          <div className="carrito-resumen-envio">
+            {faltaParaEnvioGratis > 0
+              ? `🚚 Te faltan ${faltaParaEnvioGratis.toFixed(2)} € para envío gratis`
+              : "✅ ¡Ya tienes envío gratis!"}
+          </div>
+          <p style={{ margin: 0, textAlign: "center", color: "white", opacity: 0.95, fontSize: 16, fontWeight: "bold" }}>
+            Envío gratis a partir de 50 €
+          </p>
+
+          <div className="maika-resumen" style={{ color: "rgba(245, 230, 200, 0.95)", fontSize: 15, fontVariantNumeric: "tabular-nums" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 6
+              }}
+            >
+              <span>Subtotal</span>
+              <span>{total.toFixed(2)} €</span>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 6
+              }}
+            >
+              <span>Envío</span>
+              <span>{envioCalculado.toFixed(2)} €</span>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginTop: 10,
+                fontWeight: "bold",
+                fontSize: 16,
+                borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+                paddingTop: 10,
+                color: THEME.goldMain,
+                fontVariantNumeric: "tabular-nums"
+              }}
+            >
+              <span>Total</span>
+              <span>{totalConEnvio.toFixed(2)} €</span>
             </div>
           </div>
-        ))}
+
+          <div className="carrito-resumen__acciones">
+            <button
+              type="button"
+              className="carrito-btn-principal"
+              disabled={finalizarDeshabilitado}
+              title={
+                checkoutHayRechazoServidor
+                  ? "Cierra el modal de pedido (X) para ir a la tienda; no puedes finalizar mientras haya error de stock."
+                  : procesandoPagoCheckout
+                    ? "Espera a que termine el pago en curso."
+                    : undefined
+              }
+              style={estiloRechazoServidor}
+              onClick={finalizar}
+            >
+              {checkoutHayRechazoServidor
+                ? "Volver a la tienda"
+                : procesandoPagoCheckout
+                  ? "Preparando pedido…"
+                  : "finalizar pedido por WhatsApp"}
+            </button>
+
+            <div className="carrito-resumen__fila-botones">
+              <button type="button" onClick={vaciar} className="maika-btn-secondary">
+                🗑️ vaciar carrito
+              </button>
+            </div>
+          </div>
+          </div>
+        </aside>
       </div>
-
-      <div style={{ 
-        background: THEME.bg, 
-        borderRadius: 20, 
-        padding: 20,
-        textAlign: "right"
-      }}>
-        <div
-          style={{
-            textAlign: "left",
-            marginBottom: 12,
-            padding: "10px 12px",
-            borderRadius: 12,
-            border: "1px solid gold",
-            background: THEME.bg,
-            color: "white",
-            fontSize: 14,
-            fontWeight: "bold"
-          }}
-        >
-          {faltaParaEnvioGratis > 0
-            ? `🚚 Te faltan ${faltaParaEnvioGratis.toFixed(2)} € para envío gratis`
-            : "✅ ¡Ya tienes envío gratis!"}
-        </div>
-        <p style={{ margin: "0 0 12px", textAlign: "center", color: "white", opacity: 0.95, fontSize: 18, fontWeight: "bold" }}>
-          Envío gratis a partir de 50 €
-        </p>
-        <p style={{ fontSize: 18 }}>Subtotal: <strong>{total.toFixed(2)} €</strong></p>
-        <p style={{ fontSize: 18 }}>Envío: <strong>{envioCalculado.toFixed(2)} €</strong></p>
-        <p style={{ fontSize: 24, color: THEME.goldMain }}>Total: <strong>{totalConEnvio.toFixed(2)} €</strong></p>
-      </div>
-
-      <div style={{ display: "flex", gap: 10, marginTop: 20, flexWrap: "wrap" }}>
-        <button
-          onClick={vaciar}
-          style={{
-            flex: 1,
-            padding: "15px",
-            borderRadius: 30,
-            border: `2px solid ${THEME.goldMain}`,
-            background: "transparent",
-            color: "#fff",
-            cursor: "pointer",
-            fontWeight: "bold",
-            fontSize: 16
-          }}
-        >
-          🗑️ Vaciar carrito
-        </button>
-
-        <button
-          onClick={finalizar}
-          style={{
-            flex: 1,
-            padding: "15px",
-            borderRadius: 30,
-            border: "none",
-            background: THEME.goldMain,
-            color: "#1b1745",
-            cursor: "pointer",
-            fontWeight: "bold",
-            fontSize: 16
-          }}
-        >
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <path d="M20 6L9 17l-5-5" />
-            </svg>
-            Finalizar compra
-          </span>
-        </button>
       </div>
     </div>
   );

@@ -1,33 +1,54 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import type { Usuario } from "../App";
 import ModalConfirmacion from "../ModalConfirmacion";
-import BotonCerrar from "./BotonCerrar";
+import AdminPageNav from "./admin/AdminPageNav";
 import { THEME } from "../config";
-
-function normalizarTelefono(t: string): string {
-  const s = (t || "").replace(/\D/g, "").trim();
-  if (s.startsWith("0034") && s.length > 4) return s.slice(4);
-  if (s.startsWith("34") && s.length > 9) return s.slice(2);
-  return s;
-}
+import { eliminarUsuarioBackendApi, getJwtTokenParaOperacionesUsuarios } from "../services/apiAuth";
+import { lineaCompletaDesdeDatosEnvio } from "../utils/pedidos/direccionPedidoVista";
+import { notificarExito } from "../utils/ui/notificaciones";
 
 interface ModalUsuariosProps {
   abierto: boolean;
   usuarios: Usuario[];
   onClose: () => void;
+  /** Prepara y muestra el formulario embebido debajo. */
+  onAbrirFormularioAltaAdmin?: () => void;
+  panelAltaUsuario?: ReactNode;
   mostrarNotificacion: (mensaje: string, tipo?: "normal" | "exito" | "error") => void;
   onEditUsuario?: (usuario: Usuario) => void;
+  /** Si se pasa, la fila y el botón 🔎 abren la ficha detalle. */
+  onVerDetalle?: (usuario: Usuario) => void;
   onUpdateUsuario?: (nuevosUsuarios: Usuario[]) => void;
   onDeleteUsuario?: (id: number | string) => void;
   onRefreshUsuarios?: () => void;
+}
+
+function direccionPrincipalMostrar(u: Usuario): string {
+  return lineaCompletaDesdeDatosEnvio({
+    calle: u.calle,
+    numero: u.numero,
+    bloque: u.bloque,
+    escalera: u.escalera,
+    piso: u.piso,
+    puerta: u.puerta,
+    cp: u.cp,
+    poblacion: u.poblacion,
+    ciudad: (u as { ciudad?: string }).ciudad,
+    provincia: u.provincia,
+    pais: u.pais,
+    direccion: u.direccion
+  });
 }
 
 export default function ModalUsuarios({
   abierto,
   usuarios,
   onClose,
+  onAbrirFormularioAltaAdmin,
+  panelAltaUsuario,
   mostrarNotificacion,
-  onEditUsuario,
+    onEditUsuario,
+  onVerDetalle,
   onUpdateUsuario,
   onDeleteUsuario,
   onRefreshUsuarios
@@ -42,6 +63,9 @@ export default function ModalUsuarios({
   }, [usuarios]);
 
   if (!abierto) return null;
+
+  const jwtUsuariosOps =
+    typeof localStorage !== "undefined" && !!getJwtTokenParaOperacionesUsuarios();
 
   const busquedaNorm = busqueda.trim().toLowerCase();
   const busquedaDigitos = busqueda.replace(/\D/g, "");
@@ -60,29 +84,43 @@ export default function ModalUsuarios({
       return true;
     });
 
-  const handleEliminarConfirmado = () => {
+  const handleEliminarConfirmado = async () => {
     if (!usuarioAEliminar) return;
-    
+
     const usuario = usuarioAEliminar;
+    const token = getJwtTokenParaOperacionesUsuarios();
+    if (token) {
+      try {
+        const r = await eliminarUsuarioBackendApi(token, usuario.id);
+        if (r.ok === false) {
+          if (r.status === 401) {
+            mostrarNotificacion(
+              "❌ Sesión caducada o sin permiso. Inicia sesión (cuenta con API) y vuelve a borrar para eliminar también en el servidor.",
+              "error"
+            );
+            return;
+          }
+          mostrarNotificacion(
+            `⚠️ El servidor respondió ${r.status}. Se elimina en este dispositivo; revisa el backend si hace falta.`,
+            "normal"
+          );
+        }
+      } catch {
+        mostrarNotificacion(
+          "⚠️ No hubo respuesta del servidor. Se elimina solo en local.",
+          "normal"
+        );
+      }
+    }
+
     const nuevos = usuariosState.filter((u: Usuario) => u.id !== usuario.id);
-    localStorage.setItem("usuarios", JSON.stringify(nuevos));
     setUsuariosState(nuevos);
 
     if (onDeleteUsuario) {
       onDeleteUsuario(usuario.id);
-    } else {
-      // Fallback en caso de que no se pase la prop onDeleteUsuario
-      const usuarioActual = localStorage.getItem("usuarioActual");
-      if (usuarioActual) {
-        const usuarioLogueado = JSON.parse(usuarioActual) as Usuario;
-        if (usuarioLogueado.id === usuario.id || (usuario.telefono && usuarioLogueado.telefono && normalizarTelefono(usuarioLogueado.telefono) === normalizarTelefono(usuario.telefono))) {
-          localStorage.removeItem("usuarioActual");
-          window.location.reload();
-        }
-      }
     }
     
-    mostrarNotificacion(`✅ Usuario ${usuario.nombre} eliminado`, "exito");
+    notificarExito(mostrarNotificacion, `✅ Usuario ${usuario.nombre} eliminado`);
     setUsuarioAEliminar(null);
   };
 
@@ -94,26 +132,13 @@ export default function ModalUsuarios({
     const nuevos = usuariosState.map((u: Usuario) =>
       u.id === usuario.id ? { ...u, verificado: !u.verificado } : u
     );
-    localStorage.setItem("usuarios", JSON.stringify(nuevos));
     setUsuariosState(nuevos);
 
     if (onUpdateUsuario) {
       onUpdateUsuario(nuevos);
     }
 
-    // Actualizamos el usuario logueado en App si es el mismo
-    const usuarioActual = localStorage.getItem("usuarioActual");
-    if (usuarioActual) {
-      const usuarioLogueado = JSON.parse(usuarioActual) as Usuario;
-      if (usuarioLogueado.id === usuario.id || (usuario.telefono && usuarioLogueado.telefono && normalizarTelefono(usuarioLogueado.telefono) === normalizarTelefono(usuario.telefono))) {
-        const usuarioActualizado = nuevos.find(u => u.id === usuario.id);
-        if (usuarioActualizado) {
-          localStorage.setItem("usuarioActual", JSON.stringify(usuarioActualizado));
-        }
-      }
-    }
-    
-    mostrarNotificacion(`✅ Usuario ${!usuario.verificado ? "verificado" : "desverificado"} correctamente`, "exito");
+    notificarExito(mostrarNotificacion, `✅ Usuario ${!usuario.verificado ? "verificado" : "desverificado"} correctamente`);
   };
 
   const exportarCSV = () => {
@@ -123,7 +148,7 @@ export default function ModalUsuarios({
         u.nombre,
         u.email,
         u.telefono || "",
-        u.direccion || "",
+        direccionPrincipalMostrar(u) || "",
         u.verificado ? "Sí" : "No",
         u.pedidos?.length || 0
       ])
@@ -137,53 +162,99 @@ export default function ModalUsuarios({
   };
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: "rgba(0,0,0,0.95)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "flex-start",
-        paddingTop: 0,
-        zIndex: 10000,
-        backdropFilter: "blur(5px)"
-      }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div className="modal-usuarios-contenido" style={{
-        background: "transparent",
-        padding: 40,
-        width: "98%",
-        maxWidth: 1500,
-        maxHeight: "95vh",
-        overflowY: "auto",
-        position: "relative"
-      }} onClick={(e) => e.stopPropagation()}>
-        {/* HEADER */}
-        <div style={{
-          marginBottom: 25,
-          borderBottom: `2px solid ${THEME.goldMain}`,
-          paddingBottom: 15
-        }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-            <h2 style={{ color: THEME.goldMain, margin: 0, fontSize: 36 }}>
-              👥 GESTIÓN DE USUARIOS
-            </h2>
-            <BotonCerrar onClick={onClose} ariaLabel="Cerrar" title="Cerrar" style={{ marginRight: 4 }} />
+    <>
+    <div className="admin-container gestion-usuarios-vista">
+      <AdminPageNav onVolver={onClose} etiqueta="← Volver al panel admin" />
+
+        <header
+          style={{
+            marginBottom: 18,
+            borderBottom: `1px solid color-mix(in srgb, ${THEME.goldMain} 22%, transparent)`,
+            paddingBottom: 10
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+              marginBottom: 4
+            }}
+          >
+            <h1 style={{ color: THEME.goldMain, margin: 0, fontSize: "clamp(1.5rem, 4vw, 2.25rem)" }}>
+              👥 Gestión de usuarios
+            </h1>
+            {onAbrirFormularioAltaAdmin && !panelAltaUsuario ? (
+              <button
+                type="button"
+                className="btn-admin-limpio admin-btn admin-btn--ghost admin-btn--inline admin-btn-small"
+                onClick={() => onAbrirFormularioAltaAdmin()}
+              >
+                + Nuevo usuario
+              </button>
+            ) : null}
           </div>
           <p style={{ color: "white", margin: "8px 0 0", opacity: 0.9, fontSize: 18 }}>
             Total: {usuariosState.length} usuarios | Verificados: {usuariosState.filter((u: Usuario) => u.verificado).length} | Pendientes: {usuariosState.filter((u: Usuario) => !u.verificado).length}
           </p>
-        </div>
+          <p style={{ color: "rgba(255,255,255,0.72)", margin: "10px 0 0", fontSize: 13, lineHeight: 1.4 }}>
+            {jwtUsuariosOps
+              ? "Usuarios sincronizados (API + local)"
+              : "Listado en este navegador; con sesión API se combina con el servidor al actualizar"}
+          </p>
+          <details
+            className="gestion-usuarios-info-details"
+            style={{ marginTop: 4, color: "rgba(255,255,255,0.78)", fontSize: 13, lineHeight: 1.45 }}
+          >
+            <summary
+              style={{
+                cursor: "pointer",
+                color: `color-mix(in srgb, ${THEME.goldMain} 72%, transparent)`,
+                fontWeight: 500,
+                fontSize: 12,
+                letterSpacing: "0.02em",
+                userSelect: "none",
+                listStyle: "none"
+              }}
+            >
+              ℹ️ Información
+            </summary>
+            <div style={{ marginTop: 10, paddingLeft: 10, borderLeft: `2px solid rgba(212,175,55,0.3)` }}>
+              {jwtUsuariosOps ? (
+                <p style={{ margin: "0 0 10px", color: "rgba(255,255,255,0.82)" }}>
+                  Listado del servidor (API) combinado con usuarios que solo existen en este dispositivo (sin duplicar por email o móvil).
+                </p>
+              ) : null}
+              <p style={{ margin: 0, color: "rgba(255,220,180,0.92)" }}>
+                Si limpias <strong>datos del sitio</strong> en el navegador, se borra la copia local en este equipo. Con el backend en marcha, la app{" "}
+                <strong>reintenta varias veces</strong> descargar usuarios del servidor al cargar, y de nuevo al <strong>volver la conexión</strong> o{" "}
+                <strong>cambiar a esta pestaña</strong>. Cada vez que pulsas <strong>Actualizar</strong> y la API responde, la copia local se{" "}
+                <strong>iguala</strong> a la lista fusionada (servidor + este navegador).
+              </p>
+            </div>
+          </details>
+        </header>
+
+        {onAbrirFormularioAltaAdmin && panelAltaUsuario ? (
+          <div
+            style={{
+              marginBottom: 24,
+              maxHeight: "min(78vh, 920px)",
+              overflowY: "auto",
+              WebkitOverflowScrolling: "touch"
+            }}
+          >
+            {panelAltaUsuario}
+          </div>
+        ) : null}
 
         {/* FILTROS Y ACCIONES */}
         <div style={{
           display: "flex",
           gap: 15,
+          marginTop: 6,
           marginBottom: 25,
           flexWrap: "wrap",
           alignItems: "center"
@@ -191,7 +262,7 @@ export default function ModalUsuarios({
           <div style={{ flex: 1, minWidth: 250 }}>
             <input
               type="text"
-              placeholder="🔍 Buscar por teléfono"
+              placeholder="🔍 Buscar por nombre, email o teléfono"
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               style={{
@@ -249,14 +320,14 @@ export default function ModalUsuarios({
           <button
             className="btn-azul-categoria"
             onClick={() => {
+              console.log("ModalUsuarios Actualizar: click → onRefreshUsuarios");
               if (onRefreshUsuarios) {
                 onRefreshUsuarios();
               } else {
-                const usuariosLocal = JSON.parse(localStorage.getItem("usuarios") || "[]") as Usuario[];
-                setUsuariosState(usuariosLocal);
-                onUpdateUsuario?.(usuariosLocal);
+                setUsuariosState(usuarios);
+                onUpdateUsuario?.(usuarios);
               }
-              mostrarNotificacion("🔄 Lista actualizada", "exito");
+              notificarExito(mostrarNotificacion, "🔄 Lista actualizada");
             }}
             style={{
               padding: "16px 24px",
@@ -294,13 +365,13 @@ export default function ModalUsuarios({
             border: `2px solid ${THEME.goldMain}`,
             overflow: "hidden"
           }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "auto" }}>
               <colgroup>
                 <col style={{ width: 40 }} />
-                <col style={{ width: 160 }} />
-                <col style={{ width: 200 }} />
-                <col />
-                <col style={{ width: 320 }} />
+                <col style={{ width: 220 }} />
+                <col style={{ width: 280 }} />
+                <col style={{ width: 360 }} />
+                <col style={{ width: 220 }} />
               </colgroup>
               <thead>
                 <tr style={{
@@ -313,16 +384,24 @@ export default function ModalUsuarios({
                   <th style={{ padding: "12px 12px 12px 28px", textAlign: "left", color: THEME.goldMain, fontSize: 14, verticalAlign: "top" }}>Contacto</th>
                   <th style={{ padding: "12px 12px 12px 56px", textAlign: "left", color: THEME.goldMain, fontSize: 14, verticalAlign: "top" }}>Dirección</th>
                   {/* Acciones: centrado con pelín a la derecha (paddingLeft 72px) — no tocar */}
-                  <th style={{ padding: "12px 12px 12px 72px", textAlign: "center", color: THEME.goldMain, fontSize: 14, minWidth: 320, position: "sticky", right: 0, background: THEME.bg, boxShadow: "-4px 0 8px rgba(0,0,0,0.3)", verticalAlign: "middle" }}>Acciones</th>
+                  <th style={{ padding: "12px 12px 12px 24px", textAlign: "center", color: THEME.goldMain, fontSize: 13, minWidth: 220, position: "sticky", right: 0, background: THEME.bg, boxShadow: "-4px 0 8px rgba(0,0,0,0.3)", verticalAlign: "middle" }}>Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {usuariosFiltrados.map((usuario: Usuario, index: number) => (
+                  (() => {
+                    const direccionUi = direccionPrincipalMostrar(usuario) || "—";
+                    return (
                   <tr
                     key={usuario.id || index}
                     style={{
                       borderBottom: "1px solid rgba(212,175,55,0.2)",
-                      transition: "background 0.2s"
+                      transition: "background 0.2s",
+                      cursor: (onVerDetalle || onEditUsuario) ? "pointer" : "default"
+                    }}
+                    onClick={() => {
+                      if (onVerDetalle) onVerDetalle(usuario);
+                      else onEditUsuario?.(usuario);
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.background = "rgba(212,175,55,0.1)"}
                     onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
@@ -330,48 +409,34 @@ export default function ModalUsuarios({
                     <td style={{ padding: "12px 12px", color: THEME.goldMain, fontSize: 14, verticalAlign: "top", textAlign: "left" }}>{index + 1}</td>
 
                     <td style={{ padding: "12px 12px", verticalAlign: "top", textAlign: "left" }}>
-                      <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                        <div style={{
-                          width: 36,
-                          height: 36,
-                          minWidth: 36,
-                          flexShrink: 0,
-                          borderRadius: "50%",
-                          background: THEME.goldGradient,
-                          color: THEME.bg,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontWeight: "bold",
-                          fontSize: 15
-                        }}>
-                          {usuario.nombre?.charAt(0).toUpperCase()}
+                      <div style={{ minWidth: 0, flex: 1, lineHeight: 1.35, fontSize: 12 }}>
+                        <div style={{ color: "white", fontWeight: "bold", fontSize: 12, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", height: 16 }}>
+                          {usuario.nombre}
                         </div>
-                        <div style={{ minWidth: 0, flex: 1, lineHeight: 1.5, fontSize: 14 }}>
-                          <div style={{ color: "white", fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", height: 21 }}>{usuario.nombre}</div>
-                          <div style={{ color: THEME.goldMain, fontSize: 12, height: 18 }}>
-                            ID: {String(usuario.id).slice(-6)}
-                          </div>
+                        <div style={{ color: THEME.goldMain, fontSize: 11, height: 16, marginTop: 2 }}>
+                          ID: {String(usuario.id).slice(-6)}
                         </div>
                       </div>
                     </td>
 
                     <td style={{ padding: "12px 12px 12px 28px", verticalAlign: "top", textAlign: "left" }}>
-                      <div style={{ display: "grid", gridTemplateColumns: "22px 1fr", gap: "0 6px", alignItems: "start", color: "white", lineHeight: 1.5 }}>
-                        <span style={{ gridColumn: 1, textAlign: "center", fontSize: 14, height: 21, display: "flex", alignItems: "center", justifyContent: "center" }}>📧</span>
-                        <span style={{ gridColumn: 2, fontSize: 14, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 220, height: 21 }} title={usuario.email}>{usuario.email}</span>
-                        <span style={{ gridColumn: 1, textAlign: "center", fontSize: 12, opacity: 0.9, height: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>📞</span>
-                        <span style={{ gridColumn: 2, fontSize: 12, opacity: 0.9, height: 18 }}>{usuario.telefono || "—"}</span>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 2, color: "white", lineHeight: 1.45 }}>
+                        <span style={{ fontSize: 14, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title={usuario.email}>
+                          {usuario.email || "—"}
+                        </span>
+                        <span style={{ fontSize: 12, opacity: 0.9 }}>
+                          {usuario.telefono || "—"}
+                        </span>
                       </div>
                     </td>
 
                     <td style={{ padding: "12px 12px 12px 56px", verticalAlign: "top", textAlign: "left" }}>
-                      <div style={{ color: "white", fontSize: 14, lineHeight: 1.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", minWidth: 0, height: 21 }} title={usuario.direccion || ""}>
-                        {usuario.direccion || "—"}
+                      <div style={{ color: "white", fontSize: 12, lineHeight: 1.3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", minWidth: 0 }} title={direccionUi}>
+                        {direccionUi}
                       </div>
                     </td>
 
-                    <td style={{ padding: "12px 12px", minWidth: 320, position: "sticky", right: 0, background: THEME.bg, boxShadow: "-4px 0 8px rgba(0,0,0,0.2)", verticalAlign: "middle" }}>
+                    <td style={{ padding: "10px 8px", minWidth: 220, position: "sticky", right: 0, background: THEME.bg, boxShadow: "-4px 0 8px rgba(0,0,0,0.2)", verticalAlign: "middle" }}>
                       <div style={{ display: "flex", gap: 8, flexWrap: "nowrap", justifyContent: "flex-end", alignItems: "center" }}>
                         <button
                           type="button"
@@ -384,9 +449,9 @@ export default function ModalUsuarios({
                             background: "transparent",
                             border: usuario.verificado ? "1px solid #2ecc71" : `1px solid ${THEME.goldMain}`,
                             color: usuario.verificado ? "#2ecc71" : THEME.goldMain,
-                            padding: "8px 12px",
+                            padding: "5px 8px",
                             borderRadius: 10,
-                            fontSize: 14,
+                            fontSize: 12,
                             fontWeight: 500,
                             cursor: "pointer"
                           }}
@@ -396,20 +461,21 @@ export default function ModalUsuarios({
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            onEditUsuario?.(usuario);
+                            if (onVerDetalle) onVerDetalle(usuario);
+                            else onEditUsuario?.(usuario);
                           }}
                           style={{
                             background: "transparent",
                             border: `1px solid ${THEME.goldMain}`,
                             color: THEME.goldMain,
-                            padding: "8px 12px",
+                            padding: "5px 8px",
                             borderRadius: 10,
                             cursor: "pointer",
-                            fontSize: 14
+                            fontSize: 12
                           }}
-                          title="Editar"
+                          title={onVerDetalle ? "Ver ficha (detalle cliente)" : "Editar"}
                         >
-                          ✏️
+                          🔎
                         </button>
 
                         <button
@@ -421,10 +487,10 @@ export default function ModalUsuarios({
                             background: "transparent",
                             border: "1px solid #ff4444",
                             color: "#ff4444",
-                            padding: "8px 12px",
+                            padding: "5px 8px",
                             borderRadius: 10,
                             cursor: "pointer",
-                            fontSize: 14
+                            fontSize: 12
                           }}
                           title="Eliminar"
                         >
@@ -433,6 +499,8 @@ export default function ModalUsuarios({
                       </div>
                     </td>
                   </tr>
+                    );
+                  })()
                 ))}
               </tbody>
             </table>
@@ -461,9 +529,8 @@ export default function ModalUsuarios({
             <span>⏳ Pendientes: <strong>{usuariosState.filter((u: Usuario) => !u.verificado).length}</strong></span>
           </div>
         </div>
-      </div>
-      
-      {/* MODAL DE CONFIRMACIÓN DE ELIMINAR */}
+    </div>
+
       <ModalConfirmacion
         abierto={usuarioAEliminar !== null}
         mensaje={`¿Seguro que quieres eliminar a ${usuarioAEliminar?.nombre}? Esta acción no se puede deshacer.`}
@@ -471,7 +538,7 @@ export default function ModalUsuarios({
         onCancelar={() => setUsuarioAEliminar(null)}
         textoConfirmar="Eliminar usuario"
       />
-    </div>
+    </>
   );
 }
 

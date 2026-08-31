@@ -1,0 +1,19 @@
+/*
+ * /ritual-del-mes — reutiliza los bloques `.inicio-wrapper`/`.inicio-desplegable-productos`
+ * de home.css (compartidos con /testimonios), así que todo aquí va scopeado bajo
+ * `html.ritual-no-scroll` (puesta/quitada solo por RitualDelMesPage) para no afectar a esa otra ruta.
+ */
+@media (min-width: 900px) {
+  html.ritual-no-scroll .app-shell__routes-grow {
+    overflow-y: hidden !important;
+  }
+
+  /*
+   * `.inicio-wrapper` es flex:1 dentro del wrap de ruta (flex-column); no envolverlo en otro
+   * div para no romper ese `flex:1` — el margen se le pone directamente a él. !important:
+   * el componente fija `style={{ margin: "0 auto" }}` inline, que gana a cualquier CSS sin él.
+   */
+  html.ritual-no-scroll .inicio-wrapper {
+    margin-top: clamp(48px, 9vh, 110px) !important;
+  }
+}

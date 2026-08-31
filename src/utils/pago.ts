@@ -8,6 +8,14 @@ export type DatosPago = {
   tarjetaCVV: string;
 };
 
+export const DATOS_PAGO_VACIOS: DatosPago = {
+  bizumTelefono: "",
+  tarjetaNumero: "",
+  tarjetaTitular: "",
+  tarjetaCaducidad: "",
+  tarjetaCVV: ""
+};
+
 export function normalizarTelefonoBizum(telefono: string): string {
   const soloDigitos = (telefono || "").replace(/\D/g, "").trim();
   if (soloDigitos.startsWith("0034") && soloDigitos.length > 4) return soloDigitos.slice(4);

@@ -5,18 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Aviso Legal | MAIKA</title>
     <style>
-      body { font-family: Arial, sans-serif; margin: 0; padding: 24px; background: #1b1745; color: #fff; }
-      .card { max-width: 900px; margin: 0 auto; background: #2b2560; border: 1px solid gold; border-radius: 12px; padding: 24px; position: relative; }
-      .cerrar { position: absolute; top: 24px; right: 24px; font-size: 4rem; text-decoration: none; color: #fff; line-height: 1; }
-      h1, h2, h3 { color: gold; }
-      h2 { margin-top: 1.5em; }
-      h3 { margin-top: 1em; font-size: 1.1rem; }
-      a { color: gold; }
+      body { margin: 0; padding: clamp(16px, 4vw, 32px); background: #1b1745; color: rgba(255,255,255,0.92); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.65; }
+      main.legal-static-source { max-width: 900px; margin: 0 auto; }
     </style>
   </head>
   <body>
-    <div class="card">
-      <a href="/" class="cerrar" title="Cerrar" onclick="if(window.parent!==window){event.preventDefault();window.parent.postMessage('cerrarLegal','*');return false;}">×</a>
+    <main class="legal-static-source">
       <h1>AVISOS LEGALES</h1>
       <p>Para dar cumplimiento al artículo 10 de la Ley 34/2002, de Servicios de la Sociedad de la Información y de Comercio Electrónico, informamos al usuario de nuestros datos de contacto:</p>
       <p><strong>Razón social:</strong> [indicar razón social]</p>
@@ -67,6 +61,6 @@
 
       <h2>Ley aplicable y jurisdicción</h2>
       <p>Para resolver todas las disputas o cuestiones relacionadas con este sitio web o las actividades realizadas en él, será de aplicación la legislación española, y las partes se someten expresamente a ella, siendo competentes los juzgados de Valencia para resolver todos los conflictos derivados de su uso o relacionados con él.</p>
-    </div>
+    </main>
   </body>
 </html>

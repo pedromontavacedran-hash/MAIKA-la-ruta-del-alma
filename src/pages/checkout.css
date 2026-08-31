@@ -1,0 +1,357 @@
+/* Módulo extraído de App.css (líneas 1–335). Checkout modal + overlays compartidos con flujo checkout */
+
+.checkout-mini-placeholder::placeholder {
+  font-size: 12px;
+}
+
+/* Overlay único (ModalBase + compat .modal-wrapper) */
+.modal-overlay,
+.modal-wrapper {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 10020;
+  padding: max(12px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px))
+    max(12px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+/* Checkout: fondo menos protagonista (el modal manda; estrellas más apagadas al blur) */
+.modal-overlay--checkout {
+  background: rgba(2, 1, 8, 0.82);
+  backdrop-filter: blur(12px) saturate(0.92);
+  -webkit-backdrop-filter: blur(12px) saturate(0.92);
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/*
+ * Flujo checkout/login/acceso rápido: misma referencia vertical desde arriba.
+ * Mantiene cada tarjeta con su estilo propio, pero unifica la altura de arranque.
+ */
+.modal-overlay--flujo-checkout {
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.modal-overlay--flujo-checkout > .modal-card {
+  margin: clamp(16px, 4.2vh, 56px) auto max(16px, env(safe-area-inset-bottom, 0px));
+  flex-shrink: 0;
+}
+
+.modal-overlay--align-start,
+.modal-wrapper--align-start {
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.modal-overlay--align-start > .modal-card,
+.modal-wrapper--align-start > .modal-card {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+/* Tarjeta del modal (ModalBase); maxWidth suele venir por prop */
+.modal-card {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  margin: auto;
+  border-radius: 16px;
+  padding: 24px;
+  background: linear-gradient(180deg, #1b1745, #2b2560);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  animation: modalIn 0.2s ease;
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-card--wide {
+  max-width: min(1500px, 98vw);
+}
+
+/* Admin: renombrar producto (ModalBase + título sin solapar la ×) */
+.modal-card.modal-card--renombrar-producto {
+  padding-top: 40px;
+}
+
+/* Página o panel (no es modal): solo ancla BotonCerrar sin “caja modal” */
+.maika-anchor {
+  position: relative;
+  box-sizing: border-box;
+}
+
+.checkout-modal-card {
+  /* Un pelín más claro arriba que el overlay: protagonismo sin gritar */
+  background: linear-gradient(180deg, #25224e 0%, #1e1b4a 42%, #1a173f 100%);
+  border: 1px solid rgba(212, 175, 55, 0.38);
+  border-radius: 16px;
+  /* Top extra por la cruz absoluta; lados compactos */
+  padding: 40px 18px 14px;
+  width: 90%;
+  max-width: 520px;
+  max-height: none;
+  overflow: visible;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: auto;
+  box-sizing: border-box;
+  /* Margen vertical estable; el hueco bajo la barra ya viene del shell / stack global */
+  margin: max(16px, env(safe-area-inset-top, 0px)) auto max(20px, env(safe-area-inset-bottom, 0px));
+  flex-shrink: 0;
+  box-shadow:
+    0 0 0 1px rgba(140, 118, 200, 0.22),
+    0 0 72px rgba(88, 68, 160, 0.42),
+    0 0 120px rgba(40, 28, 88, 0.22),
+    0 0 56px rgba(212, 175, 55, 0.07),
+    0 28px 64px rgba(0, 0, 0, 0.58),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Cabecera: título + badge pedido */
+.checkout-modal-header {
+  margin-bottom: 8px;
+}
+
+/* Badge “Pedido: …” — info secundaria (tras título y texto de ayuda) */
+.checkout-modal-card .checkout-pedido-badge {
+  margin-top: 2px;
+  margin-bottom: 8px;
+  margin-left: auto;
+  margin-right: auto;
+  width: fit-content;
+  max-width: 100%;
+  box-sizing: border-box;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-align: center;
+  color: #1b1745;
+  background: linear-gradient(180deg, #d4af37, #c39b2e);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  opacity: 0.7;
+}
+
+.checkout-modal-card .recordar-datos {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0 14px 0;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+  line-height: 1.35;
+}
+
+/* Checkbox nativo sustituido: borde dorado, sin el “check” gris del sistema */
+.checkout-modal-card .recordar-datos__checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  flex-shrink: 0;
+  border: 2px solid rgba(201, 162, 74, 0.7);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.checkout-modal-card .recordar-datos__checkbox:hover {
+  border-color: rgba(212, 175, 55, 0.95);
+}
+
+.checkout-modal-card .recordar-datos__checkbox:focus-visible {
+  outline: 2px solid rgba(212, 175, 55, 0.55);
+  outline-offset: 2px;
+}
+
+.checkout-modal-card .recordar-datos__checkbox:checked {
+  background: linear-gradient(180deg, #d4af37, #b8922a);
+  border-color: rgba(212, 175, 55, 0.95);
+  box-shadow: inset 0 0 0 2px rgba(11, 11, 13, 0.35);
+}
+
+/* CP + línea ciudad/provincia (panel checkout): proporción 1 : 2 */
+.checkout-ubicacion-cp-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 10px;
+  margin-top: 8px;
+  margin-bottom: 0;
+  align-items: center;
+}
+
+@media (max-width: 420px) {
+  .checkout-ubicacion-cp-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Inputs: superficie más definida frente a la tarjeta (no solo en focus) */
+.checkout-modal-card input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not(:disabled),
+.checkout-modal-card textarea:not(:disabled),
+.checkout-modal-card select:not(:disabled) {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  background: rgba(255, 255, 255, 0.11) !important;
+  border-color: rgba(212, 175, 55, 0.5) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.checkout-modal-card input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):focus,
+.checkout-modal-card textarea:focus,
+.checkout-modal-card select:focus {
+  border-color: var(--gold-light) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 0 0 2px rgba(232, 210, 150, 0.32),
+    0 0 20px rgba(232, 210, 150, 0.14);
+  outline: none;
+}
+
+/* Resumen de importes */
+.checkout-resumen-box {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.checkout-resumen-box.checkout-resumen-box--compact {
+  margin-top: 10px;
+  padding: 10px 12px;
+}
+
+.checkout-resumen-box > div {
+  margin-bottom: 6px;
+}
+
+.checkout-resumen-box > div:last-child {
+  margin-bottom: 0;
+}
+
+.checkout-resumen-box--compact > div {
+  margin-bottom: 4px;
+}
+
+.checkout-total-precio {
+  font-weight: 700;
+  color: #d4af37;
+  font-size: 18px;
+}
+
+.checkout-resumen-box--compact .checkout-total-precio {
+  font-size: 16px;
+}
+
+/* Enlace “¿Tienes código de descuento?” */
+.checkout-modal-card .checkout-codigo-descuento {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.82);
+  text-align: left;
+  width: 100%;
+  line-height: 1.4;
+  opacity: 0.75;
+  cursor: pointer;
+}
+
+.checkout-modal-card .checkout-codigo-descuento:hover {
+  opacity: 0.95;
+}
+
+/* CTA principal finalizar */
+.checkout-boton-finalizar {
+  box-shadow: 0 6px 18px rgba(212, 175, 55, 0.25);
+  font-weight: 600;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.checkout-boton-finalizar:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.38);
+}
+
+/* CTA verde WhatsApp / 1 clic: acción final — glow y sombra sin competir con el dorado del resto */
+.checkout-modal-card .checkout-boton-finalizar--whatsapp {
+  background: linear-gradient(180deg, #36eb88 0%, #1fb855 100%) !important;
+  color: #fff !important;
+  box-shadow:
+    0 6px 0 rgba(0, 0, 0, 0.28),
+    0 14px 32px rgba(0, 0, 0, 0.42),
+    0 0 26px rgba(47, 229, 118, 0.38),
+    0 0 44px rgba(37, 211, 102, 0.18) !important;
+}
+
+.checkout-modal-card .checkout-boton-finalizar--whatsapp:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.04);
+  box-shadow:
+    0 7px 0 rgba(0, 0, 0, 0.26),
+    0 18px 38px rgba(0, 0, 0, 0.44),
+    0 0 34px rgba(55, 235, 130, 0.45),
+    0 0 56px rgba(37, 211, 102, 0.22) !important;
+}
+
+/* Textos de ayuda secundarios */
+.checkout-texto-ayuda {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.checkout-modal-card input::placeholder,
+.checkout-modal-card textarea::placeholder {
+  color: rgba(255, 255, 255, 0.42);
+}
+
+@media (max-width: 600px) {
+  .modal-overlay--checkout {
+    padding: max(10px, env(safe-area-inset-top, 0px)) 8px max(10px, env(safe-area-inset-bottom, 0px));
+  }
+
+  .modal-overlay--flujo-checkout > .modal-card {
+    margin-top: clamp(12px, 3.2vh, 36px);
+  }
+
+  .checkout-modal-card {
+    padding: 38px 14px 12px;
+    max-width: 100%;
+    width: 90%;
+    border-radius: 14px;
+    max-height: none;
+    overflow: visible;
+    margin-top: clamp(20px, 5vh, 56px);
+  }
+}
+

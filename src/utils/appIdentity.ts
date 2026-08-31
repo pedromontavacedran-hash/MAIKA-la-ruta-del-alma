@@ -23,7 +23,8 @@ export function generarNumeroPedido(): string {
   const year = new Date().getFullYear().toString().slice(2);
   const month = (new Date().getMonth() + 1).toString().padStart(2, "0");
   const day = new Date().getDate().toString().padStart(2, "0");
-  const random = Math.floor(Math.random() * 100).toString().padStart(2, "0");
+  /** 4 dígitos (antes 2): más margen frente a intentos de adivinar el código al activar una cuenta técnica. */
+  const random = Math.floor(Math.random() * 10000).toString().padStart(4, "0");
   return `MK${year}${month}${day}-${random}`;
 }
 
@@ -31,4 +32,29 @@ export function generarReferenciaPago(): string {
   const time = Date.now().toString().slice(-8);
   const random = Math.floor(Math.random() * 900 + 100);
   return `PAY-${time}-${random}`;
+}
+
+/**
+ * UUID v4 para cabeceras tipo Idempotency-Key.
+ * `crypto.randomUUID` no existe en HTTP en varios móviles/WebViews (solo en contextos “seguros”).
+ */
+export function generarUuidV4(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    try {
+      return crypto.randomUUID();
+    } catch {
+      /* seguir */
+    }
+  }
+  if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+    const b = new Uint8Array(16);
+    crypto.getRandomValues(b);
+    b[6] = (b[6]! & 0x0f) | 0x40;
+    b[8] = (b[8]! & 0x3f) | 0x80;
+    const h = (n: number) => n.toString(16).padStart(2, "0");
+    let s = "";
+    for (let i = 0; i < 16; i++) s += h(b[i]!);
+    return `${s.slice(0, 8)}-${s.slice(8, 12)}-${s.slice(12, 16)}-${s.slice(16, 20)}-${s.slice(20)}`;
+  }
+  return `mk_${Date.now()}_${Math.random().toString(36).slice(2, 12)}_${Math.random().toString(36).slice(2, 12)}`;
 }

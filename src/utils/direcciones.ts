@@ -1,9 +1,22 @@
 import type { Cliente, DireccionUsuario, Pedido } from "../types";
 import type { MaikaUsuarioLS } from "./maikaUsuarios";
 
-export function direccionClave(d: Pick<DireccionUsuario, "calle" | "numero" | "cp" | "poblacion" | "provincia" | "pais">) {
-  return [d.calle, d.numero, d.cp, d.poblacion, d.provincia, d.pais]
-    .map((v) => String(v || "").trim().toUpperCase())
+/** Normaliza para comparar direcciones (evita duplicar guardada vs sugerida por tildes: Cristòfor / Cristofor). */
+function segmentoClaveDireccion(v: unknown): string {
+  return String(v ?? "")
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .toUpperCase();
+}
+
+export function direccionClave(
+  d: Pick<DireccionUsuario, "calle" | "numero" | "cp" | "poblacion" | "provincia" | "pais">
+    & Partial<Pick<DireccionUsuario, "bloque" | "escalera" | "piso" | "puerta">>
+) {
+  return [d.calle, d.numero, d.cp, d.poblacion, d.provincia, d.pais, d.bloque, d.escalera, d.piso, d.puerta]
+    .map((v) => segmentoClaveDireccion(v))
     .join("|");
 }
 
@@ -13,8 +26,8 @@ export function direccionDesdeCliente(c: Cliente): DireccionUsuario | null {
   const cp = String(c.cp || "").trim();
   const poblacion = String(c.poblacion || "").trim();
   const provincia = String(c.provincia || "").trim();
-  const pais = String(c.pais || "").trim();
-  if (!calle || !numero || !cp || !poblacion || !provincia || !pais) return null;
+  const pais = String(c.pais || "").trim() || "ESPAÑA";
+  if (!calle || !numero || !cp || !poblacion || !provincia) return null;
 
   return {
     id: `dir_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
@@ -64,6 +77,7 @@ export function normalizarDireccionesUsuario(
   if (!Array.isArray(dirsRaw)) return [];
   const out: DireccionUsuario[] = [];
   const claves = new Set<string>();
+  const ids = new Set<string>();
 
   for (let i = 0; i < dirsRaw.length; i += 1) {
     const d = dirsRaw[i] as Partial<DireccionUsuario>;
@@ -73,16 +87,25 @@ export function normalizarDireccionesUsuario(
     const cp = String(d.cp || "").trim();
     const poblacion = String(d.poblacion || "").trim();
     const provincia = String(d.provincia || "").trim();
-    const pais = String(d.pais || "").trim();
+    const pais = String(d.pais || "").trim() || "ESPAÑA";
+    const bloque = String(d.bloque || "").trim();
+    const escalera = String(d.escalera || "").trim();
+    const piso = String(d.piso || "").trim();
+    const puerta = String(d.puerta || "").trim();
     if (!calle || !numero || !cp || !poblacion || !provincia || !pais) continue;
 
-    const clave = direccionClave({ calle, numero, cp, poblacion, provincia, pais });
+    const clave = direccionClave({ calle, numero, cp, poblacion, provincia, pais, bloque, escalera, piso, puerta });
     if (claves.has(clave)) continue;
     claves.add(clave);
 
     const idRaw = String(d.id || "").trim();
+    let id = idRaw || `dir_auto_${i}_${Math.random().toString(36).slice(2, 8)}`;
+    if (ids.has(id)) {
+      id = `dir_fix_${i}_${Math.random().toString(36).slice(2, 8)}`;
+    }
+    ids.add(id);
     out.push({
-      id: idRaw || `dir_auto_${i}_${Math.random().toString(36).slice(2, 8)}`,
+      id,
       alias: String(d.alias || "").trim() || `Dirección ${out.length + 1}`,
       calle,
       numero,

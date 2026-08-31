@@ -9,8 +9,19 @@ lerna-debug.log*
 
 node_modules
 dist
+dist-electron
 dist-ssr
 *.local
+.env
+.env.*
+!.env.example
+.capacitor-live
+
+# Datos sensibles locales
+secrets.json
+database.db
+backup.zip
+backend/.env
 
 # Editor directories and files
 .vscode/*
@@ -23,3 +34,4 @@ dist-ssr
 *.sln
 *.sw?
 backend/data/*.json
+!backend/data/productos.json

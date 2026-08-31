@@ -1,56 +1,50 @@
 /**
- * Botón de cierre (cruz) unificado: mismo icono, borde y estilo en toda la app.
- * Usado en Carrito, Tienda, Favoritos, Cuenta, Editar Productos, etc.
+ * Botón de cierre (×): estilos globales `.boton-cerrar-modal` en App.css.
+ * En modales reales: usar `ModalBase` (overlay `.modal-overlay` + `.modal-card`).
+ * Fuera de ModalBase / páginas: padre `.maika-anchor` (`position: relative`).
+ * `anclaje="viewport"` fija la cruz al viewport (p. ej. tienda a pantalla completa).
  */
 import type { CSSProperties, MouseEvent } from "react";
-import { THEME } from "../config";
-
-const ICONO_CRUZ = (
-  <svg width="2em" height="2em" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <line x1="18" y1="6" x2="6" y2="18" />
-    <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-);
-
-export const estiloBotonCerrar: CSSProperties = {
-  position: "absolute",
-  right: 0,
-  top: 0,
-  width: 40,
-  height: 40,
-  minWidth: 40,
-  minHeight: 40,
-  background: THEME.bg,
-  border: `2px solid ${THEME.goldMain}`,
-  borderRadius: 8,
-  cursor: "pointer",
-  padding: 6,
-  boxSizing: "border-box",
-  boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-};
 
 interface BotonCerrarProps {
   onClick: (e?: MouseEvent<HTMLButtonElement>) => void;
   ariaLabel?: string;
   title?: string;
-  /** Para overlays (ej. lightbox) se puede pasar top/right distintos */
+  disabled?: boolean;
+  /** Misma apariencia; conserva clase para reglas del carrito (z-index / safe area). */
+  variante?: "default" | "discreto";
+  anclaje?: "modal" | "viewport";
   style?: CSSProperties;
 }
 
-export default function BotonCerrar({ onClick, ariaLabel = "Cerrar", title = "Cerrar", style }: BotonCerrarProps) {
+export default function BotonCerrar({
+  onClick,
+  ariaLabel = "Cerrar",
+  title = "Cerrar",
+  disabled = false,
+  variante = "default",
+  anclaje = "modal",
+  style
+}: BotonCerrarProps) {
+  const className = [
+    "boton-cerrar-modal",
+    variante === "discreto" ? "boton-cerrar-modal--discreto" : "",
+    anclaje === "viewport" ? "boton-cerrar-modal--viewport" : ""
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <button
       type="button"
-      className="boton-cerrar-maika"
+      className={className}
+      disabled={disabled}
       onClick={(e) => onClick(e)}
-      style={{ ...estiloBotonCerrar, ...style }}
+      style={style}
       aria-label={ariaLabel}
       title={title}
     >
-      {ICONO_CRUZ}
+      ×
     </button>
   );
 }

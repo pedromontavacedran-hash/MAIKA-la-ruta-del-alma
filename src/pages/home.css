@@ -1,0 +1,606 @@
+/* Módulo extraído de App.css (líneas 1654–2149). Hero / inicio */
+
+/*
+ * Inicio (hero + CTA "Explorar tienda"): nunca debe desplazarse, ni en móvil ni en escritorio
+ * (ver `useEffect` que pone/quita `inicio-no-scroll` en AppRoutes.tsx).
+ * Escritorio: `.app-shell__routes-grow` es el scroll real de toda la app (ver layout-shell.css) y
+ * es un contenedor distinto de html/body, así que el `overflow:hidden` de abajo no lo cubre.
+ */
+html.inicio-no-scroll,
+body.inicio-no-scroll {
+  overflow: hidden !important;
+}
+
+@media (min-width: 769px) {
+  html.inicio-no-scroll .app-shell__routes-grow {
+    overflow-y: hidden !important;
+  }
+}
+
+/* ========== Hero section ========== */
+.hero-section {
+  position: relative;
+  width: 100%;
+  min-height: 100svh;
+  overflow: hidden;
+  /* Atmósfera continua: un solo “respiradero” morado → bordes, sin cortes verticales duros */
+  background:
+    radial-gradient(
+      ellipse 115% 95% at 50% 38%,
+      rgba(78, 62, 118, 0.42) 0%,
+      rgba(48, 38, 82, 0.28) 32%,
+      rgba(28, 22, 48, 0.38) 58%,
+      rgba(14, 11, 24, 0.72) 82%,
+      rgba(8, 6, 16, 0.92) 100%
+    ),
+    linear-gradient(180deg, rgba(40, 32, 68, 0.2) 0%, transparent 38%),
+    linear-gradient(180deg, #0c0814 0%, var(--maika-bg) 50%, var(--maika-bg) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Escritorio: scaleX(stretch); la home pisa el valor desde React (--hero-desktop-stretch-x). */
+  --hero-desktop-stretch-x: 1.14;
+  /* Clics en la franja del hero no bloquean la barra fija (iconos / menú). */
+  pointer-events: none;
+}
+
+/* Fundido inferior: inicio más bajo, cierre más profundo → continuidad con el cielo */
+.hero-section::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Fundido al bloque siguiente sin tapar tanto el pie del banner */
+  height: min(18vh, 220px);
+  z-index: 5;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    transparent 52%,
+    rgba(8, 6, 20, 0.06) 68%,
+    rgba(8, 6, 18, 0.35) 84%,
+    rgba(6, 4, 14, 0.62) 94%,
+    var(--maika-bg) 100%
+  );
+}
+
+/* Contiene imagen + partículas; en escritorio llena el hero, en móvil define alto al contenido */
+.hero-section__visual {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.portal-tienda-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at center, rgba(255, 215, 120, 0.16) 0%, rgba(118, 62, 140, 0.24) 42%, rgba(22, 8, 38, 0.42) 100%);
+  animation: portalTiendaFade 280ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes portalTiendaFade {
+  0% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.72;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Logo + CTA: columna centrada, independiente del zoom del JPG (el scale solo afecta a .hero-section__img) */
+.hero-section__brand-stack {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  /*
+    Escritorio: el bloque visual es position:absolute (inset:0) y no “sube” con el padding del hero.
+    El despeje bajo la barra fija tiene que ir aquí; si no, logo/CTA quedan arriba y overflow:hidden los recorta.
+  */
+  padding-top: calc(var(--app-topbar-stack) + var(--hero-brand-stack-gap-desktop, 28px));
+  padding-left: max(12px, env(safe-area-inset-left, 0px));
+  padding-right: max(12px, env(safe-area-inset-right, 0px));
+  /* Menos hueco logo↔CTA = botón más arriba; sin margin negativo en el botón */
+  gap: clamp(7px, 1.4vh, 18px);
+  z-index: 11;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.hero-section__mandala {
+  animation: heroMandalaBreath 3.2s ease-in-out infinite;
+  transform-origin: center center;
+  will-change: transform, filter;
+}
+
+.hero-section__img-scale-x {
+  position: absolute;
+  inset: 0;
+  /* Por encima de .hero-particles (z-index 0) para que el arte del banner se lea neto */
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.hero-section__img-scale-x::after {
+  content: "";
+  position: absolute;
+  inset: -40px;
+  background: radial-gradient(
+    circle,
+    rgba(232, 210, 138, 0.18),
+    rgba(232, 210, 138, 0.08),
+    transparent 70%
+  );
+  filter: blur(40px);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hero-section__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 0% 0%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@media (min-width: 769px) {
+  /* Baja imagen + logo + CTA a la vez (todo vive dentro de __visual) */
+  .hero-section__visual {
+    /* Desplazamiento acoplado al stack (slider admin + barra), no a vh fijos */
+    top: clamp(0px, calc(var(--app-topbar-stack) * 0.34), 84px);
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  .hero-section__img-scale-x {
+    transform: scaleX(var(--hero-desktop-stretch-x));
+    transform-origin: center top;
+    /* Letterbox detrás del JPG (contain): mismo lenguaje que .hero-section, transición suave centro ↔ laterales */
+    background: radial-gradient(
+      ellipse 105% 100% at 50% 36%,
+      rgba(92, 74, 138, 0.38) 0%,
+      rgba(62, 48, 98, 0.45) 26%,
+      rgba(38, 30, 68, 0.58) 52%,
+      rgba(20, 16, 36, 0.82) 78%,
+      rgba(10, 8, 20, 0.96) 100%
+    );
+  }
+
+  .hero-section__img {
+    object-fit: contain;
+    object-position: center top;
+    filter: var(--maika-hero-logo-filter);
+  }
+}
+
+/*
+  Móvil: JPG en flujo (contain); mandala + CTA en posición absoluta sobre la parte baja del arte
+  (centrados, sin bloque extra debajo del banner).
+*/
+@media (max-width: 768px) {
+  .hero-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 0;
+    height: auto;
+    aspect-ratio: unset;
+    max-height: none;
+    overflow: visible;
+    padding: 0 10px 12px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+    box-sizing: border-box;
+    gap: 0;
+  }
+
+  .hero-section__visual {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    max-width: 100%;
+    flex: 0 0 auto;
+    overflow: visible;
+    /* Por encima del ::after de .hero-section (fade inferior, z-index 5) para que mandala + CTA no queden velados */
+    z-index: 6;
+  }
+
+  .hero-section__img-scale-x {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    max-width: 100%;
+    overflow: visible;
+    transform: none;
+    z-index: 2;
+  }
+
+  .hero-section__img {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: min(72dvh, 620px);
+    object-fit: contain;
+    object-position: center top;
+    display: block;
+    margin: 0 auto;
+    filter: var(--maika-hero-logo-filter-mobile);
+  }
+
+  /*
+   * Mandala + CTA: superpuestos al JPG, bastante más arriba que el pie del arte
+   * (evita quedar sobre «Rutas del alma» y similares en el propio banner).
+   */
+  .hero-section__brand-stack {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: max(
+      calc(10px + env(safe-area-inset-bottom, 0px)),
+      clamp(132px, 39dvh, 294px)
+    );
+    top: auto;
+    width: 100%;
+    max-width: 100%;
+    flex: unset;
+    padding: 8px 12px 10px;
+    gap: 8px;
+    z-index: 8;
+    justify-content: flex-end;
+    align-items: center;
+    flex-direction: column;
+    pointer-events: none;
+    box-sizing: border-box;
+  }
+
+  .app-shell--full-bleed-top .hero-section {
+    padding-top: calc(var(--app-topbar-stack) + var(--hero-top-gap-mobile, 84px));
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-section__mandala {
+    animation: none;
+  }
+
+  .hero-section--portal-activo .hero-section__visual,
+  .portal-tienda-overlay {
+    animation: none;
+  }
+}
+
+/* Nav integrada en el hero: mismo estilo que el hero (dorado, sin botones) */
+.hero-nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 15;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 0 28px 0;
+  min-height: 48px;
+  align-content: center;
+  pointer-events: auto;
+  box-sizing: border-box;
+}
+.hero-nav__links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.hero-nav__link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #e5c07b;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+.hero-nav__link:hover {
+  color: #f0d89a;
+  text-shadow: 0 0 12px rgba(229, 192, 123, 0.35);
+}
+.hero-nav__link[aria-current="page"] {
+  font-weight: 600;
+}
+.hero-nav__sep {
+  color: rgba(229, 192, 123, 0.6);
+  font-weight: 300;
+  user-select: none;
+}
+
+/* Respiración dorada sincronizada con el aura de entrada a tienda. */
+@keyframes hero-btn-dorado {
+  0%, 100% {
+    box-shadow:
+      0 0 10px rgba(212, 175, 55, 0.36),
+      0 8px 22px rgba(0, 0, 0, 0.32);
+  }
+  50% {
+    box-shadow:
+      0 0 16px rgba(212, 175, 55, 0.56),
+      0 10px 26px rgba(0, 0, 0, 0.36);
+  }
+}
+
+/* Botón "Explorar tienda" (flujo estable bajo el logo; no position:absolute con %) */
+.hero-section__btn-explorar {
+  position: relative;
+  pointer-events: auto;
+  /* Micro separación + offset admin (`--hero-cta-offset` en `html`, vía `heroBannerConfig`) */
+  margin-top: calc(3px + var(--hero-cta-offset));
+  padding: 12px 26px;
+  min-width: 186px;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.035em;
+  color: #160f24;
+  background: linear-gradient(135deg, #c9a63a 0%, #e8c96a 58%, #b98423 100%);
+  border: 1px solid rgba(255, 248, 220, 0.65);
+  border-radius: 999px;
+  cursor: pointer;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  animation: hero-btn-dorado 4.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  box-shadow:
+    0 0 10px rgba(212, 175, 55, 0.36),
+    0 8px 22px rgba(0, 0, 0, 0.32);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.32);
+  transition:
+    transform 0.24s ease,
+    box-shadow 0.24s ease,
+    filter 0.24s ease;
+  z-index: 12;
+  flex-shrink: 0;
+}
+.hero-section__btn-explorar:hover {
+  filter: brightness(1.04) saturate(1.05);
+  transform: translateY(-1px) scale(1.025);
+  box-shadow:
+    0 0 18px rgba(212, 175, 55, 0.68),
+    0 10px 28px rgba(0, 0, 0, 0.38);
+}
+.hero-section__btn-explorar:active {
+  transform: translateY(0) scale(0.985);
+}
+
+/* Móvil: tipografía compacta; posición desde React */
+@media (max-width: 768px) {
+  .hero-section__btn-explorar {
+    margin-top: calc(2px + var(--hero-cta-offset));
+    padding: 5px 12px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    min-width: 0;
+    max-width: min(46vw, 160px);
+    border-width: 1px;
+    line-height: 1.25;
+  }
+
+  .hero-section__btn-explorar:hover {
+    transform: none;
+  }
+
+  .hero-section__btn-explorar:active {
+    transform: translateY(0) scale(0.97);
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-nav {
+    padding: 0 18px 0;
+    min-height: 44px;
+    gap: 12px;
+  }
+  .hero-nav__links {
+    gap: 12px;
+  }
+  .hero-nav__link {
+    font-size: 0.9rem;
+  }
+}
+
+/* Inicio: estética pantalla completa (cósmica, oro/morado). Sin flex column aquí: evita estrechar el hijo y romper el grid horizontal del ritual. */
+.inicio-wrapper {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+}
+
+.inicio-page {
+  color: var(--maika-text);
+  line-height: 1.55;
+  padding-bottom: clamp(12px, 3vw, 28px);
+}
+.inicio-btn-categoria:hover {
+  transform: none;
+  box-shadow: var(--gold-hover-shadow) !important;
+  border-color: var(--gold-light) !important;
+  background: var(--maika-bg) !important;
+}
+.inicio-seccion-titulo {
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 14px rgba(232, 210, 150, 0.18), 0 2px 10px rgba(0, 0, 0, 0.48);
+}
+
+/* Desplegable Ritual del mes (revertible) */
+.inicio-page .inicio-desplegable-productos {
+  margin-bottom: clamp(28px, 4vw, 40px);
+}
+
+.inicio-desplegable-productos {
+  border: 1px solid var(--gold-border-soft);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(24, 14, 40, 0.55) 0%, rgba(8, 6, 15, 0.92) 100%);
+  overflow: hidden;
+  box-shadow:
+    0 0 28px rgba(242, 222, 138, 0.12),
+    0 0 56px rgba(100, 70, 160, 0.1),
+    inset 0 1px 0 rgba(242, 222, 138, 0.08);
+}
+
+/* Primer bloque (p. ej. «Ritual del mes»): puente vivo entre hero y contenido */
+.inicio-ritual-mes-destacado {
+  max-width: min(700px, 94vw);
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: clamp(48px, 7vw, 72px) !important;
+  border-radius: 18px;
+  border-color: rgba(200, 180, 120, 0.38);
+  background: linear-gradient(180deg, rgba(44, 32, 78, 0.65) 0%, rgba(16, 12, 34, 0.94) 100%);
+  box-shadow:
+    0 12px 48px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(232, 210, 150, 0.14),
+    0 0 48px rgba(232, 210, 150, 0.14),
+    0 0 72px rgba(100, 72, 160, 0.16),
+    0 22px 56px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.inicio-ritual-mes-destacado .inicio-desplegable-summary {
+  padding: 20px 22px 20px 20px;
+}
+
+.inicio-ritual-mes-destacado .inicio-desplegable-titulo {
+  font-size: clamp(20px, 2.9vw, 26px);
+  text-shadow:
+    0 0 24px rgba(248, 236, 188, 0.22),
+    0 0 48px rgba(120, 90, 160, 0.12);
+}
+.inicio-desplegable-summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--gold-light);
+  font-weight: bold;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+.inicio-desplegable-summary::-webkit-details-marker,
+.inicio-desplegable-summary::marker {
+  display: none;
+}
+.inicio-desplegable-summary::after {
+  content: "▶";
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  opacity: 0.9;
+}
+.inicio-desplegable-productos[open] .inicio-desplegable-summary::after {
+  content: "▼";
+}
+.inicio-desplegable-summary:hover {
+  background: rgba(242, 222, 138, 0.06);
+  box-shadow: inset 0 0 24px rgba(242, 222, 138, 0.04);
+}
+.inicio-desplegable-titulo {
+  font-size: clamp(19px, 2.6vw, 24px);
+  text-shadow: 0 0 18px rgba(242, 222, 138, 0.2);
+}
+.inicio-desplegable-sub {
+  font-size: 14px;
+  font-weight: normal;
+  color: var(--maika-text-soft);
+}
+.inicio-desplegable-summary {
+  position: relative;
+  padding-right: 44px;
+}
+
+/* Tarjetas del bloque «Ritual del mes» (borde dorado + halo, sin depender del inline) */
+.inicio-ritual-pack-card {
+  border: 2px solid var(--gold-border-soft) !important;
+  box-shadow:
+    0 0 20px rgba(242, 222, 138, 0.12),
+    0 0 40px rgba(100, 70, 160, 0.08),
+    inset 0 0 0 1px rgba(242, 222, 138, 0.06);
+}
+.inicio-ritual-pack-card:hover {
+  box-shadow: var(--gold-hover-shadow), 0 0 28px rgba(100, 70, 160, 0.1);
+}
+.inicio-ritual-pack-card img {
+  border: 1px solid rgba(242, 222, 138, 0.5) !important;
+}
+
+/* Bloque SERVICIOS: “cristal” oscuro + sombra de sección (no flota sobre el cielo) */
+.inicio-servicios-bloque {
+  margin: clamp(24px, 4vw, 44px) auto clamp(32px, 5vw, 56px);
+  padding: clamp(18px, 2.6vw, 26px) clamp(16px, 3vw, 28px);
+  max-width: min(920px, 96vw);
+  border-radius: 22px;
+  background: linear-gradient(165deg, rgba(14, 11, 26, 0.52) 0%, rgba(6, 5, 12, 0.34) 100%);
+  border: 1px solid rgba(175, 155, 105, 0.2);
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.26),
+    0 0 36px rgba(88, 60, 140, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.inicio-servicios-bloque__titulo {
+  margin: 0 0 clamp(14px, 2vw, 20px);
+}
+
+.inicio-servicios-bloque__grid {
+  margin: 0;
+  /* Menos separación vertical entre filas (tarjeta inferior centrada); columnas sin apretar */
+  gap: 10px 18px !important;
+}
+
+@keyframes heroMandalaBreath {
+  0% {
+    transform: scale(1);
+    filter: brightness(1) saturate(1);
+  }
+  50% {
+    transform: scale(1.05);
+    filter: brightness(1.1) saturate(1.08);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1) saturate(1);
+  }
+}
+
+

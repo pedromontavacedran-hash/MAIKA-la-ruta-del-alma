@@ -1,4 +1,6 @@
 import type { Usuario } from "../types";
+import { leerMaikaUsuarios } from "./maikaUsuarios";
+import { normalizarTelefonoES9 } from "./telefono";
 
 export type MetricasUsuariosAdmin = {
   total: number;
@@ -13,12 +15,17 @@ export function calcularMetricasUsuariosAdmin(listaUsuarios: Usuario[]): Metrica
   if (listaUsuarios.length > 0) {
     usuariosGuardados = listaUsuarios;
   } else {
-    try {
-      const parsed = JSON.parse(localStorage.getItem("usuarios") || "[]") as Usuario[];
-      usuariosGuardados = Array.isArray(parsed) ? parsed : [];
-    } catch {
-      usuariosGuardados = [];
-    }
+    const maika = leerMaikaUsuarios();
+    usuariosGuardados = maika.map((u) => {
+      const tel9 = normalizarTelefonoES9(u.telefono || "");
+      return {
+        id: `u_${tel9 || Date.now()}`,
+        nombre: `${String(u.nombre || "").trim()} ${String(u.apellidos || "").trim()}`.trim(),
+        email: String(u.email || "").trim(),
+        telefono: tel9,
+        verificado: !!String(u.email || "").trim()
+      } as Usuario;
+    });
   }
 
   const ahora = Date.now();

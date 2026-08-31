@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
+import { Navigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import type { Pedido } from "../types";
-import BotonCerrar from "../components/BotonCerrar";
+import AdminPageNav from "../components/admin/AdminPageNav";
 import { THEME } from "../config";
 import { isAdminAuthorized } from "../utils/adminAuth";
 
@@ -11,7 +12,7 @@ const MESES_ES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio"
 function añoMesDePedido(p: Pedido): { año: number; mes: number } | null {
   if (!p.fecha) return null;
   const s = p.fecha.trim();
-  const match = s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+  const match = s.match(/(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})/);
   if (match) {
     const dia = parseInt(match[1], 10);
     const mes = parseInt(match[2], 10);
@@ -78,38 +79,21 @@ export default function ContabilidadPage() {
       .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
   }, [pedidos, añoSeleccionado, mesSeleccionado]);
 
+  const volverDesdeAdmin = () => {
+    if (isAdminAuthorized()) {
+      setPagina("admin");
+    } else {
+      setPagina("inicio");
+    }
+  };
+
   if (!accesoAdmin) {
-    return (
-      <div style={{ maxWidth: 500, margin: "0 auto", textAlign: "center", padding: 40, position: "relative" }}>
-        <BotonCerrar
-          onClick={() => {
-            if (isAdminAuthorized()) {
-              setPagina("admin");
-            } else {
-              setPagina("inicio");
-            }
-          }}
-          ariaLabel="Cerrar"
-          title="Cerrar"
-        />
-        <p style={{ color: THEME.goldMain, marginBottom: 20 }}>Solo administradores pueden acceder a Contabilidad.</p>
-      </div>
-    );
+    return <Navigate to="/" replace />;
   }
 
   return (
-    <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 16px", position: "relative" }}>
-      <BotonCerrar
-        onClick={() => {
-          if (isAdminAuthorized()) {
-            setPagina("admin");
-          } else {
-            setPagina("inicio");
-          }
-        }}
-        ariaLabel="Cerrar"
-        title="Cerrar"
-      />
+    <div className="admin-container" style={{ maxWidth: 720, margin: "0 auto", padding: "0 16px" }}>
+      <AdminPageNav onVolver={volverDesdeAdmin} />
       <h2 style={{ textAlign: "center", color: THEME.goldMain, marginBottom: 8 }}>📅 CONTABILIDAD</h2>
       <p style={{ textAlign: "center", color: "rgba(255,255,255,0.85)", marginBottom: 24, fontSize: 14 }}>
         Resumen por año y mes para llevar las ventas

@@ -35,7 +35,26 @@ export default function CookiesBanner({
   onUpdateAnaliticas,
   onUpdateMarketing
 }: Props) {
-  if (!visible || (pagina !== "inicio" && pagina !== "tienda" && pagina !== "carrito")) return null;
+  if (
+    !visible ||
+    (pagina !== "inicio" &&
+      pagina !== "tienda" &&
+      pagina !== "servicios" &&
+      pagina !== "horoscopos" &&
+      pagina !== "ritualDelMes" &&
+      pagina !== "testimonios" &&
+      pagina !== "envios" &&
+      pagina !== "contacto" &&
+      pagina !== "sobreMaika" &&
+      pagina !== "legal" &&
+      pagina !== "legalTerminos" &&
+      pagina !== "legalPrivacidad" &&
+      pagina !== "legalCookies" &&
+      pagina !== "legalAviso" &&
+      pagina !== "carrito")
+  ) {
+    return null;
+  }
 
   return (
     <div

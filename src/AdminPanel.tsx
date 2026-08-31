@@ -1,3 +1,7 @@
+/**
+ * Vista stub. El panel operativo está en `App.tsx` (ruta `/admin`).
+ * Métricas básicas del dashboard: `useAdminMetrics` en `src/admin/hooks/useAdminMetrics.ts`.
+ */
 export default function AdminPanel() {
   return (
     <div style={{

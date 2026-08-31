@@ -1,0 +1,504 @@
+/* Módulo extraído de App.css (líneas 1402–1653). Móvil: touch targets, safe area, topbar hero, full-bleed */
+
+/* ========== Usabilidad móvil: touch targets, safe area ========== */
+@media (max-width: 640px) {
+  .cookie-banner {
+    left: 12px !important;
+    right: 12px !important;
+    bottom: max(12px, env(safe-area-inset-bottom)) !important;
+    padding: 14px !important;
+  }
+  .cookie-banner button {
+    min-height: 44px;
+    padding: 12px 16px !important;
+  }
+  .app-topbar .app-nav-link {
+    min-height: 44px;
+    padding: 10px 12px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .app-inicio-dropdown {
+    min-width: min(280px, calc(100vw - 24px)) !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: min(90vh, 720px) !important;
+    overflow-y: auto !important;
+  }
+  .app-inicio-dropdown button {
+    min-height: 44px !important;
+    padding: 12px 14px !important;
+  }
+  .app-inicio-dropdown__close {
+    min-height: 0 !important;
+    padding: 8px !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  .app-inicio-dropdown__buscar-submit {
+    flex-shrink: 0 !important;
+    padding: 10px 12px !important;
+    min-width: max-content !important;
+  }
+  .app-inicio-dropdown a {
+    min-height: 44px;
+    padding: 12px 14px !important;
+    display: flex;
+    align-items: center;
+  }
+  .app-topbar__right .app-nav-link--right,
+  .app-topbar__right .app-nav-link--carrito {
+    min-height: 44px !important;
+    padding: 10px 12px !important;
+  }
+  .app-topbar.app-topbar--hero-style .app-nav-link--menu-hamburger,
+  .app-topbar.app-topbar--hero-style .app-topbar__right .app-nav-link--right,
+  .app-topbar.app-topbar--hero-style .app-topbar__right .app-nav-link--carrito {
+    width: var(--maika-topbar-icon-box-px, 44px) !important;
+    height: var(--maika-topbar-icon-box-px, 44px) !important;
+    min-width: var(--maika-topbar-icon-box-px, 44px) !important;
+    min-height: var(--maika-topbar-icon-box-px, 44px) !important;
+    padding: 0 !important;
+    transform: translateY(var(--maika-topbar-icons-y-px, 0px)) !important;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+  }
+  /* Más compacta que cuenta/carrito: libera ancho cuando el panel tiene buscador. */
+  .app-topbar.app-topbar--hero-style .app-nav-link.app-nav-link--menu-hamburger {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+  }
+  .app-topbar.app-topbar--hero-style .app-nav-link.app-nav-link--menu-hamburger svg {
+    width: 22px !important;
+    height: 22px !important;
+    max-width: 22px !important;
+    max-height: 22px !important;
+  }
+  .app-bottombar .app-nav-link {
+    min-height: 44px;
+    padding: 10px 14px;
+  }
+  /* Evita zoom automático al enfocar en iOS */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
+/* Cabecera hero: un poco más de aire entre cuenta / carrito / favoritos en móvil */
+@media (max-width: 768px) {
+  .app-topbar.app-topbar--hero-style .app-topbar__right.app-topbar__right--btns-aligned {
+    gap: 10px !important;
+  }
+  .app-topbar.app-topbar--hero-style .app-topbar__right .app-nav-link--right,
+  .app-topbar.app-topbar--hero-style .app-topbar__right .app-nav-link--carrito {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  /* Hamburguesa: menos margen negativo que en desktop (inline -14px) para no pegarla al borde en móvil. */
+  .app-topbar.app-topbar--hero-style .app-nav-link.app-nav-link--menu-hamburger {
+    margin-left: 6px !important;
+  }
+}
+
+.app-shell a {
+  color: var(--gold-light);
+  text-decoration: none;
+  transition: color var(--maika-transition);
+}
+.app-shell a:hover {
+  color: var(--gold-main);
+}
+
+.card {
+  background: var(--maika-bg);
+  border: 1px solid var(--gold-border-soft);
+  border-radius: 18px;
+  padding: 20px;
+  text-align: center;
+  color: var(--maika-text);
+  position: relative;
+  transition: transform var(--maika-transition), box-shadow var(--maika-transition);
+}
+
+.card:hover {
+  transform: none;
+  box-shadow: var(--gold-hover-shadow);
+}
+
+.imagen-inicio-hover {
+  transition: transform var(--maika-transition), box-shadow var(--maika-transition);
+}
+
+.imagen-inicio-hover:hover {
+  transform: none;
+  box-shadow: var(--gold-hover-shadow);
+}
+
+.boton-tienda-hover {
+  background: var(--gold-gradient) !important;
+  background-image: none !important;
+  box-shadow: none;
+  transition: box-shadow var(--maika-transition);
+}
+
+.boton-tienda-hover:hover {
+  transform: none;
+  box-shadow: var(--gold-hover-shadow);
+}
+
+/*
+ * La reserva bajo la barra fija va solo en `.page-top-spacing` (rutas de contenido) o en contenedores admin;
+ * no en `__content`, para no duplicar con ese wrapper.
+ */
+.app-shell:not(.app-shell--full-bleed-top):not(.app-shell--inventario-admin) .app-shell__content {
+  box-sizing: border-box;
+}
+
+/* Regla base del bloque __content (full-bleed e inventario la anulan en sus selectores) */
+.app-shell__content {
+  overflow-x: visible;
+  min-height: 100vh;
+  min-height: 100svh;
+  overscroll-behavior-y: none;
+  display: flex;
+  flex-direction: column;
+  overflow-anchor: none;
+}
+
+/*
+ * MaikaAppShell: envuelve solo <AppRoutes />. Crece entre la barra/cookies y el checkout
+ * para que páginas como /ritual-del-mes (`.inicio-wrapper { flex: 1 }`) ocupen el espacio.
+ */
+.app-shell__routes-grow {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  overflow: visible;
+}
+
+/*
+ * Fuera de tienda: la rueda no desplaza `.app-shell__content`;
+ * el desplazamiento vertical va en `.app-shell__routes-grow` (≥769 también en layout-shell).
+ */
+.app-shell:not(.app-shell--tienda-shell-scroll) .app-shell__content {
+  overflow-y: hidden;
+}
+.app-shell:not(.app-shell--tienda-shell-scroll) .app-shell__routes-grow {
+  overflow-x: visible;
+  overflow-y: visible;
+  overscroll-behavior: auto;
+  overscroll-behavior-y: auto;
+  overflow-anchor: none;
+  scrollbar-width: auto;
+  -ms-overflow-style: auto;
+  -webkit-overflow-scrolling: auto;
+}
+
+/* Rutas que deben llenar el hueco bajo la barra (p. ej. ritual / testimonios). Sin flex interno: el grid del ritual debe usar todo el ancho (filas horizontales). */
+.maika-route-fill-column {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  min-width: 0;
+  align-self: stretch;
+}
+
+/* Entrada unificada bajo barra fija para pantallas envueltas por AppRoutes. */
+.page-top-spacing {
+  padding-top: var(--app-content-pad-bajo-nav);
+}
+
+/* Estructura compartida para alinear arranque visual entre pantallas internas. */
+.maika-page-content {
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.maika-page {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.maika-page-content--narrow {
+  max-width: 480px;
+}
+
+.maika-page-content--wide {
+  max-width: 1440px;
+}
+
+.maika-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 60px;
+  margin: 0 0 var(--maika-page-header-gap, 12px) !important;
+}
+
+.maika-page-title {
+  margin: 0;
+  color: var(--gold-main);
+  line-height: 1.2;
+}
+
+.maika-page-title--center {
+  text-align: center;
+}
+
+.maika-page-header .boton-cerrar-modal,
+.maika-page-header .boton-cerrar-modal--discreto {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  flex-shrink: 0;
+}
+
+.maika-page-subheader {
+  margin: 0 0 var(--maika-page-subheader-gap, 12px) !important;
+  min-height: calc(28px + var(--maika-page-subheader-gap, 12px));
+  display: flex;
+  align-items: center;
+}
+
+.maika-page-subheader:empty {
+  display: none;
+  min-height: 0;
+  margin: 0 !important;
+}
+
+.maika-page-body {
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.maika-page-body--center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/*
+  Móvil/tablet estrecha: nav fija (no ocupa flujo). La reserva bajo la barra es `padding-top` en
+  `.app-shell__content` (todas las anchuras, salvo full-bleed / inventario). Aquí: geometría de la barra, logo, desplegable.
+  Inventario admin: sin nav global.
+*/
+@media (max-width: 768px) {
+  /*
+   * Igual que en escritorio (layout-shell ≥769): el documento no debe hacer scroll vertical.
+   * Si no, la rueda/touch mueve `html/body` y a la vez `.app-shell__routes-grow` → sensación de “pantalla que se mueve”.
+   */
+  html,
+  body {
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: auto;
+    overscroll-behavior-y: auto;
+  }
+  html {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  #root,
+  .app-shell {
+    height: 100%;
+    min-height: 100vh;
+    min-height: 100svh;
+  }
+
+  html::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    background: transparent;
+  }
+
+  /* Sin padding-top en el shell: la reserva va en __content y evita doble hueco bajo la nav fija */
+  .app-shell:not(.app-shell--inventario-admin) {
+    padding-top: 0 !important;
+    padding-bottom: 20px !important;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)) !important;
+    padding-right: max(16px, env(safe-area-inset-right, 0px)) !important;
+  }
+
+  .app-shell.app-shell--full-bleed-top:not(.app-shell--inventario-admin) {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .app-shell.app-shell--full-bleed-x:not(.app-shell--inventario-admin) {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .app-topbar.app-topbar--hero-style {
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    z-index: 10000 !important;
+    padding-top: env(safe-area-inset-top, 0px) !important;
+    min-height: var(--app-topbar-stack) !important;
+    height: var(--app-topbar-stack) !important;
+    box-sizing: border-box !important;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    /* `overflow-x: hidden` + `visible` en y fuerza recorte y el ::before negativo no se veía */
+    overflow: visible !important;
+    /* La sombra baja la lleva .inner-row para que coincida con la línea subida. */
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  }
+
+  /*
+   * Sube el fondo hacia el notch; `overflow: visible` en la topbar para que no recorte.
+   */
+  .app-topbar.app-topbar--hero-style::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -22px;
+    bottom: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--barra-fondo-usuario, #0b0b0d) 70%, rgb(118, 102, 188)) 0%,
+        color-mix(in srgb, var(--barra-fondo-usuario, #0b0b0d) 42%, transparent) 46%,
+        color-mix(in srgb, var(--barra-fondo-usuario, #0b0b0d) 86%, rgb(6, 4, 14)) 100%
+      ),
+      var(--barra-fondo-usuario, #0b0b0d);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  /*
+   * Gradiente “puente”: bajo el borde inferior real de la fila de iconos (la topbar es flex + align-items: center en móvil).
+   * (safe + stack + inner) / 2 = borde inferior del bloque centrado de altura inner.
+   */
+  .app-topbar.app-topbar--hero-style::after {
+    top: calc(
+        (
+            env(safe-area-inset-top, 0px) + var(--app-topbar-stack) +
+              min(var(--app-topbar-h), var(--app-topbar-h-max, 104px))
+          ) / 2
+      )
+      !important;
+    bottom: auto !important;
+  }
+
+  .app-topbar.app-topbar--hero-style .app-topbar__inner-row {
+    position: relative;
+    z-index: 1;
+    min-height: min(var(--app-topbar-h), var(--app-topbar-h-max, 104px)) !important;
+    height: min(var(--app-topbar-h), var(--app-topbar-h-max, 104px)) !important;
+    max-height: min(var(--app-topbar-h), var(--app-topbar-h-max, 104px)) !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+    align-items: center !important;
+    border-bottom: 1px solid rgba(168, 148, 228, 0.16) !important;
+    box-shadow:
+      0 8px 22px rgba(0, 0, 0, 0.22),
+      0 0 12px rgba(104, 82, 180, 0.06) !important;
+  }
+
+  /*
+    Logo en barra hero: el inline es 78px; sin forzar aquí puede verse distinto al cambiar de ruta.
+    Solo web (maika-native lleva sus propias medidas más abajo).
+  */
+  html:not(.maika-native) .app-topbar.app-topbar--hero-style .app-topbar__logo-mark {
+    width: 68px !important;
+    height: 68px !important;
+    min-width: 68px !important;
+    min-height: 68px !important;
+    padding: 5px !important;
+    margin-top: 0 !important;
+    flex-shrink: 0 !important;
+    align-self: center !important;
+  }
+
+  .app-inicio-dropdown.app-inicio-dropdown--overlay {
+    top: calc(var(--app-topbar-stack) - 2px) !important;
+    z-index: 9950 !important;
+  }
+}
+
+@media (max-width: 420px) {
+  html:not(.maika-native) .app-topbar.app-topbar--hero-style .app-topbar__logo-mark {
+    width: 60px !important;
+    height: 60px !important;
+    min-width: 60px !important;
+    min-height: 60px !important;
+    padding: 4px !important;
+    margin-top: 0 !important;
+  }
+}
+
+/* Espacio para que el contenido no quede oculto bajo el header sticky */
+.app-shell__content > .app-topbar + * {
+  scroll-margin-top: 1px;
+}
+/* Espacio entre header sticky y el contenido que sigue (evita que quede oculto) */
+.app-topbar + * {
+  margin-top: 12px;
+}
+.app-shell--full-bleed-top .app-topbar + * {
+  margin-top: 0;
+}
+
+/* Cuando la primera vista es Inicio: sin hueco arriba para que nav quede a ras */
+.app-shell--full-bleed-top {
+  padding-top: 0 !important;
+  /* El Layout aplica padding horizontal al shell; sin esto el hero no llega a los bordes del viewport. */
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+/* Hero empieza debajo del topbar (o debajo del desplegable si está abierto). Sin solapamientos. */
+.app-shell--full-bleed-top .hero-section {
+  margin-top: 0;
+}
+
+/*
+  React Router puede dejar un nodo entre la nav y el hero; el margen de .app-topbar + * no aplica
+  al section y queda el hueco de 12px. Anulamos margen superior de todo lo que sigue a la nav en inicio.
+*/
+.app-shell--full-bleed-top .app-shell__content > .app-topbar ~ * {
+  margin-top: 0 !important;
+}
+
+@media (min-width: 769px) {
+  /*
+    Inicio: ancho real del viewport. El aire bajo la barra fija va solo en padding-top del hero
+    (layout estable; sin translateY ni top con porcentajes).
+  */
+  .app-shell--full-bleed-top .hero-section {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    box-sizing: border-box;
+    transform: none;
+    /* Reserva bajo la barra fija (flujo / altura del bloque). El logo+CTA van en capas absolutas: el despeje real va en .hero-section__brand-stack */
+    padding-top: calc(var(--app-topbar-stack) + var(--hero-top-gap-desktop, 72px));
+    min-height: 100vh;
+    min-height: 100svh;
+  }
+}
+

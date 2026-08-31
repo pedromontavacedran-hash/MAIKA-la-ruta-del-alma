@@ -23,6 +23,25 @@ export const INTENCIONES_OPCIONES: { value: IntencionProducto | ""; label: strin
   { value: "otro", label: "Otro" }
 ];
 
+/** Para qué está pensada la pieza (filtro futuro, solo relevante hoy en Pulseras). */
+export type GeneroJoya = "hombre" | "mujer" | "unisex";
+
+export const GENEROS_JOYA_OPCIONES: { value: GeneroJoya | ""; label: string }[] = [
+  { value: "", label: "— Sin especificar —" },
+  { value: "hombre", label: "Hombre" },
+  { value: "mujer", label: "Mujer" },
+  { value: "unisex", label: "Unisex" }
+];
+
+/** Acabado/metal de la pieza. Variante del producto, no una categoría. */
+export type AcabadoJoya = "oro" | "acero";
+
+export const ACABADOS_JOYA_OPCIONES: { value: AcabadoJoya | ""; label: string }[] = [
+  { value: "", label: "— Sin especificar —" },
+  { value: "oro", label: "Dorado" },
+  { value: "acero", label: "Acero" }
+];
+
 export interface Producto {
   id: number;
   nombre: string;
@@ -33,7 +52,8 @@ export interface Producto {
   precioCosteIvaIncluido?: number;
   stock: number;
   imagen: string;
-  categoria: "velas" | "inciensos" | "figuras" | "kits";
+  /** "velas" | "inciensos" | "figuras" | "kits" | "joyas": categorías base con estado propio. */
+  categoria: string;
   descripcion: string;
   nombreTamano?: number;
   nombreColor?: string;
@@ -44,6 +64,12 @@ export interface Producto {
   paraQueSirve?: string;
   /** Cómo usarlo (instrucciones en ficha). */
   comoUsar?: string;
+  /** Id de `SubcategoriaEntrada` (pertenece a `categoria`). Gestionada desde admin, no un enum fijo. */
+  subcategoriaId?: string;
+  /** Atributo de la pieza, no categoría. Hoy solo relevante en Pulseras. */
+  generoJoya?: GeneroJoya;
+  /** Variante de la pieza (oro/acero), no categoría. */
+  acabadoJoya?: AcabadoJoya;
 }
 
 export interface ItemCarrito extends Producto {
@@ -115,13 +141,17 @@ export interface Usuario {
   direcciones?: DireccionUsuario[];
   direccionPredeterminadaId?: string;
   password?: string;
+  hasPassword?: boolean;
+  passwordTemporal?: boolean;
   verificado?: boolean;
+  mustChangePassword?: boolean;
   pedidos?: Pedido[];
 }
 
 export interface AuthForm {
   nombre: string;
   email: string;
+  dni?: string;
   password: string;
   telefono: string;
   confirmEmail: string;
@@ -148,6 +178,7 @@ export interface EditUsuarioForm {
   dni?: string;
   telefono: string;
   password: string;
+  passwordTemporal?: boolean;
   calle: string;
   bloque: string;
   escalera: string;
@@ -160,6 +191,8 @@ export interface EditUsuarioForm {
   pais: string;
   direccion: string;
   verificado: boolean;
+  direccionesDisponibles?: DireccionUsuario[];
+  direccionEditandoId?: string;
 }
 
 export interface Pedido {
@@ -179,6 +212,21 @@ export interface Pedido {
   };
   descuento?: number;
   cupon?: string;
+  /** Fuente estructurada al confirmar; el texto largo se deriva con direccionLineaCompletaDesdeEnvio. */
+  direccionEnvio?: {
+    calle: string;
+    numero: string;
+    piso: string;
+    puerta: string;
+    cp: string;
+    poblacion: string;
+    provincia: string;
+    pais: string;
+    bloque?: string;
+    escalera?: string;
+  };
+  /** Redundante con la línea derivada de direccionEnvio (compatibilidad / lectura rápida). */
+  direccionTexto?: string;
 }
 
 export type CuponTipo = "porcentaje" | "envio_gratis";
@@ -211,15 +259,69 @@ export interface PerfilCompraRapida {
   actualizadoEn: string;
 }
 
-export type CategoriaEntrada = { id: string; nombre: string };
+export type CategoriaEntrada = { id: string; nombre: string; imagen?: string };
+
+/** Subcategoría real: pertenece a una categoría principal (`categoriaId`), gestionable desde admin. */
+export type SubcategoriaEntrada = { id: string; categoriaId: string; nombre: string };
+
+/** Pack armado por el cliente (reservado para futuro). */
+export type TipoPackCampana = "fijo" | "dinamico";
+
+/** Una línea del pack: producto del catálogo + cantidad. */
+export interface CampanaPackLinea {
+  productoId: number;
+  cantidad: number;
+}
+
+/**
+ * Campaña = pack único en tienda (visual + contenido + control).
+ * Una sola campaña activa; se persiste en localStorage (`campana_pack_maika_v1`).
+ */
+export interface CampanaPackConfig {
+  version: 1;
+  tipo: TipoPackCampana;
+  /** Si false, no se muestra el pack en tienda. */
+  activo: boolean;
+  /** VISUAL */
+  nombre: string;
+  subtitulo: string;
+  /** URL o ruta de imagen; vacío = primera imagen del primer producto resuelto. */
+  imagenUrl: string;
+  precio: number;
+  precioAnterior: number | null;
+  textoBotonTarjeta: string;
+  /** CONTENIDO */
+  descripcionLarga: string;
+  lineas: CampanaPackLinea[];
+  /** Texto storytelling / ritual (opcional). */
+  textoEspiritual: string;
+  /** CONTROL */
+  inicio: string;
+  fin: string;
+  mostrarContador: boolean;
+  mostrarAhorro: boolean;
+}
 
 export type Pagina =
   | "inicio"
   | "tienda"
+  | "suenos"
+  | "servicios"
+  | "horoscopos"
+  | "ritualDelMes"
+  | "testimonios"
+  | "lectura"
+  | "envios"
+  | "contacto"
+  | "sobreMaika"
+  | "legal"
+  | "legalTerminos"
+  | "legalPrivacidad"
+  | "legalCookies"
+  | "legalAviso"
   | "carrito"
   | "seguimiento"
   | "cuenta"
-  | "favoritos"
   | "admin"
   | "contabilidad"
   | "editarCategorias"

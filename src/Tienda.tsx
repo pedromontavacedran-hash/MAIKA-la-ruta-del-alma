@@ -1,11 +1,40 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import type { CSSProperties } from "react";
 import type { Producto } from "./App";
 import { INTENCIONES_OPCIONES } from "./types";
-import { useFavoritos } from "./hooks/useFavoritos";
+import type { SubcategoriaEntrada } from "./types";
 import BotonCerrar from "./components/BotonCerrar";
 import { THEME } from "./config";
 
-export type CategoriaEntrada = { id: string; nombre: string };
+export type CategoriaEntrada = { id: string; nombre: string; imagen?: string };
+
+const TIENDA_THUMB_WRAP: CSSProperties = {
+  marginBottom: 12,
+  width: "100%",
+  aspectRatio: "1 / 1",
+  maxHeight: 168,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+};
+
+const TIENDA_THUMB_IMG: CSSProperties = {
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+  borderRadius: 10,
+  border: "1px solid rgba(212,175,55,0.5)",
+};
+
+const TIENDA_CATEG_THUMB_WRAP: CSSProperties = {
+  marginBottom: 12,
+  width: "100%",
+  aspectRatio: "1 / 1",
+  maxHeight: 148,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+};
 
 /** Item mínimo del carrito para calcular disponibles = stock - en carrito */
 type ItemCarritoRef = { id: number; cantidad: number };
@@ -16,9 +45,11 @@ interface Props {
   inciensos: Producto[];
   figuras: Producto[];
   kits?: Producto[];
+  joyas?: Producto[];
   categoriasCatalogo?: CategoriaEntrada[];
+  subcategoriasCatalogo?: SubcategoriaEntrada[];
   cart?: ItemCarritoRef[];
-  agregarAlCarrito: (producto: Producto) => void;
+  agregarAlCarrito: (producto: Producto) => boolean;
   volver: () => void;
   /** Si se pasa, al montar se muestra esta categoría (ej. desde accesos rápidos en Inicio). */
   categoriaInicial?: string | null;
@@ -28,6 +59,12 @@ interface Props {
   busquedaInicial?: string;
   /** Limpiar el término de búsqueda en el padre. */
   onBusquedaInicialAplicada?: () => void;
+  /** Mostrar u ocultar la cruz superior de esta vista. */
+  mostrarBotonCerrar?: boolean;
+  /** El padre (p. ej. TiendaView) oculta el bloque «Pack destacado» mientras el usuario está dentro de una categoría. */
+  onVistaCategoriaInternaChange?: (abierta: boolean) => void;
+  /** Menos padding superior cuando ya hay hero de pack encima (continuidad con «Lo más vendido»). */
+  catalogoTrasPackHero?: boolean;
 }
 
 function getProductosForCategoria(
@@ -35,13 +72,20 @@ function getProductosForCategoria(
   velas: Producto[],
   inciensos: Producto[],
   figuras: Producto[],
-  kits: Producto[] = []
+  kits: Producto[] = [],
+  joyas: Producto[] = []
 ): Producto[] {
+  const v = Array.isArray(velas) ? velas : [];
+  const i = Array.isArray(inciensos) ? inciensos : [];
+  const f = Array.isArray(figuras) ? figuras : [];
+  const k = Array.isArray(kits) ? kits : [];
+  const j = Array.isArray(joyas) ? joyas : [];
   const c = cat.toLowerCase();
-  if (c === "velas") return velas;
-  if (c === "inciensos") return inciensos;
-  if (c === "figuras") return figuras;
-  if (c === "kits") return kits;
+  if (c === "velas") return v;
+  if (c === "inciensos") return i;
+  if (c === "figuras") return f;
+  if (c === "kits") return k;
+  if (c === "joyas") return j;
   return [];
 }
 
@@ -51,6 +95,7 @@ function getEmoji(cat: string): string {
   if (c === "inciensos") return "🌿";
   if (c === "figuras") return "🪷";
   if (c === "kits") return "📦";
+  if (c === "joyas") return "✨";
   return "📦";
 }
 
@@ -78,14 +123,86 @@ const categoriasPorDefecto: CategoriaEntrada[] = [
   { id: "velas", nombre: "velas" },
   { id: "inciensos", nombre: "inciensos" },
   { id: "figuras", nombre: "figuras" },
-  { id: "kits", nombre: "kits" }
+  { id: "kits", nombre: "kits" },
+  { id: "joyas", nombre: "joyería del alma" }
 ];
 
-export default function Tienda({ velas, inciensos, figuras, kits = [], categoriasCatalogo = categoriasPorDefecto, cart = [], agregarAlCarrito, volver, categoriaInicial, onCategoriaInicialAplicada, busquedaInicial, onBusquedaInicialAplicada }: Props) {
+type ImagenLightbox = { src: string; alt: string };
+
+function TiendaLightbox({ imagen, onClose }: { imagen: ImagenLightbox | null; onClose: () => void }) {
+  if (!imagen) return null;
+  return (
+    <div
+      className="tienda-lightbox-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Imagen ampliada"
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        background: "rgba(0,0,0,0.9)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 24,
+        cursor: "pointer",
+      }}
+    >
+      <BotonCerrar
+        onClick={(e) => { e?.stopPropagation(); onClose(); }}
+        ariaLabel="Cerrar"
+        title="Cerrar"
+      />
+      <img
+        src={imagen.src}
+        alt={imagen.alt}
+        decoding="async"
+        onClick={(e) => e.stopPropagation()}
+        style={{ maxWidth: "100%", maxHeight: "85vh", objectFit: "contain", borderRadius: 12 }}
+      />
+      <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.9rem", marginTop: 12 }}>
+        Clic fuera o tecla Escape para cerrar
+      </p>
+    </div>
+  );
+}
+
+export default function Tienda({
+  velas: velasIn,
+  inciensos: inciensosIn,
+  figuras: figurasIn,
+  kits: kitsIn = [],
+  joyas: joyasIn = [],
+  categoriasCatalogo = categoriasPorDefecto,
+  subcategoriasCatalogo = [],
+  cart = [],
+  agregarAlCarrito,
+  volver,
+  categoriaInicial,
+  onCategoriaInicialAplicada,
+  busquedaInicial,
+  onBusquedaInicialAplicada,
+  mostrarBotonCerrar = true,
+  onVistaCategoriaInternaChange,
+  catalogoTrasPackHero = false
+}: Props) {
+  const velas = Array.isArray(velasIn) ? velasIn : [];
+  const inciensos = Array.isArray(inciensosIn) ? inciensosIn : [];
+  const figuras = Array.isArray(figurasIn) ? figurasIn : [];
+  const kits = Array.isArray(kitsIn) ? kitsIn : [];
+  const joyas = Array.isArray(joyasIn) ? joyasIn : [];
   const [mostrarCategoria, setMostrarCategoria] = useState<string | null>(null);
+  /** `null` = aún no se ha elegido subcategoría; `"__todas__"` = "Ver todo <categoría>" (sin filtrar). */
+  const [subcategoriaAbierta, setSubcategoriaAbierta] = useState<string | null>(null);
+  const subcategoriasCategoriaActual = mostrarCategoria
+    ? subcategoriasCatalogo.filter((s) => s.categoriaId === mostrarCategoria)
+    : [];
   const [filtroIntencion, setFiltroIntencion] = useState<string>("");
   const terminoBusqueda = (busquedaInicial ?? "").trim();
-  const todosProductos = [...velas, ...inciensos, ...figuras, ...kits];
+  const todosProductos = [...velas, ...inciensos, ...figuras, ...kits, ...joyas];
   const productosBusqueda = terminoBusqueda
     ? todosProductos.filter((p) => {
         const texto = `${p.nombre} ${p.descripcion ?? ""}`.toLowerCase();
@@ -94,8 +211,67 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
     : [];
   const fondoServicios = THEME.bg;
   const [lightboxImagen, setLightboxImagen] = useState<{ src: string; alt: string } | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const { isFavorito, toggleFavorito } = useFavoritos();
+  const [anadirCarritoOkKey, setAnadirCarritoOkKey] = useState<string | null>(null);
+  const anadirCarritoOkTimeoutRef = useRef<number | null>(null);
+
+  const marcarAnadirCarritoOk = useCallback((producto: Producto) => {
+    const key = `${producto.categoria}-${producto.id}`;
+    if (anadirCarritoOkTimeoutRef.current != null) {
+      window.clearTimeout(anadirCarritoOkTimeoutRef.current);
+    }
+    setAnadirCarritoOkKey(key);
+    anadirCarritoOkTimeoutRef.current = window.setTimeout(() => {
+      setAnadirCarritoOkKey((cur) => (cur === key ? null : cur));
+      anadirCarritoOkTimeoutRef.current = null;
+    }, 190);
+  }, []);
+
+  const animarProductoAlCarrito = useCallback((origen: HTMLElement | null) => {
+    const carrito = document.querySelector<HTMLElement>("[data-maika-cart-icon]");
+    if (!origen || !carrito || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const origenRect = origen.getBoundingClientRect();
+    const carritoRect = carrito.getBoundingClientRect();
+    const burbuja = document.createElement("div");
+
+    burbuja.className = "maika-fly-to-cart";
+    burbuja.textContent = "Añadido";
+    burbuja.style.left = `${origenRect.left + origenRect.width / 2 - 42}px`;
+    burbuja.style.top = `${origenRect.top + origenRect.height / 2 - 18}px`;
+    document.body.appendChild(burbuja);
+
+    requestAnimationFrame(() => {
+      burbuja.style.transform = `translate(${carritoRect.left + carritoRect.width / 2 - origenRect.left - origenRect.width / 2}px, ${carritoRect.top + carritoRect.height / 2 - origenRect.top - origenRect.height / 2}px) scale(0.35)`;
+      burbuja.style.opacity = "0.2";
+    });
+
+    window.setTimeout(() => {
+      carrito.classList.remove("maika-cart-pulse");
+      void carrito.offsetWidth;
+      carrito.classList.add("maika-cart-pulse");
+    }, 820);
+    window.setTimeout(() => burbuja.remove(), 1020);
+    window.setTimeout(() => carrito.classList.remove("maika-cart-pulse"), 1220);
+  }, []);
+
+  const intentarAnadirAlCarrito = useCallback(
+    (producto: Producto, origen?: HTMLElement | null) => {
+      const ok = agregarAlCarrito(producto);
+      if (ok) {
+        marcarAnadirCarritoOk(producto);
+        animarProductoAlCarrito(origen ?? null);
+      }
+      return ok;
+    },
+    [agregarAlCarrito, animarProductoAlCarrito, marcarAnadirCarritoOk]
+  );
+
+  useEffect(
+    () => () => {
+      if (anadirCarritoOkTimeoutRef.current != null) window.clearTimeout(anadirCarritoOkTimeoutRef.current);
+    },
+    []
+  );
 
   const getProductImageSrc = (prod: Producto): string =>
     prod.imagen && (prod.imagen.startsWith("data:") || prod.imagen.startsWith("http") || prod.imagen.startsWith("/"))
@@ -106,58 +282,28 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
 
   const cerrarLightbox = () => setLightboxImagen(null);
 
-  const Lightbox = () =>
-    lightboxImagen ? (
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label="Imagen ampliada"
-        onClick={cerrarLightbox}
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 9999,
-          background: "rgba(0,0,0,0.9)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 24,
-          cursor: "pointer",
-        }}
-      >
-        <BotonCerrar
-          onClick={(e) => { e?.stopPropagation(); cerrarLightbox(); }}
-          ariaLabel="Cerrar"
-          title="Cerrar"
-          style={{ top: 16, right: 16, zIndex: 10000 }}
-        />
-        <img
-          src={lightboxImagen.src}
-          alt={lightboxImagen.alt}
-          onClick={(e) => e.stopPropagation()}
-          style={{ maxWidth: "100%", maxHeight: "85vh", objectFit: "contain", borderRadius: 12 }}
-        />
-        <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.9rem", marginTop: 12 }}>
-          Clic fuera o tecla Escape para cerrar
-        </p>
-      </div>
-    ) : null;
-
   useEffect(() => {
     if (categoriaInicial) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- alinear con prop categoriaInicial del padre
       setMostrarCategoria(categoriaInicial);
+      setSubcategoriaAbierta(null);
       onCategoriaInicialAplicada?.();
     }
   }, [categoriaInicial, onCategoriaInicialAplicada]);
 
+  useEffect(() => {
+    onVistaCategoriaInternaChange?.(mostrarCategoria != null);
+  }, [mostrarCategoria, onVistaCategoriaInternaChange]);
+
+  useEffect(() => {
+    return () => {
+      onVistaCategoriaInternaChange?.(false);
+    };
+  }, [onVistaCategoriaInternaChange]);
+
   /** Cantidad de este producto en el carrito (para mostrar disponibles = stock - en carrito). */
   const cantidadEnCarrito = (idProducto: number) =>
     cart.find((it) => Number(it.id) === idProducto)?.cantidad ?? 0;
-
-  useEffect(() => {
-    setRefreshKey(prev => prev + 1);
-  }, [velas, inciensos, figuras, categoriasCatalogo, cart]);
 
   useEffect(() => {
     if (!lightboxImagen) return;
@@ -166,23 +312,120 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
     return () => window.removeEventListener("keydown", onKey);
   }, [lightboxImagen]);
 
+  if (mostrarCategoria && subcategoriasCategoriaActual.length > 0 && !subcategoriaAbierta) {
+    const productosCategoria = getProductosForCategoria(mostrarCategoria, velas, inciensos, figuras, kits, joyas);
+    const entradaCat = categoriasCatalogo.find((c) => c.id === mostrarCategoria);
+    const nombreCat = entradaCat?.nombre ?? mostrarCategoria;
+    const tituloCat = getEmoji(mostrarCategoria) + " " + nombreCat.charAt(0).toUpperCase() + nombreCat.slice(1);
+    return (
+      <div className="tienda-vista tienda-vista--categoria-abierta tienda-page-layout maika-anchor" style={{ padding: 40 }}>
+        <header className="tienda-vista__cabecera-categoria">
+          <div className="tienda-vista__cabecera-placeholder" aria-hidden />
+          <h2 className="tienda-vista__titulo-categoria" style={{ color: THEME.goldMain, fontSize: "2rem" }}>
+            {tituloCat}
+          </h2>
+          <div className="tienda-vista__cabecera-categoria-cerrar">
+            <BotonCerrar
+              onClick={() => setMostrarCategoria(null)}
+              ariaLabel="Volver a categorías"
+              title="Volver a categorías"
+            />
+          </div>
+        </header>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+            gap: 24,
+          }}
+        >
+          <div
+            onClick={() => setSubcategoriaAbierta("__todas__")}
+            style={{
+              cursor: "pointer",
+              background: fondoServicios,
+              borderRadius: 20,
+              padding: 26,
+              border: `2px dashed ${THEME.goldMain}`,
+              textAlign: "center",
+            }}
+          >
+            <div style={{ fontSize: "1.8rem", marginBottom: 8 }} aria-hidden>🗂️</div>
+            <h3 style={{ color: THEME.goldMain, margin: "0 0 6px" }}>Ver toda {nombreCat}</h3>
+            <p style={{ color: "white", margin: 0 }}>{productosCategoria.length} productos</p>
+          </div>
+          {subcategoriasCategoriaActual.map((sub) => {
+            const count = productosCategoria.filter((p) => p.subcategoriaId === sub.id).length;
+            return (
+              <div
+                key={sub.id}
+                onClick={() => setSubcategoriaAbierta(sub.id)}
+                style={{
+                  cursor: "pointer",
+                  background: fondoServicios,
+                  borderRadius: 20,
+                  padding: 26,
+                  border: `2px solid ${THEME.goldMain}`,
+                  textAlign: "center",
+                }}
+              >
+                <div style={{ fontSize: "1.8rem", marginBottom: 8 }} aria-hidden>✨</div>
+                <h3 style={{ color: THEME.goldMain, margin: "0 0 6px" }}>{sub.nombre}</h3>
+                <p style={{ color: "white", margin: 0 }}>{count} productos</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
   if (mostrarCategoria) {
-    const productosCat = getProductosForCategoria(mostrarCategoria, velas, inciensos, figuras, kits);
+    const productosCatBase = getProductosForCategoria(mostrarCategoria, velas, inciensos, figuras, kits, joyas);
+    const filtrarPorSubcategoria = subcategoriaAbierta && subcategoriaAbierta !== "__todas__";
+    const productosCat = filtrarPorSubcategoria
+      ? productosCatBase.filter((p) => p.subcategoriaId === subcategoriaAbierta)
+      : productosCatBase;
     const productos = filtroIntencion
       ? productosCat.filter((p) => p.intencion === filtroIntencion)
       : productosCat;
     const entrada = categoriasCatalogo.find((c) => c.id === mostrarCategoria);
-    const nombreDisplay = entrada?.nombre ?? mostrarCategoria;
-    const titulo = getEmoji(mostrarCategoria) + " " + nombreDisplay.charAt(0).toUpperCase() + nombreDisplay.slice(1);
+    const subcategoriaEntrada = filtrarPorSubcategoria
+      ? subcategoriasCatalogo.find((s) => s.id === subcategoriaAbierta)
+      : undefined;
+    const nombreDisplay = subcategoriaEntrada ? subcategoriaEntrada.nombre : entrada?.nombre ?? mostrarCategoria;
+    const titulo = subcategoriaEntrada
+      ? "✨ " + subcategoriaEntrada.nombre
+      : getEmoji(mostrarCategoria) + " " + nombreDisplay.charAt(0).toUpperCase() + nombreDisplay.slice(1);
+    const haySubcategoriasEnEstaCategoria = subcategoriasCategoriaActual.length > 0;
 
     return (
       <>
-      <div className="tienda-vista" style={{ padding: 40, position: "relative" }}>
-        <BotonCerrar onClick={() => { setMostrarCategoria(null); setFiltroIntencion(""); }} ariaLabel="Volver a categorías" title="Volver a categorías" />
-
-        <h2 style={{ textAlign: "center", color: THEME.goldMain, fontSize: "2rem", marginBottom: 30 }}>
-          {titulo}
-        </h2>
+      <div className="tienda-vista tienda-vista--categoria-abierta tienda-page-layout maika-anchor" style={{ padding: 40 }}>
+        <header className="tienda-vista__cabecera-categoria">
+          <div className="tienda-vista__cabecera-placeholder" aria-hidden />
+          <h2 className="tienda-vista__titulo-categoria" style={{ color: THEME.goldMain, fontSize: "2rem" }}>
+            {titulo}
+          </h2>
+          <div className="tienda-vista__cabecera-categoria-cerrar">
+            {/*
+              Siempre visible: `mostrarBotonCerrar` solo afecta la cruz «volver al inicio» del listado principal
+              (evita solaparse con el pack arriba); no debe ocultar el cierre de la categoría abierta.
+            */}
+            <BotonCerrar
+              onClick={() => {
+                if (haySubcategoriasEnEstaCategoria && subcategoriaAbierta) {
+                  setSubcategoriaAbierta(null);
+                  return;
+                }
+                setMostrarCategoria(null);
+                setFiltroIntencion("");
+              }}
+              ariaLabel={haySubcategoriasEnEstaCategoria && subcategoriaAbierta ? "Volver a subcategorías" : "Volver a categorías"}
+              title={haySubcategoriasEnEstaCategoria && subcategoriaAbierta ? "Volver a subcategorías" : "Volver a categorías"}
+            />
+          </div>
+        </header>
 
         <div style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
           <span style={{ color: THEME.goldMain, fontSize: 14 }}>Filtrar por intención:</span>
@@ -212,76 +455,66 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: 20,
+            gridTemplateColumns: "repeat(auto-fit, minmax(236px, 300px))",
+            justifyContent: "center",
+            gap: 22,
           }}
         >
           {productos.map((prod) => {
             const enCarrito = cantidadEnCarrito(Number(prod.id));
             const disponibles = Math.max(0, Number(prod.stock) - enCarrito);
+            const stockCatalogo = Math.max(0, Math.floor(Number(prod.stock)) || 0);
+            const limiteCarrito = disponibles === 0 && stockCatalogo > 0;
+            const prodKey = `${prod.categoria}-${prod.id}`;
+            const recienAnadido = anadirCarritoOkKey === prodKey;
             return (
             <div
-              key={`${prod.id}-${prod.stock}-${enCarrito}-${refreshKey}`}
+              key={prodKey}
+              className="tienda-tarjeta-producto"
               style={{
                 border: `2px solid ${THEME.goldMain}`,
                 padding: 20,
                 borderRadius: 15,
                 textAlign: "center",
                 background: fondoServicios,
-                opacity: disponibles === 0 ? 0.6 : 1,
+                opacity: disponibles === 0 ? (limiteCarrito ? 0.88 : 0.6) : 1,
                 position: "relative"
               }}
             >
-              {/* Botón Favorito */}
-              <div
-                role="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleFavorito(prod.id);
-                }}
-                style={{
-                  position: "absolute",
-                  top: 10,
-                  left: 10,
-                  fontSize: "1.6rem",
-                  cursor: "pointer",
-                  zIndex: 2,
-                  opacity: isFavorito(prod.id) ? 1 : 0.5,
-                  transition: "opacity 0.2s, transform 0.2s",
-                  transform: isFavorito(prod.id) ? "scale(1.1)" : "scale(1)",
-                  userSelect: "none",
-                  WebkitTapHighlightColor: "transparent"
-                }}
-                title={isFavorito(prod.id) ? "Quitar de favoritos" : "Añadir a favoritos"}
-              >
-                {isFavorito(prod.id) ? "💛" : "🤍"}
-              </div>
-
-              <div style={{ marginBottom: 12, minHeight: 120, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={TIENDA_THUMB_WRAP}>
                 <img
                   src={getProductImageSrc(prod)}
                   alt={prod.nombre}
+                  width={400}
+                  height={400}
+                  loading="lazy"
+                  decoding="async"
                   role="button"
                   tabIndex={0}
                   onClick={(e) => { e.stopPropagation(); setLightboxImagen({ src: getProductImageSrc(prod), alt: prod.nombre }); }}
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setLightboxImagen({ src: getProductImageSrc(prod), alt: prod.nombre }); } }}
-                  style={{ maxWidth: "100%", maxHeight: 140, objectFit: "contain", borderRadius: 10, border: "1px solid rgba(212,175,55,0.5)", cursor: "pointer" }}
+                  style={{ ...TIENDA_THUMB_IMG, cursor: "pointer" }}
                   onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                 />
               </div>
               {disponibles === 0 && (
-                <div style={{
-                  position: "absolute",
-                  top: 10,
-                  right: 10,
-                  background: "#ff4444",
-                  color: "white",
-                  padding: "4px 10px",
-                  borderRadius: 15,
-                  fontSize: "0.7rem",
-                  fontWeight: "bold"
-                }}>
-                  AGOTADO
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 10,
+                    right: 10,
+                    background: limiteCarrito ? THEME.goldMain : "#ff4444",
+                    color: limiteCarrito ? "#1b1745" : "white",
+                    padding: "5px 10px",
+                    borderRadius: 15,
+                    fontSize: limiteCarrito ? "0.62rem" : "0.7rem",
+                    fontWeight: "bold",
+                    maxWidth: "min(140px, calc(100% - 52px))",
+                    lineHeight: 1.15,
+                    textAlign: "center"
+                  }}
+                >
+                  {limiteCarrito ? "No puedes añadir más" : "AGOTADO"}
                 </div>
               )}
 
@@ -309,7 +542,7 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
               }}>
                 {prod.nombre}
               </h3>
-              <p style={{ color: THEME.goldMain, fontSize: "1.2rem", margin: "10px 0" }}>
+              <p className="tienda-precio-producto" style={{ color: THEME.goldMain }}>
                 {prod.descuentoPorcentaje != null && prod.descuentoPorcentaje > 0 && (
                   <span style={{ textDecoration: "line-through", opacity: 0.8, marginRight: 8 }}>
                     {Number(prod.precio).toFixed(2)} €
@@ -332,7 +565,63 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
                 </p>
               )}
 
-              <div style={{ marginBottom: 15, fontSize: "0.8rem", color: disponibles > 5 ? "#4caf50" : disponibles > 0 ? THEME.goldMain : "#ff4444" }}>
+              {(() => {
+                /** Unidades que aún puedes añadir (coherente con insignia / botón). */
+                const pocoDisponible = disponibles > 0 && disponibles <= 3;
+                const todoEnCarrito = stockCatalogo > 0 && disponibles === 0 && enCarrito > 0;
+                const sinStockReal = stockCatalogo === 0;
+                const stockLineColor =
+                  sinStockReal || pocoDisponible
+                    ? "#ff5252"
+                    : todoEnCarrito
+                      ? "rgba(255,255,255,0.9)"
+                      : "rgba(255,255,255,0.88)";
+                return (
+                  <p
+                    style={{
+                      fontSize: "0.85rem",
+                      margin: "4px 0 6px",
+                      color: stockLineColor,
+                      fontWeight: pocoDisponible ? 600 : 400,
+                      lineHeight: 1.35
+                    }}
+                  >
+                    {todoEnCarrito ? (
+                      <>
+                        En almacén: {stockCatalogo} {stockCatalogo === 1 ? "unidad" : "unidades"} (no baja hasta que
+                        confirmes el pago).
+                      </>
+                    ) : (
+                      <>
+                        Stock: {stockCatalogo} {stockCatalogo === 1 ? "unidad" : "unidades"}
+                      </>
+                    )}
+                    {pocoDisponible && (
+                      <span style={{ display: "block", marginTop: 3, fontSize: "0.8rem", fontWeight: "bold", color: "#ff8a80" }}>
+                        ¡Quedan pocas!
+                      </span>
+                    )}
+                    {enCarrito > 0 && (
+                      <span
+                        style={{
+                          display: "block",
+                          marginTop: 4,
+                          fontSize: "0.78rem",
+                          fontWeight: 500,
+                          color: THEME.goldMain,
+                          opacity: 0.95
+                        }}
+                      >
+                        {todoEnCarrito
+                          ? "Todo el stock está en tu carrito (no puedes añadir más)."
+                          : `En carrito: ${enCarrito} · Puedes añadir ${disponibles} más.`}
+                      </span>
+                    )}
+                  </p>
+                );
+              })()}
+
+              <div style={{ marginBottom: 15, fontSize: "0.8rem", color: disponibles > 5 ? "#4caf50" : disponibles > 0 ? THEME.goldMain : limiteCarrito ? THEME.goldMain : "#ff4444" }}>
                 {disponibles > 0 ? (
                   <>
                     <span>📦 {disponibles} disponibles</span>
@@ -353,47 +642,66 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
                     </div>
                   </>
                 ) : (
-                  <span>❌ Sin stock</span>
+                  <span>{limiteCarrito ? "No puedes añadir más unidades" : "❌ Sin stock"}</span>
                 )}
               </div>
 
        <button
   type="button"
   className={disponibles > 0 ? "btn-anadir-dorado" : undefined}
-  onClick={() => {
+  onClick={(e) => {
     if (disponibles > 0) {
-      agregarAlCarrito(prod);
-      setRefreshKey(prev => prev + 1);
+      intentarAnadirAlCarrito(prod, e.currentTarget.closest(".tienda-tarjeta-producto"));
     }
   }}
   disabled={disponibles === 0}
   style={{
-    background: disponibles > 0 ? "#1565c0" : "#666",
-    border: `2px solid ${THEME.goldMain}`,
+    background: recienAnadido
+      ? "linear-gradient(135deg, rgba(0, 200, 120, 0.95), rgba(0, 150, 95, 0.98))"
+      : disponibles > 0
+        ? "#1565c0"
+        : "#666",
+    border: `2px solid ${recienAnadido ? "rgba(0, 220, 140, 0.85)" : THEME.goldMain}`,
     padding: "10px 25px",
     borderRadius: 25,
     cursor: disponibles > 0 ? "pointer" : "not-allowed",
     fontWeight: "bold",
-    color: disponibles > 0 ? THEME.goldMain : "#ccc",
-    width: "100%"
+    color: disponibles > 0 ? (recienAnadido ? "#fff" : THEME.goldMain) : "#ccc",
+    width: "100%",
+    transition: "background 0.32s ease, border-color 0.32s ease, color 0.32s ease, transform 0.28s ease",
   }}
 >
-  {disponibles > 0 ? "Añadir al carrito" : "Sin stock"}
+  {recienAnadido
+    ? "Añadido ✓"
+    : disponibles > 0
+      ? "Añadir al carrito"
+      : limiteCarrito
+        ? "No puedes añadir más"
+        : "Sin stock"}
 </button>
             </div>
             );
           })}
         </div>
       </div>
-      <Lightbox />
+      <TiendaLightbox imagen={lightboxImagen} onClose={cerrarLightbox} />
     </>
     );
   }
 
   return (
     <>
-    <div className="tienda-vista" style={{ padding: 40, position: "relative" }}>
-      <BotonCerrar onClick={volver} ariaLabel="Volver al inicio" title="Volver al inicio" />
+    <div
+      className={`tienda-vista tienda-page-layout tienda-vista--catalogo maika-anchor${catalogoTrasPackHero ? " tienda-vista--catalogo-tras-pack" : ""}`}
+    >
+      {mostrarBotonCerrar && (
+        <BotonCerrar
+          onClick={volver}
+          ariaLabel="Volver al inicio"
+          title="Volver al inicio"
+          anclaje="viewport"
+        />
+      )}
 
       {terminoBusqueda && (
         <div style={{ marginBottom: 44, background: fondoServicios, padding: "16px 12px", borderRadius: 22, border: `2px solid ${THEME.goldMain}` }}>
@@ -414,35 +722,65 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
           {productosBusqueda.length === 0 ? (
             <p style={{ color: "rgba(255,255,255,0.8)", textAlign: "center", margin: 20 }}>No hay productos que coincidan con tu búsqueda.</p>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 20 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(236px, 300px))", justifyContent: "center", gap: 22 }}>
               {productosBusqueda.map((prod) => {
                 const enCarrito = cantidadEnCarrito(Number(prod.id));
                 const disponibles = Math.max(0, Number(prod.stock) - enCarrito);
+                const stockCat = Math.max(0, Math.floor(Number(prod.stock)) || 0);
+                const limiteCarritoBusq = disponibles === 0 && stockCat > 0;
+                const prodKeyBusq = `${prod.categoria}-${prod.id}`;
+                const recienAnadidoBusq = anadirCarritoOkKey === prodKeyBusq;
                 return (
                   <div
-                    key={`busqueda-${prod.categoria}-${prod.id}`}
-                    style={{ border: `2px solid ${THEME.goldMain}`, padding: 20, borderRadius: 15, textAlign: "center", background: fondoServicios, opacity: disponibles === 0 ? 0.6 : 1, position: "relative" }}
+                    key={`busqueda-${prodKeyBusq}`}
+                    className="tienda-tarjeta-producto"
+                    style={{ border: `2px solid ${THEME.goldMain}`, padding: 20, borderRadius: 15, textAlign: "center", background: fondoServicios, opacity: disponibles === 0 ? (limiteCarritoBusq ? 0.88 : 0.6) : 1, position: "relative" }}
                   >
-                    <div
-                      role="button"
-                      onClick={(e) => { e.stopPropagation(); toggleFavorito(prod.id); }}
-                      style={{ position: "absolute", top: 10, left: 10, fontSize: "1.6rem", cursor: "pointer", zIndex: 2 }}
-                      title={isFavorito(prod.id) ? "Quitar de favoritos" : "Añadir a favoritos"}
-                    >
-                      {isFavorito(prod.id) ? "💛" : "🤍"}
-                    </div>
-                    <div style={{ marginBottom: 12, minHeight: 120, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <img src={getProductImageSrc(prod)} alt={prod.nombre} style={{ maxWidth: "100%", maxHeight: 140, objectFit: "contain", borderRadius: 10, border: "1px solid rgba(212,175,55,0.5)" }} onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                    <div style={TIENDA_THUMB_WRAP}>
+                      <img
+                        src={getProductImageSrc(prod)}
+                        alt={prod.nombre}
+                        width={400}
+                        height={400}
+                        loading="lazy"
+                        decoding="async"
+                        style={TIENDA_THUMB_IMG}
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                      />
                     </div>
                     <h3 style={{ color: prod.nombreColor ?? "white" }}>{prod.nombre}</h3>
-                    <p style={{ color: THEME.goldMain, fontSize: "1.2rem", margin: "10px 0" }}>{precioConDescuento(prod).toFixed(2)} €</p>
+                    <p className="tienda-precio-producto" style={{ color: THEME.goldMain }}>{precioConDescuento(prod).toFixed(2)} €</p>
                     <button
                       type="button"
-                      onClick={() => { if (disponibles > 0) { agregarAlCarrito(prod); setRefreshKey((k) => k + 1); } }}
+                      onClick={(e) => {
+                        if (disponibles > 0) {
+                          intentarAnadirAlCarrito(prod, e.currentTarget.closest(".tienda-tarjeta-producto"));
+                        }
+                      }}
                       disabled={disponibles === 0}
-                      style={{ padding: "10px 25px", borderRadius: 25, border: `2px solid ${THEME.goldMain}`, background: disponibles > 0 ? THEME.goldMain : "#666", color: disponibles > 0 ? "#1b1745" : "#ccc", cursor: disponibles > 0 ? "pointer" : "not-allowed", fontWeight: "bold", width: "100%" }}
+                      style={{
+                        padding: "10px 25px",
+                        borderRadius: 25,
+                        border: `2px solid ${recienAnadidoBusq ? "rgba(0, 220, 140, 0.85)" : THEME.goldMain}`,
+                        background: recienAnadidoBusq
+                          ? "linear-gradient(135deg, rgba(0, 200, 120, 0.95), rgba(0, 150, 95, 0.98))"
+                          : disponibles > 0
+                            ? THEME.goldMain
+                            : "#666",
+                        color: disponibles > 0 ? (recienAnadidoBusq ? "#fff" : "#1b1745") : "#ccc",
+                        cursor: disponibles > 0 ? "pointer" : "not-allowed",
+                        fontWeight: "bold",
+                        width: "100%",
+                        transition: "background 0.32s ease, border-color 0.32s ease, color 0.32s ease, transform 0.28s ease",
+                      }}
                     >
-                      {disponibles > 0 ? "Añadir al carrito" : "Sin stock"}
+                      {recienAnadidoBusq
+                        ? "Añadido ✓"
+                        : disponibles > 0
+                          ? "Añadir al carrito"
+                          : limiteCarritoBusq
+                            ? "No puedes añadir más"
+                            : "Sin stock"}
                     </button>
                   </div>
                 );
@@ -453,64 +791,29 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
       )}
 
       {/* MÁS VENDIDOS */}
-      <div key={`mas-vendidos-${refreshKey}`} style={{  // 👈 NUEVO: Key para actualizar esta sección
-        marginBottom: 44,
-        background: fondoServicios,
-        padding: "16px 12px",
-        borderRadius: 22,
-        border: `2px solid ${THEME.goldMain}`
-      }}>
-        <h3 style={{
-          textAlign: "center",
-          color: THEME.goldMain,
-          fontSize: "1.08rem",
-          marginBottom: 14,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 8
-        }}>
-          <span style={{ fontSize: "1.2rem" }}>🔥</span>
+      <div className="tienda-mas-vendidos-bloque">
+        <h3 className="tienda-mas-vendidos-bloque__titulo">
+          <span className="tienda-mas-vendidos-bloque__titulo-ico" aria-hidden>🔥</span>
           LOS MÁS VENDIDOS
-          <span style={{ fontSize: "1.2rem" }}>✨</span>
+          <span className="tienda-mas-vendidos-bloque__titulo-ico" aria-hidden>✨</span>
         </h3>
 
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
-          gap: 10,
+          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+          gap: 14,
         }}>
           {/* Vela Blanca */}
-          <div style={{
+          <div
+            className="tienda-tarjeta-producto"
+            style={{
             background: fondoServicios,
             borderRadius: 16,
             padding: "10px",
             border: `2px solid ${THEME.goldMain}`,
             position: "relative",
-          }}>
-            <div
-              role="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleFavorito(1);
-              }}
-              style={{
-                position: "absolute",
-                top: 5,
-                left: 5,
-                fontSize: "1.4rem",
-                cursor: "pointer",
-                zIndex: 2,
-                opacity: isFavorito(1) ? 1 : 0.5,
-                transition: "opacity 0.2s, transform 0.2s",
-                transform: isFavorito(1) ? "scale(1.1)" : "scale(1)",
-                userSelect: "none",
-                WebkitTapHighlightColor: "transparent"
-              }}
-              title={isFavorito(1) ? "Quitar de favoritos" : "Añadir a favoritos"}
-            >
-              {isFavorito(1) ? "💛" : "🤍"}
-            </div>
+          }}
+          >
             <div style={{
               position: "absolute",
               top: -8,
@@ -540,64 +843,61 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
               La favorita para limpiezas
             </p>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
-              <span style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: "0.85rem" }}>12.50€</span>
+              <span className="tienda-precio-producto tienda-precio-producto--masvendidos" style={{ color: THEME.goldMain }}>12.50€</span>
               <button
                 type="button"
                 className={`btn-mas-vendidos ${velas.find(v => v.id === 1)?.stock ? "btn-anadir-dorado" : ""}`}
-                onClick={() => {
+                onClick={(e) => {
                   const vela = velas.find(v => v.id === 1);
                   if (vela && vela.stock > 0) {
-                    agregarAlCarrito(vela);
-                    setRefreshKey(prev => prev + 1);  // 👈 NUEVO
+                    intentarAnadirAlCarrito(vela, e.currentTarget.closest(".tienda-tarjeta-producto"));
                   }
                 }}
                 style={{
-                  background: velas.find(v => v.id === 1)?.stock ? THEME.goldMain : "#666",
+                  background: (() => {
+                    const v = velas.find(x => x.id === 1);
+                    const k = v ? `${v.categoria}-${v.id}` : "";
+                    if (anadirCarritoOkKey === k) {
+                      return "linear-gradient(135deg, rgba(0, 200, 120, 0.95), rgba(0, 150, 95, 0.98))";
+                    }
+                    return v?.stock ? THEME.goldMain : "#666";
+                  })(),
                   border: "none",
                   padding: "8px 14px",
                   borderRadius: 20,
                   cursor: velas.find(v => v.id === 1)?.stock ? "pointer" : "not-allowed",
                   fontWeight: "bold",
                   fontSize: "1rem",
-                  color: velas.find(v => v.id === 1)?.stock ? "#1b1745" : "#ccc"
+                  color: (() => {
+                    const v = velas.find(x => x.id === 1);
+                    const k = v ? `${v.categoria}-${v.id}` : "";
+                    if (anadirCarritoOkKey === k) return "#fff";
+                    return v?.stock ? "#1b1745" : "#ccc";
+                  })(),
+                  transition: "background 0.32s ease, color 0.32s ease, transform 0.28s ease",
                 }}
               >
-                {velas.find(v => v.id === 1)?.stock ? "Añadir" : "Agotado"}
+                {(() => {
+                  const v = velas.find(x => x.id === 1);
+                  const k = v ? `${v.categoria}-${v.id}` : "";
+                  if (anadirCarritoOkKey === k) return "Añadido ✓";
+                  return v?.stock ? "Añadir" : "Agotado";
+                })()}
               </button>
             </div>
           </div>
 
           {/* Incienso Sándalo */}
-          <div style={{
+          <div
+            className="tienda-tarjeta-producto"
+            style={{
             background: fondoServicios,
             borderRadius: 16,
             padding: "10px",
             border: `2px solid ${THEME.goldMain}`,
             position: "relative",
-          }}>
-            <div
-              role="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleFavorito(101);
-              }}
-              style={{
-                position: "absolute",
-                top: 5,
-                left: 5,
-                fontSize: "1.4rem",
-                cursor: "pointer",
-                zIndex: 2,
-                opacity: isFavorito(101) ? 1 : 0.5,
-                transition: "opacity 0.2s, transform 0.2s",
-                transform: isFavorito(101) ? "scale(1.1)" : "scale(1)",
-                userSelect: "none",
-                WebkitTapHighlightColor: "transparent"
-              }}
-              title={isFavorito(101) ? "Quitar de favoritos" : "Añadir a favoritos"}
-            >
-              {isFavorito(101) ? "💛" : "🤍"}
-            </div>
+          }}
+          >
             <div style={{
               position: "absolute",
               top: -8,
@@ -627,64 +927,61 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
               Conexión espiritual
             </p>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
-              <span style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: "0.85rem" }}>6.50€</span>
+              <span className="tienda-precio-producto tienda-precio-producto--masvendidos" style={{ color: THEME.goldMain }}>6.50€</span>
               <button
                 type="button"
                 className={`btn-mas-vendidos ${inciensos.find(i => i.id === 101)?.stock ? "btn-anadir-dorado" : ""}`}
-                onClick={() => {
+                onClick={(e) => {
                   const incienso = inciensos.find(i => i.id === 101);
                   if (incienso && incienso.stock > 0) {
-                    agregarAlCarrito(incienso);
-                    setRefreshKey(prev => prev + 1);  // 👈 NUEVO
+                    intentarAnadirAlCarrito(incienso, e.currentTarget.closest(".tienda-tarjeta-producto"));
                   }
                 }}
                 style={{
-                  background: inciensos.find(i => i.id === 101)?.stock ? THEME.goldMain : "#666",
+                  background: (() => {
+                    const v = inciensos.find(x => x.id === 101);
+                    const k = v ? `${v.categoria}-${v.id}` : "";
+                    if (anadirCarritoOkKey === k) {
+                      return "linear-gradient(135deg, rgba(0, 200, 120, 0.95), rgba(0, 150, 95, 0.98))";
+                    }
+                    return v?.stock ? THEME.goldMain : "#666";
+                  })(),
                   border: "none",
                   padding: "8px 14px",
                   borderRadius: 20,
                   cursor: inciensos.find(i => i.id === 101)?.stock ? "pointer" : "not-allowed",
                   fontWeight: "bold",
                   fontSize: "1rem",
-                  color: inciensos.find(i => i.id === 101)?.stock ? "#1b1745" : "#ccc"
+                  color: (() => {
+                    const v = inciensos.find(x => x.id === 101);
+                    const k = v ? `${v.categoria}-${v.id}` : "";
+                    if (anadirCarritoOkKey === k) return "#fff";
+                    return v?.stock ? "#1b1745" : "#ccc";
+                  })(),
+                  transition: "background 0.32s ease, color 0.32s ease, transform 0.28s ease",
                 }}
               >
-                {inciensos.find(i => i.id === 101)?.stock ? "Añadir" : "Agotado"}
+                {(() => {
+                  const v = inciensos.find(x => x.id === 101);
+                  const k = v ? `${v.categoria}-${v.id}` : "";
+                  if (anadirCarritoOkKey === k) return "Añadido ✓";
+                  return v?.stock ? "Añadir" : "Agotado";
+                })()}
               </button>
             </div>
           </div>
 
           {/* Buda Dorado */}
-          <div style={{
+          <div
+            className="tienda-tarjeta-producto"
+            style={{
             background: fondoServicios,
             borderRadius: 16,
             padding: "10px",
             border: `2px solid ${THEME.goldMain}`,
             position: "relative",
-          }}>
-            <div
-              role="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleFavorito(201);
-              }}
-              style={{
-                position: "absolute",
-                top: 5,
-                left: 5,
-                fontSize: "1.4rem",
-                cursor: "pointer",
-                zIndex: 2,
-                opacity: isFavorito(201) ? 1 : 0.5,
-                transition: "opacity 0.2s, transform 0.2s",
-                transform: isFavorito(201) ? "scale(1.1)" : "scale(1)",
-                userSelect: "none",
-                WebkitTapHighlightColor: "transparent"
-              }}
-              title={isFavorito(201) ? "Quitar de favoritos" : "Añadir a favoritos"}
-            >
-              {isFavorito(201) ? "💛" : "🤍"}
-            </div>
+          }}
+          >
             <div style={{
               position: "absolute",
               top: -8,
@@ -714,29 +1011,46 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
               Prosperidad
             </p>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
-              <span style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: "0.85rem" }}>35.00€</span>
+              <span className="tienda-precio-producto tienda-precio-producto--masvendidos" style={{ color: THEME.goldMain }}>35.00€</span>
               <button
                 type="button"
                 className={`btn-mas-vendidos ${figuras.find(f => f.id === 201)?.stock ? "btn-anadir-dorado" : ""}`}
-                onClick={() => {
+                onClick={(e) => {
                   const figura = figuras.find(f => f.id === 201);
                   if (figura && figura.stock > 0) {
-                    agregarAlCarrito(figura);
-                    setRefreshKey(prev => prev + 1);  // 👈 NUEVO
+                    intentarAnadirAlCarrito(figura, e.currentTarget.closest(".tienda-tarjeta-producto"));
                   }
                 }}
                 style={{
-                  background: figuras.find(f => f.id === 201)?.stock ? THEME.goldMain : "#666",
+                  background: (() => {
+                    const v = figuras.find(x => x.id === 201);
+                    const k = v ? `${v.categoria}-${v.id}` : "";
+                    if (anadirCarritoOkKey === k) {
+                      return "linear-gradient(135deg, rgba(0, 200, 120, 0.95), rgba(0, 150, 95, 0.98))";
+                    }
+                    return v?.stock ? THEME.goldMain : "#666";
+                  })(),
                   border: "none",
                   padding: "8px 14px",
                   borderRadius: 20,
                   cursor: figuras.find(f => f.id === 201)?.stock ? "pointer" : "not-allowed",
                   fontWeight: "bold",
                   fontSize: "1rem",
-                  color: figuras.find(f => f.id === 201)?.stock ? "#1b1745" : "#ccc"
+                  color: (() => {
+                    const v = figuras.find(x => x.id === 201);
+                    const k = v ? `${v.categoria}-${v.id}` : "";
+                    if (anadirCarritoOkKey === k) return "#fff";
+                    return v?.stock ? "#1b1745" : "#ccc";
+                  })(),
+                  transition: "background 0.32s ease, color 0.32s ease, transform 0.28s ease",
                 }}
               >
-                {figuras.find(f => f.id === 201)?.stock ? "Añadir" : "Agotado"}
+                {(() => {
+                  const v = figuras.find(x => x.id === 201);
+                  const k = v ? `${v.categoria}-${v.id}` : "";
+                  if (anadirCarritoOkKey === k) return "Añadido ✓";
+                  return v?.stock ? "Añadir" : "Agotado";
+                })()}
               </button>
             </div>
           </div>
@@ -744,9 +1058,11 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
       </div>
 
       {/* CATEGORÍAS (sincronizadas con Editar Categorías) */}
-      <h2 style={{ textAlign: "center", color: THEME.goldMain, fontSize: "2rem", marginBottom: 30 }}>
-        Categorías
-      </h2>
+      <section className="tienda-categorias-seccion" aria-labelledby="tienda-categorias-titulo">
+        <h2 id="tienda-categorias-titulo" className="tienda-categorias-seccion__titulo">
+          Categorías
+        </h2>
+        <p className="tienda-categorias-seccion__sub">Explora por tipo de producto</p>
 
       <div
         style={{
@@ -756,12 +1072,15 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
         }}
       >
         {categoriasCatalogo.map((categoria) => {
-          const productosCat = getProductosForCategoria(categoria.id, velas, inciensos, figuras);
+          const productosCat = getProductosForCategoria(categoria.id, velas, inciensos, figuras, kits, joyas);
           const nombreDisplay = categoria.nombre.charAt(0).toUpperCase() + categoria.nombre.slice(1);
           return (
             <div
               key={categoria.id}
-              onClick={() => setMostrarCategoria(categoria.id)}
+              onClick={() => {
+                setSubcategoriaAbierta(null);
+                setMostrarCategoria(categoria.id);
+              }}
               style={{
                 cursor: "pointer",
                 background: fondoServicios,
@@ -771,15 +1090,26 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
                 textAlign: "center",
               }}
             >
-              <div style={{ marginBottom: 12, minHeight: 100, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={TIENDA_CATEG_THUMB_WRAP}>
                 <img
-                  src={`/${categoria.id}.jpg`}
+                  src={categoria.imagen || `/${categoria.id}.jpg`}
                   alt={nombreDisplay}
+                  width={400}
+                  height={400}
+                  loading="lazy"
+                  decoding="async"
                   role="button"
                   tabIndex={0}
-                  onClick={(e) => { e.stopPropagation(); setLightboxImagen({ src: `/${categoria.id}.jpg`, alt: nombreDisplay }); }}
-                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setLightboxImagen({ src: `/${categoria.id}.jpg`, alt: nombreDisplay }); } }}
-                  style={{ maxWidth: "100%", maxHeight: 120, objectFit: "contain", borderRadius: 12, border: "1px solid rgba(212,175,55,0.5)", cursor: "pointer" }}
+                  onClick={(e) => { e.stopPropagation(); setLightboxImagen({ src: categoria.imagen || `/${categoria.id}.jpg`, alt: nombreDisplay }); }}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setLightboxImagen({ src: categoria.imagen || `/${categoria.id}.jpg`, alt: nombreDisplay }); } }}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                    borderRadius: 12,
+                    border: "1px solid rgba(212,175,55,0.5)",
+                    cursor: "pointer",
+                  }}
                   onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                 />
               </div>
@@ -800,8 +1130,9 @@ export default function Tienda({ velas, inciensos, figuras, kits = [], categoria
           );
         })}
       </div>
+      </section>
     </div>
-    <Lightbox />
+    <TiendaLightbox imagen={lightboxImagen} onClose={cerrarLightbox} />
   </>
   );
 }

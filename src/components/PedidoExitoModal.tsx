@@ -1,4 +1,17 @@
-import { THEME } from "../config";
+import ModalBase from "./ModalBase";
+import {
+  PEDIDO_EXITO_COLOR_BOTON,
+  PEDIDO_EXITO_COLOR_TEXTO,
+  PEDIDO_EXITO_COLOR_TITULO,
+  PEDIDO_EXITO_FONDO_BOTON,
+  PEDIDO_EXITO_LINEA1,
+  PEDIDO_EXITO_LINEA2,
+  PEDIDO_EXITO_MODAL_BORDE,
+  PEDIDO_EXITO_MODAL_FONDO,
+  PEDIDO_EXITO_TEXTO_BOTON,
+  PEDIDO_EXITO_TITULO,
+  sustituirMarcadorPedido
+} from "../utils/barraTopPedidoExito/pedidoExitoModalFijo";
 
 interface PedidoExitoModalProps {
   abierto: boolean;
@@ -6,60 +19,62 @@ interface PedidoExitoModalProps {
   onClose: () => void;
 }
 
-export default function PedidoExitoModal({
-  abierto,
-  numeroPedido,
-  onClose
-}: PedidoExitoModalProps) {
-  if (!abierto) return null;
+export default function PedidoExitoModal({ abierto, numeroPedido, onClose }: PedidoExitoModalProps) {
+  const refPedido = numeroPedido || "";
+  const tituloCompleto = sustituirMarcadorPedido(PEDIDO_EXITO_TITULO, refPedido);
+  const textoLinea1 = sustituirMarcadorPedido(PEDIDO_EXITO_LINEA1, refPedido);
+  const textoLinea2 = sustituirMarcadorPedido(PEDIDO_EXITO_LINEA2, refPedido);
 
   return (
-    <div style={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: "rgba(0,0,0,0.9)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      zIndex: 10000
-    }}>
-      <div style={{
-        background: THEME.bg,
-        border: `3px solid ${THEME.goldMain}`,
+    <ModalBase
+      abierto={abierto}
+      onClose={onClose}
+      maxWidth="400px"
+      cerrarAlPulsarFondo={false}
+      styleCard={{
+        position: "relative",
+        background: PEDIDO_EXITO_MODAL_FONDO,
+        border: `3px solid ${PEDIDO_EXITO_MODAL_BORDE}`,
         borderRadius: 30,
         padding: 40,
-        textAlign: "center",
-        maxWidth: 400
-      }}>
-        <h2 style={{ color: THEME.goldMain, marginBottom: 20 }}>✅ PEDIDO REALIZADO</h2>
-        <p style={{ color: "#F5E6C8", marginBottom: 20 }}>
-          Tu pedido <strong>{numeroPedido}</strong> ha sido enviado por WhatsApp
-        </p>
-        <p style={{ color: "#F5E6C8", marginBottom: 10 }}>
-          Te contactaremos en breve para confirmar
-        </p>
-        <p style={{ color: "rgba(255,255,255,0.85)", fontSize: 14, marginBottom: 30 }}>
-          Pulsa Aceptar para abrir WhatsApp y enviar el resumen del pedido.
-        </p>
-        <button
-          onClick={onClose}
+        textAlign: "center"
+      }}
+    >
+      {tituloCompleto.trim() ? (
+        <h2
           style={{
-            padding: "12px 30px",
-            borderRadius: 25,
-            border: "none",
-            background: THEME.goldMain,
-            color: "#1b1745",
-            fontWeight: "bold",
-            cursor: "pointer"
+            color: PEDIDO_EXITO_COLOR_TITULO,
+            margin: "0 0 16px",
+            lineHeight: 1.3,
+            fontSize: "1.15rem",
+            fontWeight: 700
           }}
         >
-          Aceptar
-        </button>
-      </div>
-    </div>
+          {tituloCompleto}
+        </h2>
+      ) : null}
+      {textoLinea1.trim() ? (
+        <p style={{ color: PEDIDO_EXITO_COLOR_TEXTO, margin: "0 0 12px", lineHeight: 1.5 }}>{textoLinea1}</p>
+      ) : null}
+      {textoLinea2.trim() ? (
+        <p style={{ color: PEDIDO_EXITO_COLOR_TEXTO, margin: "0 0 12px", lineHeight: 1.5 }}>{textoLinea2}</p>
+      ) : null}
+      <button
+        type="button"
+        onClick={onClose}
+        style={{
+          marginTop: 22,
+          padding: "12px 30px",
+          borderRadius: 25,
+          border: "none",
+          background: PEDIDO_EXITO_FONDO_BOTON,
+          color: PEDIDO_EXITO_COLOR_BOTON,
+          fontWeight: "bold",
+          cursor: "pointer"
+        }}
+      >
+        {PEDIDO_EXITO_TEXTO_BOTON}
+      </button>
+    </ModalBase>
   );
 }
-

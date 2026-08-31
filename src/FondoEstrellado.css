@@ -1,43 +1,88 @@
-/* Fondo negro estelar — MAIKA espiritual (toda la ventana, incluidos laterales) */
-/* Fondo siempre detrás del hero y del contenido (no debe pisar nada) */
+/* Fondo negro estelar — MAIKA espiritual (toda la columna de contenido, se mueve con el scroll) */
+/* Hijo de `.app-shell__content` (position relative): absolute + top/bottom = misma altura que el contenido */
 .fondo-estrellado-aurora {
-  position: fixed;
-  top: 0;
+  position: absolute;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  min-width: 100%;
-  min-height: 100%;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  min-width: 0;
+  height: auto;
   pointer-events: none;
   z-index: -1;
   overflow: hidden;
-  background: var(--maika-bg);
+  background:
+    /* Viñeta: bordes más oscuros, centro un poco más legible (mirada al medio) */
+    radial-gradient(ellipse 115% 95% at 50% 48%, transparent 38%, rgba(0, 0, 0, 0.52) 100%),
+    radial-gradient(ellipse 130% 90% at 50% 108%, rgba(0, 0, 0, 0.58) 0%, transparent 42%),
+    radial-gradient(ellipse 42% 36% at 78% 12%, rgba(92, 68, 140, 0.2) 0%, transparent 52%),
+    radial-gradient(ellipse 48% 38% at 10% 28%, rgba(32, 22, 58, 0.42) 0%, transparent 50%),
+    radial-gradient(ellipse 58% 48% at 50% 36%, rgba(88, 62, 130, 0.14) 0%, transparent 58%),
+    radial-gradient(ellipse 95% 72% at 50% 100%, rgba(62, 36, 98, 0.34) 0%, transparent 50%),
+    linear-gradient(172deg, #050308 0%, #0a0714 34%, #08060f 58%, #020103 100%);
 }
 
-.fondo-estrellado-constelaciones {
+.fondo-estrellado-aurora__principal,
+.fondo-estrellado-aurora__movil-maika {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.fondo-estrellado-aurora__movil-maika {
+  display: none;
 }
 
 .estrella-dorada {
   position: absolute;
   border-radius: 50%;
-  background: var(--gold-main);
+  background: #ebe0b2;
   transform: translate(-50%, -50%);
-  animation: parpadear-estrella 5s ease-in-out infinite;
-  box-shadow: 0 0 6px var(--gold-glow);
+  box-shadow: 0 0 6px rgba(232, 210, 150, 0.28), 0 0 12px rgba(232, 210, 150, 0.08);
+  will-change: transform, opacity, filter;
 }
 
 @keyframes parpadear-estrella {
   0%, 100% {
     opacity: 0.5;
-    transform: translate(-50%, -50%) scale(0.95);
   }
   50% {
     opacity: 0.9;
-    transform: translate(-50%, -50%) scale(1.03);
+  }
+}
+
+@keyframes mover-estrella {
+  0% {
+    transform: translate(calc(-50% - var(--estrella-dx, 0px) * 0.45), calc(-50% - var(--estrella-dy, 0px) * 0.35)) rotate(var(--estrella-rot, 0deg)) scaleX(0.92) scaleY(0.92);
+    filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+  }
+  76% {
+    transform: translate(calc(-50% + var(--estrella-dx, 0px)), calc(-50% + var(--estrella-dy, 0px))) rotate(var(--estrella-rot, 0deg)) scaleX(1.75) scaleY(0.72);
+    filter: drop-shadow(calc(var(--estrella-dx, 0px) * -0.38) calc(var(--estrella-dy, 0px) * -0.38) 2px rgba(255, 255, 255, 0.38));
+  }
+  100% {
+    transform: translate(calc(-50% + var(--estrella-dx, 0px) * 1.25), calc(-50% + var(--estrella-dy, 0px) * 1.05)) rotate(var(--estrella-rot, 0deg)) scaleX(1.08) scaleY(0.85);
+    filter: drop-shadow(calc(var(--estrella-dx, 0px) * -0.28) calc(var(--estrella-dy, 0px) * -0.28) 1px rgba(255, 255, 255, 0.18));
+  }
+}
+
+/* Móvil: capa principal algo aligerada; capa extra arriba-izq. y cabecera (solo móvil). */
+@media (max-width: 768px) {
+  .fondo-estrellado-aurora__principal .estrella-dorada:not(:nth-child(4n + 1)) {
+    display: none !important;
+  }
+  .fondo-estrellado-aurora__principal .estrella-dorada {
+    box-shadow: none !important;
+    transform: translate(-50%, calc(-50% - 10px)) !important;
+  }
+
+  .fondo-estrellado-aurora__movil-maika {
+    display: block;
+  }
+  .fondo-estrellado-aurora__movil-maika .estrella-dorada {
+    box-shadow: none !important;
+    transform: translate(-50%, calc(-50% - 6px)) !important;
   }
 }

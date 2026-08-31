@@ -3,6 +3,7 @@ export const ADMIN_TOKEN_VALUE = "admin_ok_2026";
 export const ADMIN_LAST_LOGIN_KEY = "maika_admin_last_login";
 export const ADMIN_SESSION_MINUTES_KEY = "maika_admin_session_minutes";
 export const ADMIN_SESSION_MINUTES = 60; // Cambia este valor cuando quieras.
+const ADMIN_PANEL_JWT_KEY = "maika_admin_usuarios_jwt"; // legacy: antes guardaba el JWT admin en sessionStorage.
 
 type AdminSession = {
   token: string;
@@ -53,6 +54,15 @@ export function setAdminSessionMinutes(minutes: number): number {
   return normalized;
 }
 
+function emitMaikaAdminAuthChanged(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.dispatchEvent(new CustomEvent("maika_admin_auth_changed"));
+  } catch {
+    // ignore
+  }
+}
+
 export function setAdminAuthorization(): void {
   try {
     const sessionMs = getAdminSessionMinutes() * 60 * 1000;
@@ -61,6 +71,7 @@ export function setAdminAuthorization(): void {
   } catch {
     // ignore storage errors
   }
+  emitMaikaAdminAuthChanged();
 }
 
 export function renewAdminAuthorizationWithoutTouchingLastLogin(): void {
@@ -115,9 +126,11 @@ export function getAdminSessionExpiresAtMs(): number {
 export function clearAdminAuthorization(): void {
   try {
     localStorage.removeItem(ADMIN_TOKEN_KEY);
+    sessionStorage.removeItem(ADMIN_PANEL_JWT_KEY);
   } catch {
     // ignore storage errors
   }
+  emitMaikaAdminAuthChanged();
 }
 
 export function getAdminLastLoginMs(): number | null {

@@ -14,16 +14,21 @@ export async function enviarCodigoEmail(
 ): Promise<boolean> {
   try {
     emailjs.init(config.PUBLIC_KEY);
+    const emailNormalizado = String(email || "").trim().toLowerCase();
+    const nombreNormalizado = String(nombre || "").trim() || "Cliente";
+    if (!emailNormalizado) return false;
 
     const templateParams = {
-      to_email: email,
-      to: email,
-      email,
-      to_name: nombre,
-      name: nombre,
+      // Compatibilidad amplia con plantillas EmailJS antiguas/nuevas.
+      to_email: emailNormalizado,
+      email: emailNormalizado,
+      user_email: emailNormalizado,
+      recipient: emailNormalizado,
+      to: emailNormalizado,
+      to_name: nombreNormalizado,
+      nombre: nombreNormalizado,
       from_name: "MAIKA - La ruta del alma",
-      codigo,
-      reply_to: email
+      codigo
     };
 
     const response = await emailjs.send(
@@ -36,9 +41,11 @@ export async function enviarCodigoEmail(
     return true;
   } catch (error: unknown) {
     console.error("❌ Error completo:", error);
-    const err = error as any;
-    if (err?.text) console.error("Mensaje:", err.text);
-    if (err?.status) console.error("Estado:", err.status);
+    if (error && typeof error === "object") {
+      const err = error as { text?: string; status?: unknown };
+      if (err.text) console.error("Mensaje:", err.text);
+      if (err.status != null) console.error("Estado:", err.status);
+    }
     return false;
   }
 }

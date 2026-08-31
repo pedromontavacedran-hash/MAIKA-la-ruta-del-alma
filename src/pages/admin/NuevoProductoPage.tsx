@@ -1,8 +1,13 @@
+import { useMemo, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import type { Producto, Pagina } from "../../types";
-import BotonCerrar from "../../components/BotonCerrar";
+import type { Producto, Pagina, SubcategoriaEntrada, GeneroJoya, AcabadoJoya } from "../../types";
+import { GENEROS_JOYA_OPCIONES, ACABADOS_JOYA_OPCIONES } from "../../types";
+import AdminPageNav from "../../components/admin/AdminPageNav";
+import ProductoForm from "../../components/admin/ProductoForm";
 import { THEME } from "../../config";
 import { isAdminAuthorized } from "../../utils/adminAuth";
+import { notificarError, notificarExito } from "../../utils/ui/notificaciones";
+import { postAdminProductoApi, aplicarCatalogoActivoEnEstado } from "../../services/apiAdminProductos";
 
 export interface NuevoProductoPageProps {
   setPagina: (p: Pagina) => void;
@@ -12,8 +17,10 @@ export interface NuevoProductoPageProps {
   setInciensos: Dispatch<SetStateAction<Producto[]>>;
   figuras: Producto[];
   setFiguras: Dispatch<SetStateAction<Producto[]>>;
-  categoriaNuevoProducto: "velas" | "inciensos" | "figuras";
-  setCategoriaNuevoProducto: Dispatch<SetStateAction<"velas" | "inciensos" | "figuras">>;
+  setKits: Dispatch<SetStateAction<Producto[]>>;
+  setJoyas: Dispatch<SetStateAction<Producto[]>>;
+  categoriaNuevoProducto: "velas" | "inciensos" | "figuras" | "joyas";
+  setCategoriaNuevoProducto: Dispatch<SetStateAction<"velas" | "inciensos" | "figuras" | "joyas">>;
   nuevoProductoNombre: string;
   setNuevoProductoNombre: Dispatch<SetStateAction<string>>;
   nuevoProductoPrecio: string;
@@ -33,30 +40,19 @@ export interface NuevoProductoPageProps {
   nuevoProductoEstilo: string;
   setNuevoProductoEstilo: Dispatch<SetStateAction<string>>;
   setProductoSeleccionado: Dispatch<SetStateAction<string>>;
-  setCategoriaEditarProductos: Dispatch<SetStateAction<"velas" | "inciensos" | "figuras">>;
+  setCategoriaEditarProductos: Dispatch<SetStateAction<"velas" | "inciensos" | "figuras" | "joyas">>;
   mostrarNotificacion: (msg: string, tipo: "normal" | "exito" | "error") => void;
+  subcategoriasDe: (categoriaId: string) => SubcategoriaEntrada[];
 }
-
-const panelStyle = {
-  minHeight: "100vh" as const,
-  background: THEME.bg,
-  color: THEME.goldMain,
-  display: "flex" as const,
-  flexDirection: "column" as const,
-  alignItems: "center" as const,
-  justifyContent: "center" as const,
-  padding: 40
-};
 
 export default function NuevoProductoPage(props: NuevoProductoPageProps) {
   const {
     setPagina,
-    velas,
     setVelas,
-    inciensos,
     setInciensos,
-    figuras,
     setFiguras,
+    setKits,
+    setJoyas,
     categoriaNuevoProducto,
     setCategoriaNuevoProducto,
     nuevoProductoNombre,
@@ -79,57 +75,83 @@ export default function NuevoProductoPage(props: NuevoProductoPageProps) {
     setNuevoProductoEstilo,
     setProductoSeleccionado,
     setCategoriaEditarProductos,
-    mostrarNotificacion
+    mostrarNotificacion,
+    subcategoriasDe
   } = props;
+
+  const [subcategoriaId, setSubcategoriaId] = useState("");
+  const [generoJoya, setGeneroJoya] = useState<GeneroJoya | "">("");
+  const [acabadoJoya, setAcabadoJoya] = useState<AcabadoJoya | "">("");
+
+  const subcategoriasDeCategoria = useMemo(
+    () => subcategoriasDe(categoriaNuevoProducto),
+    [subcategoriasDe, categoriaNuevoProducto]
+  );
 
   const crearProducto = () => {
     const nombre = nuevoProductoNombre.trim();
     if (!nombre) {
-      mostrarNotificacion("Escribe el nombre del producto", "error");
+      notificarError(mostrarNotificacion, "Escribe el nombre del producto");
       return;
     }
     const precio = Number(nuevoProductoPrecio?.replace(",", "."));
     if (!Number.isFinite(precio) || precio < 0) {
-      mostrarNotificacion("Precio no válido", "error");
+      notificarError(mostrarNotificacion, "Precio no válido");
       return;
     }
     const stock = Math.max(0, Math.floor(Number(nuevoProductoStock) || 0));
     const cat = categoriaNuevoProducto;
-    let nuevoId: number;
-    if (cat === "velas") nuevoId = velas.length > 0 ? Math.max(...velas.map((p) => p.id)) + 1 : 1;
-    else if (cat === "inciensos") nuevoId = inciensos.length > 0 ? Math.max(...inciensos.map((p) => p.id)) + 1 : 101;
-    else nuevoId = figuras.length > 0 ? Math.max(...figuras.map((p) => p.id)) + 1 : 201;
-
-    const nuevoProducto: Producto = {
-      id: nuevoId,
+    if (subcategoriasDeCategoria.length > 0 && !subcategoriaId) {
+      notificarError(mostrarNotificacion, "Elige la subcategoría");
+      return;
+    }
+    const body: Record<string, unknown> = {
+      categoria: cat,
       nombre,
       precio,
       stock,
       imagen: nuevoProductoImagen && nuevoProductoImagen.startsWith("data:") ? nuevoProductoImagen : "",
-      categoria: cat,
       descripcion: nuevoProductoDescripcion.trim(),
+      activo: true,
       nombreTamano: Number(nuevoProductoTamano) || 22,
       nombreColor: nuevoProductoColor,
-      nombreEstilo: nuevoProductoEstilo as "normal" | "italic" | "bold"
+      nombreEstilo: nuevoProductoEstilo
     };
+    if (subcategoriaId) body.subcategoriaId = subcategoriaId;
+    if (cat === "joyas") {
+      if (subcategoriaId === "pulseras" && generoJoya) body.generoJoya = generoJoya;
+      if (acabadoJoya) body.acabadoJoya = acabadoJoya;
+    }
 
-    if (cat === "velas") setVelas((prev) => [...prev, nuevoProducto]);
-    else if (cat === "inciensos") setInciensos((prev) => [...prev, nuevoProducto]);
-    else setFiguras((prev) => [...prev, nuevoProducto]);
-
-    setProductoSeleccionado(`${cat}-${nuevoId}`);
-    setCategoriaEditarProductos(cat);
-    setPagina("editarProductos");
-    setNuevoProductoNombre("");
-    setNuevoProductoPrecio("10");
-    setNuevoProductoStock(5);
-    setNuevoProductoDescripcion("");
-    setNuevoProductoImagen(null);
-    setNuevoProductoNombreImagen("");
-    setNuevoProductoTamano("22");
-    setNuevoProductoColor("#ffffff");
-    setNuevoProductoEstilo("normal");
-    mostrarNotificacion(`✅ Producto "${nombre}" añadido`, "exito");
+    void (async () => {
+      try {
+        const created = (await postAdminProductoApi(body)) as Producto;
+        const newId = Number(created?.id);
+        if (!Number.isFinite(newId) || newId <= 0) {
+          notificarError(mostrarNotificacion, "Respuesta del servidor inválida (sin id)");
+          return;
+        }
+        await aplicarCatalogoActivoEnEstado(setVelas, setInciensos, setFiguras, setKits, setJoyas);
+        setProductoSeleccionado(`${cat}-${newId}`);
+        setCategoriaEditarProductos(cat);
+        setPagina("editarProductos");
+        setNuevoProductoNombre("");
+        setNuevoProductoPrecio("10");
+        setNuevoProductoStock(5);
+        setNuevoProductoDescripcion("");
+        setNuevoProductoImagen(null);
+        setNuevoProductoNombreImagen("");
+        setNuevoProductoTamano("22");
+        setNuevoProductoColor("#ffffff");
+        setNuevoProductoEstilo("normal");
+        setSubcategoriaId("");
+        setGeneroJoya("");
+        setAcabadoJoya("");
+        notificarExito(mostrarNotificacion, `✅ Producto "${nombre}" guardado en el servidor`);
+      } catch (e) {
+        notificarError(mostrarNotificacion, e instanceof Error ? e.message : "No se pudo crear el producto");
+      }
+    })();
   };
 
   const cancelar = () => {
@@ -143,83 +165,162 @@ export default function NuevoProductoPage(props: NuevoProductoPageProps) {
     setNuevoProductoTamano("22");
     setNuevoProductoColor("#ffffff");
     setNuevoProductoEstilo("normal");
+    setSubcategoriaId("");
+    setGeneroJoya("");
+    setAcabadoJoya("");
   };
 
   return (
-    <div style={{ ...panelStyle, position: "relative" }}>
-      <BotonCerrar
-        onClick={() => {
+    <div
+      className="nuevo-producto-route"
+      style={{
+        minHeight: "calc(100svh - var(--app-topbar-stack))",
+        background: THEME.bg,
+        color: THEME.goldMain,
+        display: "flex",
+        flexDirection: "column",
+        boxSizing: "border-box"
+      }}
+    >
+      <AdminPageNav
+        onVolver={() => {
           if (isAdminAuthorized()) {
             setPagina("admin");
           } else {
             setPagina("inicio");
           }
         }}
-        ariaLabel="Cerrar"
-        title="Cerrar"
       />
-      <h2 style={{ fontSize: 38, marginBottom: 30 }}>Añadir nuevo producto</h2>
-      <div className="categoria-edit-panel">
-        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Categoría</label>
-        <select className="categoria-select" value={categoriaNuevoProducto} onChange={(e) => setCategoriaNuevoProducto(e.target.value as "velas" | "inciensos" | "figuras")}>
-          <option value="velas">Velas</option>
-          <option value="inciensos">Inciensos</option>
-          <option value="figuras">Figuras</option>
-        </select>
+      <div className="nuevo-producto-route__card-area">
+        <div
+          className="inventario-modal-editar inventario-modal-editar--con-form inventario-modal-editar--nuevo-producto editar-productos-page"
+          style={{
+            background: THEME.bg,
+            border: `2px solid ${THEME.goldMain}`,
+            borderRadius: 14,
+            width: "100%",
+            maxWidth: "100%",
+            boxSizing: "border-box"
+          }}
+        >
+          <header className="inventario-modal-editar__header inventario-modal-editar__header--nuevo">
+            <div style={{ flex: "1 1 auto", minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: "clamp(0.95rem, 2.4vw, 1.1rem)",
+                  fontWeight: 800,
+                  color: THEME.goldMain,
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase"
+                }}
+              >
+                Añadir nuevo producto
+              </div>
+              <div
+                style={{
+                  marginTop: 3,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "rgba(255,255,255,0.82)",
+                  lineHeight: 1.35
+                }}
+              >
+                Mismo flujo compacto que en inventario y edición.
+              </div>
+            </div>
+          </header>
 
-        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Nombre</label>
-        <input type="text" className="categoria-text-input" value={nuevoProductoNombre} onChange={(e) => setNuevoProductoNombre(e.target.value)} placeholder="Nombre del producto" />
-
-        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Precio (€)</label>
-        <input type="number" min={0} step={0.01} className="categoria-number-input" value={nuevoProductoPrecio} onChange={(e) => setNuevoProductoPrecio(e.target.value)} />
-
-        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Stock inicial</label>
-        <input type="number" min={0} className="categoria-number-input" value={nuevoProductoStock} onChange={(e) => setNuevoProductoStock(Math.max(0, Math.floor(Number(e.target.value) || 0)))} />
-
-        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Descripción (opcional)</label>
-        <div style={{ gridColumn: "span 2", width: "100%" }}>
-          <textarea className="categoria-text-input" value={nuevoProductoDescripcion} onChange={(e) => setNuevoProductoDescripcion(e.target.value)} placeholder="Descripción del producto" style={{ width: "100%", minWidth: 0 }} />
-        </div>
-
-        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Vista previa</label>
-        <div style={{ display: "flex", alignItems: "center", gap: 15, marginTop: 10, marginBottom: 5 }}>
-          <div style={{ fontSize: Number(nuevoProductoTamano) || 22, color: nuevoProductoColor, fontStyle: nuevoProductoEstilo === "italic" ? "italic" : "normal", fontWeight: nuevoProductoEstilo === "bold" ? "bold" : "normal" }}>
-            {nuevoProductoNombre || "—"}
+          <div className="inventario-modal-editar__body-scroll">
+            <ProductoForm
+              modo="crear"
+              idPrefix="np"
+              className="producto-form--inventario-modal"
+              categoria={categoriaNuevoProducto}
+              onCategoriaChange={(c) => setCategoriaNuevoProducto(c as "velas" | "inciensos" | "figuras" | "joyas")}
+              nombre={nuevoProductoNombre}
+              onNombreChange={setNuevoProductoNombre}
+              precio={nuevoProductoPrecio}
+              onPrecioChange={setNuevoProductoPrecio}
+              descripcion={nuevoProductoDescripcion}
+              onDescripcionChange={setNuevoProductoDescripcion}
+              previewImagen={nuevoProductoImagen}
+              nombreArchivoImagen={nuevoProductoNombreImagen}
+              onSeleccionarImagen={(file, dataUrl) => {
+                setNuevoProductoNombreImagen(file.name);
+                setNuevoProductoImagen(dataUrl);
+              }}
+              color={nuevoProductoColor}
+              onColorChange={setNuevoProductoColor}
+              tamanoTexto={nuevoProductoTamano}
+              onTamanoTextoChange={setNuevoProductoTamano}
+              estiloTexto={nuevoProductoEstilo}
+              onEstiloTextoChange={setNuevoProductoEstilo}
+              textoVistaPreviaNombre={nuevoProductoNombre}
+              stockStr={String(nuevoProductoStock)}
+              onStockStrChange={(s) => setNuevoProductoStock(Math.max(0, Math.floor(parseInt(s, 10) || 0)))}
+              etiquetaBotonPrincipal="Crear producto"
+              onPrincipal={crearProducto}
+              onCancelar={cancelar}
+            >
+              {subcategoriasDeCategoria.length > 0 ? (
+                <section className="editar-productos-seccion">
+                  <div className="editar-productos-seccion__titulo">Subcategoría</div>
+                  <div className="editar-productos-seleccion-grid">
+                    <div className="editar-productos-campo">
+                      <label className="editar-productos-label" htmlFor="np-subcategoria">
+                        Subcategoría
+                      </label>
+                      <select
+                        id="np-subcategoria"
+                        className="categoria-select editar-productos-select-entrada"
+                        value={subcategoriaId}
+                        onChange={(e) => setSubcategoriaId(e.target.value)}
+                      >
+                        <option value="">— Elige subcategoría —</option>
+                        {subcategoriasDeCategoria.map((s) => (
+                          <option key={s.id} value={s.id}>{s.nombre}</option>
+                        ))}
+                      </select>
+                    </div>
+                    {categoriaNuevoProducto === "joyas" ? (
+                      <div className="editar-productos-campo">
+                        <label className="editar-productos-label" htmlFor="np-acabado-joya">
+                          Acabado
+                        </label>
+                        <select
+                          id="np-acabado-joya"
+                          className="categoria-select editar-productos-select-entrada"
+                          value={acabadoJoya}
+                          onChange={(e) => setAcabadoJoya(e.target.value as AcabadoJoya | "")}
+                        >
+                          {ACABADOS_JOYA_OPCIONES.map((o) => (
+                            <option key={o.value || "vacio"} value={o.value}>{o.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                    ) : null}
+                    {categoriaNuevoProducto === "joyas" && subcategoriaId === "pulseras" ? (
+                      <div className="editar-productos-campo">
+                        <label className="editar-productos-label" htmlFor="np-genero-joya">
+                          Pensada para
+                        </label>
+                        <select
+                          id="np-genero-joya"
+                          className="categoria-select editar-productos-select-entrada"
+                          value={generoJoya}
+                          onChange={(e) => setGeneroJoya(e.target.value as GeneroJoya | "")}
+                        >
+                          {GENEROS_JOYA_OPCIONES.map((o) => (
+                            <option key={o.value || "vacio"} value={o.value}>{o.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                    ) : null}
+                  </div>
+                </section>
+              ) : null}
+            </ProductoForm>
           </div>
-        </div>
-
-        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Imagen</label>
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <label className="categoria-file-label">
-            {nuevoProductoNombreImagen || "Seleccionar imagen"}
-            <input type="file" className="categoria-file-input" accept="image/*" onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (!file) return;
-              setNuevoProductoNombreImagen(file.name);
-              const reader = new FileReader();
-              reader.onload = (event) => setNuevoProductoImagen(event.target?.result as string);
-              reader.readAsDataURL(file);
-            }} />
-          </label>
-          {nuevoProductoImagen && <img src={nuevoProductoImagen} alt="Vista previa" style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 8, border: `2px solid ${THEME.goldMain}` }} />}
-        </div>
-
-        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Color del texto</label>
-        <input type="color" value={nuevoProductoColor} onChange={(e) => setNuevoProductoColor(e.target.value)} style={{ width: 60, height: 60, border: `2px solid ${THEME.goldMain}`, borderRadius: 12, marginBottom: 18 }} />
-
-        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Tamaño del texto</label>
-        <input type="number" min={12} max={48} className="categoria-number-input" value={nuevoProductoTamano === "0" ? "" : nuevoProductoTamano} onChange={(e) => setNuevoProductoTamano(e.target.value)} />
-
-        <label style={{ color: THEME.goldMain, fontWeight: "bold", fontSize: 20 }}>Estilo del texto</label>
-        <select value={nuevoProductoEstilo} onChange={(e) => setNuevoProductoEstilo(e.target.value)} className="categoria-select" style={{ marginBottom: 20 }}>
-          <option value="normal">Normal</option>
-          <option value="italic">Cursiva</option>
-          <option value="bold">Negrita</option>
-        </select>
-
-        <div className="categoria-btn-group">
-          <button className="categoria-edit-btn" style={{ background: "#1565c0", color: THEME.goldMain, border: `2px solid ${THEME.goldMain}` }} onClick={crearProducto}>Crear producto</button>
-          <button className="categoria-edit-btn" style={{ background: "#7b2d3a", color: "#fff", border: `2px solid ${THEME.goldMain}` }} onClick={cancelar}>Cancelar</button>
         </div>
       </div>
     </div>

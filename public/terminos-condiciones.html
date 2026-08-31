@@ -5,18 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Términos y Condiciones | MAIKA</title>
     <style>
-      body { font-family: Arial, sans-serif; margin: 0; padding: 24px; background: #1b1745; color: #fff; }
-      .card { max-width: 900px; margin: 0 auto; background: #2b2560; border: 1px solid gold; border-radius: 12px; padding: 24px; position: relative; }
-      .cerrar { position: absolute; top: 24px; right: 24px; font-size: 4rem; text-decoration: none; color: #fff; line-height: 1; }
-      h1, h2, h3 { color: gold; }
-      h2 { margin-top: 1.5em; }
-      h3 { margin-top: 1em; font-size: 1.1rem; }
-      a { color: gold; }
+      body { margin: 0; padding: clamp(16px, 4vw, 32px); background: #1b1745; color: rgba(255,255,255,0.92); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.65; }
+      main.legal-static-source { max-width: 900px; margin: 0 auto; }
     </style>
   </head>
   <body>
-    <div class="card">
-      <a href="/" class="cerrar" title="Cerrar" onclick="if(window.parent!==window){event.preventDefault();window.parent.postMessage('cerrarLegal','*');return false;}">×</a>
+    <main class="legal-static-source">
       <h1>Términos y Condiciones</h1>
       <p>Las compras realizadas en esta tienda implican la aceptación de los presentes términos y condiciones.</p>
 
@@ -56,6 +50,6 @@
 
       <h2>11. Ley aplicable y jurisdicción</h2>
       <p>Estos términos se rigen por la legislación española. Para cualquier controversia derivada de su interpretación o ejecución, las partes se someten a los juzgados y tribunales que correspondan conforme a la normativa aplicable.</p>
-    </div>
+    </main>
   </body>
 </html>

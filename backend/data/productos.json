@@ -1,0 +1,302 @@
+[
+  {
+    "id": 1,
+    "categoria": "velas",
+    "nombre": "Vela Blanca",
+    "precio": 9.5,
+    "stock": 0,
+    "imagen": "/vela-blanca.jpg",
+    "descripcion": "Purificación y paz",
+    "activo": true,
+    "precioCosteIvaIncluido": 0,
+    "nombreTamano": 22,
+    "nombreColor": "#ffffff",
+    "nombreEstilo": "normal"
+  },
+  {
+    "id": 2,
+    "categoria": "velas",
+    "nombre": "Vela Roja",
+    "precio": 14.9,
+    "stock": 0,
+    "imagen": "/vela-roja.jpg",
+    "descripcion": "Pasión y energía",
+    "activo": true,
+    "precioCosteIvaIncluido": 0,
+    "nombreTamano": 22,
+    "nombreColor": "#ffffff",
+    "nombreEstilo": "normal"
+  },
+  {
+    "id": 3,
+    "categoria": "velas",
+    "nombre": "Vela Verde",
+    "precio": 13.5,
+    "stock": 0,
+    "imagen": "/vela-verde.jpg",
+    "descripcion": "Esperanza y salud",
+    "activo": true,
+    "precioCosteIvaIncluido": 0
+  },
+  {
+    "id": 4,
+    "categoria": "velas",
+    "nombre": "Vela Azul",
+    "precio": 15,
+    "stock": 0,
+    "imagen": "/vela-azul.jpg",
+    "descripcion": "Tranquilidad y armonía",
+    "activo": true,
+    "precioCosteIvaIncluido": 0
+  },
+  {
+    "id": 5,
+    "categoria": "velas",
+    "nombre": "Vela Negra",
+    "precio": 16.5,
+    "stock": 0,
+    "imagen": "/vela-negra.jpg",
+    "descripcion": "Protección",
+    "activo": true,
+    "precioCosteIvaIncluido": 0,
+    "nombreTamano": 22,
+    "nombreColor": "#ffffff",
+    "nombreEstilo": "normal"
+  },
+  {
+    "id": 6,
+    "categoria": "velas",
+    "nombre": "Vela Rosa",
+    "precio": 13.9,
+    "stock": 0,
+    "imagen": "/vela-rosa.jpg",
+    "descripcion": "Amor y amistad",
+    "activo": true
+  },
+  {
+    "id": 7,
+    "categoria": "velas",
+    "nombre": "Vela Dorada",
+    "precio": 18,
+    "stock": 4,
+    "imagen": "/vela-dorada.jpg",
+    "descripcion": "Éxito y prosperidad",
+    "activo": true
+  },
+  {
+    "id": 8,
+    "categoria": "velas",
+    "nombre": "Vela Plateada",
+    "precio": 17.5,
+    "stock": 1,
+    "imagen": "/vela-plateada.jpg",
+    "descripcion": "Intuición",
+    "activo": true
+  },
+  {
+    "id": 9,
+    "categoria": "velas",
+    "nombre": "Vela Lavanda",
+    "precio": 12.9,
+    "stock": 5,
+    "imagen": "/vela-lavanda.jpg",
+    "descripcion": "Relajación",
+    "activo": true
+  },
+  {
+    "id": 10,
+    "categoria": "velas",
+    "nombre": "Vela Canela",
+    "precio": 13.2,
+    "stock": 5,
+    "imagen": "/vela-canela.jpg",
+    "descripcion": "Abundancia",
+    "activo": true
+  },
+  {
+    "id": 101,
+    "categoria": "inciensos",
+    "nombre": "Incienso Sándalo",
+    "precio": 6.5,
+    "stock": 0,
+    "imagen": "/incienso-sandalo.jpg",
+    "descripcion": "Meditación",
+    "activo": true,
+    "precioCosteIvaIncluido": 0
+  },
+  {
+    "id": 102,
+    "categoria": "inciensos",
+    "nombre": "Incienso Lavanda",
+    "precio": 5.9,
+    "stock": 4,
+    "imagen": "/incienso-lavanda.jpg",
+    "descripcion": "Calma",
+    "activo": true
+  },
+  {
+    "id": 103,
+    "categoria": "inciensos",
+    "nombre": "Incienso Ruda",
+    "precio": 7.2,
+    "stock": 0,
+    "imagen": "/incienso-ruda.jpg",
+    "descripcion": "Protección",
+    "activo": true
+  },
+  {
+    "id": 104,
+    "categoria": "inciensos",
+    "nombre": "Incienso Jazmín",
+    "precio": 6.8,
+    "stock": 2,
+    "imagen": "/incienso-jazmin.jpg",
+    "descripcion": "Amor",
+    "activo": true
+  },
+  {
+    "id": 105,
+    "categoria": "inciensos",
+    "nombre": "Incienso Palo Santo",
+    "precio": 8.5,
+    "stock": 3,
+    "imagen": "/incienso-palosanto.jpg",
+    "descripcion": "Limpieza",
+    "activo": true
+  },
+  {
+    "id": 106,
+    "categoria": "inciensos",
+    "nombre": "Incienso Mirra",
+    "precio": 7.9,
+    "stock": 5,
+    "imagen": "/incienso-mirra.jpg",
+    "descripcion": "Espiritualidad",
+    "activo": true
+  },
+  {
+    "id": 107,
+    "categoria": "inciensos",
+    "nombre": "Incienso Canela",
+    "precio": 6.4,
+    "stock": 5,
+    "imagen": "/incienso-canela.jpg",
+    "descripcion": "Éxito",
+    "activo": true
+  },
+  {
+    "id": 108,
+    "categoria": "inciensos",
+    "nombre": "Incienso Rosa",
+    "precio": 6.1,
+    "stock": 5,
+    "imagen": "/incienso-rosa.jpg",
+    "descripcion": "Armonía",
+    "activo": true
+  },
+  {
+    "id": 201,
+    "categoria": "figuras",
+    "nombre": "Buda Dorado",
+    "precio": 35,
+    "stock": 0,
+    "imagen": "/buda-dorado.jpg",
+    "descripcion": "Iluminación",
+    "activo": true
+  },
+  {
+    "id": 202,
+    "categoria": "figuras",
+    "nombre": "Buda Meditación",
+    "precio": 42,
+    "stock": 3,
+    "imagen": "/buda-meditacion.jpg",
+    "descripcion": "Paz interior",
+    "activo": true
+  },
+  {
+    "id": 203,
+    "categoria": "figuras",
+    "nombre": "Figura Protección",
+    "precio": 28,
+    "stock": 3,
+    "imagen": "/figura-proteccion.jpg",
+    "descripcion": "Escudo energético",
+    "activo": true
+  },
+  {
+    "id": 204,
+    "categoria": "figuras",
+    "nombre": "Buda Prosperidad",
+    "precio": 39,
+    "stock": 3,
+    "imagen": "/buda-prosperidad.jpg",
+    "descripcion": "Abundancia",
+    "activo": true
+  },
+  {
+    "id": 205,
+    "categoria": "figuras",
+    "nombre": "Buda Blanco",
+    "precio": 33,
+    "stock": 3,
+    "imagen": "/buda-blanco.jpg",
+    "descripcion": "Pureza",
+    "activo": true
+  },
+  {
+    "id": 206,
+    "categoria": "figuras",
+    "nombre": "Figura Ángel",
+    "precio": 24,
+    "stock": 3,
+    "imagen": "/figura-angel.jpg",
+    "descripcion": "Protección divina",
+    "activo": true
+  },
+  {
+    "id": 207,
+    "categoria": "figuras",
+    "nombre": "Ganesh",
+    "precio": 48,
+    "stock": 0,
+    "imagen": "/ganesh.jpg",
+    "descripcion": "Sabiduría",
+    "activo": true
+  },
+  {
+    "id": 301,
+    "categoria": "kits",
+    "nombre": "Kit Luna Nueva",
+    "precio": 29.9,
+    "stock": 10,
+    "imagen": "/kit-luna-nueva.jpg",
+    "descripcion": "Vela blanca, incienso ruda y figura protección. Ideal para ritual de inicio.",
+    "activo": true
+  },
+  {
+    "id": 302,
+    "categoria": "kits",
+    "nombre": "Kit Protección Hogar",
+    "precio": 24.5,
+    "stock": 8,
+    "imagen": "/kit-proteccion.jpg",
+    "descripcion": "Vela negra, incienso palo santo. Limpieza y protección.",
+    "activo": true
+  },
+  {
+    "id": 303,
+    "categoria": "joyas",
+    "nombre": "Brazalete Infinito",
+    "precio": 19,
+    "stock": 5,
+    "imagen": "/tienda/joyas/pulseras/brazalete-infinito-303.jpg",
+    "descripcion": "",
+    "activo": true,
+    "nombreTamano": 22,
+    "nombreColor": "#ffffff",
+    "nombreEstilo": "normal",
+    "subcategoriaId": "pulseras",
+    "acabadoJoya": "oro"
+  }
+]

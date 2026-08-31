@@ -1,9 +1,14 @@
 import { useState } from "react";
+import {
+  ensureAdminPanelJwtInSession,
+  getLastAdminPanelLoginError,
+  getLastAdminPanelRateLimitResetAt
+} from "./services/apiAuth";
+import { setAdminAuthorization } from "./utils/adminAuth";
 
 export default function Login({ onLogin }: { onLogin: () => void }) {
   const [clave, setClave] = useState("");
-
-  const PASSWORD = "maika123";
+  const [enviando, setEnviando] = useState(false);
 
   return (
     <div style={{
@@ -29,16 +34,31 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
 
         <button
           style={{ marginTop: "10px" }}
-          onClick={() => {
-            if (clave === PASSWORD) {
-              localStorage.setItem("maika_admin", "ok");
-              onLogin();
-            } else {
-              alert("Contraseña incorrecta");
+          disabled={enviando}
+          onClick={async () => {
+            setEnviando(true);
+            try {
+              if (await ensureAdminPanelJwtInSession(clave)) {
+                setAdminAuthorization();
+                onLogin();
+              } else {
+                const motivo = getLastAdminPanelLoginError();
+                const resetAt = getLastAdminPanelRateLimitResetAt();
+                const resetTexto = resetAt ? new Date(resetAt).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "";
+                alert(
+                  motivo === "rate_limit"
+                    ? `Demasiados intentos.${resetTexto ? ` Vuelve a probar sobre las ${resetTexto}.` : " Espera unos minutos y vuelve a probar."}`
+                    : motivo === "network"
+                      ? "No se pudo contactar con el servidor."
+                      : "Contraseña incorrecta"
+                );
+              }
+            } finally {
+              setEnviando(false);
             }
           }}
         >
-          Entrar
+          {enviando ? "Entrando..." : "Entrar"}
         </button>
       </div>
     </div>
