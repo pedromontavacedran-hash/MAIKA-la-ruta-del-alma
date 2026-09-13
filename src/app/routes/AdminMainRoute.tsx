@@ -1,4 +1,4 @@
-﻿import { Suspense, type Dispatch, type SetStateAction } from "react";
+import { Suspense, type Dispatch, type SetStateAction } from "react";
 import { CuentaPage } from "../routing/lazyPages";
 import GestionUsuariosPage from "../../pages/GestionUsuariosPage";
 import AdminPanelShell from "../../components/admin/AdminPanelShell";
@@ -28,7 +28,6 @@ import { normalizarTelefonoBizum } from "../../utils/pago";
 
 import { useAdminDisenoWebEditor } from "./useAdminDisenoWebEditor";
 import { AdminDisenoWebPanel } from "./AdminDisenoWebPanel";
-
 export type AdminMainRouteProps = {
   esAdmin: boolean;
   accesoAdmin: boolean;
@@ -161,7 +160,6 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
     notaPedidoEnvio,
     setNotaPedidoEnvio
   } = p;
-
   const disenoWebEditor = useAdminDisenoWebEditor({ esAdmin, accesoAdmin, mostrarNotificacion });
   const { pantallaLimpiaDisenoWebApartado } = disenoWebEditor;
 
@@ -179,7 +177,7 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
               <Suspense
                 fallback={(
                   <div style={{ color: THEME.goldMain, padding: 20, textAlign: "center" }}>
-                    Cargando formularioâ€¦
+                    Cargando formulario…
                   </div>
                 )}
               >
@@ -236,10 +234,10 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
         />
       ) : (
       <>
-      {!pantallaLimpiaDisenoWebApartado ? <h2 className="admin-title">âš™ï¸ PANEL ADMIN</h2> : null}
+      {!pantallaLimpiaDisenoWebApartado ? <h2 className="admin-title">⚙️ PANEL ADMIN</h2> : null}
       {!accesoAdmin ? (
         <p className="admin-subtitle">
-          Ãšltima sesión: {adminUltimoLoginTexto} | Ahora: {adminAhoraTexto}
+          Última sesión: {adminUltimoLoginTexto} | Ahora: {adminAhoraTexto}
         </p>
       ) : null}
 
@@ -250,7 +248,7 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
           flatInnerFrame={pantallaLimpiaDisenoWebApartado}
           sessionMeta={
             <>
-              Ãšltima sesión: {adminUltimoLoginTexto} | Ahora: {adminAhoraTexto}
+              Última sesión: {adminUltimoLoginTexto} | Ahora: {adminAhoraTexto}
             </>
           }
           onCerrar={() => {
@@ -274,7 +272,7 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
                 className="btn-admin-limpio admin-btn admin-btn--green"
                 onClick={cargarUsuarios}
               >
-                ðŸ“‹ GESTIÃ“N DE USUARIOS
+                📋 GESTIÓN DE USUARIOS
               </button>
               <button
                 className="btn-admin-limpio admin-btn admin-btn--purple"
@@ -283,7 +281,7 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
                 }}
                 style={{ marginTop: 10 }}
               >
-                ðŸ”® NORIA HORÃ“SCOPOS (PREVIEW)
+                🔮 NORIA HORÓSCOPOS (PREVIEW)
               </button>
               <AdminLecturaPantallaPanel />
             </div>
@@ -298,7 +296,7 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
                 className="btn-admin-limpio admin-btn admin-btn--blue"
                 onClick={() => setPagina("seguimiento")}
               >
-                ðŸšš SEGUIMIENTO DE PEDIDOS
+                🚚 SEGUIMIENTO DE PEDIDOS
               </button>
                 </>
               ) : null}
@@ -321,14 +319,14 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
               <summary
                 className="btn-admin-limpio admin-btn admin-btn--blue admin-summary-btn"
               >
-                ðŸ›’ EDICIÃ“N TIENDA
+                🛒 EDICIÓN TIENDA
               </summary>
               <div className="admin-submenu">
                 <button
                   className="admin-submenu-item admin-submenu-item--button"
                   onClick={() => setPagina("editarCategorias")}
                 >
-                  ðŸ“ Editar categorías
+                  📁 Editar categorías
                 </button>
                 <button
                   className="admin-submenu-item admin-submenu-item--button"
@@ -340,16 +338,16 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
                   <summary
                     className="admin-submenu-item"
                   >
-                    ðŸ“‚ Desplegable de la página de inicio
+                    📂 Desplegable de la página de inicio
                   </summary>
                   <div className="admin-accordion-content">
-                    <p style={{ color: "rgba(255,255,255,0.85)", fontSize: 13, marginBottom: 8 }}>Cada bloque es <strong style={{ color: THEME.goldMain }}>lo que tú quieras</strong>: algo novedoso, ofertas, ritual del mes, caja misteriosaâ€¦ Título y subtítulo los pones tú; eliges desde qué producto empieza y cuántos mostrar. En subtítulo puedes usar <strong style={{ color: THEME.goldMain }}>{"{mes}"}</strong> y <strong style={{ color: THEME.goldMain }}>{"{año}"}</strong> para la fecha.</p>
+                    <p style={{ color: "rgba(255,255,255,0.85)", fontSize: 13, marginBottom: 8 }}>Cada bloque es <strong style={{ color: THEME.goldMain }}>lo que tú quieras</strong>: algo novedoso, ofertas, ritual del mes, caja misteriosa… Título y subtítulo los pones tú; eliges desde qué producto empieza y cuántos mostrar. En subtítulo puedes usar <strong style={{ color: THEME.goldMain }}>{"{mes}"}</strong> y <strong style={{ color: THEME.goldMain }}>{"{año}"}</strong> para la fecha.</p>
                     <details style={{ marginBottom: 12 }}>
-                      <summary style={{ color: THEME.goldMain, cursor: "pointer", fontSize: 13, fontWeight: "bold" }}>Â¿De dónde salen los productos? Ver orden del catálogo</summary>
-                      <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 12, marginTop: 8, marginBottom: 4 }}>Los productos salen del catálogo en este orden: <strong>velas</strong> â†’ <strong>inciensos</strong> â†’ <strong>figuras</strong> â†’ <strong>kits</strong> â†’ <strong>joyería del alma</strong>. El número &quot;Desde producto&quot; es la posición (0 = el primero, 1 = el segundoâ€¦). Así sabes qué productos verá cada bloque:</p>
+                      <summary style={{ color: THEME.goldMain, cursor: "pointer", fontSize: 13, fontWeight: "bold" }}>¿De dónde salen los productos? Ver orden del catálogo</summary>
+                      <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 12, marginTop: 8, marginBottom: 4 }}>Los productos salen del catálogo en este orden: <strong>velas</strong> → <strong>inciensos</strong> → <strong>figuras</strong> → <strong>kits</strong> → <strong>joyería del alma</strong>. El número &quot;Desde producto&quot; es la posición (0 = el primero, 1 = el segundo…). Así sabes qué productos verá cada bloque:</p>
                       <ul style={{ margin: 0, paddingLeft: 20, color: "rgba(255,255,255,0.85)", fontSize: 12, maxHeight: 120, overflowY: "auto" }}>
                         {[...velas, ...inciensos, ...figuras, ...(kits ?? []), ...(joyas ?? [])].map((p, i) => (
-                          <li key={`${p.categoria}-${p.id}`} style={{ marginBottom: 2 }}><strong style={{ color: THEME.goldMain }}>{i}</strong> â€“ {p.nombre}</li>
+                          <li key={`${p.categoria}-${p.id}`} style={{ marginBottom: 2 }}><strong style={{ color: THEME.goldMain }}>{i}</strong> – {p.nombre}</li>
                         ))}
                       </ul>
                       {[...velas, ...inciensos, ...figuras, ...(kits ?? []), ...(joyas ?? [])].length === 0 && (
@@ -387,7 +385,7 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
                               setDesplegableInicio(next);
                               localStorage.setItem(DESPLEGABLE_INICIO_KEY, JSON.stringify(next));
                             }}
-                            placeholder="Ej: Lo nuevo, Ofertas, Lo que quieras destacarâ€¦"
+                            placeholder="Ej: Lo nuevo, Ofertas, Lo que quieras destacar…"
                             style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `2px solid ${THEME.goldMain}`, background: THEME.bg, color: "white", fontSize: 13, boxSizing: "border-box" }}
                           />
                         </div>
@@ -402,7 +400,7 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
                               setDesplegableInicio(next);
                               localStorage.setItem(DESPLEGABLE_INICIO_KEY, JSON.stringify(next));
                             }}
-                            placeholder="Ej: Lunas de {mes} {año} â€“ Ver productos"
+                            placeholder="Ej: Lunas de {mes} {año} – Ver productos"
                             style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `2px solid ${THEME.goldMain}`, background: THEME.bg, color: "white", fontSize: 13, boxSizing: "border-box" }}
                           />
                         </div>
@@ -436,7 +434,7 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
                             </select>
                           </div>
                           <div>
-                            <label style={{ display: "block", color: "rgba(255,255,255,0.9)", fontSize: 12, marginBottom: 2 }}>NÂº productos</label>
+                            <label style={{ display: "block", color: "rgba(255,255,255,0.9)", fontSize: 12, marginBottom: 2 }}>Nº productos</label>
                             <select
                               value={bloque.numProductos}
                               onChange={(e) => {
@@ -481,7 +479,7 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
                       }}
                       style={{ width: "100%", padding: "12px", marginTop: 8, background: "rgba(201,162,74,0.2)", color: THEME.goldMain, border: `2px dashed ${THEME.goldMain}`, borderRadius: 10, cursor: "pointer", fontWeight: "bold", fontSize: 14 }}
                     >
-                      ï¼‹ Añadir otro bloque (lo que quieras: novedades, ofertas, etc.)
+                      ＋ Añadir otro bloque (lo que quieras: novedades, ofertas, etc.)
                     </button>
                   </div>
                 </details>
@@ -508,7 +506,7 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
                                 setServiciosInicio(next);
                                 localStorage.setItem(SERVICIOS_INICIO_KEY, JSON.stringify(next));
                               }}
-                              placeholder="Ej: ðŸ”® Tarot Evolutivo"
+                              placeholder="Ej: 🔮 Tarot Evolutivo"
                               style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `2px solid ${THEME.goldMain}`, background: THEME.bg, color: "white", fontSize: 13, boxSizing: "border-box" }}
                             />
                           </div>
@@ -569,7 +567,7 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
                                   setServiciosInicio(next);
                                   localStorage.setItem(SERVICIOS_INICIO_KEY, JSON.stringify(next));
                                 }}
-                                placeholder="45â‚¬"
+                                placeholder="45€"
                                 style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `2px solid ${THEME.goldMain}`, background: THEME.bg, color: "white", fontSize: 13, boxSizing: "border-box" }}
                               />
                             </div>
@@ -616,7 +614,7 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
                 className="btn-admin-limpio admin-btn admin-btn--green"
                 onClick={() => setPagina("inventario")}
               >
-                ðŸ“¦ INVENTARIO
+                📦 INVENTARIO
               </button>
               <AdminCampanaPackPanel mostrarNotificacion={mostrarNotificacion} />
             </div>
@@ -635,13 +633,13 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
                   setPagina("editarCupones");
                 }}
               >
-                ðŸŽŸï¸ CÃ“DIGOS PROMOCIONALES
+                🎟️ CÓDIGOS PROMOCIONALES
               </button>
               <button
                 className="btn-admin-limpio admin-btn admin-btn--purple"
                 onClick={() => setPagina("contabilidad")}
               >
-                ðŸ“… CONTABILIDAD
+                📅 CONTABILIDAD
               </button>
             </div>
               </section>

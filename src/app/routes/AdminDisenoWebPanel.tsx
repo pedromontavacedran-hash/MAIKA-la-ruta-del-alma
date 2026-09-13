@@ -193,7 +193,7 @@ export function AdminDisenoWebPanel({ editor }: AdminDisenoWebPanelProps) {
                             { id: "fondo" as const, label: "Fondo" },
                             { id: "hero" as const, label: "Imagen hero" },
                             { id: "heroLogo" as const, label: "Logo" },
-                            { id: "boton" as const, label: "BotÃ³n" },
+                            { id: "boton" as const, label: "Botón" },
                             { id: "espaciado" as const, label: "Espaciado" }
                           ] as const
                         ).map((tab) => {
@@ -214,7 +214,7 @@ export function AdminDisenoWebPanel({ editor }: AdminDisenoWebPanelProps) {
                                       : tab.id === "hero"
                                         ? "Imagen hero (ruta dedicada)"
                                         : tab.id === "boton"
-                                          ? "BotÃ³n Â«Explorar tiendaÂ» (ruta dedicada)"
+                                          ? "Botón «Explorar tienda» (ruta dedicada)"
                                           : tab.id === "espaciado"
                                             ? "Espaciado (ruta dedicada)"
                                             : undefined
@@ -281,11 +281,11 @@ export function AdminDisenoWebPanel({ editor }: AdminDisenoWebPanelProps) {
                   >
                   <div style={{ padding: "10px 12px", display: "grid", gap: 8 }}>
                     <h4 style={{ margin: "0 0 8px", color: THEME.goldMain, fontSize: 15, fontWeight: 800 }}>
-                      Logo y colores de la barra; hero y fondo. El texto del modal de pedido realizado va fijo en cÃ³digo (
+                      Logo y colores de la barra; hero y fondo. El texto del modal de pedido realizado va fijo en código (
                       <code style={{ fontSize: 12 }}>pedidoExitoModalFijo.ts</code>).
                     </h4>
                   <div style={{ fontSize: 10, fontWeight: 700, color: THEME.goldMain, letterSpacing: "0.02em", lineHeight: 1.35 }}>
-                    Presets: guarda o carga la configuraciÃ³n completa de los cuatro apartados (barra superior, fondo del modal, imagen hero, logo del mensaje). MÃ¡ximo {CHECKOUT_VISUAL_PRESETS_MAX} presets guardados. Â«Restaurar todoÂ» vuelve a tu predeterminado: la primera vez se tomÃ³ una copia de lo que ya tenÃ­as en este navegador; puedes actualizarlo con el botÃ³n de abajo o volver al genÃ©rico del cÃ³digo.
+                    Presets: guarda o carga la configuración completa de los cuatro apartados (barra superior, fondo del modal, imagen hero, logo del mensaje). Máximo {CHECKOUT_VISUAL_PRESETS_MAX} presets guardados. «Restaurar todo» vuelve a tu predeterminado: la primera vez se tomó una copia de lo que ya tenías en este navegador; puedes actualizarlo con el botón de abajo o volver al genérico del código.
                   </div>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
                     <input
@@ -378,8 +378,8 @@ export function AdminDisenoWebPanel({ editor }: AdminDisenoWebPanelProps) {
                   <span style={{ fontSize: 9, color: "rgba(255,255,255,0.42)", lineHeight: 1.35 }}>
                     Estado:{" "}
                     {hayBaselineRestaurarTodo
-                      ? "predeterminado personalizado activo (Restaurar todo â‰  cÃ³digo genÃ©rico)."
-                      : "sin predeterminado guardado: Restaurar todo = valores genÃ©ricos del cÃ³digo."}
+                      ? "predeterminado personalizado activo (Restaurar todo ≠ código genérico)."
+                      : "sin predeterminado guardado: Restaurar todo = valores genéricos del código."}
                   </span>
                   {mensajePredeterminadoRestaurar ? (
                     <div
@@ -401,7 +401,7 @@ export function AdminDisenoWebPanel({ editor }: AdminDisenoWebPanelProps) {
                     </div>
                   ) : null}
                   {checkoutVisualPresetsLista.length === 0 ? (
-                    <span style={{ fontSize: 10, color: "rgba(255,255,255,0.45)" }}>NingÃºn preset guardado aÃºn.</span>
+                    <span style={{ fontSize: 10, color: "rgba(255,255,255,0.45)" }}>Ningún preset guardado aún.</span>
                   ) : (
                     <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "grid", gap: 6 }}>
                       {checkoutVisualPresetsLista.map((p) => (
@@ -616,7 +616,7 @@ export function AdminDisenoWebPanel({ editor }: AdminDisenoWebPanelProps) {
                             step={1}
                             value={logoPosXSliderUi}
                             onChange={(e) => aplicarLogoPosXDesdeUiPorCien(Number(e.target.value))}
-                            aria-label="PosiciÃ³n horizontal del logo"
+                            aria-label="Posición horizontal del logo"
                             style={{ flex: 1, minWidth: 0, height: 20, margin: 0, padding: 0, accentColor: THEME.goldMain }}
                           />
                           <button
@@ -652,7 +652,7 @@ export function AdminDisenoWebPanel({ editor }: AdminDisenoWebPanelProps) {
                         />
                       </label>
                       <label style={{ display: "grid", gap: 6, color: "rgba(255,255,255,0.88)", fontSize: 11, fontWeight: 700 }}>
-                        TamaÃ±o iconos ({ICONOS_BARRA_ESCALA_MIN}â€“{ICONOS_BARRA_ESCALA_MAX}%): hamburguesa, llave, usuario, carrito y corazÃ³n
+                        Tamaño iconos ({ICONOS_BARRA_ESCALA_MIN}–{ICONOS_BARRA_ESCALA_MAX}%): hamburguesa, llave, usuario, carrito y corazón
                         <input
                           type="range"
                           min={ICONOS_BARRA_ESCALA_MIN}
@@ -667,7 +667,7 @@ export function AdminDisenoWebPanel({ editor }: AdminDisenoWebPanelProps) {
                               )
                             )
                           }
-                          aria-label="TamaÃ±o de los iconos de la barra superior"
+                          aria-label="Tamaño de los iconos de la barra superior"
                           style={{ width: "100%", height: 20, margin: 0, padding: 0, accentColor: THEME.goldMain }}
                         />
                         <span style={{ color: "rgba(255,255,255,0.55)", fontSize: 9, lineHeight: 1.3 }}>
@@ -776,7 +776,7 @@ export function AdminDisenoWebPanel({ editor }: AdminDisenoWebPanelProps) {
                               fontWeight: 700
                             }}
                           >
-                            Cielo clÃ¡sico
+                            Cielo clásico
                           </button>
                           <button
                             type="button"
@@ -827,7 +827,7 @@ export function AdminDisenoWebPanel({ editor }: AdminDisenoWebPanelProps) {
                           <FondoEstrellasDensidadPreview densidad={fondoEstrellasDensidad} color={fondoEstrellasColor} />
                         </button>
                         <div style={{ color: "rgba(255,255,255,0.45)", fontSize: 8, lineHeight: 1.3 }}>
-                          Misma lÃ³gica que inicio/tienda: zona vacÃ­a y el fondo que ya tienes configurado (localStorage).
+                          Misma lógica que inicio/tienda: zona vacía y el fondo que ya tienes configurado (localStorage).
                         </div>
                       </div>
                       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
@@ -1104,7 +1104,7 @@ export function AdminDisenoWebPanel({ editor }: AdminDisenoWebPanelProps) {
                           disabled={!heroBannerPuedeDeshacer}
                           title={
                             heroBannerPuedeDeshacer
-                              ? "Vuelve a la imagen (y zoom/estirado) justo antes del Ãºltimo cambio de archivo. Puedes pulsar varias veces hasta 5 pasos."
+                              ? "Vuelve a la imagen (y zoom/estirado) justo antes del último cambio de archivo. Puedes pulsar varias veces hasta 5 pasos."
                               : "Sube primero otra imagen para poder deshacer"
                           }
                           onClick={deshacerUltimoCambioHeroBanner}
@@ -1119,17 +1119,17 @@ export function AdminDisenoWebPanel({ editor }: AdminDisenoWebPanelProps) {
                             fontWeight: 700
                           }}
                         >
-                          â†© Deshacer Ãºltimo
+                          ↩ Deshacer último
                         </button>
                       </div>
                       <p style={{ margin: 0, color: "rgba(255,255,255,0.5)", fontSize: 9, lineHeight: 1.35 }}>
-                        Cada vez que guardas una imagen nueva, puedes deshacer hasta {HERO_BANNER_UNDO_MAX} cambios seguidos (se guarda tambiÃ©n el zoom y el estirado que tenÃ­as en ese momento).
+                        Cada vez que guardas una imagen nueva, puedes deshacer hasta {HERO_BANNER_UNDO_MAX} cambios seguidos (se guarda también el zoom y el estirado que tenías en ese momento).
                       </p>
                       {heroBannerNombreArchivo ? (
                         <div style={{ color: "rgba(255,255,255,0.72)", fontSize: 10, lineHeight: 1.2 }}>{heroBannerNombreArchivo}</div>
                       ) : null}
                       <div style={{ color: "rgba(255,255,255,0.62)", fontSize: 10, lineHeight: 1.35 }}>
-                        EdiciÃ³n directa: los cambios del hero se guardan en este navegador al mover sliders o subir imagen.
+                        Edición directa: los cambios del hero se guardan en este navegador al mover sliders o subir imagen.
                       </div>
                       <button
                         type="button"
@@ -1150,7 +1150,7 @@ export function AdminDisenoWebPanel({ editor }: AdminDisenoWebPanelProps) {
                         Ver inicio â€” pantalla completa
                       </button>
                       <label style={{ color: "rgba(255,255,255,0.82)", fontSize: 11, display: "grid", gap: 4 }}>
-                        Zoom hero: {heroBannerZoom}% (menos = mÃ¡s lejos, mÃ¡s = mÃ¡s cerca)
+                        Zoom hero: {heroBannerZoom}% (menos = más lejos, más = más cerca)
                         <input
                           type="range"
                           min={HERO_BANNER_ZOOM_MIN}
@@ -1161,7 +1161,7 @@ export function AdminDisenoWebPanel({ editor }: AdminDisenoWebPanelProps) {
                         />
                       </label>
                       <label style={{ color: "rgba(255,255,255,0.82)", fontSize: 11, display: "grid", gap: 4 }}>
-                        Estirado horizontal (solo escritorio): {heroBannerStretchX}% (100% = sin estirar; mÃ¡s = mÃ¡s ancho)
+                        Estirado horizontal (solo escritorio): {heroBannerStretchX}% (100% = sin estirar; más = más ancho)
                         <input
                           type="range"
                           min={HERO_BANNER_STRETCH_X_MIN}
@@ -1240,7 +1240,7 @@ export function AdminDisenoWebPanel({ editor }: AdminDisenoWebPanelProps) {
                         <div
                           role="dialog"
                           aria-modal="true"
-                          aria-label="Vista previa: pÃ¡gina de inicio real (barra superior y hero, con los ajustes del panel si caben en sesiÃ³n)"
+                          aria-label="Vista previa: página de inicio real (barra superior y hero, con los ajustes del panel si caben en sesión)"
                           style={{
                             position: "fixed",
                             inset: 0,

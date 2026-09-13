@@ -391,24 +391,26 @@ export default function Tienda({
             gap: 24,
           }}
         >
-          <div
-            onClick={() => setSubcategoriaAbierta("__todas__")}
-            style={{
-              cursor: "pointer",
-              background: fondoServicios,
-              borderRadius: 20,
-              padding: 26,
-              border: `2px dashed ${THEME.goldMain}`,
-              textAlign: "center",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center"
-            }}
-          >
-            <div style={{ fontSize: "1.8rem", marginBottom: 8 }} aria-hidden>🗂️</div>
-            <h3 style={{ color: THEME.goldMain, margin: "0 0 6px", minHeight: "2.8em", lineHeight: "1.4em" }}>Ver toda {nombreCat}</h3>
-            <p style={{ color: "white", margin: 0, marginTop: "auto" }}>{productosCategoria.length} productos</p>
-          </div>
+          {mostrarCategoria !== "inciensos" && (
+            <div
+              onClick={() => setSubcategoriaAbierta("__todas__")}
+              style={{
+                cursor: "pointer",
+                background: fondoServicios,
+                borderRadius: 20,
+                padding: 26,
+                border: `2px dashed ${THEME.goldMain}`,
+                textAlign: "center",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center"
+              }}
+            >
+              <div style={{ fontSize: "1.8rem", marginBottom: 8 }} aria-hidden>🗂️</div>
+              <h3 style={{ color: THEME.goldMain, margin: "0 0 6px", minHeight: "2.8em", lineHeight: "1.4em" }}>Ver toda {nombreCat}</h3>
+              <p style={{ color: "white", margin: 0, marginTop: "auto" }}>{productosCategoria.length} productos</p>
+            </div>
+          )}
           {subcategoriasCategoriaActual.map((sub) => {
             const count = productosCategoria.filter((p) => p.subcategoriaId === sub.id).length;
             return (
