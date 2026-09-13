@@ -9,6 +9,10 @@ type Props = {
   pedidosTotales: number;
   usuariosTotales: number;
   stockBajo: number;
+  unidadesVendidas: number;
+  valorInventario: number;
+  unidadesEnStock: number;
+  topProductos: Array<{ nombre: string; cantidad: number; ventas: number }>;
   pedidos: Pedido[];
   pedidosPendientes: Pedido[];
   pedidosEnviados: Pedido[];
@@ -30,6 +34,10 @@ export default function AdminMetricasPanel({
   pedidosTotales,
   usuariosTotales,
   stockBajo,
+  unidadesVendidas,
+  valorInventario,
+  unidadesEnStock,
+  topProductos,
   pedidos,
   pedidosPendientes,
   pedidosEnviados,
@@ -74,7 +82,7 @@ export default function AdminMetricasPanel({
 
         <div className="metric-card">
           <div className="metric-label">📦 Pedidos (total)</div>
-          <div className="metric-hint">Todos los pedidos registrados</div>
+          <div className="metric-hint">Excluye cancelados/rechazados</div>
           <div className="metric-value">{pedidosTotales}</div>
         </div>
 
@@ -87,7 +95,43 @@ export default function AdminMetricasPanel({
           <div className="metric-label">⚠️ Stock bajo</div>
           <div className="metric-value">{stockBajo}</div>
         </div>
+
+        <div className="metric-card">
+          <div className="metric-label">🏷️ Unidades vendidas</div>
+          <div className="metric-hint">Total histórico (no cancelados)</div>
+          <div className="metric-value">{unidadesVendidas}</div>
+        </div>
+
+        <div className="metric-card">
+          <div className="metric-label">📦 Unidades en stock</div>
+          <div className="metric-value">{unidadesEnStock}</div>
+        </div>
+
+        <div className="metric-card">
+          <div className="metric-label">💰 Valor inventario</div>
+          <div className="metric-hint">Stock × precio venta</div>
+          <div className="metric-value">{valorInventario.toFixed(2)} €</div>
+        </div>
       </div>
+
+      {topProductos.length > 0 && (
+        <div style={{ marginTop: 16 }}>
+          <div className="admin-metricas-title" style={{ fontSize: 16, marginBottom: 8 }}>🔥 Top productos (por unidades)</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {topProductos.map((p, i) => (
+              <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 12px", background: "rgba(255,255,255,0.04)", borderRadius: 8, fontSize: 14 }}>
+                <span style={{ color: "white" }}>
+                  <span style={{ color: goldColor, fontWeight: "bold", marginRight: 8 }}>{i + 1}.</span>
+                  {p.nombre}
+                </span>
+                <span style={{ color: "rgba(255,255,255,0.7)" }}>
+                  {p.cantidad} uds · {p.ventas.toFixed(2)} €
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

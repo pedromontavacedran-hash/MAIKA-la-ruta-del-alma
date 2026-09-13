@@ -22,6 +22,7 @@ export function listaProductosSegura(raw: unknown): Producto[] {
     const o = item as Partial<Producto> & Record<string, unknown>;
     const cat = categoriaNormalizada(o.categoria);
     if (!cat || !CATEGORIAS.has(cat)) continue;
+    if (o.activo === false) continue;
     const id = Number(o.id);
     if (!Number.isFinite(id) || id <= 0) continue;
     const nombre = typeof o.nombre === "string" ? o.nombre.trim() : "";
@@ -63,6 +64,7 @@ export function listaProductosSegura(raw: unknown): Producto[] {
     if (o.acabadoJoya === "oro" || o.acabadoJoya === "acero") {
       base.acabadoJoya = o.acabadoJoya;
     }
+    if (typeof o.activo === "boolean") base.activo = o.activo;
     out.push(base);
   }
   return out;

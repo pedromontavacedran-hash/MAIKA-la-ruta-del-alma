@@ -2016,6 +2016,10 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
               pedidosTotales={metrics.pedidosTotales}
               usuariosTotales={metrics.usuariosTotales}
               stockBajo={metrics.stockBajo}
+              unidadesVendidas={metrics.unidadesVendidas}
+              valorInventario={metrics.valorInventario}
+              unidadesEnStock={metrics.unidadesEnStock}
+              topProductos={metrics.topProductos}
               pedidos={pedidos}
               pedidosPendientes={pedidosPendientes}
               pedidosEnviados={pedidosEnviados}

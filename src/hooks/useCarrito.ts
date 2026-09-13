@@ -311,6 +311,10 @@ export function useCarrito(
   const agregarAlCarrito = useCallback(
     (producto: Producto, opts?: { silenciarNotificacion?: boolean; mensajeExito?: string }): boolean => {
       const idNum = Number(producto.id);
+      if (producto.activo === false) {
+        notificarError(mostrarNotificacion, `❌ ${producto.nombre} ya no está disponible`);
+        return false;
+      }
       const stockDisponible = Math.max(0, Number(producto.stock));
       if (!Number.isFinite(idNum) || stockDisponible <= 0) {
         notificarError(mostrarNotificacion, `❌ ${producto.nombre} agotado`);

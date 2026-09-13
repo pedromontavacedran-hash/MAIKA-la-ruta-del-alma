@@ -70,6 +70,8 @@ export interface Producto {
   generoJoya?: GeneroJoya;
   /** Variante de la pieza (oro/acero), no categoría. */
   acabadoJoya?: AcabadoJoya;
+  /** Si false, el producto no se muestra en la tienda ni se puede añadir al carrito. */
+  activo?: boolean;
 }
 
 export interface ItemCarrito extends Producto {

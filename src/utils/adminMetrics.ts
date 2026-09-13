@@ -43,6 +43,8 @@ export function calcularMetricasAdmin(params: {
   const ventasSemanaAnterior = new Map<string, number>();
 
   pedidos.forEach((pedido) => {
+    const estado = String(pedido.estado ?? "pendiente").toLowerCase();
+    if (estado === "cancelado" || estado === "rechazado" || estado === "cancelado") return;
     const totalPedido = Number.isFinite(Number(pedido.total)) ? Number(pedido.total) : 0;
     const fechaPedido = parseFechaPedido(pedido.fecha);
 
