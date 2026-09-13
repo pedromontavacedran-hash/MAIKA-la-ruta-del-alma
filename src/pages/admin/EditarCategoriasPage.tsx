@@ -112,6 +112,7 @@ export default function EditarCategoriasPage(props: EditarCategoriasPageProps) {
     figuras,
     kits,
     joyas,
+    subcategoriasCatalogo,
     subcategoriasDe,
     agregarSubcategoria,
     renombrarSubcategoria,
@@ -403,13 +404,15 @@ export default function EditarCategoriasPage(props: EditarCategoriasPageProps) {
       {nivel === "subcategorias" ? (
         <div className="editar-productos-page__content editar-productos-page__panel">
           <section className="editar-productos-seccion">
-            <div className="editar-productos-seccion__titulo">Subcategorías de {nombreCategoriaActual}</div>
-            {subcategoriasDeCategoriaActual.length === 0 ? (
+            <div className="editar-productos-seccion__titulo">Todas las subcategorías</div>
+            {subcategoriasCatalogo.length === 0 ? (
               <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 13 }}>Todavía no hay subcategorías.</p>
             ) : (
               <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
-                {subcategoriasDeCategoriaActual.map((sub) => {
-                  const enUso = listaActual.filter((p) => p.subcategoriaId === sub.id).length;
+                {subcategoriasCatalogo.map((sub) => {
+                  const todosProductos = [...velas, ...inciensos, ...figuras, ...kits, ...joyas];
+                  const enUso = todosProductos.filter((p) => p.subcategoriaId === sub.id).length;
+                  const nombreCategoriaSub = categoriasCatalogo.find((c) => c.id === sub.categoriaId)?.nombre ?? sub.categoriaId;
                   const editando = subEditandoId === sub.id;
                   return (
                     <li
@@ -449,7 +452,7 @@ export default function EditarCategoriasPage(props: EditarCategoriasPageProps) {
                         />
                       ) : (
                         <span style={{ flex: 1, color: "white" }}>
-                          {sub.nombre}{" "}
+                          {sub.nombre} · <span style={{ color: "rgba(212,175,55,0.8)", fontSize: 12 }}>{nombreCategoriaSub}</span>{" "}
                           <span style={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>
                             ({enUso} {enUso === 1 ? "producto" : "productos"})
                           </span>
