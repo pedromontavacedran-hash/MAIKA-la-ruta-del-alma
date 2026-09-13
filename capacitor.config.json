@@ -1,9 +1,5 @@
 {
   "appId": "com.maika.app",
   "appName": "Maika",
-  "webDir": "dist",
-  "server": {
-    "url": "http://192.168.0.19:5173",
-    "cleartext": true
-  }
+  "webDir": "dist"
 }
