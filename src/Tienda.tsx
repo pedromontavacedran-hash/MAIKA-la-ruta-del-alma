@@ -109,6 +109,30 @@ function precioConDescuento(p: Producto): number {
   return Math.round(base * (1 - d / 100) * 100) / 100;
 }
 
+/** Estado compartido por las tarjetas de producto (catalogo, busqueda, mas vendidos). */
+type EstadoTarjeta = {
+  enCarrito: number;
+  disponibles: number;
+  stockCatalogo: number;
+  limiteCarrito: boolean;
+  prodKey: string;
+  recienAnadido: boolean;
+};
+
+function calcularEstadoTarjeta(
+  prod: Producto,
+  cantidadEnCarrito: (id: number) => number,
+  anadirCarritoOkKey: string | null
+): EstadoTarjeta {
+  const enCarrito = cantidadEnCarrito(Number(prod.id));
+  const disponibles = Math.max(0, Number(prod.stock) - enCarrito);
+  const stockCatalogo = Math.max(0, Math.floor(Number(prod.stock)) || 0);
+  const limiteCarrito = disponibles === 0 && stockCatalogo > 0;
+  const prodKey = `${prod.categoria}-${prod.id}`;
+  const recienAnadido = anadirCarritoOkKey === prodKey;
+  return { enCarrito, disponibles, stockCatalogo, limiteCarrito, prodKey, recienAnadido };
+}
+
 /** Convierte el nombre del producto en nombre de archivo: "Vela Blanca" → "vela-blanca.jpg" */
 function nombreProductoToImagen(nombre: string): string {
   const slug = nombre
@@ -496,12 +520,7 @@ export default function Tienda({
           }}
         >
           {productos.map((prod) => {
-            const enCarrito = cantidadEnCarrito(Number(prod.id));
-            const disponibles = Math.max(0, Number(prod.stock) - enCarrito);
-            const stockCatalogo = Math.max(0, Math.floor(Number(prod.stock)) || 0);
-            const limiteCarrito = disponibles === 0 && stockCatalogo > 0;
-            const prodKey = `${prod.categoria}-${prod.id}`;
-            const recienAnadido = anadirCarritoOkKey === prodKey;
+            const { enCarrito, disponibles, stockCatalogo, limiteCarrito, prodKey, recienAnadido } = calcularEstadoTarjeta(prod, cantidadEnCarrito, anadirCarritoOkKey);
             return (
             <div
               key={prodKey}
@@ -759,12 +778,7 @@ export default function Tienda({
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(236px, 300px))", justifyContent: "center", gap: 22 }}>
               {productosBusqueda.map((prod) => {
-                const enCarrito = cantidadEnCarrito(Number(prod.id));
-                const disponibles = Math.max(0, Number(prod.stock) - enCarrito);
-                const stockCat = Math.max(0, Math.floor(Number(prod.stock)) || 0);
-                const limiteCarritoBusq = disponibles === 0 && stockCat > 0;
-                const prodKeyBusq = `${prod.categoria}-${prod.id}`;
-                const recienAnadidoBusq = anadirCarritoOkKey === prodKeyBusq;
+                const { disponibles, limiteCarrito: limiteCarritoBusq, prodKey: prodKeyBusq, recienAnadido: recienAnadidoBusq } = calcularEstadoTarjeta(prod, cantidadEnCarrito, anadirCarritoOkKey);
                 return (
                   <div
                     key={`busqueda-${prodKeyBusq}`}
