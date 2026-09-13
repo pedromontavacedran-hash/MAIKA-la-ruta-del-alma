@@ -348,11 +348,14 @@ export default function Tienda({
               padding: 26,
               border: `2px dashed ${THEME.goldMain}`,
               textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center"
             }}
           >
             <div style={{ fontSize: "1.8rem", marginBottom: 8 }} aria-hidden>🗂️</div>
-            <h3 style={{ color: THEME.goldMain, margin: "0 0 6px" }}>Ver toda {nombreCat}</h3>
-            <p style={{ color: "white", margin: 0 }}>{productosCategoria.length} productos</p>
+            <h3 style={{ color: THEME.goldMain, margin: "0 0 6px", minHeight: "2.8em", lineHeight: "1.4em" }}>Ver toda {nombreCat}</h3>
+            <p style={{ color: "white", margin: 0, marginTop: "auto" }}>{productosCategoria.length} productos</p>
           </div>
           {subcategoriasCategoriaActual.map((sub) => {
             const count = productosCategoria.filter((p) => p.subcategoriaId === sub.id).length;
@@ -367,14 +370,18 @@ export default function Tienda({
                   padding: 26,
                   border: `2px solid ${THEME.goldMain}`,
                   textAlign: "center",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center"
                 }}
               >
                 <div style={{ fontSize: "1.8rem", marginBottom: 8 }} aria-hidden>✨</div>
-                <h3 style={{ color: THEME.goldMain, margin: "0 0 6px" }}>{sub.nombre}</h3>
-                <p style={{ color: "white", margin: 0 }}>{count} productos</p>
+                <h3 style={{ color: THEME.goldMain, margin: "0 0 6px", minHeight: "2.8em", lineHeight: "1.4em" }}>{sub.nombre}</h3>
+                <p style={{ color: "white", margin: 0, marginTop: "auto" }}>{count} productos</p>
               </div>
             );
-          })}
+          })
+}
         </div>
       </div>
     );
@@ -1088,6 +1095,9 @@ export default function Tienda({
                 padding: 30,
                 border: `2px solid ${THEME.goldMain}`,
                 textAlign: "center",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center"
               }}
             >
               <div style={TIENDA_CATEG_THUMB_WRAP}>
@@ -1113,17 +1123,19 @@ export default function Tienda({
                   onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                 />
               </div>
-              <h2 style={{ color: THEME.goldMain }}>{getEmoji(categoria.id)} {nombreDisplay}</h2>
-              <p style={{ color: "white" }}>{productosCat.length} productos</p>
-              <div style={{
-                background: THEME.goldMain,
-                color: "#1b1745",
-                padding: "8px 20px",
-                borderRadius: 20,
-                fontWeight: "bold",
-                display: "inline-block",
-                marginTop: 10
-              }}>
+              <h2 style={{ color: THEME.goldMain, margin: "0 0 6px", minHeight: "2.8em", lineHeight: "1.4em" }}>{getEmoji(categoria.id)} {nombreDisplay}</h2>
+              <p style={{ color: "white", margin: 0, marginTop: "auto" }}>{productosCat.length} productos</p>
+              <div
+                style={{
+                  background: THEME.goldMain,
+                  color: "#1b1745",
+                  padding: "8px 20px",
+                  borderRadius: 20,
+                  fontWeight: "bold",
+                  display: "inline-block",
+                  marginTop: 10
+                }}
+              >
                 Ver todas →
               </div>
             </div>
