@@ -20,7 +20,7 @@
     "test:watch": "vitest",
     "preview": "vite preview",
     "backend:dev": "node backend/server.js",
-    "test:backend": "vitest run --config backend/vitest.config.js && node --test backend/utils/usuarioPayload.test.js",
+    "test:backend": "vitest run --config backend/vitest.config.js && node --test backend/utils/usuarioPayload.test.js backend/tests/productoPublico.test.js",
     "sync-logo": "node scripts/sync-logo-to-iconos.mjs",
     "backup:data": "node scripts/backup-data.mjs",
     "reset:usuarios": "node scripts/reset-usuarios.mjs",

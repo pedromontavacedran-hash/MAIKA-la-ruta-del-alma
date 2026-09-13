@@ -9,6 +9,7 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/**/*.test.js"],
+    exclude: ["tests/productoPublico.test.js"],
     setupFiles: ["tests/setup-backend-env.js"],
     fileParallelism: false
   }
