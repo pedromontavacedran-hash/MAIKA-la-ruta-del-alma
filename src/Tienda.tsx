@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import type { CSSProperties } from "react";
 import type { Producto } from "./App";
 import { INTENCIONES_OPCIONES } from "./types";
-import type { SubcategoriaEntrada } from "./types";
+import type { SubcategoriaEntrada, Pedido } from "./types";
 import BotonCerrar from "./components/BotonCerrar";
 import { THEME } from "./config";
 
@@ -65,6 +65,8 @@ interface Props {
   onVistaCategoriaInternaChange?: (abierta: boolean) => void;
   /** Menos padding superior cuando ya hay hero de pack encima (continuidad con «Lo más vendido»). */
   catalogoTrasPackHero?: boolean;
+  /** Pedidos históricos para calcular «Los más vendidos» dinámicamente. */
+  pedidos?: Pedido[];
 }
 
 function getProductosForCategoria(
@@ -187,7 +189,8 @@ export default function Tienda({
   onBusquedaInicialAplicada,
   mostrarBotonCerrar = true,
   onVistaCategoriaInternaChange,
-  catalogoTrasPackHero = false
+  catalogoTrasPackHero = false,
+  pedidos = []
 }: Props) {
   const velas = Array.isArray(velasIn) ? velasIn : [];
   const inciensos = Array.isArray(inciensosIn) ? inciensosIn : [];
@@ -213,6 +216,31 @@ export default function Tienda({
   const [lightboxImagen, setLightboxImagen] = useState<{ src: string; alt: string } | null>(null);
   const [anadirCarritoOkKey, setAnadirCarritoOkKey] = useState<string | null>(null);
   const anadirCarritoOkTimeoutRef = useRef<number | null>(null);
+
+  /** Top 3 productos más vendidos según pedidos reales. Si no hay pedidos, fallback a los 3 primeros del catálogo. */
+  const masVendidos = (() => {
+    const acumulado = new Map<number, number>();
+    for (const pedido of pedidos) {
+      for (const item of pedido.items ?? []) {
+        const id = Number(item.id);
+        if (!Number.isFinite(id) || id <= 0) continue;
+        const cantidad = Number(item.cantidad) || 0;
+        if (cantidad <= 0) continue;
+        acumulado.set(id, (acumulado.get(id) ?? 0) + cantidad);
+      }
+    }
+    const catalogo = [...velas, ...inciensos, ...figuras, ...kits, ...joyas];
+    const porId = new Map(catalogo.map((p) => [Number(p.id), p]));
+    const top = [...acumulado.entries()]
+      .map(([id, cantidad]) => ({ producto: porId.get(id), cantidad }))
+      .filter((x): x is { producto: Producto; cantidad: number } => x.producto != null)
+      .sort((a, b) => b.cantidad - a.cantidad)
+      .slice(0, 3);
+    if (top.length === 0) {
+      return catalogo.slice(0, 3).map((p) => ({ producto: p, cantidad: 0 }));
+    }
+    return top;
+  })();
 
   const marcarAnadirCarritoOk = useCallback((producto: Producto) => {
     const key = `${producto.categoria}-${producto.id}`;
@@ -798,6 +826,7 @@ export default function Tienda({
       )}
 
       {/* MÁS VENDIDOS */}
+      {masVendidos.length > 0 && (
       <div className="tienda-mas-vendidos-bloque">
         <h3 className="tienda-mas-vendidos-bloque__titulo">
           <span className="tienda-mas-vendidos-bloque__titulo-ico" aria-hidden>🔥</span>
@@ -810,8 +839,15 @@ export default function Tienda({
           gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
           gap: 14,
         }}>
-          {/* Vela Blanca */}
+          {masVendidos.map(({ producto: p, cantidad }) => {
+            const emoji = getEmoji(p.categoria);
+            const precio = precioConDescuento(p);
+            const stock = Math.max(0, Math.floor(Number(p.stock)) || 0);
+            const prodKey = `${p.categoria}-${p.id}`;
+            const recienAnadido = anadirCarritoOkKey === prodKey;
+            return (
           <div
+            key={prodKey}
             className="tienda-tarjeta-producto"
             style={{
             background: fondoServicios,
@@ -821,6 +857,7 @@ export default function Tienda({
             position: "relative",
           }}
           >
+            {cantidad > 0 && (
             <div style={{
               position: "absolute",
               top: -8,
@@ -832,237 +869,59 @@ export default function Tienda({
               fontWeight: "bold",
               fontSize: "0.82rem",
             }}>
-              🔥 234 vendidos
+              🔥 {cantidad} vendidos
             </div>
-            <div style={{ fontSize: "1.7rem", textAlign: "center", marginBottom: 6 }}>🕯️</div>
+            )}
+            <div style={{ fontSize: "1.7rem", textAlign: "center", marginBottom: 6 }}>{emoji}</div>
             <h4 style={{
-              color: velas.find(v => v.id === 1)?.nombreColor ?? THEME.goldMain,
+              color: p.nombreColor ?? THEME.goldMain,
               textAlign: "center",
-              fontSize: velas.find(v => v.id === 1)?.nombreTamano ? `${velas.find(v => v.id === 1)!.nombreTamano}px` : "1.06rem",
+              fontSize: p.nombreTamano ? `${p.nombreTamano}px` : "1.06rem",
               fontWeight: "bold",
               lineHeight: 1.2,
               textShadow: "0 1px 2px rgba(0,0,0,0.45)",
-              fontStyle: velas.find(v => v.id === 1)?.nombreEstilo === "italic" ? "italic" : undefined
+              fontStyle: p.nombreEstilo === "italic" ? "italic" : undefined
             }}>
-              {velas.find(v => v.id === 1)?.nombre ?? "Vela Blanca"}
+              {p.nombre}
             </h4>
+            {p.paraQueSirve && (
             <p style={{ color: "rgba(255,255,255,0.96)", fontSize: "0.98rem", margin: "8px 0", lineHeight: 1.45 }}>
-              La favorita para limpiezas
+              ✦ {p.paraQueSirve}
             </p>
+            )}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
-              <span className="tienda-precio-producto tienda-precio-producto--masvendidos" style={{ color: THEME.goldMain }}>12.50€</span>
+              <span className="tienda-precio-producto tienda-precio-producto--masvendidos" style={{ color: THEME.goldMain }}>{precio.toFixed(2)}€</span>
               <button
                 type="button"
-                className={`btn-mas-vendidos ${velas.find(v => v.id === 1)?.stock ? "btn-anadir-dorado" : ""}`}
+                className={`btn-mas-vendidos ${stock ? "btn-anadir-dorado" : ""}`}
                 onClick={(e) => {
-                  const vela = velas.find(v => v.id === 1);
-                  if (vela && vela.stock > 0) {
-                    intentarAnadirAlCarrito(vela, e.currentTarget.closest(".tienda-tarjeta-producto"));
+                  if (stock > 0) {
+                    intentarAnadirAlCarrito(p, e.currentTarget.closest(".tienda-tarjeta-producto"));
                   }
                 }}
                 style={{
-                  background: (() => {
-                    const v = velas.find(x => x.id === 1);
-                    const k = v ? `${v.categoria}-${v.id}` : "";
-                    if (anadirCarritoOkKey === k) {
-                      return "linear-gradient(135deg, rgba(0, 200, 120, 0.95), rgba(0, 150, 95, 0.98))";
-                    }
-                    return v?.stock ? THEME.goldMain : "#666";
-                  })(),
+                  background: recienAnadido
+                    ? "linear-gradient(135deg, rgba(0, 200, 120, 0.95), rgba(0, 150, 95, 0.98))"
+                    : stock ? THEME.goldMain : "#666",
                   border: "none",
                   padding: "8px 14px",
                   borderRadius: 20,
-                  cursor: velas.find(v => v.id === 1)?.stock ? "pointer" : "not-allowed",
+                  cursor: stock ? "pointer" : "not-allowed",
                   fontWeight: "bold",
                   fontSize: "1rem",
-                  color: (() => {
-                    const v = velas.find(x => x.id === 1);
-                    const k = v ? `${v.categoria}-${v.id}` : "";
-                    if (anadirCarritoOkKey === k) return "#fff";
-                    return v?.stock ? "#1b1745" : "#ccc";
-                  })(),
+                  color: recienAnadido ? "#fff" : stock ? "#1b1745" : "#ccc",
                   transition: "background 0.32s ease, color 0.32s ease, transform 0.28s ease",
                 }}
               >
-                {(() => {
-                  const v = velas.find(x => x.id === 1);
-                  const k = v ? `${v.categoria}-${v.id}` : "";
-                  if (anadirCarritoOkKey === k) return "Añadido ✓";
-                  return v?.stock ? "Añadir" : "Agotado";
-                })()}
+                {recienAnadido ? "Añadido ✓" : stock ? "Añadir" : "Agotado"}
               </button>
             </div>
           </div>
-
-          {/* Incienso Sándalo */}
-          <div
-            className="tienda-tarjeta-producto"
-            style={{
-            background: fondoServicios,
-            borderRadius: 16,
-            padding: "10px",
-            border: `2px solid ${THEME.goldMain}`,
-            position: "relative",
-          }}
-          >
-            <div style={{
-              position: "absolute",
-              top: -8,
-              right: -8,
-              background: "#ff4444",
-              color: "white",
-              padding: "5px 10px",
-              borderRadius: 20,
-              fontWeight: "bold",
-              fontSize: "0.82rem",
-            }}>
-              🔥 189 vendidos
-            </div>
-            <div style={{ fontSize: "1.7rem", textAlign: "center", marginBottom: 6 }}>🌿</div>
-            <h4 style={{
-              color: inciensos.find(i => i.id === 101)?.nombreColor ?? THEME.goldMain,
-              textAlign: "center",
-              fontSize: inciensos.find(i => i.id === 101)?.nombreTamano ? `${inciensos.find(i => i.id === 101)!.nombreTamano}px` : "1.06rem",
-              fontWeight: "bold",
-              lineHeight: 1.2,
-              textShadow: "0 1px 2px rgba(0,0,0,0.45)",
-              fontStyle: inciensos.find(i => i.id === 101)?.nombreEstilo === "italic" ? "italic" : undefined
-            }}>
-              {inciensos.find(i => i.id === 101)?.nombre ?? "Incienso Sándalo"}
-            </h4>
-            <p style={{ color: "rgba(255,255,255,0.96)", fontSize: "0.98rem", margin: "8px 0", lineHeight: 1.45 }}>
-              Conexión espiritual
-            </p>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
-              <span className="tienda-precio-producto tienda-precio-producto--masvendidos" style={{ color: THEME.goldMain }}>6.50€</span>
-              <button
-                type="button"
-                className={`btn-mas-vendidos ${inciensos.find(i => i.id === 101)?.stock ? "btn-anadir-dorado" : ""}`}
-                onClick={(e) => {
-                  const incienso = inciensos.find(i => i.id === 101);
-                  if (incienso && incienso.stock > 0) {
-                    intentarAnadirAlCarrito(incienso, e.currentTarget.closest(".tienda-tarjeta-producto"));
-                  }
-                }}
-                style={{
-                  background: (() => {
-                    const v = inciensos.find(x => x.id === 101);
-                    const k = v ? `${v.categoria}-${v.id}` : "";
-                    if (anadirCarritoOkKey === k) {
-                      return "linear-gradient(135deg, rgba(0, 200, 120, 0.95), rgba(0, 150, 95, 0.98))";
-                    }
-                    return v?.stock ? THEME.goldMain : "#666";
-                  })(),
-                  border: "none",
-                  padding: "8px 14px",
-                  borderRadius: 20,
-                  cursor: inciensos.find(i => i.id === 101)?.stock ? "pointer" : "not-allowed",
-                  fontWeight: "bold",
-                  fontSize: "1rem",
-                  color: (() => {
-                    const v = inciensos.find(x => x.id === 101);
-                    const k = v ? `${v.categoria}-${v.id}` : "";
-                    if (anadirCarritoOkKey === k) return "#fff";
-                    return v?.stock ? "#1b1745" : "#ccc";
-                  })(),
-                  transition: "background 0.32s ease, color 0.32s ease, transform 0.28s ease",
-                }}
-              >
-                {(() => {
-                  const v = inciensos.find(x => x.id === 101);
-                  const k = v ? `${v.categoria}-${v.id}` : "";
-                  if (anadirCarritoOkKey === k) return "Añadido ✓";
-                  return v?.stock ? "Añadir" : "Agotado";
-                })()}
-              </button>
-            </div>
-          </div>
-
-          {/* Buda Dorado */}
-          <div
-            className="tienda-tarjeta-producto"
-            style={{
-            background: fondoServicios,
-            borderRadius: 16,
-            padding: "10px",
-            border: `2px solid ${THEME.goldMain}`,
-            position: "relative",
-          }}
-          >
-            <div style={{
-              position: "absolute",
-              top: -8,
-              right: -8,
-              background: "#ff4444",
-              color: "white",
-              padding: "5px 10px",
-              borderRadius: 20,
-              fontWeight: "bold",
-              fontSize: "0.82rem",
-            }}>
-              🔥 156 vendidos
-            </div>
-            <div style={{ fontSize: "1.7rem", textAlign: "center", marginBottom: 6 }}>🪷</div>
-            <h4 style={{
-              color: figuras.find(f => f.id === 201)?.nombreColor ?? THEME.goldMain,
-              textAlign: "center",
-              fontSize: figuras.find(f => f.id === 201)?.nombreTamano ? `${figuras.find(f => f.id === 201)!.nombreTamano}px` : "1.06rem",
-              fontWeight: "bold",
-              lineHeight: 1.2,
-              textShadow: "0 1px 2px rgba(0,0,0,0.45)",
-              fontStyle: figuras.find(f => f.id === 201)?.nombreEstilo === "italic" ? "italic" : undefined
-            }}>
-              {figuras.find(f => f.id === 201)?.nombre ?? "Buda Dorado"}
-            </h4>
-            <p style={{ color: "rgba(255,255,255,0.96)", fontSize: "0.98rem", margin: "8px 0", lineHeight: 1.45 }}>
-              Prosperidad
-            </p>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
-              <span className="tienda-precio-producto tienda-precio-producto--masvendidos" style={{ color: THEME.goldMain }}>35.00€</span>
-              <button
-                type="button"
-                className={`btn-mas-vendidos ${figuras.find(f => f.id === 201)?.stock ? "btn-anadir-dorado" : ""}`}
-                onClick={(e) => {
-                  const figura = figuras.find(f => f.id === 201);
-                  if (figura && figura.stock > 0) {
-                    intentarAnadirAlCarrito(figura, e.currentTarget.closest(".tienda-tarjeta-producto"));
-                  }
-                }}
-                style={{
-                  background: (() => {
-                    const v = figuras.find(x => x.id === 201);
-                    const k = v ? `${v.categoria}-${v.id}` : "";
-                    if (anadirCarritoOkKey === k) {
-                      return "linear-gradient(135deg, rgba(0, 200, 120, 0.95), rgba(0, 150, 95, 0.98))";
-                    }
-                    return v?.stock ? THEME.goldMain : "#666";
-                  })(),
-                  border: "none",
-                  padding: "8px 14px",
-                  borderRadius: 20,
-                  cursor: figuras.find(f => f.id === 201)?.stock ? "pointer" : "not-allowed",
-                  fontWeight: "bold",
-                  fontSize: "1rem",
-                  color: (() => {
-                    const v = figuras.find(x => x.id === 201);
-                    const k = v ? `${v.categoria}-${v.id}` : "";
-                    if (anadirCarritoOkKey === k) return "#fff";
-                    return v?.stock ? "#1b1745" : "#ccc";
-                  })(),
-                  transition: "background 0.32s ease, color 0.32s ease, transform 0.28s ease",
-                }}
-              >
-                {(() => {
-                  const v = figuras.find(x => x.id === 201);
-                  const k = v ? `${v.categoria}-${v.id}` : "";
-                  if (anadirCarritoOkKey === k) return "Añadido ✓";
-                  return v?.stock ? "Añadir" : "Agotado";
-                })()}
-              </button>
-            </div>
-          </div>
+            );
+          })}
         </div>
       </div>
+      )}
 
       {/* CATEGORÍAS (sincronizadas con Editar Categorías) */}
       <section className="tienda-categorias-seccion" aria-labelledby="tienda-categorias-titulo">

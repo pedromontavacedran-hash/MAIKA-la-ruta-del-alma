@@ -107,7 +107,8 @@ export default function TiendaView() {
     busquedaTienda,
     setBusquedaTienda,
     mostrarNotificacion,
-    sincronizarCarritoAlEntrarVista
+    sincronizarCarritoAlEntrarVista,
+    pedidos
   } = useApp();
   const [campana, setCampana] = useState<CampanaPackConfig>(() => getCampanaPack());
   useEffect(() => {
@@ -732,6 +733,7 @@ export default function TiendaView() {
         busquedaInicial={busquedaTienda}
         onBusquedaInicialAplicada={() => setBusquedaTienda("")}
         onVistaCategoriaInternaChange={setVistaCategoriaInternaAbierta}
+        pedidos={pedidos}
       />
     </>
   );
