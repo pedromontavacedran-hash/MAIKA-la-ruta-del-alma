@@ -48,3 +48,31 @@ export const DetalleClientePage = lazy(loadDetalleClientePage);
 
 export const loadNuevoProductoPage = () => import("../../pages/admin/NuevoProductoPage");
 export const NuevoProductoPage = lazy(loadNuevoProductoPage);
+
+/* ---------------- Experiencias (pesadas) ---------------- */
+export const loadHoroscoposPage = () => import("../../pages/HoroscoposPage");
+export const HoroscoposPage = lazy(loadHoroscoposPage);
+
+export const loadLecturaPage = () => import("../../pages/LecturaPage");
+export const LecturaPage = lazy(loadLecturaPage);
+
+export const loadSueno = () => import("../../Sueno");
+export const Sueno = lazy(loadSueno);
+
+export const loadSuenoPremiumPage = () => import("../../pages/SuenoPremiumPage");
+export const SuenoPremiumPage = lazy(loadSuenoPremiumPage);
+
+/* ---------------- Admin ---------------- */
+export const loadAdminMainRoute = () =>
+  import("../routes/AdminMainRoute").then((m) => ({ default: m.AdminMainRoute }));
+export const AdminMainRoute = lazy(loadAdminMainRoute);
+
+export const loadEditarCuponesAdminPanel = () =>
+  import("../routes/EditarCuponesAdminPanel").then((m) => ({ default: m.EditarCuponesAdminPanel }));
+export const EditarCuponesAdminPanel = lazy(loadEditarCuponesAdminPanel);
+
+export const loadContabilidadPage = () => import("../../pages/ContabilidadPage");
+export const ContabilidadPage = lazy(loadContabilidadPage);
+
+export const loadConfigMetricasPage = () => import("../../pages/admin/ConfigMetricasPage");
+export const ConfigMetricasPage = lazy(loadConfigMetricasPage);

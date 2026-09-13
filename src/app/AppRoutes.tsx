@@ -12,37 +12,38 @@ import {
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import HeroParticles from "../components/HeroParticles";
 import MaikaLogoImg from "../components/MaikaLogoImg";
+import AdminRouteGuard from "../components/AdminRouteGuard";
+import ExperienciaAuthGuard from "../components/ExperienciaAuthGuard";
 import ServiciosPage from "../pages/ServiciosPage";
 import RitualDelMesPage from "../pages/RitualDelMesPage";
 import TestimoniosPage from "../pages/TestimoniosPage";
 import EnviosPage from "../pages/EnviosPage";
-import HoroscoposPage from "../pages/HoroscoposPage";
-import LecturaPage from "../pages/LecturaPage";
-import Sueno from "../Sueno";
-import SuenoPremiumPage from "../pages/SuenoPremiumPage";
-import ExperienciaAuthGuard from "../components/ExperienciaAuthGuard";
 import ContactoPage from "../pages/ContactoPage";
 import SobreMaikaPage from "../pages/SobreMaikaPage";
 import LegalIndexPage from "../pages/LegalIndexPage";
 import LegalDocumentPage from "../pages/LegalDocumentPage";
-import ContabilidadPage from "../pages/ContabilidadPage";
-import ConfigMetricasPage from "../pages/admin/ConfigMetricasPage";
+import { type CuponAdminEntrada } from "./routes/EditarCuponesAdminPanel";
 import {
+  AdminMainRoute,
   CarritoPage,
+  ConfigMetricasPage,
+  ContabilidadPage,
   CuentaPage,
   DetalleClientePage,
   EditarCategoriasPage,
+  EditarCuponesAdminPanel,
   EditarProductosPage,
+  HoroscoposPage,
   InventarioPage,
+  LecturaPage,
   NuevaCategoriaPage,
   NuevoProductoPage,
   ResetPasswordPage,
   SeguimientoPage,
+  Sueno,
+  SuenoPremiumPage,
   TiendaView
 } from "./routing/lazyPages";
-import { AdminMainRoute } from "./routes/AdminMainRoute";
-import AdminRouteGuard from "../components/AdminRouteGuard";
-import { EditarCuponesAdminPanel, type CuponAdminEntrada } from "./routes/EditarCuponesAdminPanel";
 import {
   THEME,
   NOTA_PEDIDO_ENVIO_DEFAULT,
@@ -581,8 +582,9 @@ export function AppRoutes(p: AppRoutesProps) {
   }, []);
 
   const adminMainRouteElement = (
-    <AdminRouteGuard>
-      <AdminMainRoute
+    <Suspense fallback={fallbackAdmin}>
+      <AdminRouteGuard>
+        <AdminMainRoute
         esAdmin={esAdmin}
         accesoAdmin={accesoAdmin}
         modalUsuariosAbierto={modalUsuariosAbierto}
@@ -648,7 +650,8 @@ export function AppRoutes(p: AppRoutesProps) {
         notaPedidoEnvio={notaPedidoEnvio}
         setNotaPedidoEnvio={setNotaPedidoEnvio}
       />
-    </AdminRouteGuard>
+      </AdminRouteGuard>
+    </Suspense>
   );
 
   return (
@@ -726,8 +729,10 @@ export function AppRoutes(p: AppRoutesProps) {
     )} />
 
     {/* MI CUENTA */}
-    <Route path="/cuenta" element={bloqueLayoutContenido(
-      <CuentaPage
+    <Route path="/cuenta" element={(
+      <Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando MAIKA...</div>}>
+        {bloqueLayoutContenido(
+          <CuentaPage
         formAuth={formAuth}
         setFormAuth={setFormAuth}
         modoRegistro={modoRegistro}
@@ -749,9 +754,10 @@ export function AppRoutes(p: AppRoutesProps) {
         setModoForzadoRegistroDesdeAcceso={setModoForzadoRegistroDesdeAcceso}
         confirmacionIdentidadActivacion={confirmacionIdentidadActivacion}
         setConfirmacionIdentidadActivacion={setConfirmacionIdentidadActivacion}
-      />
+      />)}
+      </Suspense>
     )} />
-    <Route path="/reset-password" element={bloqueLayoutContenido(<ResetPasswordPage />)} />
+    <Route path="/reset-password" element={<Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando MAIKA...</div>}>{bloqueLayoutContenido(<ResetPasswordPage />)}</Suspense>} />
 
     {/* TIENDA */}
     <Route path="/tienda/*" element={(
@@ -768,12 +774,12 @@ export function AppRoutes(p: AppRoutesProps) {
     )} />
 
     <Route path="/servicios" element={bloqueLayoutContenido(<ServiciosPage />)} />
-    <Route path="/suenos" element={bloqueLayoutSuenos(<ExperienciaAuthGuard tipo="sueno"><Sueno /></ExperienciaAuthGuard>)} />
-    <Route path="/sueno-premium" element={bloqueLayoutContenido(<ExperienciaAuthGuard tipo="sueno"><SuenoPremiumPage /></ExperienciaAuthGuard>)} />
-    <Route path="/horoscopos" element={bloqueLayoutContenido(<ExperienciaAuthGuard tipo="horoscopo"><HoroscoposPage /></ExperienciaAuthGuard>)} />
+    <Route path="/suenos" element={bloqueLayoutSuenos(<ExperienciaAuthGuard tipo="sueno"><Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando MAIKA...</div>}><Sueno /></Suspense></ExperienciaAuthGuard>)} />
+    <Route path="/sueno-premium" element={bloqueLayoutContenido(<ExperienciaAuthGuard tipo="sueno"><Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando MAIKA...</div>}><SuenoPremiumPage /></Suspense></ExperienciaAuthGuard>)} />
+    <Route path="/horoscopos" element={bloqueLayoutContenido(<ExperienciaAuthGuard tipo="horoscopo"><Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando MAIKA...</div>}><HoroscoposPage /></Suspense></ExperienciaAuthGuard>)} />
     <Route path="/ritual-del-mes" element={bloqueLayoutContenido(<RitualDelMesPage />)} />
     <Route path="/testimonios" element={bloqueLayoutContenido(<TestimoniosPage />)} />
-    <Route path="/lectura" element={bloqueLayoutLectura(<ExperienciaAuthGuard tipo="horoscopo"><LecturaPage /></ExperienciaAuthGuard>)} />
+    <Route path="/lectura" element={bloqueLayoutLectura(<ExperienciaAuthGuard tipo="horoscopo"><Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando MAIKA...</div>}><LecturaPage /></Suspense></ExperienciaAuthGuard>)} />
     <Route path="/envios" element={bloqueLayoutContenido(<EnviosPage />)} />
     <Route path="/contacto" element={bloqueLayoutContenido(<ContactoPage />)} />
     <Route path="/sobre-maika" element={bloqueLayoutContenido(<SobreMaikaPage />)} />
@@ -993,7 +999,8 @@ export function AppRoutes(p: AppRoutesProps) {
       path="/admin/configuracion-metricas"
       element={(
         <AdminRouteGuard>
-          <ConfigMetricasPage
+          <Suspense fallback={fallbackAdmin}>
+            <ConfigMetricasPage
             setPagina={setPagina}
             umbralStockBajo={umbralStockBajo}
             setUmbralStockBajo={setUmbralStockBajo}
@@ -1004,6 +1011,7 @@ export function AppRoutes(p: AppRoutesProps) {
             notaKey={NOTA_PEDIDO_ENVIO_KEY}
             notaDefault={NOTA_PEDIDO_ENVIO_DEFAULT}
           />
+          </Suspense>
         </AdminRouteGuard>
       )}
     />
@@ -1012,12 +1020,14 @@ export function AppRoutes(p: AppRoutesProps) {
       path="/admin/editar-cupones"
       element={
         <AdminRouteGuard>
-        <EditarCuponesAdminPanel
+        <Suspense fallback={fallbackAdmin}>
+          <EditarCuponesAdminPanel
           cuponesAdmin={cuponesAdmin}
           setCuponesAdmin={setCuponesAdmin}
           setPagina={setPagina}
           mostrarNotificacion={sinNotificacionAdmin}
         />
+        </Suspense>
         </AdminRouteGuard>
       }
     />
@@ -1045,12 +1055,12 @@ export function AppRoutes(p: AppRoutesProps) {
     )} />
 
     {/* SEGUIMIENTO DE PEDIDOS */}
-    <Route path="/seguimiento" element={bloqueLayoutContenido(<SeguimientoPage />)} />
+    <Route path="/seguimiento" element={<Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando MAIKA...</div>}>{bloqueLayoutContenido(<SeguimientoPage />)}</Suspense>} />
 
     {/* CONTABILIDAD (admin real + compat legacy) */}
     <Route
       path="/admin/contabilidad"
-      element={accesoAdmin ? bloqueLayoutContenido(<ContabilidadPage />) : <Navigate to="/" replace />}
+      element={accesoAdmin ? <Suspense fallback={fallbackAdmin}>{bloqueLayoutContenido(<ContabilidadPage />)}</Suspense> : <Navigate to="/" replace />}
     />
     <Route path="/contabilidad" element={<Navigate to="/admin/contabilidad" replace />} />
     <Route path="*" element={<Navigate to="/" replace />} />

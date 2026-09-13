@@ -44,9 +44,14 @@ export default defineConfig({
     chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
-        manualChunks: {
-          "vendor-react": ["react", "react-dom"],
-          "vendor-email": ["@emailjs/browser"],
+        manualChunks(id) {
+          if (!id) return;
+          if (id.includes("node_modules")) {
+            if (id.includes("react-dom")) return "vendor-react";
+            if (id.includes("react")) return "vendor-react";
+            if (id.includes("emailjs")) return "vendor-email";
+            return "vendor";
+          }
         },
       },
     },
