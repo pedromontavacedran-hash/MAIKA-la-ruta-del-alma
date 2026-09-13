@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { readCarritos, writeCarritos } from "../lib/storage.js";
+import { readCarritos, writeCarritos, readProductos } from "../lib/storage.js";
 import { authMiddlewareCheckoutOk } from "../lib/auth.js";
 
 export const carritoRouter = Router();
@@ -29,10 +29,26 @@ carritoRouter.put("/carrito/:usuarioId", authMiddlewareCheckoutOk, async (req, r
     res.status(400).json({ error: "Datos inválidos" });
     return;
   }
+  const productos = await readProductos();
+  const porId = new Map(productos.map((p) => [Number(p.id), p]));
+  const itemsSanos = [];
+  for (const it of items) {
+    const id = Number(it?.id);
+    const cantidad = Math.floor(Number(it?.cantidad) || 0);
+    if (!Number.isFinite(id) || id <= 0 || cantidad <= 0) continue;
+    const prod = porId.get(id);
+    if (!prod) continue;
+    const stock = Math.max(0, Number(prod.stock) || 0);
+    itemsSanos.push({
+      ...it,
+      id,
+      cantidad: Math.min(cantidad, stock)
+    });
+  }
   const carritos = await readCarritos();
   const payload = {
     usuarioId,
-    items,
+    items: itemsSanos,
     updatedAt: new Date().toISOString()
   };
   const idx = carritos.findIndex((c) => String(c?.usuarioId) === String(usuarioId));

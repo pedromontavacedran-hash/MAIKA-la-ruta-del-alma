@@ -56,6 +56,7 @@ export default function ContabilidadPage() {
 
   const [añoSeleccionado, setAñoSeleccionado] = useState<string>(""); // "2026"
   const [mesSeleccionado, setMesSeleccionado] = useState<string>(""); // "" = todo el año, "1".."12" = mes
+  const [estadoFiltro, setEstadoFiltro] = useState<string>(""); // "" = todos, "entregado" | "enviado" | "pendiente"
 
   const añosDisponibles = useMemo(() => {
     const set = new Set<number>();
@@ -73,11 +74,12 @@ export default function ContabilidadPage() {
       .filter((p) => {
         const ym = añoMesDePedido(p);
         if (!ym || ym.año !== año) return false;
-        if (mesSeleccionado) return ym.mes === parseInt(mesSeleccionado, 10);
+        if (mesSeleccionado && ym.mes !== parseInt(mesSeleccionado, 10)) return false;
+        if (estadoFiltro && String(p.estado ?? "pendiente") !== estadoFiltro) return false;
         return true;
       })
       .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
-  }, [pedidos, añoSeleccionado, mesSeleccionado]);
+  }, [pedidos, añoSeleccionado, mesSeleccionado, estadoFiltro]);
 
   const volverDesdeAdmin = () => {
     if (isAdminAuthorized()) {
@@ -147,6 +149,29 @@ export default function ContabilidadPage() {
             ))}
           </select>
         </div>
+        <div style={{ flex: "1 1 160px", minWidth: 140 }}>
+          <label style={{ display: "block", color: THEME.goldMain, marginBottom: 6, fontSize: 14 }}>Estado</label>
+          <select
+            value={estadoFiltro}
+            onChange={(e) => setEstadoFiltro(e.target.value)}
+            disabled={!añoSeleccionado}
+            style={{
+              width: "100%",
+              padding: 12,
+              borderRadius: 10,
+              border: "2px solid gold",
+              background: THEME.bg,
+              color: "white",
+              fontSize: 16,
+              opacity: añoSeleccionado ? 1 : 0.7
+            }}
+          >
+            <option value="">Todos</option>
+            <option value="entregado">Entregados</option>
+            <option value="enviado">Enviados</option>
+            <option value="pendiente">Pendientes</option>
+          </select>
+        </div>
       </div>
 
       {añoSeleccionado && (() => {
@@ -167,6 +192,7 @@ export default function ContabilidadPage() {
                   {mesSeleccionado
                     ? `${MESES_ES[parseInt(mesSeleccionado, 10) - 1]} ${añoSeleccionado}`
                     : `Año ${añoSeleccionado} (todo el año)`}
+                  {estadoFiltro && ` · ${estadoFiltro}`}
                 </strong>
                 <div style={{ color: "white", fontSize: 16 }}>
                   <span style={{ marginRight: 16 }}>{n} pedidos</span>

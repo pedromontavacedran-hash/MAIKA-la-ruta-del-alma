@@ -28,7 +28,7 @@ export function calcularTotales({
     return acc + precio * Number(item.cantidad || 0);
   }, 0);
 
-  const envio = calcularEnvioFn ? calcularEnvioFn(provincia, subtotal) : (subtotal > 50 ? 0 : 4.99);
+  const envio = calcularEnvioFn ? calcularEnvioFn(provincia, subtotal) : (subtotal >= 50 ? 0 : 4.9);
   const total = Math.max(0, subtotal + envio - descuento);
 
   return { subtotal, envio, total };

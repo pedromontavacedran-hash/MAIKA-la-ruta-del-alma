@@ -465,7 +465,7 @@ export function categoriaProductoValida(c) {
 
 /** Respuesta pública: sin campo `activo` (solo se listan activos). */
 export function productoPublicoTienda(p) {
-  const { activo: _a, ...rest } = p;
+  const { activo: _a, precioCosteIvaIncluido: _c, ...rest } = p;
   return rest;
 }
 

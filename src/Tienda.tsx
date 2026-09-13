@@ -113,7 +113,7 @@ function nombreProductoToImagen(nombre: string): string {
     .trim()
     .toLowerCase()
     .normalize("NFD")
-    .replace(/\u0300-\u036f/g, "")
+    .replace(/[\u0300-\u036f]/g, "")
     .replace(/\s+/g, "-")
     .replace(/[^a-z0-9-]/g, "");
   return slug ? `/${slug}.jpg` : "";
@@ -501,7 +501,7 @@ export default function Tienda({
                   onClick={(e) => { e.stopPropagation(); setLightboxImagen({ src: getProductImageSrc(prod), alt: prod.nombre }); }}
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setLightboxImagen({ src: getProductImageSrc(prod), alt: prod.nombre }); } }}
                   style={{ ...TIENDA_THUMB_IMG, cursor: "pointer" }}
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                  onError={(e) => { (e.target as HTMLImageElement).src = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="%231b1745"/><text x="200" y="200" font-size="80" text-anchor="middle" dominant-baseline="central">📦</text></svg>')}`; }}
                 />
               </div>
               {disponibles === 0 && (
@@ -752,7 +752,7 @@ export default function Tienda({
                         loading="lazy"
                         decoding="async"
                         style={TIENDA_THUMB_IMG}
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                        onError={(e) => { (e.target as HTMLImageElement).src = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="%231b1745"/><text x="200" y="200" font-size="80" text-anchor="middle" dominant-baseline="central">📦</text></svg>')}`; }}
                       />
                     </div>
                     <h3 style={{ color: prod.nombreColor ?? "white" }}>{prod.nombre}</h3>
@@ -1120,7 +1120,7 @@ export default function Tienda({
                     border: "1px solid rgba(212,175,55,0.5)",
                     cursor: "pointer",
                   }}
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                  onError={(e) => { (e.target as HTMLImageElement).src = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="%231b1745"/><text x="200" y="200" font-size="80" text-anchor="middle" dominant-baseline="central">📦</text></svg>')}`; }}
                 />
               </div>
               <h2 style={{ color: THEME.goldMain, margin: "0 0 6px", minHeight: "2.8em", lineHeight: "1.4em" }}>{getEmoji(categoria.id)} {nombreDisplay}</h2>
