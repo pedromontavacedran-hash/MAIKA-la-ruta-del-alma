@@ -1,19 +1,12 @@
 export type MetodoPago = "bizum" | "tarjeta";
 
+/** Único método de pago real es Bizum: no se recogen ni persisten campos de tarjeta (número/CVV). */
 export type DatosPago = {
   bizumTelefono: string;
-  tarjetaNumero: string;
-  tarjetaTitular: string;
-  tarjetaCaducidad: string;
-  tarjetaCVV: string;
 };
 
 export const DATOS_PAGO_VACIOS: DatosPago = {
-  bizumTelefono: "",
-  tarjetaNumero: "",
-  tarjetaTitular: "",
-  tarjetaCaducidad: "",
-  tarjetaCVV: ""
+  bizumTelefono: ""
 };
 
 export function normalizarTelefonoBizum(telefono: string): string {
@@ -23,27 +16,16 @@ export function normalizarTelefonoBizum(telefono: string): string {
   return soloDigitos;
 }
 
+/** "tarjeta" no tiene datos que validar (no se recogen campos de tarjeta): pasa siempre. */
 export function validarDatosPago(
   metodoPago: MetodoPago,
   datosPago: DatosPago,
-  mensajeBizumInvalido: string,
-  mensajeTarjetaInvalida: string,
-  mensajeTitularVacio: string,
-  mensajeCaducidadInvalida: string,
-  mensajeCvvInvalido: string
+  mensajeBizumInvalido: string
 ): string | null {
-  if (metodoPago === "bizum") {
-    const telefonoSinPrefijo = normalizarTelefonoBizum(datosPago.bizumTelefono);
-    if (!/^[67]\d{8}$/.test(telefonoSinPrefijo)) {
-      return mensajeBizumInvalido;
-    }
-    return null;
+  if (metodoPago !== "bizum") return null;
+  const telefonoSinPrefijo = normalizarTelefonoBizum(datosPago.bizumTelefono);
+  if (!/^[67]\d{8}$/.test(telefonoSinPrefijo)) {
+    return mensajeBizumInvalido;
   }
-
-  const numero = datosPago.tarjetaNumero.replace(/\s+/g, "");
-  if (!/^\d{13,19}$/.test(numero)) return mensajeTarjetaInvalida;
-  if (!datosPago.tarjetaTitular.trim()) return mensajeTitularVacio;
-  if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(datosPago.tarjetaCaducidad.trim())) return mensajeCaducidadInvalida;
-  if (!/^\d{3,4}$/.test(datosPago.tarjetaCVV.trim())) return mensajeCvvInvalido;
   return null;
 }

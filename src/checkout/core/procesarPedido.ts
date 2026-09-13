@@ -10,10 +10,6 @@ import { calcularTotales } from "../../utils/pedidos/calcularTotales";
 
 export type DatosPagoCheckout = {
   bizumTelefono: string;
-  tarjetaNumero: string;
-  tarjetaTitular: string;
-  tarjetaCaducidad: string;
-  tarjetaCVV: string;
 };
 
 /** Datos que la capa de aplicación (App) usa para actualizar UI tras un checkout completado. */
@@ -132,11 +128,7 @@ export function validarCheckoutPedido(input: ValidarCheckoutPedidoInput): Valida
   const errorPago = validarDatosPago(
     metodoPagoActual,
     datosPagoActual,
-    "Introduce el número de móvil para pago Bizum (9 dígitos)",
-    "Número de tarjeta no válido",
-    "Introduce el titular de la tarjeta",
-    "No se pudo usar compra rápida: caducidad no válida",
-    "No se pudo usar compra rápida: CVC no válido"
+    "Introduce el número de móvil para pago Bizum (9 dígitos)"
   );
   if (errorPago) {
     return { ok: false, tipo: "error", mensaje: errorPago };

@@ -97,7 +97,7 @@ authRouter.post("/test-email", testEmailLimiter, async (_req, res) => {
     });
     res.json({ ok: true, to });
   } catch (error) {
-    // eslint-disable-next-line no-console
+     
     console.error("[maika-backend] Error enviando email de prueba:", error);
     res.status(500).json({ error: "Error enviando email" });
   }
@@ -219,7 +219,12 @@ authRouter.post("/auth/register", registerLimiter, limiteActivacionTecnicaIpSiAp
   const telNorm = normalizarTelefono(telefono || "");
   const activarCuentaTecnica = req.body?.activarCuentaTecnica === true;
   const passwordTemporalRegistro = req.body?.passwordTemporal === true;
-  if (!emailNorm || !passwordStr || passwordStr.length > PASSWORD_MAX_LEN) {
+  if (
+    !emailNorm ||
+    !passwordStr ||
+    passwordStr.length < 8 ||
+    passwordStr.length > PASSWORD_MAX_LEN
+  ) {
     res.status(400).json({ error: "Datos incompletos" });
     return;
   }
@@ -485,8 +490,8 @@ authRouter.get("/auth/open-reset", openResetLinkLimiter, async (req, res) => {
     const safeDestino = escapeHtml(destino);
     if (chromeAbierto) {
       res.type("html").send(`<!DOCTYPE html>
-<html lang="es"><head><meta charset="utf-8"><title></title></head>
-<body style="margin:0;background:#fff;">
+<html lang="es"><head><meta charset="utf-8"><title>MAIKA</title></head>
+<body style="font-family:system-ui,sans-serif;max-width:520px;margin:48px auto;padding:0 20px;line-height:1.5;">
   <script>
   (function () {
     function cerrarPestanaCorreo() {
@@ -498,6 +503,9 @@ authRouter.get("/auth/open-reset", openResetLinkLimiter, async (req, res) => {
     setTimeout(cerrarPestanaCorreo, 1000);
   })();
   </script>
+  <h1 style="font-size:1.2rem;color:#8f6e28;">MAIKA</h1>
+  <p>Hemos abierto la página para restablecer tu contraseña en <strong>Google Chrome</strong>. Si esta pestaña no se ha cerrado sola, puedes cerrarla.</p>
+  <p><a href="${safeDestino}" style="color:#bfa15a;">Continuar en este navegador</a></p>
 </body></html>`);
       return;
     }
@@ -547,7 +555,7 @@ authRouter.post("/auth/forgot-password", forgotPasswordLimiter, async (req, res)
     const resetLink = buildResetPasswordPageUrl(baseUrl, token);
     const emailClickHref = buildResetEmailClickHref(baseUrl, token);
     if (!IS_PRODUCTION && process.env.NODE_ENV !== "test") {
-      // eslint-disable-next-line no-console
+       
       console.log("[maika-backend] RESET LINK:", resetLink);
     }
 
@@ -557,12 +565,12 @@ authRouter.post("/auth/forgot-password", forgotPasswordLimiter, async (req, res)
         clickHref: emailClickHref
       });
       if (!enviado && !IS_PRODUCTION && process.env.MAIKA_QUIET !== "1") {
-        // eslint-disable-next-line no-console
+         
         console.warn("[maika-backend] SMTP no configurado: enlace disponible solo en consola de desarrollo.");
       }
     } catch (err) {
       if (!IS_PRODUCTION && process.env.MAIKA_QUIET !== "1") {
-        // eslint-disable-next-line no-console
+         
         console.error("[maika-backend] No se pudo enviar email de recuperación:", err?.message || err);
       }
     }

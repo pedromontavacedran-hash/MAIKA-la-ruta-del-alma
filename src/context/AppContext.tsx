@@ -1,5 +1,5 @@
 /* Fast refresh: el hook useApp debe vivir junto al provider en este módulo. */
-/* eslint-disable react-refresh/only-export-components */
+ 
 import { createContext, useContext, type ReactNode } from "react";
 import type { Producto, ItemCarrito, Usuario, CategoriaEntrada, SubcategoriaEntrada, Pagina, Pedido } from "../types";
 import type { PerfilCompraRapida } from "../types";

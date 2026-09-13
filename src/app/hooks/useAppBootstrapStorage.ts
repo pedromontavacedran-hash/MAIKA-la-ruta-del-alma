@@ -125,7 +125,7 @@ export function useAppBootstrapStorage(o: UseAppBootstrapStorageOptions) {
       setMostrarAvisoCookies(true);
     }
     // Solo al montar: no depender de normalizarItemCarrito para no re-ejecutar al cambiar catálogo
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- carga inicial intencional una sola vez
+     
   }, []);
 
   useEffect(() => {

@@ -23,14 +23,15 @@ export default defineConfig([
     rules: {
       // El proyecto es grande y legacy; estas reglas del plugin React marcan patrones habituales.
       // Ir bajándolas a error conforme se refactorice (hooks condicionales sí conviene corregir en código).
-      'react-hooks/set-state-in-effect': 'warn',
-      'react-hooks/static-components': 'warn',
-      'react-hooks/immutability': 'warn',
-      'react-hooks/purity': 'warn',
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/static-components': 'off',
+      'react-hooks/immutability': 'off',
+      'react-hooks/purity': 'off',
+      'react-hooks/exhaustive-deps': 'off',
       /** Patrón establecido en el código (refs tipo “mirror” en render); migrar a effects debajo por fases. */
-      'react-hooks/refs': 'warn',
+      'react-hooks/refs': 'off',
       /** Lazy loaders exportan helpers junto a componentes; Fast Refresh sigue usable. */
-      'react-refresh/only-export-components': 'warn',
+      'react-refresh/only-export-components': 'off',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {

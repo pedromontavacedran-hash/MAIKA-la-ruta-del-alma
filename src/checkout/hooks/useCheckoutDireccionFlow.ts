@@ -181,7 +181,7 @@ export function useCheckoutDireccionFlow(d: UseCheckoutDireccionFlowDeps) {
     datosClienteAntesModoDireccionRef.current = { ...datosCliente };
     usuarioAntesModoDireccionRef.current = usuario;
     finalizarCarrito();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- depende de modoDireccionCheckout y ruta
+     
   }, [location.pathname, modoDireccionCheckout]);
 
   /** Tras login o recuperar contraseña en `/cuenta?modo=direccion`, vuelve al modal de finalizar compra (no a «Mi cuenta»). */
@@ -201,7 +201,7 @@ export function useCheckoutDireccionFlow(d: UseCheckoutDireccionFlowDeps) {
     }
     modoDireccionCheckoutAbiertoRef.current = false;
     void finalizarCarrito();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- finalizarCarrito estable en práctica para este hook
+     
   }, [usuario, location.pathname, modoDireccionCheckout]);
 
   useEffect(() => {

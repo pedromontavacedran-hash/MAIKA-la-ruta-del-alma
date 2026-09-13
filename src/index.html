@@ -295,40 +295,56 @@
             
             // Mostrar en consola
             console.log('CART:', carrito);
-            document.getElementById('console-msg').innerHTML = 'CART: ' + JSON.stringify(carrito);
+            document.getElementById('console-msg').textContent = 'CART: ' + JSON.stringify(carrito);
             
             // Actualizar vista
             actualizarCarrito();
         }
         
+        function crearItemCarrito(item, subtotal) {
+            const li = document.createElement('li');
+            const span1 = document.createElement('span');
+            span1.textContent = item.name + ' x' + item.quantity;
+            const span2 = document.createElement('span');
+            span2.textContent = '€' + subtotal.toFixed(2);
+            li.appendChild(span1);
+            li.appendChild(span2);
+            return li;
+        }
+
+        function limpiarLista(lista) {
+            while (lista.firstChild) lista.removeChild(lista.firstChild);
+        }
+
         function actualizarCarrito() {
             const lista = document.getElementById('carrito-lista');
             const totalElement = document.getElementById('carrito-total');
             const infoProductos = document.getElementById('info-productos');
-            
+
+            limpiarLista(lista);
+
             if (carrito.length === 0) {
-                lista.innerHTML = '<li style="text-align: center; color: #666;">Carrito vacío</li>';
-                totalElement.innerHTML = 'Total: €0.00';
-                infoProductos.innerHTML = '0 productos - 0.00 €';
+                const li = document.createElement('li');
+                li.style.textAlign = 'center';
+                li.style.color = '#666';
+                li.textContent = 'Carrito vacío';
+                lista.appendChild(li);
+                totalElement.textContent = 'Total: €0.00';
+                infoProductos.textContent = '0 productos - 0.00 €';
             } else {
-                let html = '';
                 let total = 0;
                 let cantidadTotal = 0;
-                
+
                 for (let i = 0; i < carrito.length; i++) {
                     const item = carrito[i];
                     const subtotal = item.price * item.quantity;
                     total += subtotal;
                     cantidadTotal += item.quantity;
-                    html += `<li>
-                        <span>${item.name} x${item.quantity}</span>
-                        <span>€${subtotal.toFixed(2)}</span>
-                    </li>`;
+                    lista.appendChild(crearItemCarrito(item, subtotal));
                 }
-                
-                lista.innerHTML = html;
-                totalElement.innerHTML = `Total: €${total.toFixed(2)}`;
-                infoProductos.innerHTML = `${cantidadTotal} productos - ${total.toFixed(2)} €`;
+
+                totalElement.textContent = 'Total: €' + total.toFixed(2);
+                infoProductos.textContent = cantidadTotal + ' productos - ' + total.toFixed(2) + ' €';
             }
         }
     </script>

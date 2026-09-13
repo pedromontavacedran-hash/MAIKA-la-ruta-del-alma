@@ -11,7 +11,7 @@ interface NotificacionProps {
 export default function Notificacion({ 
   mensaje, 
   tipo = "normal", 
-  duration = 5000, 
+  duration = 10000, 
   onClose 
 }: NotificacionProps) {
   const onCloseRef = useRef(onClose);

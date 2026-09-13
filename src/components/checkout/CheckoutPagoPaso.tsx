@@ -5,10 +5,6 @@ import { DATOS_PAGO_VACIOS } from "../../utils/pago";
 
 type DatosPago = {
   bizumTelefono: string;
-  tarjetaNumero: string;
-  tarjetaTitular: string;
-  tarjetaCaducidad: string;
-  tarjetaCVV: string;
 };
 
 type CuponAplicadoLegacy = {

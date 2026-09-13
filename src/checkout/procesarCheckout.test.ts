@@ -68,11 +68,7 @@ function ctxValido(): EnviarPedidoWhatsAppContext {
   return {
     datosCliente: cliente,
     datosPago: {
-      bizumTelefono: "612345678",
-      tarjetaNumero: "",
-      tarjetaTitular: "",
-      tarjetaCaducidad: "",
-      tarjetaCVV: ""
+      bizumTelefono: "612345678"
     },
     cart: [item],
     descuentoCupon: 0,

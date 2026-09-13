@@ -1,3 +1,384 @@
+/** Ocultar barras de desplazamiento en la página de sueños (el scroll con rueda/tactil sigue funcionando). */
+.maika-sueno-pagina,
+.maika-sueno-pagina * {
+  scrollbar-width: none;
+}
+.maika-sueno-pagina::-webkit-scrollbar,
+.maika-sueno-pagina *::-webkit-scrollbar {
+  display: none;
+}
+
+/**
+ * El recuadro de resultado (`.maika-sueno-pagina > div` con overflow propio) tiene su propio tope de
+ * altura (`maxHeight` inline) y scrollea internamente; la página fluye normal y la ruta scrollea si hace
+ * falta, como el resto de páginas. Antes se forzaba `height:100%` + flex-fill pensando en ocupar
+ * exactamente el alto disponible, pero el wrapper compartido de las rutas usa `min-height` (no `height`
+ * fija), así que ese 100% no era fiable: según el contenido (checkbox de voz, panel de contexto, avatar)
+ * la página acababa unos px más alta que el hueco real y cualquier rueda de ratón "saltaba" ese resto.
+ */
+
+.maika-sueno-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 28px;
+  align-items: start;
+}
+
+/** Antes de interpretar (Maika oculta): una sola columna, sin hueco ni gap reservados para el avatar. */
+.maika-sueno-grid--sin-avatar {
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+.maika-sueno-col-principal {
+  min-width: 0;
+}
+
+.maika-sueno-col-avatar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 860px) {
+  .maika-sueno-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.maika-sueno-subtitulo {
+  margin: 0 0 16px;
+  color: rgba(245, 230, 163, 0.8);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.maika-sueno-contexto-panel {
+  margin-top: 10px;
+  padding: 18px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+}
+
+.maika-sueno-contexto-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.maika-sueno-contexto-icono {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  background: rgba(212, 175, 55, 0.14);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+}
+
+.maika-sueno-contexto-pregunta {
+  margin: 0 0 4px;
+  color: #f5e6a3;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.maika-sueno-contexto-ayuda {
+  margin: 0;
+  color: rgba(245, 230, 163, 0.72);
+  font-size: 13.5px;
+}
+
+.maika-sueno-contexto-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.maika-sueno-chip {
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 13.5px;
+  cursor: pointer;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  background: rgba(212, 175, 55, 0.1);
+  color: #f5e6d0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.maika-sueno-chip:hover {
+  background: rgba(212, 175, 55, 0.22);
+}
+
+.maika-sueno-chip.activo {
+  border-color: rgba(212, 175, 55, 0.85);
+  background: rgba(212, 175, 55, 0.4);
+}
+
+.maika-sueno-contexto-textarea {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  font-size: 14px;
+  line-height: 1.4;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  outline: none;
+  resize: none;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.maika-sueno-contexto-acciones {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+}
+
+.maika-sueno-btn-primario {
+  padding: 9px 18px;
+  border-radius: 10px;
+  background: linear-gradient(45deg, #d4af37, #f5e6a3);
+  border: none;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.maika-sueno-btn-secundario {
+  padding: 9px 14px;
+  border-radius: 10px;
+  background: none;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  color: rgba(245, 230, 163, 0.85);
+  cursor: pointer;
+}
+
+.maika-sueno-btn-primario:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/** "Profundizar con Maika": conversación libre y gratuita sobre el sueño ya interpretado. */
+.maika-sueno-profundizar {
+  margin-top: 22px;
+  padding: 18px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.maika-sueno-profundizar-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.maika-sueno-profundizar-titulo {
+  margin: 0 0 4px;
+  color: #f5e6a3;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.maika-sueno-profundizar-ayuda {
+  margin: 0;
+  color: rgba(245, 230, 163, 0.72);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.maika-sueno-profundizar-contador {
+  margin: 10px 0 0;
+  color: rgba(212, 175, 55, 0.75);
+  font-size: 12.5px;
+  letter-spacing: 0.2px;
+}
+
+.maika-sueno-profundizar-hilo {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.maika-sueno-profundizar-limite {
+  margin-top: 28px;
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+}
+
+.maika-sueno-profundizar-limite-titulo {
+  margin: 0 0 8px;
+  color: #f5e6a3;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.maika-sueno-profundizar-limite-texto {
+  margin: 0;
+  color: rgba(245, 230, 163, 0.85);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.maika-sueno-cooldown {
+  margin: 18px 0 0;
+  color: rgba(245, 230, 163, 0.75);
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* Cierre de la experiencia gratuita: separación visual suave bajo el bloque premium. */
+.maika-sueno-cierre {
+  margin-top: 30px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(212, 175, 55, 0.22);
+  text-align: center;
+}
+
+.maika-sueno-bloqueado {
+  margin: 24px auto;
+  max-width: 480px;
+  padding: 22px 20px;
+  border-radius: 12px;
+  background: rgba(120, 90, 200, 0.10);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.maika-sueno-bloqueado-titulo {
+  margin: 0 0 8px;
+  color: #f5e6a3;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.maika-sueno-bloqueado-texto {
+  margin: 0;
+  color: rgba(245, 230, 163, 0.85);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.maika-sueno-entrada-profunda {
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(212, 175, 55, 0.3);
+  min-height: calc(42vh - 38px);
+  box-sizing: border-box;
+}
+
+.maika-sueno-profundizar-invitacion {
+  margin: 18px 0 6px;
+  color: #f5e6a3;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.maika-sueno-profundizar-precio {
+  margin: 0;
+  color: rgba(245, 230, 163, 0.85);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/** Separa visualmente la lectura profunda de pago del chat gratuito de arriba: no deben leerse como la misma cosa. */
+.maika-sueno-separador-premium {
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(212, 175, 55, 0.2);
+  text-align: center;
+}
+
+.maika-sueno-profundizar-fila {
+  display: flex;
+}
+
+.maika-sueno-profundizar-fila.usuario {
+  justify-content: flex-end;
+}
+
+.maika-sueno-profundizar-fila.maika {
+  justify-content: flex-start;
+}
+
+.maika-sueno-burbuja-usuario,
+.maika-sueno-burbuja-maika {
+  max-width: 88%;
+  padding: 10px 14px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  text-align: left;
+}
+
+.maika-sueno-burbuja-usuario {
+  border-radius: 14px 14px 4px 14px;
+  background: linear-gradient(135deg, #d4af37, #c9a43a);
+  color: #1a1208;
+}
+
+.maika-sueno-burbuja-maika {
+  border-radius: 14px 14px 14px 4px;
+  background: rgba(20, 16, 10, 0.85);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: #f5e6e0;
+}
+
+.maika-sueno-btn-escuchar {
+  display: block;
+  margin-top: 8px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: rgba(212, 175, 55, 0.85);
+  font-size: 12.5px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.maika-sueno-profundizar-cargando {
+  margin: 14px 0 0;
+  font-size: 13.5px;
+  font-style: italic;
+  color: rgba(212, 175, 55, 0.85);
+  animation: maika-profundizar-pulso 1.6s ease-in-out infinite;
+}
+
+@keyframes maika-profundizar-pulso {
+  0%,
+  100% {
+    opacity: 0.65;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.maika-sueno-profundizar-error {
+  margin: 14px 0 0;
+  color: #ffb3b3;
+  font-size: 13.5px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .maika-sueno-profundizar-cargando {
+    animation: none !important;
+  }
+}
+
 .maika-sueno-row-voz {
   margin-top: 10px;
   display: flex;
@@ -20,4 +401,60 @@
   accent-color: #d4af37;
   width: 16px;
   height: 16px;
+}
+
+.maika-avatar {
+  position: relative;
+  width: 148px;
+  height: 200px;
+  margin: 0 0 16px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transform: translateY(0);
+  animation: maika-avatar-aparecer 1s ease-out;
+}
+
+/** Maika llega junto con el inicio de la interpretación (el componente se monta en ese momento, no antes). */
+@keyframes maika-avatar-aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/** Variante grande: misma proporción (148:200), pensada para la columna lateral junto al interpretador. */
+.maika-avatar--lg {
+  width: 190px;
+  height: 257px;
+  margin: 22px 0 0 auto;
+}
+
+.maika-avatar--lg .maika-avatar-img {
+  width: 190px;
+  height: 257px;
+  border-radius: 16px;
+}
+
+/** Sin anillo ni mandala superpuestos: la foto ya trae su propio marco dorado, así que no se duplica. */
+.maika-avatar-img {
+  width: 148px;
+  height: 200px;
+  border-radius: 12px;
+  object-fit: cover;
+  object-position: 50% 20%;
+  background: rgba(0, 0, 0, 0.6);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .maika-avatar,
+  .maika-avatar-img {
+    animation: none !important;
+  }
 }

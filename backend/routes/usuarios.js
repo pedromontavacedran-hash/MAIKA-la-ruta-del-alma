@@ -88,7 +88,7 @@ usuariosRouter.patch("/me", authMiddlewareCheckoutOk, async (req, res) => {
           return idemStore;
         });
       } catch (e) {
-        // eslint-disable-next-line no-console
+         
         console.error("[perfil] idempotencia no guardada (perfil ya persistido)", e);
       }
     }

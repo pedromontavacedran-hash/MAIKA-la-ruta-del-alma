@@ -23,16 +23,16 @@ if (process.env.MAIKA_USER_DATA) {
 }
 
 process.on("uncaughtException", (err) => {
-  // eslint-disable-next-line no-console
+   
   console.error("[maika-backend] uncaughtException", err);
 });
 process.on("unhandledRejection", (reason, promise) => {
-  // eslint-disable-next-line no-console
+   
   console.error("[maika-backend] unhandledRejection", reason, promise);
 });
 
 if (!String(process.env.OPENAI_API_KEY || "").trim()) {
-  // eslint-disable-next-line no-console
+   
   console.error(
     "[maika-backend] OPENAI_API_KEY no definida: interpretación por IA desactivada hasta configurar la clave (.env o userData)."
   );
@@ -62,6 +62,10 @@ export const publicTiendaDir = path.join(BACKEND_DIR, "..", "public", "tienda");
 /** `jti` de tokens premium con lectura profunda ya generada (permite chat con el mismo JWT hasta que caduque). */
 export const premiumSeguimientoOkFile = path.join(dataDir, "premium_jti_seguimiento_ok.json");
 export const premiumJtiLegacyUsedFile = path.join(dataDir, "premium_unlock_jtis.json");
+/** Mapa identificador → timestamp de la última interpretación gratuita (límite 1 sueño / 24 h). */
+export const suenoUsoGratuitoFile = path.join(dataDir, "sueno_uso_gratuito.json");
+/** Mapa `usr:<id>` → { fecha, signo } de la lectura de horóscopo del día (límite 1 / día natural ES). */
+export const horoscopoUsoDiarioFile = path.join(dataDir, "horoscopo_uso_diario.json");
 
 export const CATEGORIAS_PRODUCTO = ["velas", "inciensos", "figuras", "kits", "joyas"];
 export const IS_PRODUCTION = process.env.NODE_ENV === "production";
@@ -80,7 +84,7 @@ function resolveSecret(name, { ephemeralDev = false } = {}) {
   if (value) return value;
   if (ephemeralDev) {
     const ephemeral = crypto.randomBytes(32).toString("hex");
-    // eslint-disable-next-line no-console
+     
     console.warn(
       `[maika-backend] ${name} no definida en .env; secreto temporal de desarrollo (solo esta sesión).`
     );
@@ -95,13 +99,13 @@ export const JWT_SECRET = resolveSecret("JWT_SECRET", { ephemeralDev: true });
 /** Duración del JWT de sesión de cliente (`login` / `PATCH /auth/password`). Ej.: `1d`, `12h`, `7d`. */
 export const JWT_CLIENT_EXPIRES_IN = String(process.env.JWT_CLIENT_EXPIRES_IN || "1d").trim() || "1d";
 /** Firma de tokens de desbloqueo premium (lectura profunda). En producción define `MAIKA_PREMIUM_JWT_SECRET` aparte de `JWT_SECRET`. */
-export const PREMIUM_JWT_SECRET = requireEnvSecretInProduction("MAIKA_PREMIUM_JWT_SECRET") || JWT_SECRET;
+export const PREMIUM_JWT_SECRET = requireEnvSecretInProduction("MAIKA_PREMIUM_JWT_SECRET") || (IS_PRODUCTION ? JWT_SECRET : resolveSecret("JWT_SECRET", { ephemeralDev: true }));
 /** Clave del panel: solo vive en backend. En producción es obligatoria. */
 export const ADMIN_PANEL_PASSWORD = resolveSecret("MAIKA_ADMIN_PANEL_PASSWORD");
 /** Coste bcrypt para nuevos hashes (4–12). Menor = login más rápido; en producción suele usarse 10–12. */
 export const BCRYPT_ROUNDS = Number.isFinite(Number(process.env.BCRYPT_ROUNDS))
   ? Math.min(12, Math.max(4, Number(process.env.BCRYPT_ROUNDS)))
-  : 8;
+  : 10;
 /** Hash dummy: `bcrypt.compare` en login siempre corre contra un hash real (mitiga fugas por tiempo). */
 export const LOGIN_TIMING_DUMMY_HASH = bcrypt.hashSync("__maika_login_timing_dummy__", BCRYPT_ROUNDS);
 

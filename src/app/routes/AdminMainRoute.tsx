@@ -2,7 +2,6 @@ import { Suspense, type Dispatch, type SetStateAction } from "react";
 import { createPortal } from "react-dom";
 import { CuentaPage } from "../routing/lazyPages";
 import GestionUsuariosPage from "../../pages/GestionUsuariosPage";
-import AdminAccessPanel from "../../components/admin/AdminAccessPanel";
 import AdminPanelShell from "../../components/admin/AdminPanelShell";
 import AdminCampanaPackPanel from "../../components/admin/AdminCampanaPackPanel";
 import { AdminLecturaPantallaPanel } from "../../components/admin/AdminLecturaPantallaPanel";
@@ -28,14 +27,9 @@ import type { AdminMetricsResumen } from "../../admin/hooks/useAdminMetrics";
 import type { MaikaUsuarioLS } from "../../utils/maikaUsuarios";
 import type { MaikaPedidoLS } from "../../utils/maikaPedidos";
 import type { CuponAdminEntrada } from "./EditarCuponesAdminPanel";
-import { clearAdminAuthorization, setAdminAuthorization } from "../../utils/adminAuth";
-import {
-  clearAdminUsuariosApiJwt,
-  ensureAdminPanelJwtInSession,
-  getLastAdminPanelLoginError,
-  getLastAdminPanelRateLimitResetAt
-} from "../../services/apiAuth";
-import { notificarError, notificarExito } from "../../utils/ui/notificaciones";
+import { clearAdminAuthorization } from "../../utils/adminAuth";
+import { clearAdminUsuariosApiJwt } from "../../services/apiAuth";
+
 import { normalizarTelefonoES9 } from "../../utils/telefono";
 import { normalizarTelefonoBizum } from "../../utils/pago";
 import { ALTURA_BARRA_TOP_MAX, ALTURA_BARRA_TOP_MIN, ICONOS_BARRA_ESCALA_MAX, ICONOS_BARRA_ESCALA_MIN, LOGO_POS_X_REL_MAX, LOGO_POS_X_REL_MIN, type BarraTopPedidoExitoCfg, logoTamanoDesdeAlturaBarra } from "../../utils/barraTopPedidoExito/barraTopPedidoExitoCfg";
@@ -156,8 +150,6 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
     setEditUsuarioForm,
     setModalEditarUsuarioAbierto,
     guardarEdicionUsuario,
-    claveAdmin,
-    setClaveAdmin,
     setAccesoAdmin,
     adminUltimoLoginTexto,
     adminAhoraTexto,
@@ -188,10 +180,6 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
     esVistaDisenoWebCompleta,
     esApartadoDisenoWebHero,
     mostrarBloqueHeroDisenoWeb,
-    adminAccesoBloqueadoRateLimit,
-    setAdminAccesoBloqueadoRateLimit,
-    adminAccesoMensajeError,
-    setAdminAccesoMensajeError,
     barraTopPedidoExitoCfg,
     colorFondoBarraTemporal,
     setColorFondoBarraTemporal,
@@ -276,39 +264,6 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
     subirFondoPantalla,
     subirLogoBarraPendiente
   } = useAdminDisenoWebEditor({ esAdmin, accesoAdmin, mostrarNotificacion });
-
-  async function intentarAccederAdmin() {
-    if (adminAccesoBloqueadoRateLimit) return;
-    setAdminAccesoMensajeError("");
-    const ok = await ensureAdminPanelJwtInSession(claveAdmin);
-    if (ok) {
-      setAdminAuthorization();
-      setAccesoAdmin(true);
-      setClaveAdmin("");
-      setAdminAccesoBloqueadoRateLimit(false);
-      setAdminAccesoMensajeError("");
-      return;
-    }
-    const error = getLastAdminPanelLoginError();
-    if (error === "rate_limit") {
-      setAdminAccesoBloqueadoRateLimit(true);
-      const resetAt = getLastAdminPanelRateLimitResetAt();
-      const segundos = resetAt ? Math.max(1, Math.ceil((resetAt - Date.now()) / 1000)) : null;
-      setAdminAccesoMensajeError(
-        segundos ? `Demasiados intentos. Prueba de nuevo en ${segundos}s.` : "Demasiados intentos. Prueba de nuevo más tarde."
-      );
-      if (resetAt) {
-        window.setTimeout(() => {
-          setAdminAccesoBloqueadoRateLimit(false);
-          setAdminAccesoMensajeError("");
-        }, Math.max(0, resetAt - Date.now()));
-      }
-    } else if (error === "network") {
-      setAdminAccesoMensajeError("Error de conexión. Inténtalo de nuevo.");
-    } else {
-      setAdminAccesoMensajeError("Clave incorrecta.");
-    }
-  }
 
   return (
     <>

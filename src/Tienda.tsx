@@ -284,7 +284,7 @@ export default function Tienda({
 
   useEffect(() => {
     if (categoriaInicial) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- alinear con prop categoriaInicial del padre
+       
       setMostrarCategoria(categoriaInicial);
       setSubcategoriaAbierta(null);
       onCategoriaInicialAplicada?.();

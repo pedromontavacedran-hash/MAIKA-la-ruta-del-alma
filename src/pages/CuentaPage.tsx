@@ -422,6 +422,17 @@ export default function CuentaPage(props: CuentaPageProps) {
     setSearchParams(next, { replace: true });
   }, [embedPanelGestion, searchParams, setSearchParams, mostrarNotificacion]);
 
+  /** `?vista=registro|login`: entrada directa a la pestaña pedida (p. ej. desde el guard de Sueños/Horóscopo). */
+  useEffect(() => {
+    if (embedPanelGestion) return;
+    const vista = searchParams.get("vista");
+    if (vista !== "registro" && vista !== "login") return;
+    setModoRegistro(vista === "registro" ? "register" : "login");
+    const next = new URLSearchParams(searchParams);
+    next.delete("vista");
+    setSearchParams(next, { replace: true });
+  }, [embedPanelGestion, searchParams, setSearchParams, setModoRegistro]);
+
   /**
    * Hueco bajo la nav: `page-top-spacing` y `__content` usan `--app-content-pad-bajo-nav` (= `--app-topbar-stack` en `global.css`).
    */

@@ -217,11 +217,7 @@ export function useMaikaCheckout(p: UseMaikaCheckoutInput) {
 
   const [metodoPago, setMetodoPago] = useState<"bizum" | "tarjeta">("bizum");
   const [datosPago, setDatosPago] = useState({
-    bizumTelefono: "",
-    tarjetaNumero: "",
-    tarjetaTitular: "",
-    tarjetaCaducidad: "",
-    tarjetaCVV: ""
+    bizumTelefono: ""
   });
 
   const [modalRepeatPedidoAbierto, setModalRepeatPedidoAbierto] = useState(false);

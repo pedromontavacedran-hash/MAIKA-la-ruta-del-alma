@@ -58,11 +58,7 @@ export function useCompraRapida(p: UseCompraRapidaParams) {
     const errorPago = validarDatosPago(
       perfilCompraRapida.metodoPago,
       perfilCompraRapida.datosPago,
-      "No se pudo usar compra rápida: móvil de Bizum no válido",
-      "No se pudo usar compra rápida: tarjeta no válida",
-      "No se pudo usar compra rápida: falta titular",
-      "No se pudo usar compra rápida: caducidad no válida",
-      "No se pudo usar compra rápida: CVC no válido"
+      "No se pudo usar compra rápida: móvil de Bizum no válido"
     );
     return !errorPago;
   }, [perfilCompraRapida]);

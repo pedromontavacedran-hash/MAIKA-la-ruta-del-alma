@@ -1,0 +1,27 @@
+appId: com.maika.app
+productName: MAIKA Rutas del Alma
+copyright: Copyright © MAIKA
+asar: false
+directories:
+  output: dist-electron
+# package.json, node_modules (prod) y main se incluyen por defecto; aquí el front y el API.
+# backend/data/*.json queda excluido (salvo productos.json, catálogo semilla): son datos de
+# usuarios/pedidos/carritos reales de la máquina donde se compila, nunca deben viajar dentro
+# del instalador. En producción MAIKA_USER_DATA (electron/main.mjs) apunta a userData de
+# Electron, no a esta carpeta: ensureStorage() recrea los defaults ahí en el primer arranque.
+files:
+  - dist/**/*
+  - backend/**/*
+  - electron/**/*.mjs
+  - electron/**/*.html
+  - '!backend/data/*.json'
+  - backend/data/productos.json
+win:
+  target: nsis
+  icon: public/icon.ico
+  # Sin certificado de código: evita descargar winCodeSign (a veces falla por red/GitHub).
+  signAndEditExecutable: false
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true

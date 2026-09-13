@@ -12,7 +12,7 @@ import {
   usuarioIdIdempotencia,
   idempotencyConflictBody
 } from "../lib/storage.js";
-import { authMiddleware, authMiddlewareCheckoutOk } from "../lib/auth.js";
+import { authMiddleware, authMiddlewareCheckoutOk, usuariosAccessMiddleware } from "../lib/auth.js";
 
 export const pedidosRouter = Router();
 
@@ -79,7 +79,7 @@ pedidosRouter.post("/pedidos", authMiddlewareCheckoutOk, async (req, res) => {
       await writePedidos(pedidos);
     } catch (e) {
       await restaurarProductosDesdeSnapshotJson(rollbackStockJson);
-      // eslint-disable-next-line no-console
+       
       console.error("[pedidos] POST error tras stock/pedidos", e);
       return { status: 500, body: { error: "No se pudo registrar el pedido" } };
     }
@@ -91,7 +91,7 @@ pedidosRouter.post("/pedidos", authMiddlewareCheckoutOk, async (req, res) => {
           return idemStore;
         });
       } catch (e) {
-        // eslint-disable-next-line no-console
+         
         console.error("[pedidos] idempotencia no guardada (pedido ya persistido)", e);
       }
     }
@@ -102,22 +102,16 @@ pedidosRouter.post("/pedidos", authMiddlewareCheckoutOk, async (req, res) => {
   res.status(outcome.status).json(outcome.body);
 });
 
-pedidosRouter.patch("/pedidos/:numero/estado", authMiddleware, async (req, res) => {
+/** Solo admin: cambia el estado de fulfillment de CUALQUIER pedido (gestión de envíos en el panel). */
+pedidosRouter.patch("/pedidos/:numero/estado", usuariosAccessMiddleware, async (req, res) => {
   const { numero } = req.params;
   const { estado } = req.body ?? {};
-  const userId = `user_${String(req.user?.id ?? "").trim()}`;
-  if (!String(req.user?.id ?? "").trim()) {
-    res.status(401).json({ error: "Token inválido" });
-    return;
-  }
   if (!estado || !["pendiente", "enviado", "entregado"].includes(estado)) {
     res.status(400).json({ error: "Estado inválido" });
     return;
   }
   const pedidos = await readPedidos();
-  const idx = pedidos.findIndex((p) =>
-    String(p?.numero) === String(numero) && String(p?.usuarioId || "") === userId
-  );
+  const idx = pedidos.findIndex((p) => String(p?.numero) === String(numero));
   if (idx === -1) {
     res.status(404).json({ error: "Pedido no encontrado" });
     return;

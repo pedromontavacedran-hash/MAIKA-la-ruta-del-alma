@@ -1,14 +1,44 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { Link, Navigate, useLocation } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { getApiBaseUrl } from "../config/apiBaseUrl";
+import { CHECKOUT_CONFIG } from "../config/checkoutConfig";
+import { buscarVozPorNombre, detenerNarracion, hablarNatural } from "../voz";
+import { MaikaAvatar } from "../components/MaikaAvatar";
 import "../Sueno.css";
 
 export type SuenoPremiumLocationState = {
   sueno: string;
   interpretacionBasica?: string;
+  emocion?: string;
+  historialAdicional?: SuenoChatMensaje[];
+  /** Preguntas que la IA dejó en la interpretación base (p. ej. detalles que faltan). */
+  preguntas?: string[];
+  /** Preferencias de voz de la pantalla anterior, para seguir narrando igual tras desbloquear. */
+  narrarVoz?: boolean;
+  vozNombre?: string;
+  velocidadVoz?: number;
+  tonoVoz?: number;
 };
 
 export type SuenoChatMensaje = { rol: "user" | "ai"; texto: string };
+
+type ContextoLecturaProfunda = {
+  texto: string;
+  interpretacionBasica: string;
+  emocion: string;
+  historialAdicional: SuenoChatMensaje[];
+};
+
+/** Preguntas que la interpretación base deja abiertas (frases con «?»); máx. 4, para la pantalla profunda. */
+export function extraerPreguntasInterpretacion(texto: string): string[] {
+  const limpio = texto.replace(/\r\n/g, "\n").trim();
+  if (!limpio) return [];
+  const frases = limpio
+    .split(/(?<=[.!?])\s+|\n+/)
+    .map((s) => s.trim())
+    .filter((s) => /\?/.test(s) && s.length >= 12);
+  return frases.slice(0, 4);
+}
 
 type OkToken = { ok: true; token: string };
 type ErrMsg = { ok: false; mensaje: string };
@@ -19,10 +49,9 @@ const TIMEOUT_MS = 60_000;
 
 /** Mensajes rotativos mientras llega la lectura profunda (rendimiento percibido). */
 const MENSAJES_ESPERA_LECTURA = [
-  "Estoy conectando con tu sueño... dame un instante ✨",
-  "Conectando con el significado de lo que contaste...",
-  "Observando los símbolos de tu relato...",
-  "Interpretando lo que hay detrás..."
+  "MAIKA está conectando con tu sueño… ✨",
+  "Conectando con Maika sobre lo que contaste…",
+  "Un instante, ya casi tienes tu lectura…"
 ] as const;
 
 /**
@@ -68,15 +97,15 @@ async function solicitarSimularCobroRemoto(signal: AbortSignal): Promise<OkToken
 }
 
 async function seguimientoSuenoRemoto(
-  texto: string,
-  interpretacionBasica: string,
+  contexto: ContextoLecturaProfunda,
   desbloqueoToken: string,
-  signal: AbortSignal
+  signal: AbortSignal,
+  enfasis?: string
 ): Promise<SeguimientoResultado> {
   const body = JSON.stringify({
-    texto,
-    interpretacionBasica: interpretacionBasica.trim() || undefined,
-    desbloqueoToken
+    ...contexto,
+    desbloqueoToken,
+    enfasis: enfasis?.trim() || undefined
   });
   const base = getApiBaseUrl();
   const urls = import.meta.env.DEV
@@ -156,12 +185,39 @@ async function seguimientoSuenoRemoto(
   return { ok: false, mensaje: ultimo };
 }
 
+async function solicitarAspectosRemoto(
+  contexto: ContextoLecturaProfunda,
+  signal: AbortSignal
+): Promise<string[]> {
+  const base = getApiBaseUrl();
+  const urls = import.meta.env.DEV
+    ? [`${base}/sueno/aspectos`, "/api/sueno/aspectos"]
+    : [`${base}/sueno/aspectos`];
+  for (const url of urls) {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(contexto),
+      signal
+    });
+    if (res.status === 404 && url !== urls[urls.length - 1]) continue;
+    const data = await res.json();
+    if (!res.ok || data.ok !== true || !Array.isArray(data.aspectos) ||
+        data.aspectos.length > 4 || data.aspectos.some((s: unknown) => typeof s !== "string" || !s.trim() || s.length > 180)) {
+      throw new Error("No se pudieron preparar los aspectos");
+    }
+    return data.aspectos;
+  }
+  throw new Error("No se pudieron preparar los aspectos");
+}
+
 async function suenoChatRemoto(
   historial: SuenoChatMensaje[],
+  contextoSueno: ContextoLecturaProfunda,
   desbloqueoToken: string,
   signal: AbortSignal
 ): Promise<{ ok: true; mensaje: string } | { ok: false; mensaje: string }> {
-  const body = JSON.stringify({ historial });
+  const body = JSON.stringify({ historial, contextoSueno });
   const base = getApiBaseUrl();
   const urls = import.meta.env.DEV
     ? [`${base}/sueno/chat`, "/api/sueno/chat"]
@@ -281,13 +337,6 @@ const btnPrimario: CSSProperties = {
   fontSize: "16px"
 };
 
-const btnSec: CSSProperties = {
-  marginTop: "10px",
-  display: "inline-block",
-  color: "rgba(245,230,163,0.85)",
-  fontSize: "15px"
-};
-
 const chatBurbujaUser: CSSProperties = {
   display: "inline-block",
   padding: "10px 14px",
@@ -342,17 +391,85 @@ const chatBurbujaAi: CSSProperties = {
   boxShadow: "0 4px 12px rgba(0,0,0,0.2)"
 };
 
-export default function SuenoPremiumPage() {
-  const location = useLocation();
-  const state = location.state as SuenoPremiumLocationState | null;
+export type LecturaProfundaProps = {
+  sueno: string;
+  interpretacionBasica?: string;
+  emocion?: string;
+  historialAdicional?: SuenoChatMensaje[];
+  preguntas?: string[];
+  /** Preferencias de voz traídas de la pantalla de interpretación, para seguir igual aquí. */
+  narrarVoz?: boolean;
+  vozNombre?: string;
+  velocidadVoz?: number;
+  tonoVoz?: number;
+  /** Incrustado bajo la interpretación básica: sin su propio `padding`/`max-width` de página. */
+  sinContenedor?: boolean;
+};
 
-  const sueno = useMemo(() => String(state?.sueno ?? "").trim(), [state?.sueno]);
+/** Pantalla (o bloque incrustado) de pago y lectura profunda, reutilizable desde la ruta o desde `Sueno.tsx`. */
+export function LecturaProfunda({
+  sueno: suenoProp,
+  interpretacionBasica: interpretacionBasicaProp,
+  emocion: emocionProp,
+  historialAdicional: historialAdicionalProp,
+  preguntas,
+  narrarVoz: narrarVozProp,
+  vozNombre,
+  velocidadVoz: velocidadVozProp,
+  tonoVoz: tonoVozProp,
+  sinContenedor
+}: LecturaProfundaProps) {
+  const sueno = useMemo(() => suenoProp.trim(), [suenoProp]);
   const interpretacionBasica = useMemo(
-    () => String(state?.interpretacionBasica ?? "").trim(),
-    [state?.interpretacionBasica]
+    () => String(interpretacionBasicaProp ?? "").trim(),
+    [interpretacionBasicaProp]
   );
+  const preguntasInterpretacion = useMemo(
+    () => (Array.isArray(preguntas) ? preguntas.slice(0, 4) : []),
+    [preguntas]
+  );
+  /**
+   * Contexto completo que se envía a /sueno/aspectos, /sueno/seguimiento y /sueno/chat:
+   * relato original + emoción al despertar + interpretación inicial + el intercambio gratuito
+   * (pregunta del usuario y respuesta de MAIKA). Sin él, la lectura profunda perdería la conversación.
+   */
+  const contexto = useMemo<ContextoLecturaProfunda>(
+    () => ({
+      texto: sueno,
+      interpretacionBasica,
+      emocion: String(emocionProp ?? "").trim().slice(0, 300),
+      historialAdicional: (Array.isArray(historialAdicionalProp) ? historialAdicionalProp : [])
+        .filter(
+          (m): m is SuenoChatMensaje =>
+            !!m && (m.rol === "user" || m.rol === "ai") && typeof m.texto === "string" && !!m.texto.trim()
+        )
+        .slice(0, 2)
+    }),
+    [sueno, interpretacionBasica, emocionProp, historialAdicionalProp]
+  );
+  /** Aspectos generados con el contexto completo; si falla la petición, se usan las preguntas legadas. */
+  const [aspectos, setAspectos] = useState<string[] | null>(null);
+  useEffect(() => {
+    if (!sueno) return;
+    const ctl = new AbortController();
+    solicitarAspectosRemoto(contexto, ctl.signal)
+      .then(setAspectos)
+      .catch(() => setAspectos([]));
+    return () => ctl.abort();
+  }, [contexto, sueno]);
+  const aspectosSugeridos = aspectos ?? preguntasInterpretacion;
+  const narrarVoz = narrarVozProp ?? true;
+  const vozNombrePref = vozNombre ?? "";
+  const velocidadVoz = typeof velocidadVozProp === "number" ? velocidadVozProp : 1.15;
+  const tonoVoz = typeof tonoVozProp === "number" ? tonoVozProp : 0.85;
 
   const [desbloqueado, setDesbloqueado] = useState(false);
+  /** Pregunta abierta (de la primera interpretación) que el usuario elige para que la lectura profunda haga hincapié en ella. */
+  const [enfasisElegido, setEnfasisElegido] = useState<string | null>(null);
+  /** Texto libre de "lo que quedó pendiente", como alternativa a elegir una de las preguntas. */
+  const [enfasisTexto, setEnfasisTexto] = useState("");
+  /** El bloque de pago solo aparece tras elegir una pregunta o escribir algo (o directamente si no hay preguntas). */
+  const [pagoDesbloqueado, setPagoDesbloqueado] = useState(false);
   const [cargando, setCargando] = useState(false);
   const [faseCarga, setFaseCarga] = useState<"idle" | "pago" | "ia">("idle");
   /** Mismo JWT que envía el chat en `Authorization` (tras lectura profunda, el backend marca el `jti` como OK). */
@@ -367,6 +484,8 @@ export default function SuenoPremiumPage() {
   /** Texto de espera rotativo; el interval solo toca esto, nunca `historial`. */
   const [mensajeEspera, setMensajeEspera] = useState("");
   const chatBottomRef = useRef<HTMLDivElement>(null);
+  /** El recuadro con scroll propio: solo lo autoseguimos si ya estabas abajo del todo. */
+  const cajaChatRef = useRef<HTMLDivElement>(null);
   /** Siempre el último historial renderizado (evita closure obsoleto al enviar). */
   const historialRef = useRef<SuenoChatMensaje[]>([]);
   /** Bloquea doble envío antes de que React aplique `cargandoChat`. */
@@ -377,6 +496,65 @@ export default function SuenoPremiumPage() {
    */
   const rotacionEsperaActivaRef = useRef(false);
   historialRef.current = historial;
+  /** Respuesta de la IA que se está escribiendo letra a letra ahora mismo (índice en `historial`). */
+  const [revelado, setRevelado] = useState<{ index: number; texto: string } | null>(null);
+  const reveladoTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (reveladoTimerRef.current != null) {
+        window.clearInterval(reveladoTimerRef.current);
+      }
+      detenerNarracion();
+    };
+  }, []);
+
+  /** Escribe la respuesta letra a letra (mismo ritmo que la pantalla de interpretación) y la narra. */
+  const revelarYNarrar = useCallback(
+    (index: number, mensaje: string) => {
+      if (reveladoTimerRef.current != null) {
+        window.clearInterval(reveladoTimerRef.current);
+        reveladoTimerRef.current = null;
+      }
+      const caracteres = Array.from(mensaje);
+      if (caracteres.length === 0) {
+        setRevelado(null);
+        return;
+      }
+      setRevelado({ index, texto: "" });
+
+      if (narrarVoz) {
+        // Con voz: el texto sigue exactamente lo que se va narrando (eventos reales
+        // de la voz), no una estimación aparte que puede desincronizarse.
+        const voz = buscarVozPorNombre(vozNombrePref);
+        window.setTimeout(() => {
+          hablarNatural(
+            mensaje,
+            true,
+            voz,
+            velocidadVoz,
+            tonoVoz,
+            (visible) => setRevelado({ index, texto: visible }),
+            () => setRevelado({ index, texto: mensaje })
+          );
+        }, 300);
+        return;
+      }
+
+      const msPorLetra = Math.max(12, Math.round(100 / velocidadVoz));
+      let idx = 0;
+      const timer = window.setInterval(() => {
+        idx += 1;
+        setRevelado({ index, texto: mensaje.slice(0, idx) });
+        if (idx >= caracteres.length) {
+          window.clearInterval(timer);
+          reveladoTimerRef.current = null;
+        }
+      }, msPorLetra);
+      reveladoTimerRef.current = timer;
+    },
+    [narrarVoz, vozNombrePref, velocidadVoz, tonoVoz]
+  );
 
   const finalizarLecturaCarga = useCallback(() => {
     rotacionEsperaActivaRef.current = false;
@@ -386,13 +564,14 @@ export default function SuenoPremiumPage() {
     setFaseCarga("idle");
   }, []);
 
-  /** Lo que se muestra en el panel: placeholder derivado o historial real del chat. */
+  /** Lo que se muestra en el panel: placeholder derivado o historial real del chat (un único hilo). */
   const historialRender = useMemo((): SuenoChatMensaje[] => {
     if (modoEsperaLectura) {
       return [{ rol: "ai", texto: mensajeEspera.trim() || MENSAJES_ESPERA_LECTURA[0] }];
     }
-    return historial;
-  }, [modoEsperaLectura, mensajeEspera, historial]);
+    if (!revelado) return historial;
+    return historial.map((m, i) => (i === revelado.index ? { ...m, texto: revelado.texto } : m));
+  }, [modoEsperaLectura, mensajeEspera, historial, revelado]);
 
   /** Chat usable: mismo JWT premium (`desbloqueoToken`), sin carga ni placeholder rotando. */
   const chatActivo = useMemo(
@@ -405,7 +584,14 @@ export default function SuenoPremiumPage() {
   );
 
   useEffect(() => {
-    chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = cajaChatRef.current;
+    if (!el) return;
+    // Solo sigue el chat mientras ya estás abajo del todo; si subes a releer,
+    // no te lo vuelve a bajar de golpe con cada actualización.
+    const distanciaAlFondo = el.scrollHeight - el.scrollTop - el.clientHeight;
+    if (distanciaAlFondo < 80) {
+      el.scrollTop = el.scrollHeight;
+    }
   }, [historialRender, cargandoChat]);
 
   useEffect(() => {
@@ -450,14 +636,15 @@ export default function SuenoPremiumPage() {
         setDesbloqueoToken(cobro.token);
         setFaseCarga("ia");
         const out = await seguimientoSuenoRemoto(
-          sueno,
-          interpretacionBasica,
+          contexto,
           cobro.token,
-          ctl.signal
+          ctl.signal,
+          enfasisElegido ?? undefined
         );
         if (myEpoch !== lecturaProfundaEpoch) return;
         if (out.ok) {
           setHistorial([{ rol: "ai", texto: out.mensaje }]);
+          revelarYNarrar(0, out.mensaje);
         } else {
           setDesbloqueado(false);
           setHistorial([]);
@@ -475,7 +662,7 @@ export default function SuenoPremiumPage() {
         }
       }
     })();
-  }, [sueno, interpretacionBasica, finalizarLecturaCarga]);
+  }, [contexto, finalizarLecturaCarga, revelarYNarrar, enfasisElegido]);
 
   const enviarMensaje = useCallback(() => {
     const t = input.trim();
@@ -499,9 +686,11 @@ export default function SuenoPremiumPage() {
     const tid = window.setTimeout(() => ctl.abort(), TIMEOUT_MS);
     void (async () => {
       try {
-        const data = await suenoChatRemoto(nuevoHistorial, desbloqueoToken, ctl.signal);
+        const data = await suenoChatRemoto(nuevoHistorial, contexto, desbloqueoToken, ctl.signal);
         if (data.ok) {
+          const aiIndex = nuevoHistorial.length;
           setHistorial((prev) => [...prev, { rol: "ai", texto: data.mensaje }]);
+          revelarYNarrar(aiIndex, data.mensaje);
         } else {
           setErrorChat(data.mensaje);
         }
@@ -511,33 +700,36 @@ export default function SuenoPremiumPage() {
         setCargandoChat(false);
       }
     })();
-  }, [input, desbloqueoToken, cargandoChat, cargando, modoEsperaLectura]);
+  }, [input, contexto, desbloqueoToken, cargandoChat, cargando, modoEsperaLectura, revelarYNarrar]);
 
-  if (!state || !sueno) {
-    return <Navigate to="/suenos" replace />;
+  if (!sueno) {
+    return null;
   }
 
   return (
-    <div style={panel}>
-      <h1 style={titulo}>Lectura profunda del alma (3,99&nbsp;€)</h1>
-      <p style={{ color: "rgba(245,230,163,0.92)", fontSize: "16px", lineHeight: 1.55, margin: 0 }}>
-        Accede a una lectura más profunda y personalizada de tu sueño: más matices, más vínculos con lo que viviste,{" "}
-        <strong>sin repetir</strong> la primera interpretación.
-      </p>
-      <p
-        style={{
-          color: "rgba(245,230,163,0.82)",
-          fontSize: "15px",
-          lineHeight: 1.55,
-          margin: "10px 0 0"
-        }}
-      >
-        El paso de pago está <strong>simulado</strong> por ahora; cuando conectes Stripe, aquí mismo vivirá el mismo
-        ritual, con el cobro y la tranquilidad de que solo quien corresponde abre esta puerta.
-      </p>
+    <div style={sinContenedor ? undefined : panel}>
+      {sinContenedor ? null : <h1 style={titulo}>Lectura profunda del alma (3,99&nbsp;€)</h1>}
+      {!desbloqueado ? (
+        <>
+          <p style={{ color: "rgba(245,230,163,0.92)", fontSize: "16px", lineHeight: 1.55, margin: 0 }}>
+            Accede a una lectura más profunda y personalizada de tu sueño: más matices, más vínculos con lo que
+            viviste, <strong>sin repetir</strong> la primera interpretación.
+          </p>
+          <p
+            style={{
+              color: "rgba(245,230,163,0.82)",
+              fontSize: "15px",
+              lineHeight: 1.55,
+              margin: "10px 0 0"
+            }}
+          >
+            El pago se coordina <strong>por Bizum</strong> y se confirma a mano (como en la tienda).
+          </p>
+        </>
+      ) : null}
 
       {!desbloqueado ? (
-        <div style={caja}>
+        <div style={sinContenedor ? undefined : caja}>
           <p style={{ marginTop: 0 }}>
             <strong>Tu relato</strong> (resumen): {sueno.length > 220 ? `${sueno.slice(0, 220)}…` : sueno}
           </p>
@@ -547,16 +739,121 @@ export default function SuenoPremiumPage() {
               lo mismo.
             </p>
           ) : null}
-          <p style={{ marginBottom: 0 }}>
-            Incluye el relato que trajiste y, si la hay, tu primera interpretación: la profunda enlaza con eso sin
-            copiarla.
-          </p>
-          <button type="button" style={btnPrimario} onClick={iniciarPagoSimulado} disabled={cargando}>
-            Ver el mensaje oculto de tu sueño ✨
-          </button>
-          <p style={{ marginTop: "8px", fontSize: "14px", opacity: 0.8, marginBottom: 0 }}>
-            También puedes usar: «Desbloquear lectura profunda» — mismo paso.
-          </p>
+
+          {aspectosSugeridos.length > 0 ? (
+            <div
+              style={{
+                margin: "0 0 14px",
+                padding: "10px",
+                borderRadius: "10px",
+                border: "1px solid rgba(212,175,55,0.25)",
+                background: "rgba(212,175,55,0.07)"
+              }}
+            >
+              <p style={{ margin: "0 0 4px", fontSize: "14px", color: "#f5e6a3" }}>
+                Aspectos que aún podemos explorar
+              </p>
+              <p style={{ margin: "0 0 8px", fontSize: "13px", opacity: 0.8 }}>
+                Elige uno si quieres que la Lectura Profunda haga especial hincapié en él (opcional).
+              </p>
+              {aspectosSugeridos.map((p) => {
+                const elegida = enfasisElegido === p;
+                return (
+                  <button
+                    key={p.slice(0, 40)}
+                    type="button"
+                    style={{
+                      ...chipSugerencia,
+                      background: elegida ? "rgba(212,175,55,0.4)" : chipSugerencia.background,
+                      border: elegida ? "1px solid rgba(212,175,55,0.8)" : chipSugerencia.border
+                    }}
+                    disabled={cargando}
+                    onClick={() => {
+                      setEnfasisElegido(elegida ? null : p);
+                      setPagoDesbloqueado(true);
+                    }}
+                  >
+                    {elegida ? "✓ " : ""}
+                    {p}
+                  </button>
+                );
+              })}
+              <textarea
+                value={enfasisTexto}
+                onChange={(e) => setEnfasisTexto(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    if (enfasisTexto.trim()) {
+                      setEnfasisElegido(enfasisTexto.trim());
+                    }
+                    setPagoDesbloqueado(true);
+                  }
+                }}
+                placeholder="O escribe aquí lo que quedó pendiente y pulsa Intro…"
+                rows={2}
+                disabled={cargando}
+                style={{
+                  width: "100%",
+                  marginTop: "10px",
+                  padding: "10px 12px",
+                  borderRadius: "10px",
+                  border: "1px solid rgba(212,175,55,0.35)",
+                  background: "rgba(0,0,0,0.45)",
+                  color: "#f5e6e0",
+                  fontSize: "14px",
+                  lineHeight: 1.5,
+                  resize: "vertical",
+                  outline: "none",
+                  boxSizing: "border-box"
+                }}
+              />
+            </div>
+          ) : null}
+
+          {pagoDesbloqueado || (aspectos !== null && aspectosSugeridos.length === 0) ? (
+            <>
+              <div
+                style={{
+                  margin: "14px 0",
+                  padding: "14px",
+                  borderRadius: "12px",
+                  border: "1px solid rgba(122,196,164,0.35)",
+                  background: "rgba(122,196,164,0.08)"
+                }}
+              >
+                <p style={{ margin: 0, fontSize: "15px", lineHeight: 1.6 }}>
+                  <strong>Cómo pagar (3,99&nbsp;€):</strong>
+                  <br />
+                  1. Envía <strong>3,99&nbsp;€ por Bizum al 673&nbsp;175&nbsp;547</strong> (Maika) con el concepto
+                  «Lectura profunda».
+                  <br />
+                  2. Avísame con el comprobante por WhatsApp.
+                  <br />
+                  3. Abre tu lectura profunda.
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "10px" }}>
+                  <a
+                    href={`https://wa.me/${CHECKOUT_CONFIG.whatsappNumber}?text=${encodeURIComponent(
+                      "Hola Maika, acabo de enviar 3,99 € por Bizum para la lectura profunda de mi sueño. Te adjunto el comprobante."
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      ...btnPrimario,
+                      textDecoration: "none",
+                      display: "inline-block",
+                      fontSize: "14px",
+                      padding: "8px 16px"
+                    }}
+                  >
+                    Enviar comprobante por WhatsApp 💬
+                  </a>
+                </div>
+              </div>
+
+            </>
+          ) : null}
           {error ? (
             <div style={{ marginTop: "12px" }}>
               <p style={{ color: "#ffb3b3", margin: "0 0 8px" }} role="alert">
@@ -580,18 +877,18 @@ export default function SuenoPremiumPage() {
               </button>
             </div>
           ) : null}
-          <div>
-            <Link to="/suenos" style={btnSec}>
-              ← Volver al interpretador
-            </Link>
-          </div>
         </div>
       ) : (
-        <div style={caja}>
-          <h2 style={{ ...titulo, fontSize: "22px", marginTop: 0 }}>Tu lectura profunda</h2>
-          <p style={{ marginTop: 0, fontSize: "15px", opacity: 0.88, marginBottom: 0 }}>
-            Lo primero es lo que ya recibiste; debajo puedes seguir en un tono más cercano, como un acompañamiento.
-          </p>
+        <div style={sinContenedor ? undefined : caja}>
+          {sinContenedor ? null : (
+            <>
+              {narrarVoz ? <MaikaAvatar /> : null}
+              <h2 style={{ ...titulo, fontSize: "22px", marginTop: 0 }}>Tu lectura profunda</h2>
+              <p style={{ marginTop: 0, fontSize: "15px", opacity: 0.88, marginBottom: 0 }}>
+                Lo primero es lo que ya recibiste; debajo puedes seguir en un tono más cercano, como un acompañamiento.
+              </p>
+            </>
+          )}
           {cargando ? (
             <p
               style={{
@@ -608,6 +905,7 @@ export default function SuenoPremiumPage() {
           ) : null}
 
           <div
+            ref={cajaChatRef}
             style={{
               marginTop: "18px",
               maxHeight: "min(52vh, 420px)",
@@ -654,6 +952,33 @@ export default function SuenoPremiumPage() {
             </div>
           ) : null}
 
+          {chatActivo && aspectosSugeridos.length > 0 ? (
+            <div
+              style={{
+                marginTop: "12px",
+                padding: "10px",
+                borderRadius: "10px",
+                border: "1px solid rgba(212,175,55,0.25)",
+                background: "rgba(212,175,55,0.07)"
+              }}
+            >
+              <p style={{ margin: "0 0 8px", fontSize: "13px", opacity: 0.8 }}>
+                Aspectos que aún podemos explorar — pulsa uno si quieres escribir sobre él:
+              </p>
+              {aspectosSugeridos.map((p) => (
+                <button
+                  key={p.slice(0, 40)}
+                  type="button"
+                  style={chipSugerencia}
+                  disabled={cargandoChat}
+                  onClick={() => setInput(`Sobre «${p}»: `)}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          ) : null}
+
           <>
             <div style={{ marginTop: "12px", display: "flex", flexWrap: "wrap", gap: "0" }}>
               {sugerenciasChat.map((s) => (
@@ -689,6 +1014,7 @@ export default function SuenoPremiumPage() {
                 boxSizing: "border-box"
               }}
             />
+
             <button
               type="button"
               style={{
@@ -709,13 +1035,32 @@ export default function SuenoPremiumPage() {
             ) : null}
           </>
 
-          <div style={{ marginTop: "18px" }}>
-            <Link to="/suenos" style={{ ...btnSec, textDecoration: "none" }}>
-              ← Nueva interpretación
-            </Link>
-          </div>
         </div>
       )}
     </div>
+  );
+}
+
+/** Ruta directa (`/sueno-premium`): lee el estado de navegación y delega en `LecturaProfunda`. */
+export default function SuenoPremiumPage() {
+  const location = useLocation();
+  const state = location.state as SuenoPremiumLocationState | null;
+
+  if (!state || !String(state.sueno ?? "").trim()) {
+    return <Navigate to="/suenos" replace />;
+  }
+
+  return (
+    <LecturaProfunda
+      sueno={state.sueno}
+      interpretacionBasica={state.interpretacionBasica}
+      emocion={state.emocion}
+      historialAdicional={state.historialAdicional}
+      preguntas={state.preguntas}
+      narrarVoz={state.narrarVoz}
+      vozNombre={state.vozNombre}
+      velocidadVoz={state.velocidadVoz}
+      tonoVoz={state.tonoVoz}
+    />
   );
 }

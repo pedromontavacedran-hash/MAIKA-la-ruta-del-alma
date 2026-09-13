@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">Maika</string>
-    <string name="title_activity_main">Maika</string>
-    <string name="package_name">com.maika.app</string>
-    <string name="custom_url_scheme">com.maika.app</string>
-</resources>

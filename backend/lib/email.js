@@ -4,7 +4,17 @@ import { esEmailVerificable } from "./validacion.js";
 
 let smtpTransporter = null;
 
+/**
+ * Bajo `NODE_ENV=test` NUNCA se crea un transporte SMTP real: los tests pueden tener credenciales
+ * reales en el entorno (.env, shell) y los flujos de registro/recuperación los disparan. Punto
+ * único de bloqueo — cualquier envío pasa por `getSmtpTransporter`.
+ */
+function smtpBloqueadoEnTests() {
+  return process.env.NODE_ENV === "test";
+}
+
 export function smtpConfigCompleta() {
+  if (smtpBloqueadoEnTests()) return false;
   return Boolean(
     String(process.env.SMTP_HOST || "").trim() &&
     String(process.env.SMTP_USER || "").trim() &&
@@ -13,6 +23,7 @@ export function smtpConfigCompleta() {
 }
 
 export function getSmtpTransporter() {
+  if (smtpBloqueadoEnTests()) return null;
   if (!smtpConfigCompleta()) return null;
   if (smtpTransporter) return smtpTransporter;
   const port = Number(process.env.SMTP_PORT || 587);
@@ -98,18 +109,18 @@ export async function enviarEmailResetPassword(to, resetLink, { clickHref } = {}
 }
 
 export async function verificarSmtpAlArrancar() {
-  if (process.env.NODE_ENV === "production") return;
+  if (process.env.NODE_ENV === "production" || smtpBloqueadoEnTests()) return;
   if (!smtpConfigCompleta()) {
-    // eslint-disable-next-line no-console
+     
     console.warn("[maika-backend] SMTP no configurado (SMTP_HOST/USER/PASS en .env). Los correos de recuperación no se enviarán.");
     return;
   }
   try {
     await getSmtpTransporter()?.verify();
-    // eslint-disable-next-line no-console
+     
     console.log("[maika-backend] SMTP verificado OK.");
   } catch (err) {
-    // eslint-disable-next-line no-console
+     
     console.error(
       "[maika-backend] SMTP configurado pero NO funciona (revisa contraseña de aplicación Gmail):",
       err?.message || err

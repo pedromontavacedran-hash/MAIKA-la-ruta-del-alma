@@ -25,7 +25,7 @@ export function openUrlInChrome(url) {
   if (process.env.MAIKA_OPEN_LINKS_IN_CHROME === "0") return false;
   const chrome = findChromeExecutable();
   if (!chrome) {
-    // eslint-disable-next-line no-console
+     
     console.warn("[maika-backend] Chrome no encontrado; enlace no abierto automáticamente:", url);
     return false;
   }
@@ -33,7 +33,7 @@ export function openUrlInChrome(url) {
     spawn(chrome, [url], { detached: true, stdio: "ignore" }).unref();
     return true;
   } catch (err) {
-    // eslint-disable-next-line no-console
+     
     console.warn("[maika-backend] No se pudo abrir Chrome:", err?.message || err);
     return false;
   }

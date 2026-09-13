@@ -1,0 +1,40 @@
+---
+description: Estándares de layout y scroll (shell, nav fija, sin saltos verticales)
+globs: src/**/*.{tsx,ts,css}
+alwaysApply: false
+---
+
+# MAIKA — Layout, scroll y barra fija
+
+## Un solo scrollport vertical
+
+- El desplazamiento principal **no** debe asumirse siempre en `window` ni en `.app-shell`.
+- Usar **`getMaikaScrollPortEl()`** (`src/utils/maikaScrollPort.ts`): en **`/tienda`** el scroll es `.app-shell` (clase `app-shell--tienda-shell-scroll`); en el resto es **`.app-shell__content`** (escritorio ≥769px con `body`/`html` overflow hidden).
+- Cualquier **`scrollTop = 0`**, ancla, o truco tras `<details>` / modales debe usar ese helper (o el mismo criterio), no `querySelector(".app-shell")` a ciegas.
+
+## Altura bajo la nav
+
+- **`--app-topbar-stack`** en `:root` es la única reserva vertical bajo la barra fija (incluye safe-area).
+- **`--app-topbar-h`**: sincronizar con **`useLayoutEffect`** en `NavPrincipal` o **antes del primer paint** (`main.tsx` + lectura LS). No actualizar en `useEffect` post-pintado si provoca saltos de `padding-top` global.
+
+## `min-height` y viewport
+
+- Evitar **`min-height: 100dvh`** apilado dentro de cadenas que **ya** reservan `--app-topbar-stack` sin compensar; puede sumar altura al scrollport y disparar *scroll anchoring*.
+- Para wrappers de ruta, preferir **`calc(100dvh - var(--app-topbar-stack))`** o **`height: 100%`** del contenedor con scroll, según el diseño (ver `buildScreenStyle` en `AppRoutes.tsx`).
+
+## `scroll-padding-top`
+
+- Ponerlo **solo** en el elemento que tiene **`overflow-y: auto`** (scrollport real). No duplicar en `html` en escritorio si el documento no hace scroll (ver `global.css` + `layout-shell.css`).
+
+## Navegación SPA
+
+- Tras **`navigate()`**, alinear el reset de scroll con **`useLayoutEffect`** en la ruta (ver `useAppRouting.ts`) y/o **`queueMicrotask`** si hace falta encadenar tras `navigate` sin un fotograma intermedio incoherente.
+
+## `<details>` / acordeones
+
+- El toggle nativo puede disparar scroll implícito; si molesta, preservar **`scrollTop`** del scrollport en `toggle` (captura) o usar acordeón controlado sin `<details>`.
+
+## CSS que suele empeorar el “temblor”
+
+- Evitar **`transform`** innecesario en contenedores con **`position: fixed`** si no hace falta composición explícita.
+- Mantener **`overflow-anchor: none`** en `.app-shell` / `.app-shell__content` donde ya esté definido al trabajar en scroll interno.

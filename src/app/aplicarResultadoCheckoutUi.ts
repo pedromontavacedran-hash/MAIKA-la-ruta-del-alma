@@ -95,11 +95,7 @@ export function aplicarResultadoCheckoutUi(ctx: AplicarResultadoCheckoutUiContex
 
   setMetodoPago("bizum");
   setDatosPago({
-    bizumTelefono: "",
-    tarjetaNumero: "",
-    tarjetaTitular: "",
-    tarjetaCaducidad: "",
-    tarjetaCVV: ""
+    bizumTelefono: ""
   });
   setCuponAplicado(null);
   setCuponInput("");

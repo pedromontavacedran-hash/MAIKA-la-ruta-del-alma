@@ -61,6 +61,25 @@ describe.sequential("Auth API", () => {
     expect(me.status).toBe(200);
   });
 
+  it("nunca crea transporte SMTP real en tests aunque haya credenciales en el entorno", async () => {
+    // Regresión: con SMTP_* "reales" el transporte debe seguir siendo null y no enviarse nada.
+    process.env.SMTP_HOST = "smtp.gmail.com";
+    process.env.SMTP_USER = "vitest-no-real@maika.test";
+    process.env.SMTP_PASS = "vitest-no-real";
+    try {
+      const { getSmtpTransporter, smtpConfigCompleta } = await import("../lib/email.js");
+      expect(smtpConfigCompleta()).toBe(false);
+      expect(getSmtpTransporter()).toBeNull();
+      const res = await request(app).post("/auth/forgot-password").send({ email: testEmail });
+      expect(res.status).toBe(200);
+      expect(globalThis.__MAIKA_TEST_LAST_RESET_TOKEN__).toBeTruthy();
+    } finally {
+      process.env.SMTP_HOST = "";
+      process.env.SMTP_USER = "";
+      process.env.SMTP_PASS = "";
+    }
+  });
+
   afterAll(() => {
     delete globalThis.__MAIKA_TEST_LAST_RESET_TOKEN__;
   });

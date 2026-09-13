@@ -61,7 +61,7 @@ export default function GestionUsuariosPage(props: Props) {
   useEffect(() => {
     cargarUsuarios();
     // Solo al montar la página de gestión (referencia estable no requerida)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   return (

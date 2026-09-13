@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactElement } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { guardarLecturaDiaria, leerLecturaDiaria, type SignoId } from "@/utils/horoscopoDiario";
+import { getApiBaseUrl } from "@/config/apiBaseUrl";
+import { esSignoId, guardarLecturaDiaria, type SignoId } from "@/utils/horoscopoDiario";
 import {
   guardarIndiceArcanoTirada,
   indiceArcanoAleatorio,
@@ -163,6 +164,55 @@ const MS_PAUSA_TRAS_SALIDA = 3000;
 const DURACION_GIRO_RUEDA_ARIES_SEG = 3;
 const STORAGE_RESET_ARIES_AT = "horoscopos-reset-aries-at";
 const ROTACION_BASE_ARIES = -90;
+
+/**
+ * El límite del horóscopo (1 lectura por día natural, hora de España) vive en el backend
+ * (`usr:<id>` en `horoscopo_uso_diario.json`). localStorage queda solo como caché visual para
+ * que /lectura pueda pintar la carta; no decide nada.
+ */
+async function consultarEstadoHoroscopo(): Promise<{ yaUsado: boolean; signo: SignoId | null; restanteMs: number }> {
+  const base = getApiBaseUrl();
+  const urls = import.meta.env.DEV
+    ? [`${base}/horoscopo/estado`, "/api/horoscopo/estado"]
+    : [`${base}/horoscopo/estado`];
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, { credentials: "include" });
+      if (res.status === 404 && url !== urls[urls.length - 1]) continue;
+      const data = await res.json().catch(() => ({}));
+      const signo = typeof data?.signo === "string" && esSignoId(data.signo) ? data.signo : null;
+      const restanteMs = Number.isFinite(Number(data?.restanteMs)) ? Math.max(0, Number(data.restanteMs)) : 0;
+      return { yaUsado: data?.yaUsado === true, signo, restanteMs };
+    } catch {
+      /* probar la siguiente URL */
+    }
+  }
+  return { yaUsado: false, signo: null, restanteMs: 0 };
+}
+
+
+
+async function registrarUsoHoroscopo(signo: SignoId): Promise<void> {
+  const base = getApiBaseUrl();
+  const urls = import.meta.env.DEV
+    ? [`${base}/horoscopo/uso`, "/api/horoscopo/uso"]
+    : [`${base}/horoscopo/uso`];
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ signo })
+      });
+      if (res.status === 404 && url !== urls[urls.length - 1]) continue;
+      return;
+    } catch {
+      /* probar la siguiente URL */
+    }
+  }
+}
+
 const CARTA_TRASERA_POR_SIGNO: Record<SignoId, string> = {
   aries: "/tarot/Aries.jpg",
   tauro: "/tarot/Tauro.jpg",
@@ -214,6 +264,9 @@ export default function HoroscoposPage() {
   const [cartaHoverActiva, setCartaHoverActiva] = useState(false);
   const [hoverSignoId, setHoverSignoId] = useState<SignoId | null>(null);
   const [accesoDiarioVerificado, setAccesoDiarioVerificado] = useState(false);
+  /** Fin del bloqueo diario (medianoche Europe/Madrid). 0 = sin bloqueo. */
+  const [horoscopoBloqueadoHasta, setHoroscopoBloqueadoHasta] = useState(0);
+  const [ahoraMs, setAhoraMs] = useState(() => Date.now());
   const giroTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pulsoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const resetAriesTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -292,15 +345,27 @@ export default function HoroscoposPage() {
       setAccesoDiarioVerificado(true);
       return;
     }
-    const lecturaDiaria = leerLecturaDiaria();
-    if (lecturaDiaria?.signo) {
-      navigate("/lectura", {
-        replace: true,
-        state: { signo: lecturaDiaria.signo },
-      });
-      return;
-    }
-    setAccesoDiarioVerificado(true);
+    let vivo = true;
+    void (async () => {
+      // El backend decide si hoy ya hay lectura para esta cuenta; localStorage solo es caché.
+      // Si ya se consumió la lectura diaria, NO se navega a /lectura: se muestra el bloqueo
+      // directamente en esta página (igual que en Sueños), sin cartas ni CTAs.
+      const estado = await consultarEstadoHoroscopo();
+      if (!vivo) return;
+      if (estado.yaUsado) {
+        const hasta = estado.restanteMs > 0
+          ? Date.now() + estado.restanteMs
+          : Number.MAX_SAFE_INTEGER;
+        setHoroscopoBloqueadoHasta(hasta);
+        setAhoraMs(Date.now());
+        setAccesoDiarioVerificado(true);
+        return;
+      }
+      setAccesoDiarioVerificado(true);
+    })();
+    return () => {
+      vivo = false;
+    };
   }, [navigate, previewActivo]);
 
   const clearPostCartaTimers = () => {
@@ -412,6 +477,7 @@ export default function HoroscoposPage() {
     }
     localStorage.setItem(STORAGE_SIGNO_SELECCIONADO, signoSeleccionado);
     guardarLecturaDiaria(resultado, null);
+    void registrarUsoHoroscopo(resultado);
     setSignoRevelado(resultado);
     setFlipped(false);
     setCartaSaliendo(false);
@@ -474,8 +540,82 @@ export default function HoroscoposPage() {
     setPulsoActivo(false);
   };
 
+  // Actualiza el restante del bloqueo diario; al llegar a 00:00 (hora española) se libera solo.
+  useEffect(() => {
+    if (horoscopoBloqueadoHasta <= Date.now()) return;
+    const id = window.setInterval(() => setAhoraMs(Date.now()), 30_000);
+    return () => window.clearInterval(id);
+  }, [horoscopoBloqueadoHasta]);
+
   if (!accesoDiarioVerificado) {
     return null;
+  }
+
+  const horoscopoBloqueado = horoscopoBloqueadoHasta > ahoraMs;
+  if (horoscopoBloqueado) {
+    return (
+      <div style={{ padding: 20, color: "white" }}>
+        <div style={{ maxWidth: 720 }}>
+          <h1
+            className="horoscopo-titulo"
+            style={{
+              fontSize: "32px",
+              color: "#d4af37",
+              letterSpacing: "1px",
+              textShadow: "0 0 10px rgba(212,175,55,0.5)",
+              marginBottom: "6px",
+              textTransform: "uppercase"
+            }}
+          >
+            Horóscopo diario
+          </h1>
+          <p className="horoscopo-sub">Las estrellas te esperan cada mañana</p>
+        </div>
+        <div
+          role="status"
+          style={{
+            maxWidth: 480,
+            margin: "24px auto",
+            padding: "22px 20px",
+            borderRadius: 12,
+            textAlign: "center",
+            color: "#f5e6a3",
+            background: "rgba(120, 90, 200, 0.10)",
+            border: "1px solid rgba(212, 175, 55, 0.3)"
+          }}
+        >
+          <p style={{ margin: "0 0 14px", fontSize: 16, lineHeight: 1.5 }}>
+            🔮 Ya has utilizado tu horóscopo gratuito de hoy.
+          </p>
+          <p
+            style={{
+              margin: 0,
+              marginLeft: "9%",
+              color: "rgba(245, 230, 163, 0.85)",
+              fontSize: 14,
+              lineHeight: 1.55
+            }}
+          >
+            Podrás consultar una nueva lectura a partir de las 00:00 h.
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            style={{
+              marginTop: 24,
+              padding: "9px 14px",
+              borderRadius: 10,
+              background: "none",
+              border: "1px solid rgba(212, 175, 55, 0.35)",
+              color: "rgba(245, 230, 163, 0.85)",
+              cursor: "pointer"
+            }}
+          >
+            ← Volver a Maika
+          </button>
+        </div>
+      </div>
+    );
   }
 
   const seleccionarSigno = (indice: number) => {

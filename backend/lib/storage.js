@@ -163,13 +163,13 @@ function shouldPruneIdempotencia(file, force) {
 
 function logIdempotenciaPruned(file, removedCount) {
   if (removedCount <= 0 || process.env.MAIKA_QUIET === "1") return;
-  // eslint-disable-next-line no-console
+   
   console.log("[idempotencia] pruned:", path.basename(file), removedCount);
 }
 
 function logIdempotenciaInflightHit(file) {
   if (process.env.MAIKA_QUIET === "1") return;
-  // eslint-disable-next-line no-console
+   
   console.log("[idempotencia] inflight hit:", path.basename(file));
 }
 

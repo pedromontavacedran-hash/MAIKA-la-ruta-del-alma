@@ -139,6 +139,9 @@ export function useAuthMaika(o: UseAuthMaikaOptions) {
       if (!hasClientSession()) {
         const ok = await probeClientSessionApi();
         if (!ok) {
+          // El servidor dice que no hay sesión: el snapshot de localStorage es obsoleto y no debe
+          // seguir pintando la UI como logueada (p. ej. tras reiniciar el backend con secreto viejo).
+          limpiarSesionInvalida();
           setAuthPerfilSync({ estado: "ok", reintentando: false, intento: 0, ultimoErrorAt: null });
           return "sin_token";
         }
@@ -230,6 +233,9 @@ export function useAuthMaika(o: UseAuthMaikaOptions) {
       purgarJwtLegacyEnLocalStorage();
       const ok = await probeClientSessionApi();
       if (!ok) {
+        // Sin sesión real en el servidor: limpiar el snapshot para que /cuenta muestre login,
+        // igual que hacen /suenos y /horoscopo con ExperienciaAuthGuard.
+        limpiarSesionInvalida();
         marcarUiLista();
         return;
       }

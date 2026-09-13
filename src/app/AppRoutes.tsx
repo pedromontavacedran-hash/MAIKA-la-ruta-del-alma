@@ -20,6 +20,7 @@ import HoroscoposPage from "../pages/HoroscoposPage";
 import LecturaPage from "../pages/LecturaPage";
 import Sueno from "../Sueno";
 import SuenoPremiumPage from "../pages/SuenoPremiumPage";
+import ExperienciaAuthGuard from "../components/ExperienciaAuthGuard";
 import ContactoPage from "../pages/ContactoPage";
 import SobreMaikaPage from "../pages/SobreMaikaPage";
 import LegalIndexPage from "../pages/LegalIndexPage";
@@ -258,6 +259,20 @@ export function AppRoutes(p: AppRoutesProps) {
   const bloqueLayoutContenido = (children: ReactNode) => (
     <div className="page-top-spacing">
       <div style={buildScreenStyle(800, "20px", undefined, "40px")}>{children}</div>
+    </div>
+  );
+
+  /**
+   * /suenos: igual que `bloqueLayoutContenido`, pero sin el `min-height` de "al menos toda la pantalla".
+   * Esa reserva asume que el hueco real bajo la barra (`routes-grow`) coincide con `100svh - app-topbar-stack`,
+   * pero el shell le resta además su propio padding inferior; en páginas con mucho contenido no se nota (ya
+   * scrollean de sobra), pero el estado inicial de Sueños es más corto que ese mínimo forzado, así que la
+   * página "obligada a medir eso" quedaba unos px más alta que el hueco real y cualquier rueda de ratón lo
+   * consumía de golpe (efecto de salto). Aquí el alto lo pone el contenido real, sin mínimo artificial.
+   */
+  const bloqueLayoutSuenos = (children: ReactNode) => (
+    <div className="page-top-spacing">
+      <div style={buildScreenStyle(800, "20px", { minHeight: 0 }, "40px")}>{children}</div>
     </div>
   );
 
@@ -753,12 +768,12 @@ export function AppRoutes(p: AppRoutesProps) {
     )} />
 
     <Route path="/servicios" element={bloqueLayoutContenido(<ServiciosPage />)} />
-    <Route path="/suenos" element={bloqueLayoutContenido(<Sueno />)} />
-    <Route path="/sueno-premium" element={bloqueLayoutContenido(<SuenoPremiumPage />)} />
-    <Route path="/horoscopos" element={bloqueLayoutContenido(<HoroscoposPage />)} />
+    <Route path="/suenos" element={bloqueLayoutSuenos(<ExperienciaAuthGuard tipo="sueno"><Sueno /></ExperienciaAuthGuard>)} />
+    <Route path="/sueno-premium" element={bloqueLayoutContenido(<ExperienciaAuthGuard tipo="sueno"><SuenoPremiumPage /></ExperienciaAuthGuard>)} />
+    <Route path="/horoscopos" element={bloqueLayoutContenido(<ExperienciaAuthGuard tipo="horoscopo"><HoroscoposPage /></ExperienciaAuthGuard>)} />
     <Route path="/ritual-del-mes" element={bloqueLayoutContenido(<RitualDelMesPage />)} />
     <Route path="/testimonios" element={bloqueLayoutContenido(<TestimoniosPage />)} />
-    <Route path="/lectura" element={bloqueLayoutLectura(<LecturaPage />)} />
+    <Route path="/lectura" element={bloqueLayoutLectura(<ExperienciaAuthGuard tipo="horoscopo"><LecturaPage /></ExperienciaAuthGuard>)} />
     <Route path="/envios" element={bloqueLayoutContenido(<EnviosPage />)} />
     <Route path="/contacto" element={bloqueLayoutContenido(<ContactoPage />)} />
     <Route path="/sobre-maika" element={bloqueLayoutContenido(<SobreMaikaPage />)} />

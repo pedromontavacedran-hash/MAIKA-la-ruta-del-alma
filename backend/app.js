@@ -12,6 +12,7 @@ import { carritoRouter } from "./routes/carrito.js";
 import { productosRouter } from "./routes/productos.js";
 import { categoriasRouter } from "./routes/categorias.js";
 import { suenoRouter } from "./routes/sueno.js";
+import { horoscopoRouter } from "./routes/horoscopo.js";
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use(carritoRouter);
 app.use(productosRouter);
 app.use(categoriasRouter);
 app.use(suenoRouter);
+app.use(horoscopoRouter);
 
 const serveMaikaDist = process.env.MAIKA_SERVE_DIST === "1";
 if (serveMaikaDist) {
@@ -55,7 +57,8 @@ if (serveMaikaDist) {
         p.startsWith("/carrito") ||
         p.startsWith("/productos") ||
         p.startsWith("/admin/") ||
-        p.startsWith("/sueno/")
+        p.startsWith("/sueno/") ||
+        p.startsWith("/horoscopo/")
       ) {
         next();
         return;

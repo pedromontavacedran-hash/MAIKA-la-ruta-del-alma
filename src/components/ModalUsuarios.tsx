@@ -363,15 +363,15 @@ export default function ModalUsuarios({
             background: THEME.bg,
             borderRadius: 20,
             border: `2px solid ${THEME.goldMain}`,
-            overflow: "hidden"
+            overflow: "hidden",
+            overflowX: "auto"
           }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "auto" }}>
+            <table style={{ width: "100%", minWidth: 740, borderCollapse: "collapse", tableLayout: "auto" }}>
               <colgroup>
-                <col style={{ width: 40 }} />
-                <col style={{ width: 220 }} />
-                <col style={{ width: 280 }} />
-                <col style={{ width: 360 }} />
-                <col style={{ width: 220 }} />
+                <col style={{ width: 32 }} />
+                <col style={{ width: 150 }} />
+                <col style={{ width: "auto" }} />
+                <col style={{ width: 200 }} />
               </colgroup>
               <thead>
                 <tr style={{
@@ -381,8 +381,7 @@ export default function ModalUsuarios({
                 }}>
                   <th style={{ padding: "12px 12px", textAlign: "left", color: THEME.goldMain, fontSize: 14, verticalAlign: "top" }}>#</th>
                   <th style={{ padding: "12px 12px", textAlign: "left", color: THEME.goldMain, fontSize: 14, verticalAlign: "top" }}>Usuario</th>
-                  <th style={{ padding: "12px 12px 12px 28px", textAlign: "left", color: THEME.goldMain, fontSize: 14, verticalAlign: "top" }}>Contacto</th>
-                  <th style={{ padding: "12px 12px 12px 56px", textAlign: "left", color: THEME.goldMain, fontSize: 14, verticalAlign: "top" }}>Dirección</th>
+                  <th style={{ padding: "12px 12px", textAlign: "left", color: THEME.goldMain, fontSize: 14, verticalAlign: "top" }}>Contacto</th>
                   {/* Acciones: centrado con pelín a la derecha (paddingLeft 72px) — no tocar */}
                   <th style={{ padding: "12px 12px 12px 24px", textAlign: "center", color: THEME.goldMain, fontSize: 13, minWidth: 220, position: "sticky", right: 0, background: THEME.bg, boxShadow: "-4px 0 8px rgba(0,0,0,0.3)", verticalAlign: "middle" }}>Acciones</th>
                 </tr>
@@ -390,7 +389,6 @@ export default function ModalUsuarios({
               <tbody>
                 {usuariosFiltrados.map((usuario: Usuario, index: number) => (
                   (() => {
-                    const direccionUi = direccionPrincipalMostrar(usuario) || "—";
                     return (
                   <tr
                     key={usuario.id || index}
@@ -419,20 +417,14 @@ export default function ModalUsuarios({
                       </div>
                     </td>
 
-                    <td style={{ padding: "12px 12px 12px 28px", verticalAlign: "top", textAlign: "left" }}>
+                    <td style={{ padding: "12px 12px", verticalAlign: "top", textAlign: "left" }}>
                       <div style={{ display: "flex", flexDirection: "column", gap: 2, color: "white", lineHeight: 1.45 }}>
-                        <span style={{ fontSize: 14, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title={usuario.email}>
+                        <span style={{ fontSize: 13, whiteSpace: "normal", wordBreak: "break-all", overflowWrap: "anywhere" }} title={usuario.email}>
                           {usuario.email || "—"}
                         </span>
                         <span style={{ fontSize: 12, opacity: 0.9 }}>
                           {usuario.telefono || "—"}
                         </span>
-                      </div>
-                    </td>
-
-                    <td style={{ padding: "12px 12px 12px 56px", verticalAlign: "top", textAlign: "left" }}>
-                      <div style={{ color: "white", fontSize: 12, lineHeight: 1.3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", minWidth: 0 }} title={direccionUi}>
-                        {direccionUi}
                       </div>
                     </td>
 

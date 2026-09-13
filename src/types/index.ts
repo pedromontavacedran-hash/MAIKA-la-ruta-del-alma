@@ -249,12 +249,9 @@ export interface ConsentimientoCookies {
 export interface PerfilCompraRapida {
   datosCliente: Cliente;
   metodoPago: "bizum" | "tarjeta";
+  /** Único método de pago real es Bizum: no se recogen ni persisten campos de tarjeta (número/CVV). */
   datosPago: {
     bizumTelefono: string;
-    tarjetaNumero: string;
-    tarjetaTitular: string;
-    tarjetaCaducidad: string;
-    tarjetaCVV: string;
   };
   actualizadoEn: string;
 }
