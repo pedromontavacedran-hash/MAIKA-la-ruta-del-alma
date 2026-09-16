@@ -1,0 +1,585 @@
+﻿/*
+ * Debe ir DESPUÃ‰S de `.carta-wrapper`: si no, `position: relative` y el resto
+ * anulan el centrado absoluto y la carta acaba fuera del centro de la rueda.
+ */
+.carta-wrapper.carta-wrapper--noria {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  right: auto;
+  bottom: auto;
+  z-index: 0;
+  display: block;
+  width: fit-content;
+  height: fit-content;
+  margin: 0;
+  transform: translate3d(-50%, -44.8%, 0);
+  isolation: isolate;
+  perspective: 1000px;
+  perspective-origin: center center;
+  pointer-events: auto;
+}
+
+.carta-inner {
+  position: relative;
+  width: clamp(188px, 25vw, 252px);
+  aspect-ratio: 5 / 8.6;
+  transform-origin: center center;
+  transition: transform 0.6s ease, filter 0.25s ease;
+  transform-style: preserve-3d;
+  cursor: pointer;
+  pointer-events: auto;
+  filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.35));
+}
+
+.carta-inner--hover-activa {
+  filter:
+    drop-shadow(0 0 14px rgba(212, 175, 55, 0.55))
+    drop-shadow(0 0 24px rgba(212, 175, 55, 0.28));
+}
+
+.carta-inner--signo-hover {
+  filter:
+    drop-shadow(0 0 18px rgba(255, 215, 120, 0.62))
+    drop-shadow(0 0 36px rgba(255, 215, 120, 0.3));
+}
+
+/*
+ * DEBE ir despuÃ©s de `.carta-inner`: si no, el width clamp(188pxâ€¦) deja la carta enorme
+ * y â€œsaleâ€ del centro de la noria.
+ */
+.carta-inner.carta-inner--noria {
+  width: clamp(134px, 24vw, 190px);
+  max-width: 190px;
+  aspect-ratio: 5 / 8.6;
+  background: transparent !important;
+  filter: none;
+  box-shadow: none !important;
+}
+
+.carta-inner.carta-inner--noria.carta-inner--hover-activa,
+.carta-inner.carta-inner--noria.carta-inner--signo-hover {
+  filter: none;
+  box-shadow: none;
+}
+
+.carta-inner--entrada {
+  animation: cartaEntradaSuave 0.52s cubic-bezier(0.2, 0.9, 0.25, 1);
+}
+
+.carta-inner.flipped {
+  transform: rotateY(180deg);
+}
+
+.carta-wrapper--saliendo {
+  pointer-events: none;
+}
+
+.carta-wrapper--saliendo .carta-inner {
+  transition:
+    transform 0.26s cubic-bezier(0.52, 0, 0.74, 0.26),
+    opacity 0.22s ease-in;
+  transform: rotateY(180deg) translateY(min(125vh, 900px)) scale(0.88);
+  opacity: 0;
+}
+
+/* Solo caras del flip en /horoscopos â€” NO el .carta de /lectura (misma clase, otra pÃ¡gina) */
+.carta-inner .carta {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.carta-inner .carta img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  border: none;
+}
+
+.cara-trasera {
+  transform: rotateY(0deg);
+}
+
+.carta-trasera-contenido {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 37%;
+  transform: none;
+  z-index: 6;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.cara-frontal {
+  transform: rotateY(180deg) rotate(0deg);
+  transform-origin: center center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.carta-cerrar-temp {
+  position: absolute;
+  top: 128px;
+  right: -24px;
+  transform: none;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(246, 194, 84, 0.78);
+  background: rgba(10, 10, 16, 0.92);
+  color: #f6c254;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  border-radius: 8px;
+  cursor: pointer;
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.carta-cerrar-temp--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.carta-cerrar-temp:hover {
+  background: rgba(18, 16, 28, 0.98);
+  box-shadow:
+    0 0 12px rgba(246, 194, 84, 0.42),
+    0 0 22px rgba(246, 194, 84, 0.2);
+}
+
+.carta-frontal-base {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  border: none;
+  opacity: 0.94;
+}
+
+.carta-signo-label {
+  margin: 0;
+  color: rgba(246, 194, 84, 0.88);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 3px rgba(212, 175, 55, 0.24);
+}
+
+.carta-signo-label--fade {
+  animation: cartaSignoFade 0.36s ease;
+}
+
+.carta-signo-label--pendiente {
+  opacity: 0.72;
+  letter-spacing: 0.1em;
+}
+
+@keyframes cartaSignoFade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cartaEntradaSuave {
+  from {
+    opacity: 0;
+    transform: translateY(32px) scale(0.9);
+    filter: blur(1.2px);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1.02);
+    filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes centroRespira {
+  0%,
+  100% {
+    text-shadow:
+      0 0 10px rgba(246, 194, 84, 0.45),
+      0 0 18px rgba(246, 194, 84, 0.2);
+  }
+  50% {
+    text-shadow:
+      0 0 14px rgba(246, 194, 84, 0.58),
+      0 0 24px rgba(246, 194, 84, 0.28);
+  }
+}
+
+@keyframes signoPulsoLlegada {
+  0% {
+    box-shadow:
+      0 0 18px rgba(120, 100, 255, 0.22),
+      inset 0 0 12px rgba(80, 120, 255, 0.12);
+  }
+  100% {
+    box-shadow:
+      0 0 28px rgba(80, 120, 255, 0.28),
+      inset 0 0 16px rgba(120, 100, 255, 0.14);
+  }
+}
+
+.carta-flip {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  display: block;
+  margin: 0 auto;
+  width: clamp(235px, 35vw, 340px);
+  perspective: 1000px;
+}
+
+.carta-flip__inner {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 5 / 8.6;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.carta-flip--revelada .carta-flip__inner {
+  transform: rotateY(180deg);
+}
+
+.carta-flip__cara {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+}
+
+.carta-flip__cara--trasera img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  margin: 0 auto;
+  object-fit: contain;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+}
+
+.carta-flip__img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  margin: 0 auto;
+  object-fit: contain;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+}
+
+.carta-flip__cara--frontal {
+  transform: rotateY(180deg);
+  border-radius: 0;
+}
+
+.carta-img {
+  width: clamp(235px, 35vw, 340px);
+  display: block;
+  margin: 0 auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+}
+
+@media (max-width: 640px) {
+  .rueda-centro {
+    width: min(236px, 68vw);
+    height: min(236px, 68vw);
+    filter: blur(14px);
+  }
+
+  .horoscopos-frase {
+    top: -22px;
+    font-size: clamp(0.8rem, 2.8vw, 0.9rem);
+  }
+
+  .signo-circulo {
+    width: 48px;
+    height: 48px;
+  }
+
+  .icono {
+    width: 30px;
+    height: 30px;
+  }
+
+  .signo {
+    width: 64px;
+  }
+
+  .nombre {
+    font-size: 9px;
+  }
+
+  .rueda {
+    width: min(344px, 90vw);
+    height: min(344px, 90vw);
+  }
+
+  .rueda-anillo--externo {
+    width: min(288px, 78vw);
+    height: min(288px, 78vw);
+  }
+
+  .rueda-anillo--medio {
+    width: min(218px, 60vw);
+    height: min(218px, 60vw);
+  }
+
+  .rueda-anillo--interno {
+    width: min(150px, 42vw);
+    height: min(150px, 42vw);
+  }
+
+  .rueda-marca {
+    width: 4px;
+    height: 4px;
+  }
+
+  .rueda-radial {
+    height: 130px;
+  }
+
+  .rueda-conexion {
+    width: 18px;
+  }
+
+  .rueda-nodo-interseccion,
+  .rueda-nodo-signo {
+    width: 2px;
+    height: 2px;
+  }
+
+  .rueda-nodo-interseccion--exterior {
+    width: 3px;
+    height: 3px;
+  }
+
+  .centro-texto {
+    width: min(178px, 46vw);
+    height: min(178px, 46vw);
+  }
+
+  .centro-nombre {
+    font-size: clamp(16px, 4.8vw, 22px);
+  }
+
+  .carta-flip {
+    width: clamp(210px, 64vw, 310px);
+  }
+
+  .carta-inner {
+    width: clamp(142px, 40vw, 194px);
+  }
+
+  .carta-inner.carta-inner--noria {
+    width: clamp(96px, 24vw, 132px);
+    max-width: 132px;
+  }
+
+  .carta-inner.carta-inner--noria .carta img {
+    width: clamp(96px, 24vw, 132px);
+  }
+
+  .horoscopos-selector--noria .signo {
+    width: 62px;
+  }
+
+  .horoscopos-selector--noria .signo-circulo {
+    width: 46px;
+    height: 46px;
+  }
+
+  .horoscopos-selector--noria .icono {
+    width: 28px;
+    height: 28px;
+  }
+
+  .horoscopos-selector--noria .nombre {
+    font-size: 8.5px;
+    margin-top: 4px;
+  }
+
+  .carta-img {
+    width: clamp(210px, 64vw, 310px);
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rueda-centro,
+  .rueda-marcas,
+  .rueda-radiales,
+  .rueda-conexiones {
+    animation: none !important;
+  }
+}
+
+.horoscopos-lista-fade {
+  animation: horoscoposListaFoco 0.38s ease;
+}
+
+@keyframes horoscoposListaFoco {
+  from {
+    opacity: 0.88;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .horoscopos-lista-fade {
+    animation: none;
+  }
+}
+
+@keyframes horoscoposAbrirSigno {
+  from {
+    opacity: 0.88;
+    transform: translateY(14px) scale(0.992);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.horoscopos-area-foco--signo-abierto {
+  animation: horoscoposAbrirSigno 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .horoscopos-area-foco--signo-abierto {
+    animation: none;
+  }
+}
+
+.horoscopos-page__signos {
+  width: 100%;
+  max-width: min(1240px, 100%);
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: clamp(12px, 2vw, 20px);
+}
+
+.horoscopos-page__signos--con-cta {
+  margin-bottom: 0;
+}
+
+.horoscopos-page__signos--con-cta .horoscopos-signo-card--solo {
+  margin-bottom: clamp(10px, 2.2vw, 18px);
+}
+
+.horoscopos-signo-card {
+  scroll-margin-top: max(96px, calc(var(--app-topbar-stack) + 10px));
+  box-sizing: border-box;
+  width: 92%;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: clamp(44px, 6.5vw, 58px);
+  padding: 18px 20px 28px;
+  text-align: left;
+  border-radius: 18px;
+  border: 1px solid rgba(212, 175, 55, 0.18);
+  background: linear-gradient(
+    168deg,
+    rgba(42, 32, 68, 0.55) 0%,
+    rgba(28, 22, 48, 0.78) 38%,
+    rgba(18, 14, 32, 0.9) 100%
+  );
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  animation: horoscoposSignoIn 0.4s ease forwards;
+  opacity: 0;
+  transition: border-color 0.35s ease, box-shadow 0.35s ease;
+  /* Panel tipo modal: cabe en pantalla sin scroll */
+  max-height: min(90dvh, 680px);
+  overflow-x: hidden;
+  overflow-y: hidden;
+  overscroll-behavior: contain;
+}
+
+.horoscopos-signo-card__layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: min-content;
+  gap: 0;
+}
+
+@media (min-width: 641px) {
+  .horoscopos-signo-card__layout--solo {
+    display: grid;
+    grid-template-columns: minmax(260px, min(320px, 30vw)) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(32px, 4.5vw, 52px);
+  }
+
+  .horoscopos-signo-card__layout--solo .horoscopos-signo-card__carta {
+    align-items: center;
+    align-self: stretch;
+    display: flex;
+    justify-content: center;
+  }
+}
+
+.horoscopos-signo-card__carta {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 148px;
+  max-width: 100%;
+  margin: 0 auto 12px;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.horoscopos-signo-card .horoscopos-carta-bloque--solo-ficha {
+  width: 100%;
+  max-width: 148px;
+  margin: 0;
+  gap: 0;
+}
+

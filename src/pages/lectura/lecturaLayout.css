@@ -1,0 +1,214 @@
+﻿
+.lectura-shell {
+  width: 100%;
+
+  /* Tokens /lectura (solo valores que se repiten en este archivo) */
+  --l-space-xs: 8px;
+  --l-space-sm: 16px;
+  --l-space-md: 30px;
+  --l-space-lg: 40px;
+  --l-text-base: 14px;
+  --l-line: 1.45;
+  --l-gold: rgba(212, 175, 55, 1);
+  --l-gold-soft: rgba(212, 175, 55, 0.15);
+  /* Dorado UI /lectura (siempre definido en esta cÃ¡scara) */
+  --lectura-btn-oro: rgba(232, 199, 106, 0.98);
+  --lectura-contador-brillo: 0 0 10px rgba(212, 175, 55, 0.45), 0 0 22px rgba(212, 175, 55, 0.24);
+  /* LÃ­nea horizontal a ancho malla (arriba del bloque inferior y bajo la pregunta) */
+  --lectura-linea-malla-gradient: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(212, 175, 55, 0.28) 8%,
+    rgba(212, 175, 55, 0.5) 50%,
+    rgba(212, 175, 55, 0.28) 92%,
+    transparent 100%
+  );
+}
+
+.lectura-shell.lectura-page {
+  position: relative;
+  isolation: isolate;
+  /* El ancho lo limita `.lectura-page-ruta-wrap` en AppRoutes; aquÃ­ llenamos el wrap. */
+  width: 100%;
+  max-width: 100%;
+  margin-inline: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  /* Aire bajo la nav: lo aporta la ruta (`.page-top-spacing`); aquÃ­ solo ritmo interno */
+  --lectura-pad-top: clamp(16px, 3vw, 28px);
+  /* Pie + botÃ³n flotante â€œConsultasâ€ (Layout ~bottom 20) + barra home en mÃ³vil */
+  --lectura-pad-bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(40px, 11vw, 64px));
+  --lectura-signo-fs: 18px;
+  --lectura-signo-lh: 1.15;
+  height: var(--lectura-pantalla-alto);
+  min-height: var(--lectura-pantalla-alto);
+  /* `--lectura-tirar-hacia-barra` en `html` (admin): resta aire interno; el hueco bajo la nav sigue en `.page-top-spacing`. */
+  padding-top: max(
+    clamp(6px, 1.4vw, 14px),
+    calc(var(--lectura-pad-top) - var(--lectura-tirar-hacia-barra, 0px))
+  );
+  padding-right: 0;
+  padding-bottom: var(--lectura-pad-bottom);
+  padding-left: 0;
+  box-sizing: border-box;
+  /* Fondo global: admin â†’ Â«Capa baseÂ» degradado lila (fondoPantallaConfig + FondoEstrellado). */
+  background: transparent;
+  overflow: hidden;
+}
+
+/* Piscis: lectura larga; sube el bloque para ganar aire Ãºtil sin tocar el grid general */
+.lectura-shell.lectura-page.lectura-shell--piscis {
+  --lectura-pad-top: clamp(14px, 2.8vw, 26px);
+}
+
+.lectura-shell.lectura-page.lectura-shell--piscis .lectura-main {
+  padding-top: 0;
+}
+
+.lectura-shell.lectura-page.lectura-shell--piscis .lectura-contenido.lectura-container:not(.lectura-contenido--empty) {
+  margin-top: -6px;
+}
+
+.lectura-shell.lectura-page::before {
+  content: none;
+}
+
+.lectura-shell .lectura-contenido {
+  /* --- layout --- */
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.lectura-shell .lectura-contenido.lectura-container:not(.lectura-contenido--empty) {
+  /* --- layout --- */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  /* Aire real entre lectura y CTA: un margen negativo en `__bottom` solapaba botones sobre el texto (mÃ³vil y tablet). */
+  gap: clamp(12px, 2.2vw, 22px);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-left: auto;
+  margin-right: auto;
+  align-self: stretch;
+  padding: 0 clamp(var(--l-space-sm), 3vw, var(--l-space-lg));
+  height: 100%;
+  max-height: 100%;
+  overflow: visible;
+
+  /* --- visual --- */
+  color: var(--l-gold);
+  line-height: 1.75;
+  font-size: 16px;
+}
+
+/* Ocupa el alto bajo la barra; en mÃ³vil el scroll unificado va aquÃ­ (ver Â§11). */
+.lectura-shell.lectura-page > .lectura-contenido.lectura-container.lectura-malla:not(.lectura-contenido--empty) {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.lectura-shell .lectura-malla__top {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 2.2vw, 22px);
+  min-height: 0;
+  overflow: visible;
+}
+
+/*
+ * .lectura-malla vive en el mismo nodo que .lectura-contenido (flex column + height 100% + overflow hidden).
+ * Sin esto, el bloque superior se come la altura y el pie (rayas 1px + CTA) queda recortado o invisible.
+ */
+.lectura-shell .lectura-contenido.lectura-container.lectura-malla > .lectura-malla__top {
+  flex: 0 0 auto;
+  min-height: 0;
+  /* El texto ya no tiene scroll interno; si no cabe, la pÃ¡gina entera hace scroll. */
+  overflow: visible;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  align-content: start;
+}
+
+.lectura-shell .lectura-main {
+  display: flex;
+  flex-direction: column;
+  /* flex-start: el contenido arranca arriba; â€œcenterâ€ dejaba hueco bajo la lectura y el pie muy abajo */
+  justify-content: flex-start;
+  padding-top: 4px;
+  padding-bottom: clamp(8px, 2vw, 16px);
+  overflow: visible;
+}
+
+.lectura-shell .lectura-malla__bottom {
+  position: relative;
+  z-index: 2;
+  margin-top: 0;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+}
+
+/* Bloques inferiores: columna centrada (texto estrecho); la raya va aparte a ancho malla */
+.lectura-shell.lectura-page .lectura-bloque-inferior {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  max-width: min(360px, 100%);
+  margin-left: clamp(3px, 0.9vw, 10px);
+  margin-right: auto;
+  box-sizing: border-box;
+  transform: translateX(220px);
+  text-align: left;
+}
+
+.lectura-shell.lectura-page .lectura-bloque-inferior--cabecera {
+  padding: 0 0 clamp(4px, 1vw, 8px);
+  gap: clamp(8px, 1.35vw, 14px);
+}
+
+.lectura-shell.lectura-page .lectura-bloque-inferior--cta {
+  padding: 0 0 clamp(6px, 1.2vw, 12px);
+  border-top: none;
+  max-width: min(360px, 100%);
+}
+
+/* Misma anchura Ãºtil que carta + columna texto; 2px + shrink 0 para que no desaparezca con flex */
+.lectura-shell .lectura-linea-malla-cta {
+  align-self: stretch;
+  width: 100%;
+  min-width: 0;
+  min-height: 2px;
+  height: 2px;
+  margin: clamp(3px, 0.65vw, 6px) 0 clamp(8px, 1.35vw, 14px);
+  box-sizing: border-box;
+  border: none;
+  flex-shrink: 0;
+  pointer-events: none;
+  background: var(
+    --lectura-linea-malla-gradient,
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(212, 175, 55, 0.28) 8%,
+      rgba(212, 175, 55, 0.5) 50%,
+      rgba(212, 175, 55, 0.28) 92%,
+      transparent 100%
+    )
+  );
+}
+
+.lectura-shell .lectura-linea-malla-cta--superior {
+  margin: 0 0 clamp(6px, 1.1vw, 11px);
+}
+
+/* ===== 2. LAYOUT (GRID / COLUMNAS) ===== */

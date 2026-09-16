@@ -1,0 +1,34 @@
+﻿/**
+ * /lectura â€” cÃ¡scara, fondo, layout de malla y tipografÃ­a de bloques.
+ * Importado solo desde LecturaPage. Todo lo de esta ruta va bajo .lectura-shell (sin reglas en App.css).
+ */
+
+/*
+ * /lectura no debe desplazarse nunca (igual que /horoscopos, ver `horoscopos-no-scroll` en
+ * horoscopo.css). Clase puesta/quitada solo por LecturaPage, asÃ­ que no afecta a otras rutas.
+ */
+html.lectura-no-scroll,
+body.lectura-no-scroll {
+  overflow: hidden !important;
+}
+
+/*
+ * Escritorio: `.app-shell__routes-grow` es un contenedor de scroll propio, distinto de html/body
+ * (ver layout-shell.css), asÃ­ que el `overflow:hidden` de arriba no lo cubre por sÃ­ solo.
+ */
+@media (min-width: 769px) {
+  html.lectura-no-scroll .app-shell__routes-grow {
+    overflow-y: hidden !important;
+  }
+}
+
+/* Valores por defecto; el admin puede sobreescribirlos en `html` vÃ­a `lecturaPantallaConfig.ts`. */
+:root {
+  --lectura-pantalla-alto: calc(100dvh - var(--app-topbar-stack));
+  /* Ancho del wrap de ruta /lectura (AppRoutes); mÃ¡s ancho y sin scroll. */
+  --lectura-pantalla-ancho-max: min(1100px, 100%);
+  /* Solo columna de texto; la carta no usa esta variable. */
+  --lectura-pantalla-texto-ancho-max: 900px;
+}
+
+/* ===== 1. CONTENEDOR GENERAL ===== */

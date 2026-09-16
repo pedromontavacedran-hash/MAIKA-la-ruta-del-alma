@@ -1,0 +1,455 @@
+﻿
+.lectura-shell .lectura-signo,
+.lectura-shell .lectura-contenido .signo-titulo {
+  font-size: var(--lectura-signo-fs, 22px);
+  line-height: var(--lectura-signo-lh, 1.2);
+  margin: 10px 0 10px;
+}
+
+.lectura-shell .lectura-titulo {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(245, 230, 200, 0.95);
+}
+
+.lectura-shell .lectura-subtitulo-semana {
+  font-style: italic;
+  font-weight: 500;
+  color: rgba(255, 252, 245, 0.92);
+  opacity: 1;
+}
+
+.lectura-shell .lectura-contenido .lectura-cabecera-sub {
+  font-size: 15px;
+  font-weight: 600;
+  opacity: 0.8;
+  margin: 0 0 10px;
+}
+
+/* ===== 5. BLOQUE SEMANA ===== */
+
+.lectura-shell .texto-normal {
+  color: rgba(252, 246, 255, 0.82);
+}
+
+.lectura-shell .titulo-seccion {
+  color: var(--l-gold);
+}
+
+.lectura-shell .lectura-malla__columna-lectura .titulo-seccion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.4em;
+  row-gap: 0.15em;
+  margin: 0 0 0.55em;
+  line-height: 1.35;
+  font-weight: 600;
+}
+
+.lectura-shell .titulo-seccion__icono {
+  opacity: 0.95;
+  filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.45));
+  flex-shrink: 0;
+}
+
+.lectura-shell .lectura-base {
+  /* --- layout --- */
+  margin: 8px 0;
+}
+
+.lectura-shell .lectura-base__parrafo {
+  /* --- layout --- */
+  margin: 0 0 8px;
+}
+
+.lectura-shell .bloque-carta p {
+  /* --- layout --- */
+  margin: 0 0 8px;
+
+  /* --- visual --- */
+  opacity: 1;
+  color: rgba(255, 255, 255, 0.96);
+}
+
+.lectura-shell .lectura-base__parrafo:last-child,
+.lectura-shell .bloque-carta p:last-child {
+  margin-bottom: 0;
+}
+
+.lectura-shell .lectura-contador {
+  margin: 0;
+  padding: 0;
+  border-top: none;
+  text-align: left;
+  font-size: 1.02rem;
+  line-height: 1.4;
+  color: rgba(245, 230, 200, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  gap: clamp(5px, 1vw, 9px);
+}
+
+.lectura-shell .lectura-contador p {
+  margin: 0;
+}
+
+.lectura-shell .lectura-contador p:first-child {
+  margin-bottom: 0;
+  font-size: 0.9rem;
+  color: rgba(245, 230, 200, 0.78);
+  font-weight: 500;
+}
+
+.lectura-shell .lectura-contador p:last-child {
+  margin-bottom: 0;
+}
+
+.lectura-shell .lectura-contador__cuenta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 18px;
+  font-size: 1.14rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-align: left;
+}
+
+.lectura-shell .lectura-contador__estrella {
+  font-size: 0.75rem;
+  line-height: 1;
+  margin-inline: 5px;
+}
+
+/* Aviso: texto secundario claro (no dorado; como referencia visual) */
+.lectura-shell.lectura-page .lectura-contador p.lectura-contador__aviso {
+  color: rgba(198, 204, 224, 0.88);
+  text-shadow: none;
+  font-weight: 500;
+  font-size: clamp(11px, 2.9vw, 12.5px);
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+  max-width: 28em;
+}
+
+.lectura-shell.lectura-page .lectura-contador p.lectura-contador__cuenta {
+  color: var(--lectura-btn-oro);
+  text-shadow: var(--lectura-contador-brillo);
+}
+
+.lectura-shell.lectura-page .lectura-contador p.lectura-contador__cuenta .lectura-contador__mensaje {
+  color: var(--lectura-btn-oro);
+  text-shadow: var(--lectura-contador-brillo);
+}
+
+.lectura-shell.lectura-page .lectura-contador p.lectura-contador__cuenta .lectura-contador__estrella {
+  color: var(--lectura-btn-oro);
+  text-shadow:
+    0 0 8px rgba(212, 175, 55, 0.58),
+    0 0 18px rgba(212, 175, 55, 0.38);
+}
+
+/* ===== 6. BLOQUE CARTA (TEXTO / TARJETA) ===== */
+
+.lectura-shell .lectura-malla__columna-lectura {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(6px, 1vw, 10px);
+  min-width: 0;
+  max-width: min(var(--lectura-pantalla-texto-ancho-max, 720px), 100%);
+  /* Misma caja Ãºtil para tÃ­tulos, pÃ¡rrafos y separador (evita â€œescalÃ³nâ€ visual). */
+  box-sizing: border-box;
+  text-align: start;
+}
+
+.lectura-shell .lectura-malla__columna-lectura .lectura-malla__sup,
+.lectura-shell .lectura-malla__columna-lectura .lectura-malla__inf,
+.lectura-shell .lectura-malla__columna-lectura .bloque-semana,
+.lectura-shell .lectura-malla__columna-lectura .bloque-carta {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.lectura-shell .lectura-malla__columna-lectura .lectura-base__parrafo,
+.lectura-shell .lectura-malla__columna-lectura .bloque-carta p {
+  text-wrap: pretty;
+  overflow-wrap: break-word;
+}
+
+.lectura-shell .lectura-malla__columna-lectura .lectura-malla__inf {
+  margin-top: 0;
+}
+
+.lectura-shell .lectura-separador-oro {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  align-self: stretch;
+  margin: clamp(2px, 0.5vw, 6px) 0;
+}
+
+.lectura-shell .lectura-separador-oro__linea {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(212, 175, 55, 0.45) 20%,
+    rgba(212, 175, 55, 0.65) 50%,
+    rgba(212, 175, 55, 0.45) 80%,
+    transparent
+  );
+}
+
+.lectura-shell .lectura-separador-oro__estrella {
+  flex-shrink: 0;
+  font-size: 11px;
+  line-height: 1;
+  color: rgba(232, 199, 106, 0.95);
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.55);
+  letter-spacing: 0;
+}
+
+.lectura-shell .bloque-carta {
+  /* --- layout --- */
+  margin: 8px 0 4px;
+  padding: 4px 0 0;
+  border-radius: 0;
+  box-sizing: border-box;
+
+  /* Sin caja alrededor del texto de carta */
+  border: none;
+  outline: none;
+  background: transparent;
+  box-shadow: none;
+  transition: none;
+}
+
+.lectura-shell .bloque-carta:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.lectura-shell .etiqueta-carta {
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(212, 175, 55, 0.7);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.lectura-shell .bloque-carta h3.lectura-nombre-arcano {
+  margin: 0 0 12px;
+  font-size: clamp(1.15rem, 2.1vw, 1.45rem);
+  font-weight: 700;
+  color: #f5d36a;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-shadow:
+    0 0 18px rgba(212, 175, 55, 0.45),
+    0 0 36px rgba(212, 175, 55, 0.2);
+}
+
+/* ===== 7. FRASE FINAL ===== */
+
+.lectura-shell .frase-final {
+  margin-top: 10px;
+  font-style: italic;
+  opacity: 0.9;
+  /* Misma lÃ­nea base que el resto del bloque (sin sangrÃ­a lateral distinta). */
+  border-left: none;
+  padding-left: 0;
+  text-wrap: pretty;
+  overflow-wrap: break-word;
+}
+
+.lectura-shell .lectura-frase-cierre {
+  margin-top: clamp(8px, 1.35vw, 16px);
+  font-style: italic;
+  font-weight: 500;
+  color: rgba(232, 199, 106, 0.95);
+  opacity: 1;
+  border-left: none;
+  padding-left: 0;
+  text-shadow: 0 0 14px rgba(212, 175, 55, 0.22);
+}
+
+/* ===== 8. CTA ===== */
+
+.lectura-shell .lectura-cta {
+  /* --- layout --- */
+  position: static;
+  z-index: 5;
+  margin: 0;
+  padding: 0 0 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+
+  /* --- visual --- */
+  border-top: none;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.lectura-shell.lectura-page .lectura-bloque-inferior .lectura-cta-texto {
+  margin: 0;
+  line-height: 1.4;
+  text-align: left;
+  font-size: clamp(11px, 2.9vw, 12.5px);
+  font-weight: 500;
+  color: rgba(198, 204, 224, 0.88);
+  letter-spacing: 0.02em;
+  max-width: 36em;
+  width: 100%;
+}
+
+.lectura-shell.lectura-page a.btn-consulta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 320px;
+  box-sizing: border-box;
+  margin: 10px 0 0;
+  padding: 14px 22px;
+  border: 2px solid rgba(212, 175, 55, 0.85);
+  color: var(--lectura-btn-oro);
+  border-radius: 12px;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-align: center;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.3s ease,
+    text-shadow 0.3s ease,
+    filter 0.3s ease;
+  box-shadow:
+    0 4px 22px rgba(212, 175, 55, 0.28),
+    0 0 32px rgba(212, 175, 55, 0.12);
+}
+
+.lectura-shell.lectura-page a.btn-consulta .btn-consulta__contenido {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.lectura-shell.lectura-page a.btn-consulta .btn-consulta__icono-wa {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  color: var(--lectura-btn-oro);
+  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.55));
+}
+
+.lectura-shell.lectura-page a.btn-consulta .btn-consulta__etiqueta {
+  color: var(--lectura-btn-oro);
+  text-shadow:
+    0 0 10px rgba(212, 175, 55, 0.42),
+    0 0 22px rgba(212, 175, 55, 0.22);
+}
+
+.lectura-shell.lectura-page a.btn-consulta:visited {
+  color: var(--lectura-btn-oro);
+}
+
+.lectura-shell.lectura-page a.btn-consulta:visited .btn-consulta__etiqueta {
+  color: var(--lectura-btn-oro);
+}
+
+.lectura-shell.lectura-page a.btn-consulta:hover {
+  background: var(--l-gold);
+  color: #0d0b12;
+  box-shadow: 0 6px 30px rgba(212, 175, 55, 0.25);
+  transform: translateY(-1px);
+}
+
+.lectura-shell.lectura-page a.btn-consulta:hover .btn-consulta__icono-wa {
+  color: #0d0b12;
+  filter: none;
+}
+
+.lectura-shell.lectura-page a.btn-consulta:hover .btn-consulta__etiqueta {
+  color: #0d0b12;
+  text-shadow: none;
+}
+
+.lectura-shell .lectura-cta-servicio {
+  margin: 10px 0 0;
+  max-width: 320px;
+  padding: 0 8px 0 0;
+  box-sizing: border-box;
+  text-align: left;
+  font-size: clamp(9.5px, 2.4vw, 10.5px);
+  line-height: 1.4;
+  font-weight: 500;
+  color: rgba(245, 230, 200, 0.72);
+}
+
+.lectura-shell.lectura-page .lectura-cta button.btn-inicio-secundario,
+.lectura-shell.lectura-page .btn-inicio-secundario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: clamp(220px, 58vw, 280px);
+  align-self: flex-start;
+  box-sizing: border-box;
+  margin: 10px 0 0;
+  padding: 12px 36px;
+  border: 2px solid rgba(212, 175, 55, 0.75);
+  color: var(--lectura-btn-oro);
+  text-shadow:
+    0 0 10px rgba(212, 175, 55, 0.42),
+    0 0 22px rgba(212, 175, 55, 0.22);
+  background: rgba(10, 10, 20, 0.55);
+  border-radius: 11px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.35px;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    background-color 0.28s ease,
+    border-color 0.28s ease,
+    color 0.28s ease,
+    box-shadow 0.28s ease,
+    transform 0.28s ease,
+    text-shadow 0.28s ease;
+}
+
+/* Mismo criterio que .btn-consulta:hover: dorado sÃ³lido + texto oscuro (se lee bien) */
+.lectura-shell.lectura-page .lectura-cta button.btn-inicio-secundario:hover,
+.lectura-shell.lectura-page .btn-inicio-secundario:hover {
+  background: var(--l-gold);
+  border-color: var(--l-gold);
+  color: #0d0b12;
+  text-shadow: none;
+  box-shadow: 0 6px 30px rgba(212, 175, 55, 0.25);
+  transform: translateY(-1px);
+}
+
+.lectura-shell.lectura-page .lectura-cta button.btn-inicio-secundario:focus-visible,
+.lectura-shell.lectura-page .btn-inicio-secundario:focus-visible {
+  outline: 2px solid rgba(232, 199, 106, 0.85);
+  outline-offset: 3px;
+}
+
+/* ===== 10. ESTADO VACÃO ===== */

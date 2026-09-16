@@ -1,0 +1,148 @@
+﻿/* MÃ³dulo extraÃ­do de App.css (lÃ­neas 6254â€“8165). HorÃ³scopos lista + modal signo */
+
+html.horoscopos-no-scroll,
+body.horoscopos-no-scroll {
+  overflow: hidden !important;
+}
+
+/*
+ * Escritorio: `.app-shell__routes-grow` es el scroll real de toda la app (ver layout-shell.css) y
+ * es un contenedor distinto de html/body, asÃ­ que el `overflow:hidden` de arriba no lo cubre.
+ * Con la rueda algo justa de alto puede desbordarlo por poco y sacar una barra de scroll no deseada
+ * (esta ruta nunca debe desplazarse, ver `useHoroscoposNoScroll` en HoroscoposPage.tsx).
+ */
+@media (min-width: 769px) {
+  html.horoscopos-no-scroll .app-shell__routes-grow {
+    overflow-y: hidden !important;
+  }
+}
+
+/* â€”â€”â€” HorÃ³scopos: lectura, contraste, ritmo y CTA â€”â€”â€” */
+
+.inicio-page.horoscopos-page {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 0 24px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-height: 0;
+}
+
+.horoscopos-page__shell {
+  width: min(100%, 740px);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0;
+}
+
+.horoscopos-header {
+  display: none;
+}
+
+.horoscopos-page__titulo {
+  scroll-margin-top: calc(var(--app-topbar-stack) + 16px);
+  margin-top: 0;
+  margin-bottom: clamp(18px, 3.2vw, 26px);
+  padding-bottom: clamp(6px, 1.2vw, 14px);
+  font-size: clamp(1.55rem, 3.6vw, 1.95rem);
+  line-height: 1.2;
+}
+
+.horoscopos-page__semana {
+  margin: 0 auto clamp(18px, 3vw, 26px);
+  max-width: 36em;
+  color: rgba(150, 158, 195, 0.62);
+  font-size: clamp(0.78rem, 1.45vw, 0.88rem);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.horoscopos-page__intro {
+  margin: clamp(28px, 5vw, 40px) auto;
+  max-width: 34em;
+  padding: clamp(8px, 2vw, 16px) clamp(10px, 2.2vw, 20px);
+  text-align: center;
+  font-size: clamp(1.22rem, 2.85vw, 1.48rem);
+  line-height: 1.72;
+  font-style: italic;
+  font-weight: 400;
+  color: rgba(205, 212, 238, 0.94);
+  letter-spacing: 0.018em;
+  text-wrap: balance;
+}
+
+.horoscopos-selector {
+  margin: clamp(16px, 3vw, 28px) auto 0;
+  width: 100%;
+  max-width: 520px;
+  position: relative;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.horoscopos-frase {
+  position: absolute;
+  top: -26px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(560px, 92%);
+  margin: 0;
+  text-align: center;
+  color: rgba(175, 188, 235, 0.78);
+  opacity: 0.78;
+  font-size: clamp(0.86rem, 1.55vw, 0.96rem);
+  line-height: 1.25;
+  letter-spacing: 0.015em;
+  font-style: italic;
+  pointer-events: none;
+  text-wrap: balance;
+}
+
+.frase-superior {
+  text-align: center;
+  color: #d4af37;
+  font-size: 14px;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+
+.intro {
+  opacity: 0.7;
+  font-style: italic;
+}
+
+.horoscopos-reset-btn {
+  margin-top: 12px;
+  border: 1px solid rgba(120, 100, 255, 0.42);
+  background: rgba(10, 10, 16, 0.84);
+  color: rgba(190, 200, 255, 0.92);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.horoscopos-reset-btn:hover {
+  background: rgba(18, 16, 28, 0.94);
+  box-shadow: 0 0 14px rgba(80, 120, 255, 0.22);
+}
+
+.horoscopos-page .horoscopos-header {
+  margin-bottom: clamp(2px, 1.2vw, 10px);
+  padding-top: 0;
+}
+
+.horoscopos-selector::before {
+  content: none;
+}
+

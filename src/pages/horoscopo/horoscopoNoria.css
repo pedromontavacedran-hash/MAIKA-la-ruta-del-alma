@@ -1,0 +1,758 @@
+﻿/* â€”â€”â€” Noria horÃ³scopo (rÃ©plica UI: carta central, cabecera dorada, pasos) â€”â€”â€” */
+
+.inicio-page.horoscopos-page--noria {
+  position: relative;
+  padding-bottom: clamp(20px, 4vw, 36px);
+  background-color: #05030a;
+  background-image:
+    radial-gradient(ellipse 58% 42% at 78% 28%, rgba(120, 60, 160, 0.16) 0%, transparent 55%),
+    radial-gradient(ellipse 48% 38% at 14% 48%, rgba(160, 50, 100, 0.11) 0%, transparent 52%),
+    radial-gradient(ellipse 70% 30% at 50% 88%, rgba(40, 20, 70, 0.45) 0%, transparent 55%),
+    radial-gradient(1px 1px at 10% 15%, rgba(255, 255, 255, 0.42), transparent),
+    radial-gradient(1px 1px at 22% 8%, rgba(255, 255, 255, 0.32), transparent),
+    radial-gradient(1px 1px at 35% 22%, rgba(255, 255, 255, 0.28), transparent),
+    radial-gradient(1px 1px at 48% 12%, rgba(255, 255, 255, 0.35), transparent),
+    radial-gradient(1px 1px at 62% 18%, rgba(255, 255, 255, 0.22), transparent),
+    radial-gradient(1px 1px at 75% 10%, rgba(255, 255, 255, 0.3), transparent),
+    radial-gradient(1px 1px at 88% 20%, rgba(255, 255, 255, 0.26), transparent),
+    radial-gradient(1px 1px at 92% 38%, rgba(255, 255, 255, 0.2), transparent),
+    radial-gradient(1px 1px at 8% 42%, rgba(255, 255, 255, 0.22), transparent),
+    radial-gradient(1px 1px at 18% 58%, rgba(255, 255, 255, 0.18), transparent),
+    radial-gradient(1px 1px at 42% 68%, rgba(255, 255, 255, 0.16), transparent),
+    radial-gradient(1px 1px at 58% 72%, rgba(255, 255, 255, 0.14), transparent),
+    radial-gradient(1px 1px at 72% 62%, rgba(255, 255, 255, 0.2), transparent),
+    radial-gradient(1px 1px at 28% 38%, rgba(255, 255, 255, 0.15), transparent),
+    radial-gradient(1px 1px at 55% 45%, rgba(255, 255, 255, 0.12), transparent),
+    radial-gradient(ellipse 120% 65% at 50% -8%, rgba(90, 50, 140, 0.38) 0%, transparent 50%),
+    linear-gradient(180deg, #1a0d28 0%, #0c0616 32%, #05030a 72%, #020108 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.horoscopos-page__shell--noria {
+  position: relative;
+  width: min(100%, 660px);
+  padding-top: clamp(8px, 2.2vw, 20px);
+  padding-bottom: clamp(28px, 6vw, 48px);
+}
+
+/* Estrella / brÃºjula tenue a la derecha (como referencia). */
+.horoscopos-page__shell--noria::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  right: max(-48px, -8vw);
+  top: 30%;
+  width: min(200px, 48vw);
+  height: min(200px, 48vw);
+  pointer-events: none;
+  opacity: 0.055;
+  background: repeating-conic-gradient(
+    from 0deg at 50% 50%,
+    rgba(246, 210, 150, 0.9) 0deg,
+    rgba(246, 210, 150, 0.9) 1.2deg,
+    transparent 1.2deg,
+    transparent 11.25deg
+  );
+  border-radius: 50%;
+}
+
+.horoscopos-page__shell--noria::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  left: -8px;
+  right: -8px;
+  bottom: 0;
+  height: min(96px, 20vw);
+  pointer-events: none;
+  opacity: 0.88;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.35) 100%);
+  clip-path: polygon(0 100%, 0 48%, 10% 36%, 20% 46%, 30% 32%, 42% 44%, 52% 28%, 64% 40%, 74% 30%, 84% 42%, 94% 34%, 100% 48%, 100% 100%);
+}
+
+.horoscopos-selector--noria {
+  position: relative;
+  z-index: 2;
+  max-width: min(660px, 100%);
+  gap: clamp(18px, 3.2vw, 32px);
+}
+
+.horoscopos-noria-header {
+  width: 100%;
+  text-align: center;
+  padding: 0 12px 0;
+}
+
+/* Header noria: tÃ­tulo + una sola lÃ­nea (boceto, acotado a esta pÃ¡gina). */
+.horoscopos-page--noria .horoscopo-titulo {
+  margin: -6px 0 8px;
+  color: #f6d48d;
+  font-size: clamp(28px, 5.6vw, 48px);
+  font-weight: 500;
+  text-align: center;
+  letter-spacing: 0.02em;
+  font-family: Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  text-shadow:
+    0 0 14px rgba(255, 224, 150, 0.42),
+    0 0 34px rgba(246, 194, 84, 0.22);
+}
+
+.horoscopos-page--noria .horoscopo-sub {
+  margin: 0 auto clamp(18px, 3.2vw, 26px);
+  max-width: 28em;
+  color: rgba(249, 227, 185, 0.92);
+  text-align: center;
+  font-size: clamp(13px, 1.45vw, 19px);
+  line-height: 1.45;
+  font-family: Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  letter-spacing: 0.01em;
+  text-shadow: 0 0 10px rgba(255, 216, 130, 0.2);
+}
+
+.horoscopos-page--noria .horoscopo-sub--frase {
+  font-style: italic;
+}
+
+.horoscopos-noria-pasos {
+  margin: 0 auto;
+  padding: 11px 32px;
+  max-width: min(440px, 96%);
+  text-align: center;
+  font-family: Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  font-size: clamp(1rem, 1.9vw, 1.28rem);
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: rgba(235, 221, 190, 0.94);
+  background: rgba(18, 10, 30, 0.82);
+  border: 1px solid rgba(220, 182, 96, 0.34);
+  border-radius: 0;
+  clip-path: polygon(14px 0%, calc(100% - 14px) 0%, 100% 50%, calc(100% - 14px) 100%, 14px 100%, 0 50%);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.horoscopos-noria-pasos__sep {
+  margin: 0 0.4em;
+  color: #e8c76a;
+  text-shadow: 0 0 10px rgba(246, 194, 84, 0.45);
+}
+
+.horoscopos-selector--noria .rueda-anillo--externo {
+  width: min(456px, 76vw);
+  height: min(456px, 76vw);
+  border-width: 1.7px;
+  border-color: rgba(255, 234, 172, 0.78);
+  box-shadow:
+    0 0 38px rgba(255, 218, 132, 0.42),
+    0 0 70px rgba(255, 206, 104, 0.2);
+}
+
+.horoscopos-selector--noria .rueda-anillo--medio {
+  width: min(348px, 58vw);
+  height: min(348px, 58vw);
+  border-width: 1.05px;
+  border-color: rgba(236, 194, 106, 0.52);
+  box-shadow:
+    0 0 18px rgba(246, 194, 84, 0.26),
+    inset 0 0 20px rgba(0, 0, 0, 0.18);
+}
+
+.horoscopos-selector--noria .rueda-anillo--micro-a {
+  width: min(400px, 66vw);
+  height: min(400px, 66vw);
+  border: 0.75px solid rgba(255, 220, 150, 0.34);
+  box-shadow: 0 0 12px rgba(246, 194, 84, 0.14);
+}
+
+.horoscopos-selector--noria .rueda-anillo--micro-b {
+  width: min(298px, 49vw);
+  height: min(298px, 49vw);
+  border: 0.6px solid rgba(180, 140, 60, 0.32);
+  box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.22);
+}
+
+.horoscopos-selector--noria .rueda-marca {
+  background: rgba(246, 200, 120, 0.38);
+  box-shadow: 0 0 8px rgba(246, 194, 84, 0.28);
+}
+
+.horoscopos-selector--noria .rueda-radial {
+  height: min(260px, 43vw);
+  width: 1.15px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 242, 205, 0.58) 0%,
+    rgba(246, 194, 84, 0.34) 40%,
+    transparent 100%
+  );
+  box-shadow: 0 0 10px rgba(255, 215, 120, 0.3);
+}
+
+.horoscopos-selector--noria .rueda-conexion {
+  width: 28px;
+  background: rgba(236, 194, 106, 0.22);
+  box-shadow: 0 0 6px rgba(246, 194, 84, 0.28);
+}
+
+.horoscopos-selector--noria .rueda-nodo-interseccion,
+.horoscopos-selector--noria .rueda-nodo-signo {
+  background: rgba(255, 224, 146, 0.68);
+  box-shadow: 0 0 12px rgba(246, 194, 84, 0.5);
+}
+
+.horoscopos-selector--noria .rueda-nodo-interseccion--exterior {
+  background: rgba(255, 236, 176, 0.8);
+}
+
+.horoscopos-selector--noria .signo .nombre {
+  color: rgba(255, 248, 240, 0.9);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
+}
+
+.horoscopos-selector--noria .signo.activo .nombre {
+  color: #fff8e8;
+  text-shadow: 0 0 10px rgba(246, 194, 84, 0.45);
+}
+
+.horoscopos-selector--noria .signo {
+  width: 72px;
+}
+
+.horoscopos-selector--noria .signo-circulo {
+  width: 54px;
+  height: 54px;
+}
+
+.horoscopos-selector--noria .icono {
+  width: 34px;
+  height: 34px;
+}
+
+.horoscopos-selector--noria .nombre {
+  margin-top: 5px;
+  font-size: 10px;
+}
+
+/*
+ * Doble clase: `.carta-container` (mÃ¡s abajo) pone `position: relative` y `margin-top`.
+ * Si no ganamos en especificidad, el overlay no cubre la rueda y la carta queda ARRIBA.
+ */
+.carta-container.carta-container--noria-centro {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  margin: 0;
+  margin-top: 0;
+  min-height: 0;
+  display: block;
+  padding: 0;
+  z-index: 11;
+  pointer-events: none;
+}
+
+.carta-container.carta-container--noria-centro .carta-wrapper {
+  pointer-events: auto;
+}
+
+/* Halo en capas: nÃºcleo + aura + difuso (sin offset en drop-shadow = sin mancha). */
+.carta-wrapper--noria::before {
+  content: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: -1;
+  width: min(260px, 58vw);
+  height: min(260px, 58vw);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  border-radius: 50%;
+  background: none;
+  filter: none;
+}
+
+/* TamaÃ±o base de noria: el ancho REAL va en `.carta-inner.carta-inner--noria` (despuÃ©s de `.carta-inner`). */
+.carta-inner--noria {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  border-radius: 8px;
+  outline: none;
+  transform-origin: center center;
+}
+
+/* Luz en capas en la imagen (nÃºcleo + medio + exterior); profundidad solo con box-shadow oscuro. */
+.carta-inner.carta-inner--noria .carta img {
+  display: block;
+  width: clamp(134px, 24vw, 190px);
+  max-width: 100%;
+  height: auto;
+  border-radius: 14px;
+  box-shadow: none;
+  filter: brightness(1.2) contrast(1.1) saturate(1.16);
+  transition: all 0.3s ease;
+}
+
+.carta-inner.carta-inner--noria:hover .carta img {
+  transform: scale(1.05);
+  filter: brightness(1.26) contrast(1.12) saturate(1.18);
+  box-shadow: none;
+}
+
+.carta-cerrar-temp--noria {
+  top: -6px;
+  right: -6px;
+}
+
+.rueda {
+  position: relative;
+  z-index: 6;
+  width: min(430px, 86vw);
+  height: min(430px, 86vw);
+  margin: 0 auto;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, rgba(10, 8, 18, 0.98) 0%, rgba(7, 6, 12, 0.92) 46%, rgba(4, 4, 8, 0.28) 72%, rgba(4, 4, 8, 0) 100%);
+  box-shadow:
+    0 0 34px rgba(120, 100, 255, 0.12),
+    inset 0 0 30px rgba(80, 120, 255, 0.08);
+}
+
+.rueda.rueda--noria {
+  /* Radio Ãºtil para orbitar signos (opcional; la lÃ³gica actual usa NORIA_GEOM en TSX). */
+  --rueda-signo-r: calc(min(528px, 84vw) * 0.44);
+  width: min(528px, 84vw);
+  height: min(528px, 84vw);
+  background:
+    radial-gradient(circle at 50% 48%, rgba(56, 36, 84, 0.62) 0%, rgba(18, 12, 34, 0.94) 52%, rgba(8, 5, 16, 0.99) 100%),
+    radial-gradient(circle at center, rgba(255, 220, 150, 0.14) 0%, transparent 44%);
+  box-shadow:
+    0 0 70px rgba(255, 210, 100, 0.2),
+    0 0 120px rgba(255, 200, 80, 0.1),
+    inset 0 0 72px rgba(0, 0, 0, 0.52);
+}
+
+.horoscopos-selector--noria .rueda-centro {
+  width: min(378px, 69vw);
+  height: min(378px, 69vw);
+  opacity: 0.4;
+  filter: blur(26px);
+  background: radial-gradient(
+    circle,
+    rgba(255, 230, 180, 0.5) 0%,
+    rgba(246, 200, 110, 0.22) 38%,
+    transparent 72%
+  );
+  animation: ruedaCentroPulsoNoria 4.2s ease-in-out infinite;
+}
+
+.horoscopos-selector--noria .rueda-centro--activo {
+  background: radial-gradient(
+    circle,
+    rgba(255, 240, 200, 0.58) 0%,
+    rgba(255, 210, 120, 0.28) 40%,
+    transparent 72%
+  );
+}
+
+@keyframes ruedaCentroPulsoNoria {
+  0%,
+  100% {
+    opacity: 0.34;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+  50% {
+    opacity: 0.52;
+    transform: translate(-50%, -50%) scale(1.04);
+  }
+}
+
+.rueda-centro {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(300px, 64vw);
+  height: min(300px, 64vw);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.15), transparent 70%);
+  opacity: 0.25;
+  filter: blur(30px);
+  animation: ruedaCentroPulso 4s ease-in-out infinite;
+}
+
+.rueda-centro--activo {
+  background: radial-gradient(circle, rgba(246, 194, 84, 0.22), transparent 70%);
+}
+
+@keyframes ruedaCentroPulso {
+  0% {
+    opacity: 0.18;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  50% {
+    opacity: 0.34;
+    transform: translate(-50%, -50%) scale(1.03);
+  }
+  100% {
+    opacity: 0.18;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+}
+
+.rueda-anillo {
+  position: absolute;
+  border-radius: 50%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+
+.rueda-anillo--externo {
+  width: min(362px, 76vw);
+  height: min(362px, 76vw);
+  border: 1.2px solid rgba(154, 136, 255, 0.34);
+  box-shadow:
+    0 0 20px rgba(122, 148, 255, 0.18),
+    0 0 36px rgba(102, 126, 250, 0.08);
+}
+
+.rueda-anillo--medio {
+  width: min(278px, 58vw);
+  height: min(278px, 58vw);
+  border: 0.8px solid rgba(100, 120, 210, 0.16);
+  box-shadow: 0 0 4px rgba(80, 120, 255, 0.06);
+}
+
+.rueda-anillo--interno {
+  width: min(194px, 41vw);
+  height: min(194px, 41vw);
+  border: 0.7px solid rgba(100, 110, 200, 0.12);
+  box-shadow: none;
+}
+
+.rueda-anillo--signos {
+  width: min(330px, 70vw);
+  height: min(330px, 70vw);
+  border: 1.05px solid rgba(174, 156, 255, 0.44);
+  box-shadow:
+    0 0 16px rgba(152, 168, 255, 0.28),
+    0 0 30px rgba(120, 142, 255, 0.14);
+}
+
+.rueda-marcas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  animation: ruedaCosmosRotar 120s linear infinite;
+}
+
+.rueda-marca {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(140, 160, 255, 0.42);
+  box-shadow: 0 0 8px rgba(80, 120, 255, 0.28);
+}
+
+.rueda-radiales {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  animation: ruedaCosmosRotar 144s linear infinite reverse;
+}
+
+.rueda-radial {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.6px;
+  height: 160px;
+  transform-origin: center top;
+  background: linear-gradient(
+    to bottom,
+    rgba(120, 100, 255, 0.12) 0%,
+    rgba(80, 120, 255, 0.07) 46%,
+    rgba(80, 120, 255, 0.02) 100%
+  );
+}
+
+.rueda-conexiones {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  animation: ruedaCosmosRotar 180s linear infinite;
+}
+
+@keyframes ruedaCosmosRotar {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rueda-conexion {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 0.8px;
+  background: rgba(100, 120, 220, 0.08);
+  box-shadow: none;
+  transform-origin: left center;
+}
+
+.rueda-nodo-interseccion,
+.rueda-nodo-signo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(120, 130, 220, 0.22);
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.rueda-nodo-interseccion--exterior {
+  width: 4px;
+  height: 4px;
+  background: rgba(100, 140, 255, 0.26);
+}
+
+.rueda-nodo-signo {
+  width: 2.5px;
+  height: 2.5px;
+  background: rgba(110, 125, 210, 0.18);
+}
+
+.signos-capa {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 8;
+  width: 0;
+  height: 0;
+  transition: transform var(--rueda-rot-dur, 18s) cubic-bezier(0.24, 0.84, 0.44, 1);
+}
+
+.signo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: 0 0;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    transform 0s linear,
+    filter 0.25s ease;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 76px;
+}
+
+.signo-contenido {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: rotate(calc(var(--rueda-rot-angle, 0deg) * -1));
+  transition: transform var(--rueda-rot-dur, 18s) linear;
+}
+
+.signo:not(.activo) {
+  opacity: 0.82;
+}
+
+.signo:hover,
+.signo:active,
+.signo:focus {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.signo-circulo {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1.7px solid rgba(242, 208, 112, 0.86);
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 50% 38%, rgba(28, 22, 12, 0.92) 0%, rgba(8, 6, 4, 0.98) 100%);
+  box-shadow:
+    0 0 16px rgba(255, 226, 146, 0.62),
+    0 0 30px rgba(246, 194, 84, 0.32),
+    inset 0 0 12px rgba(242, 208, 112, 0.2);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.icono {
+  width: 36px;
+  height: 36px;
+  color: #e8c76a;
+  display: block;
+  transform: translateY(-1px);
+  transition: transform 0.25s ease, filter 0.25s ease, color 0.25s ease;
+  filter: drop-shadow(0 0 3px rgba(212, 175, 55, 0.35));
+  overflow: visible;
+}
+
+.nombre {
+  margin-top: 4px;
+  font-size: 10px;
+  line-height: 1.15;
+  color: rgba(232, 210, 160, 0.92);
+  text-shadow: 0 0 8px rgba(212, 175, 55, 0.25);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.signo:hover .icono {
+  color: #f6c254;
+  filter: drop-shadow(0 0 8px rgba(246, 194, 84, 0.52));
+}
+
+.signo:hover .signo-circulo {
+  transform: scale(1.12);
+  border-color: rgba(255, 232, 156, 1);
+  box-shadow:
+    0 0 24px rgba(255, 228, 150, 0.82),
+    0 0 40px rgba(246, 194, 84, 0.4),
+    inset 0 0 16px rgba(246, 194, 84, 0.24);
+  filter:
+    drop-shadow(0 0 8px rgba(212, 175, 55, 0.4))
+    drop-shadow(0 0 16px rgba(246, 194, 84, 0.22));
+}
+
+.signo:focus-visible {
+  outline: 2px solid rgba(246, 194, 84, 0.75);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+.signo.activo .icono {
+  color: #fff6dc;
+  transform: scale(1.22);
+  filter:
+    drop-shadow(0 0 12px rgba(246, 194, 84, 0.92))
+    drop-shadow(0 0 22px rgba(246, 194, 84, 0.58));
+}
+
+.signo.activo .signo-circulo {
+  transform: scale(1.16);
+  border-color: rgba(255, 242, 198, 1);
+  box-shadow:
+    0 0 38px rgba(255, 220, 126, 0.9),
+    0 0 62px rgba(246, 194, 84, 0.48),
+    inset 0 0 20px rgba(255, 236, 181, 0.36);
+  background:
+    radial-gradient(circle at 50% 38%, rgba(58, 42, 18, 0.94) 0%, rgba(16, 11, 4, 0.98) 100%),
+    radial-gradient(circle, rgba(255, 215, 120, 0.18), transparent 72%);
+}
+
+.signo.activo .nombre {
+  color: #ffe7a7;
+  text-shadow: 0 0 8px rgba(246, 194, 84, 0.48);
+}
+
+.signo--pulso .signo-circulo {
+  animation: signoPulsoLlegada 0.22s ease-out;
+}
+
+.signos-capa--girando .signo:not(.activo) .signo-circulo {
+  opacity: 0.74;
+  box-shadow:
+    0 0 18px rgba(242, 208, 112, 0.28),
+    inset 0 0 12px rgba(242, 208, 112, 0.14);
+}
+
+.signos-capa--girando .signo:not(.activo) .nombre {
+  opacity: 0.62;
+}
+
+.signos-capa--girando .signo.activo .signo-circulo {
+  box-shadow:
+    0 0 34px rgba(246, 194, 84, 0.72),
+    inset 0 0 16px rgba(255, 236, 181, 0.24);
+}
+
+.centro-texto {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #f6c254;
+  text-align: center;
+  width: min(202px, 46vw);
+  height: min(202px, 46vw);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(120, 100, 255, 0.14) 0%,
+      rgba(80, 120, 255, 0.1) 28%,
+      rgba(40, 50, 110, 0.06) 48%,
+      rgba(10, 7, 24, 0) 74%
+    );
+  border: none;
+  box-shadow: none;
+}
+
+.centro-nombre {
+  display: block;
+  font-size: clamp(18px, 3.8vw, 26px);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #ffe4a8;
+  text-shadow:
+    0 0 12px rgba(246, 194, 84, 0.7),
+    0 0 24px rgba(246, 194, 84, 0.32);
+  font-weight: 600;
+}
+
+.centro-nombre--respira {
+  animation: centroRespira 2.6s ease-in-out infinite;
+}
+
+.carta-container {
+  text-align: center;
+  margin-top: 10px;
+  position: relative;
+  z-index: 4;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.carta-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  cursor: default;
+  perspective: 1000px;
+  pointer-events: none;
+}
+

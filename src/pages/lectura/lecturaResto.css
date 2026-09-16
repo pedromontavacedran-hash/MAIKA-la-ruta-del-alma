@@ -1,0 +1,162 @@
+﻿
+.lectura-shell .lectura-contenido.lectura-container.lectura-contenido--empty {
+  /* --- layout --- */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  width: 100%;
+
+  /* --- visual --- */
+  text-align: center;
+}
+
+.lectura-shell .lectura-page__texto {
+  margin: 4px auto 0;
+  max-width: 34ch;
+  color: rgba(255, 244, 218, 0.92);
+  line-height: 1.7;
+  font-size: clamp(1.03rem, 1.9vw, 1.2rem);
+  text-wrap: pretty;
+}
+
+/* ===== 11. RESPONSIVE ===== */
+
+@media (max-width: 959px) {
+  .lectura-shell.lectura-page {
+    /* --- layout --- */
+    --lectura-pad-top: clamp(6px, 1.8vw, 14px);
+    --lectura-pad-bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(60px, 20vw, 96px));
+    --lectura-signo-fs: clamp(17px, 5vw, 22px);
+    padding-top: max(
+      clamp(4px, 1.2vw, 10px),
+      calc(var(--lectura-pad-top) - var(--lectura-tirar-hacia-barra, 0px))
+    );
+    padding-bottom: var(--lectura-pad-bottom);
+  }
+
+  .lectura-shell .lectura-contenido.lectura-container:not(.lectura-contenido--empty) {
+    /* --- layout --- */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: clamp(10px, 2vw, 18px);
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+  }
+
+  /*
+   * MÃ³vil: sin scroll; todo el contenido se ve ajustado a la pantalla.
+   */
+  .lectura-shell.lectura-page > .lectura-contenido.lectura-container.lectura-malla:not(.lectura-contenido--empty) {
+    align-items: stretch;
+    overflow: hidden;
+  }
+
+  .lectura-shell .lectura-contenido.lectura-container.lectura-malla:not(.lectura-contenido--empty) > .lectura-malla__top {
+    flex: 0 0 auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .lectura-shell .lectura-malla__top,
+  .lectura-shell .lectura-malla-principal {
+    width: 100%;
+  }
+
+  .lectura-shell .lectura-malla__columna-lectura {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .lectura-shell .lectura-contenido:not(.lectura-contenido--empty) .lectura-carta-columna.columna-carta {
+    /* --- layout --- */
+    position: static;
+    top: auto;
+    transform: none;
+    padding-left: 0;
+    align-items: center;
+  }
+
+  .lectura-shell .lectura-contenido:not(.lectura-contenido--empty) .lectura-carta-columna .carta {
+    /* --- layout --- */
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: none;
+  }
+
+  .lectura-shell .lectura-contenido:not(.lectura-contenido--empty) .lectura-carta-columna .carta img {
+    /* --- layout --- */
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: min(238px, 82vw);
+    max-height: min(36dvh, 320px);
+    margin-inline: auto;
+    object-fit: contain;
+  }
+
+  .lectura-shell .lectura-contenido .columna-texto {
+    /* --- layout --- */
+    max-width: 100%;
+    font-size: clamp(15px, 3.85vw, 17px);
+    line-height: 1.68;
+  }
+
+  .lectura-shell .lectura-contenido .titulo-seccion {
+    font-size: clamp(1.02rem, 2.85vw, 1.18rem);
+  }
+
+  .lectura-shell .lectura-contenido {
+    /* --- layout --- */
+    padding-inline: var(--l-space-sm);
+  }
+
+  .lectura-shell.lectura-page .lectura-bloque-inferior {
+    transform: none;
+    margin-inline: 0;
+    margin-left: 0;
+    max-width: 100%;
+    align-self: stretch;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lectura-shell .lectura-contenido:not(.lectura-contenido--empty) .lectura-carta-columna .carta.carta--interactiva {
+    transition: none !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  .lectura-shell .lectura-contenido:not(.lectura-contenido--empty) .lectura-carta-columna .carta.carta--interactiva:hover {
+    transform: none !important;
+    animation: none !important;
+  }
+
+  .lectura-shell .lectura-contenido:not(.lectura-contenido--empty) .lectura-carta-columna .carta .carta-brillo,
+  .lectura-shell .lectura-contenido:not(.lectura-contenido--empty) .lectura-carta-columna .carta .carta-destello,
+  .lectura-shell .lectura-contenido:not(.lectura-contenido--empty) .lectura-carta-columna .carta .carta-destino,
+  .lectura-shell .lectura-contenido:not(.lectura-contenido--empty) .lectura-carta-columna .carta .carta-aura,
+  .lectura-shell .lectura-contenido:not(.lectura-contenido--empty) .lectura-carta-columna .carta .carta-particulas,
+  .lectura-shell .lectura-contenido:not(.lectura-contenido--empty) .lectura-carta-columna .carta .carta-particulas .particula {
+    animation: none !important;
+    transition: none !important;
+    opacity: 0 !important;
+  }
+
+  .lectura-shell .lectura-contenido:not(.lectura-contenido--empty) .lectura-carta-columna .carta-entrada,
+  .lectura-shell .lectura-contenido:not(.lectura-contenido--empty) .lectura-carta-columna .carta-entrada.is-visible {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+  }
+}
