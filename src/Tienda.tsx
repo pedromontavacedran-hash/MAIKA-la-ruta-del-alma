@@ -545,36 +545,37 @@ export default function Tienda({
                     position: "absolute",
                     top: 10,
                     right: 10,
-                    background: limiteCarrito ? THEME.goldMain : "#ff4444",
-                    color: limiteCarrito ? "#1b1745" : "white",
+                    background: "#ff4444",
+                    color: "white",
                     padding: "5px 10px",
                     borderRadius: 15,
-                    fontSize: limiteCarrito ? "0.62rem" : "0.7rem",
+                    fontSize: "0.7rem",
                     fontWeight: "bold",
                     maxWidth: "min(140px, calc(100% - 52px))",
                     lineHeight: 1.15,
                     textAlign: "center"
                   }}
                 >
-                  {limiteCarrito ? "No puedes añadir más" : "AGOTADO"}
+                  AGOTADO
                 </div>
               )}
 
-              {disponibles > 0 && disponibles <= 3 && (
-                <div style={{
-                  background: THEME.goldMain,
-                  color: "#1b1745",
-                  padding: "3px 8px",
-                  borderRadius: 12,
-                  fontSize: "0.66rem",
-                  fontWeight: "bold",
-                  margin: "5px 0 0",
-                  textAlign: "center",
-                  lineHeight: 1.2
-                }}>
-                  {disponibles === 1 ? "🔥 ¡ÚLTIMA UNIDAD!" : `🔥 ¡ÚLTIMAS ${disponibles} UNIDADES!`}
-                </div>
-              )}
+              <div style={{ minHeight: 24, margin: "5px 0 0" }}>
+                {disponibles > 0 && disponibles <= 3 && (
+                  <div style={{
+                    background: THEME.goldMain,
+                    color: "#1b1745",
+                    padding: "3px 8px",
+                    borderRadius: 12,
+                    fontSize: "0.66rem",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    lineHeight: 1.2
+                  }}>
+                    {disponibles === 1 ? "🔥 ¡ÚLTIMA UNIDAD!" : `🔥 ¡ÚLTIMAS ${disponibles} UNIDADES!`}
+                  </div>
+                )}
+              </div>
 
               <h3 style={{
                 color: prod.nombreColor ?? "white",
@@ -645,7 +646,7 @@ export default function Tienda({
                     </div>
                   </>
                 ) : (
-                  <span>{limiteCarrito ? "No puedes añadir más" : "❌ Sin stock"}</span>
+                  !limiteCarrito && <span>❌ Sin stock</span>
                 )}
               </div>
 
@@ -681,7 +682,7 @@ export default function Tienda({
     : disponibles > 0
       ? "Añadir al carrito"
       : limiteCarrito
-        ? "No puedes añadir más"
+        ? "Sin existencias"
         : "Sin stock"}
 </button>
             </div>
@@ -789,7 +790,7 @@ export default function Tienda({
                         : disponibles > 0
                           ? "Añadir al carrito"
                           : limiteCarritoBusq
-                            ? "No puedes añadir más"
+                            ? "Sin existencias"
                             : "Sin stock"}
                     </button>
                   </div>

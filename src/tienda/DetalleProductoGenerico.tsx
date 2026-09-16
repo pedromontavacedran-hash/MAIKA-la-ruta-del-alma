@@ -28,7 +28,6 @@ export function DetalleProductoGenerico({
   categoriaDetalle,
   subcategoriaDetalle,
   disponibles,
-  limiteCarrito,
   recienAnadido,
   imgSrc,
   fichaTecnica,
@@ -189,7 +188,7 @@ export function DetalleProductoGenerico({
             </p>
           )}
           <p style={{ color: disponibles > 0 ? THEME.goldMain : "#ff8a80", fontWeight: "bold", margin: "0 0 14px" }}>
-            {disponibles > 0 ? `${disponibles} ${disponibles === 1 ? "unidad disponible" : "unidades disponibles"}` : limiteCarrito ? "No puedes añadir más" : "Producto agotado"}
+            {disponibles > 0 ? `${disponibles} ${disponibles === 1 ? "unidad disponible" : "unidades disponibles"}` : "Producto agotado"}
           </p>
           <button
             type="button"
@@ -209,7 +208,7 @@ export function DetalleProductoGenerico({
               fontWeight: "bold"
             }}
           >
-            {recienAnadido ? "Añadido ✓" : disponibles > 0 ? "Añadir al carrito" : limiteCarrito ? "No puedes añadir más" : "Sin stock"}
+            {recienAnadido ? "Añadido ✓" : disponibles > 0 ? "Añadir al carrito" : "Sin existencias"}
           </button>
         </div>
       </article>
