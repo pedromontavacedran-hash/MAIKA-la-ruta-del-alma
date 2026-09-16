@@ -762,7 +762,7 @@ export default function NavPrincipal({
             onClick={() => setInicioMenuAbierto(false)}
             style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: location.pathname === PATH_BY_PAGINA.servicios ? 700 : itemMenuInicio.fontWeight }}
           >
-            Servicios
+            ✨ Servicios
           </Link>
         </div>
         <div>
