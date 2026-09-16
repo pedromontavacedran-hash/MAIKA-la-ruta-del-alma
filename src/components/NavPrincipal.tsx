@@ -756,6 +756,15 @@ export default function NavPrincipal({
             🔮 Horóscopos
           </Link>
         </div>
+        <div style={{ marginBottom: 6 }}>
+          <Link
+            to={PATH_BY_PAGINA.servicios}
+            onClick={() => setInicioMenuAbierto(false)}
+            style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: location.pathname === PATH_BY_PAGINA.servicios ? 700 : itemMenuInicio.fontWeight }}
+          >
+            Servicios
+          </Link>
+        </div>
         <div>
           <Link
             to={PATH_BY_PAGINA.ritualDelMes}
@@ -826,15 +835,6 @@ export default function NavPrincipal({
             style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: location.pathname === PATH_BY_PAGINA.contacto ? 700 : itemMenuInicio.fontWeight }}
           >
             Contacto
-          </Link>
-        </div>
-        <div style={{ marginBottom: 6 }}>
-          <Link
-            to={PATH_BY_PAGINA.servicios}
-            onClick={() => setInicioMenuAbierto(false)}
-            style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: location.pathname === PATH_BY_PAGINA.servicios ? 700 : itemMenuInicio.fontWeight }}
-          >
-            Servicios
           </Link>
         </div>
         <div style={{ marginBottom: 6 }}>
