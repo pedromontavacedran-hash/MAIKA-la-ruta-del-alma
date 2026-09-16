@@ -221,7 +221,7 @@
   {
     "id": 304,
     "categoria": "inciensos",
-    "nombre": "Incienso Árbol Dorado Alaukik",
+    "nombre": "Incienso Árbol Dorado 90g",
     "precio": 4,
     "stock": 2,
     "imagen": "/inciensos/alaukik-arbol-dorado.jpg",
@@ -314,7 +314,7 @@
   {
     "id": 305,
     "categoria": "inciensos",
-    "nombre": "Incienso Litchi Alaukik",
+    "nombre": "Incienso Litchi 90g",
     "precio": 4,
     "stock": 1,
     "imagen": "/inciensos/alaukik-litchi.jpg",
@@ -816,7 +816,7 @@
   {
     "id": 306,
     "categoria": "inciensos",
-    "nombre": "Incienso Almíscar Alaukik",
+    "nombre": "Incienso Almíscar 90g",
     "precio": 4,
     "stock": 2,
     "imagen": "/inciensos/alaukik-almiscar.jpg",
@@ -900,7 +900,7 @@
   {
     "id": 307,
     "categoria": "inciensos",
-    "nombre": "Incienso Aqua Fresh Alaukik",
+    "nombre": "Incienso Aqua Fresh 90g",
     "precio": 4,
     "stock": 2,
     "imagen": "/inciensos/alaukik-aqua-fresh.jpg",
@@ -984,7 +984,7 @@
   {
     "id": 308,
     "categoria": "inciensos",
-    "nombre": "Incienso Lavanda Alaukik",
+    "nombre": "Incienso Lavanda 90g",
     "precio": 4,
     "stock": 2,
     "imagen": "/inciensos/alaukik-lavanda.jpg",
@@ -1068,7 +1068,7 @@
   {
     "id": 309,
     "categoria": "inciensos",
-    "nombre": "Incienso Musk Melon Alaukik",
+    "nombre": "Incienso Musk Melon 90g",
     "precio": 4,
     "stock": 2,
     "imagen": "/inciensos/alaukik-musk-melon.jpg",
@@ -1170,7 +1170,7 @@
   {
     "id": 310,
     "categoria": "inciensos",
-    "nombre": "Incienso Canela Alaukik",
+    "nombre": "Incienso Canela 90g",
     "precio": 4,
     "stock": 2,
     "imagen": "/inciensos/alaukik-canela.jpg",
@@ -1263,7 +1263,7 @@
   {
     "id": 311,
     "categoria": "inciensos",
-    "nombre": "Incienso Nirvana Alaukik",
+    "nombre": "Incienso Nirvana 90g",
     "precio": 4,
     "stock": 2,
     "imagen": "/inciensos/alaukik-nirvana.jpg",
@@ -1338,7 +1338,7 @@
   {
     "id": 312,
     "categoria": "inciensos",
-    "nombre": "Incienso Atrae Dinero Alaukik",
+    "nombre": "Incienso Atrae Dinero 90g",
     "precio": 4,
     "stock": 2,
     "imagen": "/inciensos/alaukik-atrae-dinero.jpg",
@@ -1413,7 +1413,7 @@
   {
     "id": 313,
     "categoria": "inciensos",
-    "nombre": "Incienso Limpia Casas Alaukik 30g",
+    "nombre": "Incienso Limpia Casas 30g",
     "precio": 2.5,
     "stock": 1,
     "imagen": "/inciensos/alaukik-limpia-casas.jpg",
@@ -1582,7 +1582,7 @@
   {
     "id": 318,
     "categoria": "inciensos",
-    "nombre": "Incienso Smudge Romero Suami 25g",
+    "nombre": "Incienso Smudge Romero 25g",
     "precio": 2.25,
     "stock": 1,
     "imagen": "/tienda/inciensos/suami/smudge-romero.jpg",
@@ -1599,7 +1599,7 @@
   {
     "id": 319,
     "categoria": "inciensos",
-    "nombre": "Incienso Smudge Sanación Cuerpo y Alma Suami 25g",
+    "nombre": "Incienso Smudge Sanación Cuerpo y Alma 25g",
     "precio": 2.25,
     "stock": 1,
     "imagen": "/tienda/inciensos/suami/smudge-sanacion-cuerpo-alma.jpg",
@@ -1616,7 +1616,7 @@
   {
     "id": 320,
     "categoria": "inciensos",
-    "nombre": "Incienso Smudge Limpieza Suami 25g",
+    "nombre": "Incienso Smudge Limpieza 25g",
     "precio": 2.25,
     "stock": 1,
     "imagen": "/tienda/inciensos/suami/smudge-limpieza.jpg",
@@ -1633,7 +1633,7 @@
   {
     "id": 321,
     "categoria": "inciensos",
-    "nombre": "Incienso Smudge Eucalipto Suami 25g",
+    "nombre": "Incienso Smudge Eucalipto 25g",
     "precio": 2.25,
     "stock": 1,
     "imagen": "/tienda/inciensos/suami/smudge-eucalipto.jpg",
@@ -1650,7 +1650,7 @@
   {
     "id": 322,
     "categoria": "inciensos",
-    "nombre": "Incienso Orgánico Mirra Ullas 25g",
+    "nombre": "Incienso Orgánico Mirra 25g",
     "precio": 2.99,
     "stock": 1,
     "imagen": "/tienda/inciensos/ullas/ullas-mirra.jpg",
@@ -1667,7 +1667,7 @@
   {
     "id": 323,
     "categoria": "inciensos",
-    "nombre": "Incienso Orgánico Canela Ullas 25g",
+    "nombre": "Incienso Orgánico Canela 25g",
     "precio": 2.99,
     "stock": 1,
     "imagen": "/tienda/inciensos/ullas/ullas-canela.jpg",
@@ -1684,7 +1684,7 @@
   {
     "id": 324,
     "categoria": "inciensos",
-    "nombre": "Incienso Orgánico Ruda Ullas 25g",
+    "nombre": "Incienso Orgánico Ruda 25g",
     "precio": 2.99,
     "stock": 1,
     "imagen": "/tienda/inciensos/ullas/ullas-ruda.jpg",
@@ -1701,7 +1701,7 @@
   {
     "id": 325,
     "categoria": "inciensos",
-    "nombre": "Incienso Orgánico Laurel Ullas 25g",
+    "nombre": "Incienso Orgánico Laurel 25g",
     "precio": 2.99,
     "stock": 1,
     "imagen": "/tienda/inciensos/ullas/ullas-laurel.jpg",
@@ -1718,7 +1718,7 @@
   {
     "id": 326,
     "categoria": "inciensos",
-    "nombre": "Incienso Orgánico Rosa Ullas 25g",
+    "nombre": "Incienso Orgánico Rosa 25g",
     "precio": 2.99,
     "stock": 1,
     "imagen": "/tienda/inciensos/ullas/ullas-rosa.jpg",
