@@ -95,22 +95,6 @@ export default function Carrito({
               <div className="carrito-producto-fila__cuerpo">
                 <div className="carrito-producto-fila__info">
                   <strong className="carrito-producto-fila__nombre">{item.nombre}</strong>
-                  {item.descripcion?.trim() ? (
-                    <p className="carrito-producto-fila__desc">{item.descripcion.trim()}</p>
-                  ) : null}
-                  {(() => {
-                    const stockItem = Math.max(0, Math.floor(Number(item.stock)) || 0);
-                    if (stockItem <= 0) {
-                      return <p style={{ color: "#ff8888", fontSize: "0.85rem", margin: "4px 0 0" }}>⚠ Sin stock disponible</p>;
-                    }
-                    if (item.cantidad >= stockItem) {
-                      return <p style={{ color: "#ffcc66", fontSize: "0.85rem", margin: "4px 0 0" }}>⚠ Máximo disponible ({stockItem} uds)</p>;
-                    }
-                    if (stockItem <= 5) {
-                      return <p style={{ color: "#ffaa66", fontSize: "0.85rem", margin: "4px 0 0" }}>Quedan {stockItem} uds</p>;
-                    }
-                    return null;
-                  })()}
                 </div>
                 <div className="carrito-producto-fila__control-precio">
                   <div className="carrito-producto-fila__qty">

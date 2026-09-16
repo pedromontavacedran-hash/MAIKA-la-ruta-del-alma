@@ -1,8 +1,13 @@
 import type { BarraTopPedidoExitoCfg } from "./barraTopPedidoExito/barraTopPedidoExitoCfg";
 import {
+  ALTURA_BARRA_TOP_MAX,
+  ALTURA_BARRA_TOP_MIN,
   BARRA_TOP_PEDIDO_EXITO_CFG_DEFAULT,
   guardarBarraTopPedidoExitoCfg,
+  ICONOS_BARRA_ESCALA_MAX,
+  ICONOS_BARRA_ESCALA_MIN,
   leerBarraTopPedidoExitoCfg,
+  logoTamanoDesdeAlturaBarra,
   normalizarBarraTopPedidoExitoCfg
 } from "./barraTopPedidoExito/barraTopPedidoExitoCfg";
 import {
@@ -23,7 +28,8 @@ import {
   leerFondoPantallaConfig,
   leerFondoPantallaOscuridad,
   leerFondoPantallaTono,
-  limpiarFondoPantallaConfig
+  limpiarFondoPantallaConfig,
+  type FondoAppCapaPresetId
 } from "./fondoPantallaConfig";
 import {
   guardarHeroBannerAjuste,
@@ -386,6 +392,68 @@ export function buildCheckoutVisualPayloadFromLocalStorage(): CheckoutVisualPres
       ctaOffset: ajuste.ctaOffset
     },
     heroLogo: { ...leerHeroLogoConfig() },
+    layout: { ...leerWebLayoutConfig() }
+  };
+}
+
+/**
+ * Mismo shape que `buildCheckoutVisualPayloadFromLocalStorage` pero con el estado temporal
+ * del panel admin (valores pendientes de aplicar, sin pasar por localStorage).
+ */
+export function buildCheckoutVisualPayloadFromPanelState(params: {
+  barraCfg: BarraTopPedidoExitoCfg;
+  colorFondoBarra: string;
+  colorIconosBarra: string;
+  alturaBarra: number;
+  iconosEscalaPct: number;
+  logoUrlDataPendiente: string | null;
+  fondoPantallaUrl: string;
+  fondoOscuridad: number;
+  fondoTono: string;
+  estrellasDensidad: number;
+  estrellasColor: string;
+  estrellasMovimiento: number;
+  appCapaPreset: FondoAppCapaPresetId;
+  heroBannerSrc: string;
+  heroBannerZoom: number;
+  heroBannerStretchX: number;
+  heroBannerCtaOffset: number;
+  heroLogo: HeroLogoConfig;
+}): CheckoutVisualPresetPayload {
+  const alturaBarraSuperior = Math.max(
+    ALTURA_BARRA_TOP_MIN,
+    Math.min(ALTURA_BARRA_TOP_MAX, Math.round(params.alturaBarra))
+  );
+  return {
+    revision: CHECKOUT_VISUAL_PRESET_REVISION,
+    barra: {
+      ...params.barraCfg,
+      fondoBarraSuperior: params.colorFondoBarra,
+      colorIconosBarraSuperior: params.colorIconosBarra,
+      alturaBarraSuperior,
+      iconosEscalaPct: Math.max(
+        ICONOS_BARRA_ESCALA_MIN,
+        Math.min(ICONOS_BARRA_ESCALA_MAX, Math.round(params.iconosEscalaPct))
+      ),
+      logoTamano: logoTamanoDesdeAlturaBarra(alturaBarraSuperior),
+      ...(params.logoUrlDataPendiente ? { logoUrl: params.logoUrlDataPendiente } : {})
+    },
+    fondo: {
+      pantallaUrl: params.fondoPantallaUrl,
+      oscuridad: params.fondoOscuridad,
+      tono: params.fondoTono,
+      estrellasDensidad: params.estrellasDensidad,
+      estrellasColor: params.estrellasColor,
+      estrellasMovimiento: params.estrellasMovimiento,
+      appCapaPreset: params.appCapaPreset
+    },
+    hero: {
+      bannerSrc: params.heroBannerSrc,
+      zoom: params.heroBannerZoom,
+      stretchX: params.heroBannerStretchX,
+      ctaOffset: params.heroBannerCtaOffset
+    },
+    heroLogo: { ...params.heroLogo },
     layout: { ...leerWebLayoutConfig() }
   };
 }

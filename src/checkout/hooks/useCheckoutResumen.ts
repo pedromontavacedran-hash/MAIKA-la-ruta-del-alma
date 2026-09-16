@@ -80,6 +80,7 @@ export function useCheckoutResumen({
   const primerCampoFaltanteCheckout = useMemo(() => {
     const nombreCompleto = `${(datosCliente.nombre || "").trim()} ${(datosCliente.apellidos || "").trim()}`.trim();
     if (!nombreCompleto) return "Nombre y apellidos";
+    if (nombreCompleto.split(/\s+/).filter(Boolean).length < 2) return "Nombre y apellidos (completos)";
 
     const soloDigitos = (datosCliente.telefono || "").replace(/\D/g, "").trim();
     const tel = soloDigitos.startsWith("0034") && soloDigitos.length > 4

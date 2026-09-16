@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { NavigateFunction } from "react-router-dom";
 import type { Cliente, DireccionUsuario, Usuario } from "../../types";
-import { CLIENTE_VACIO } from "../../app/hooks/useClienteMaika";
 import { DIRECCIONES_MAX } from "../../app/routing/routeMaps";
-import { repartirNombreApellidos } from "../../utils/appIdentity";
 import { construirDireccionBasica, construirDireccionCompleta } from "../../utils/direccion";
 import {
   direccionClave as direccionClaveFn,
@@ -20,57 +18,17 @@ import {
   eliminarDireccionCheckoutPersistida,
   guardarDireccionEnMaikaUsuarios
 } from "../../utils/checkoutDireccionPersist";
-import { perfilUsuarioPayloadDesdeMaika } from "../../utils/perfilPayloadDesdeMaika";
 import { actualizarPerfilOEncolar } from "../../utils/perfilOfflineQueue";
 import { hasClientSession } from "../../services/apiAuth";
-import { prepareDireccionesParaGuardar } from "../../utils/prepareDireccionesParaGuardar";
 import { notificarError, notificarExito } from "../../utils/ui/notificaciones";
 import { direccionCheckoutEsSoloHistorialPedidos } from "../../utils/direccionCheckoutOrigen";
 import { persistirDireccionHistorialSeleccionadaEnLibreta } from "../../utils/persistirHistorialDireccionEnLibreta";
+import {
+  perfilPayloadMaikaConDireccionesActuales,
+  clienteSincronoDesdeUsuario
+} from "../utils/checkoutDireccionesHelpers";
 
 const DIRECCION_LAST_EDITADA_KEY = "maika_direccion_last_editada_id";
-
-function perfilPayloadMaikaConDireccionesActuales(maikaRow: MaikaUsuarioLS, usuarioActual: Usuario | null): Record<string, unknown> {
-  const body = perfilUsuarioPayloadDesdeMaika(maikaRow);
-  if (Array.isArray(body.direcciones)) {
-    const preparado = prepareDireccionesParaGuardar(
-      body.direcciones as DireccionUsuario[],
-      Array.isArray(usuarioActual?.direcciones) ? usuarioActual.direcciones : [],
-      String(body.direccionPredeterminadaId || usuarioActual?.direccionPredeterminadaId || "")
-    );
-    body.direcciones = preparado.direcciones;
-    body.direccionPredeterminadaId = preparado.direccionPredeterminadaId;
-  }
-  return body;
-}
-
-function clienteSincronoDesdeUsuario(usuarioFuente: Usuario | null): Cliente | null {
-  if (!usuarioFuente) return null;
-  const repartido = repartirNombreApellidos(usuarioFuente.nombre || "", "");
-  return {
-    ...CLIENTE_VACIO,
-    nombre: (repartido.nombre || "").toUpperCase(),
-    apellidos: (repartido.apellidos || "").toUpperCase(),
-    nombreApellidos:
-      `${(repartido.nombre || "").trim()} ${(repartido.apellidos || "").trim()}`.trim() || usuarioFuente.nombre || "",
-    email: usuarioFuente.email || "",
-    dni: usuarioFuente.dni || "",
-    telefono: usuarioFuente.telefono || "",
-    direccion: usuarioFuente.direccion || "",
-    calle: usuarioFuente.calle || "",
-    numero: usuarioFuente.numero || "",
-    bloque: usuarioFuente.bloque || "",
-    escalera: usuarioFuente.escalera || "",
-    piso: usuarioFuente.piso || "",
-    puerta: usuarioFuente.puerta || "",
-    cp: usuarioFuente.cp || "",
-    poblacion: usuarioFuente.poblacion || "",
-    provincia: usuarioFuente.provincia || "",
-    ciudad: usuarioFuente.ciudad || "",
-    pais: (usuarioFuente.pais || "").trim() || "ESPAÑA",
-    notas: ""
-  };
-}
 
 export type UseCheckoutDireccionesDeps = {
   datosCliente: Cliente;

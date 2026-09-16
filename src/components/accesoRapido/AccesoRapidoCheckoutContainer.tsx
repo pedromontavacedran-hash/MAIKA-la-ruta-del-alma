@@ -117,13 +117,9 @@ export default function AccesoRapidoCheckoutContainer(props: Props) {
       onEntrar={entrarAccesoRapido}
       onOlvidePassword={() => {
         const emailObjetivo = String(emailRegistrado || "").trim().toLowerCase();
-        if (!emailObjetivo) {
-          notificarError(mostrarNotificacion, "❌ No hay email asociado a este teléfono");
-          return;
-        }
         void (async () => {
           try {
-            await solicitarRecuperacionPasswordApi(emailObjetivo);
+            await solicitarRecuperacionPasswordApi(emailObjetivo, telefono);
             notificarExito(mostrarNotificacion, "✅ Te hemos enviado un enlace seguro para crear tu contraseña.");
           } catch {
             notificarError(mostrarNotificacion, "❌ No se pudo enviar el enlace seguro. Inténtalo más tarde.");

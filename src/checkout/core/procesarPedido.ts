@@ -113,6 +113,9 @@ export function validarCheckoutPedido(input: ValidarCheckoutPedidoInput): Valida
   ) {
     return { ok: false, tipo: "error", mensaje: "Completa todos los datos" };
   }
+  if (nombreCompletoActual.split(/\s+/).filter(Boolean).length < 2) {
+    return { ok: false, tipo: "error", mensaje: "Escribe tu nombre y apellidos completos" };
+  }
   const telefonoNormalizadoCheckout = normalizarTelefonoES9(datosClienteActual.telefono || "");
   if (!/^[67]\d{8}$/.test(telefonoNormalizadoCheckout)) {
     return {

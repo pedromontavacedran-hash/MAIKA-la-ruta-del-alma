@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AuthForm, Cliente, Pagina, Usuario } from "../../types";
 import type { MaikaUsuarioLS } from "../../utils/maikaUsuarios";
 import { normalizarTelefonoES9 } from "../../utils/telefono";
@@ -25,31 +25,12 @@ import {
 } from "../../utils/activacionIdentidadSession";
 import { resetAccesoRapidoCheckoutState } from "../../utils/accesoRapidoState";
 import { tieneEmailRealMaika } from "../../utils/emailTecnicoMaika";
-
-/** Misma sesión JWT que Mi cuenta: API primero y perfil canónico vía /me después. */
-async function loginServidorDesdeAccesoRapido(
-  emailNorm: string,
-  tel9: string,
-  pass: string
-): Promise<LoginApiResponse> {
-  if (emailNorm) {
-    try {
-      return await loginApi(emailNorm, pass);
-    } catch (e) {
-      if (e instanceof LoginApiError && e.status === 404) {
-        return await loginApi(tel9, pass);
-      }
-      throw e;
-    }
-  }
-  return await loginApi(tel9, pass);
-}
+import { loginServidorDesdeAccesoRapido } from "../utils/accesoRapidoLogin";
+import RequisitosPasswordAccesoRapido from "../components/RequisitosPasswordAccesoRapido";
 import {
-  loginApi,
   LoginApiError,
   obtenerEstadoUsuarioPorTelefonoApi,
-  solicitarRecuperacionPasswordApi,
-  type LoginApiResponse
+  solicitarRecuperacionPasswordApi
 } from "../../services/apiAuth";
 import { notificarError, notificarExito } from "../../utils/ui/notificaciones";
 
@@ -273,7 +254,6 @@ export function useAccesoRapidoCheckout(d: UseAccesoRapidoCheckoutDeps) {
 
   const entrarAccesoRapido = useCallback(() => {
     const tel9 = normalizarTelefonoES9(accesoRapidoTelefono || "");
-    const maikaU = findMaikaUsuarioPorTel9(tel9);
     const passInput = String(accesoRapidoLoginPassword || "").trim();
     if (!passInput) {
       notificarError(mostrarNotificacion, "❌ Introduce la contraseña");
@@ -285,11 +265,9 @@ export function useAccesoRapidoCheckout(d: UseAccesoRapidoCheckoutDeps) {
     }
     void (async () => {
       await loadCuentaPage();
-      const emailApiRaw = String(maikaU?.email || "").trim().toLowerCase();
-      const emailApi = tieneEmailRealMaika(emailApiRaw) ? emailApiRaw : "";
       let usuarioLogin: Usuario | null = null;
       try {
-        const auth = await loginServidorDesdeAccesoRapido(emailApi, tel9, passInput);
+        const auth = await loginServidorDesdeAccesoRapido(tel9, passInput);
         usuarioLogin = await iniciarSesionConToken(auth.token);
       } catch (e) {
         if (e instanceof LoginApiError && e.status === 401) {
@@ -402,34 +380,31 @@ export function useAccesoRapidoCheckout(d: UseAccesoRapidoCheckoutDeps) {
         if (confirmacionEstadoTelefonoSeqRef.current !== confirmacionSeq) return;
         if (!estado.existe) return;
 
-        const emailBackend = String(estado.email || "").trim().toLowerCase();
-        const emailRealBackend = tieneEmailRealMaika(emailBackend) ? emailBackend : "";
         const usuariosMaika = leerMaikaUsuarios();
         let actualizado = false;
         const usuariosActualizados = usuariosMaika.map((u) => {
           if (normalizarTelefonoES9(u.telefono || "") !== tel9) return u;
           const siguiente = {
             ...u,
-            email: emailBackend || u.email,
             hasPassword: !!estado.hasPassword
           };
           actualizado =
             actualizado ||
-            siguiente.email !== u.email ||
             siguiente.hasPassword !== u.hasPassword;
           return siguiente;
         });
 
         if (actualizado) guardarMaikaUsuarios(usuariosActualizados);
 
-        const sinEmailBackend = !emailRealBackend;
-        const sinPasswordBackend = !!emailRealBackend && !estado.hasPassword;
+        const sinEmailBackend = !estado.hasEmail;
+        const sinPasswordBackend = estado.hasEmail && !estado.hasPassword;
         setAccesoRapidoCuentaSinEmail(sinEmailBackend);
         setAccesoRapidoCuentaSinPassword(sinPasswordBackend);
         setAccesoRapidoCuentaConActividadSinEmail(
           sinEmailBackend && telefonoTieneActividadSinEmail(tel9)
         );
-        setAccesoRapidoEmailRegistrado(emailRealBackend);
+        // Conserva un email que ya conocía este navegador, pero nunca recibe uno nuevo desde esta consulta pública.
+        setAccesoRapidoEmailRegistrado(emailReal);
       })
       .catch(() => {
         /* Confirmación silenciosa: si falla, se mantiene la predicción local. */
@@ -575,12 +550,8 @@ export function useAccesoRapidoCheckout(d: UseAccesoRapidoCheckoutDeps) {
     void (async () => {
       await loadCuentaPage();
       const emailFinal = (accesoRapidoEmailVerificado || usuariosMaika[idx].email || "").trim().toLowerCase();
-      if (!tieneEmailRealMaika(emailFinal)) {
-        notificarError(mostrarNotificacion, "❌ Necesitamos un e-mail para enviarte el enlace seguro de contraseña.");
-        return;
-      }
       try {
-        await solicitarRecuperacionPasswordApi(emailFinal);
+        await solicitarRecuperacionPasswordApi(emailFinal, tel9);
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         notificarError(mostrarNotificacion, `❌ ${msg}`);
@@ -613,20 +584,8 @@ export function useAccesoRapidoCheckout(d: UseAccesoRapidoCheckoutDeps) {
     mostrarNotificacion
   ]);
 
-  const renderRequisitosPassword = useCallback((password: string): ReactNode => {
-    const estado = evaluarPasswordBasica(password || "");
-    const tieneMinimo = estado.tieneMinimo;
-    const tieneLetrasYNumeros = estado.tieneLetrasYNumeros;
-    return (
-      <div style={{ marginTop: 8, marginBottom: 2, fontSize: 12, lineHeight: 1.45 }}>
-        <div style={{ color: tieneMinimo ? "rgba(126,205,143,0.95)" : "rgba(255,255,255,0.62)" }}>
-          {tieneMinimo ? "✔" : "•"} Minimo 8 caracteres
-        </div>
-        <div style={{ color: tieneLetrasYNumeros ? "rgba(126,205,143,0.95)" : "rgba(255,255,255,0.62)" }}>
-          {tieneLetrasYNumeros ? "✔" : "•"} Contiene letras y numeros
-        </div>
-      </div>
-    );
+  const renderRequisitosPassword = useCallback((password: string) => {
+    return <RequisitosPasswordAccesoRapido password={password} />;
   }, []);
 
   useEffect(() => {
