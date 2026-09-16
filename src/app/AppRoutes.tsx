@@ -10,6 +10,7 @@ import {
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import ExperienciaAuthGuard from "../components/ExperienciaAuthGuard";
 import ServiciosPage from "../pages/ServiciosPage";
+import TarotEvolutivoPage from "../pages/TarotEvolutivoPage";
 import RitualDelMesPage from "../pages/RitualDelMesPage";
 import TestimoniosPage from "../pages/TestimoniosPage";
 import EnviosPage from "../pages/EnviosPage";
@@ -397,6 +398,7 @@ export function AppRoutes(p: AppRoutesProps) {
     )} />
 
     <Route path="/servicios" element={bloqueLayoutContenido(<ServiciosPage />)} />
+    <Route path="/servicios/tarot-evolutivo" element={bloqueLayoutContenido(<TarotEvolutivoPage />)} />
     <Route path="/suenos" element={bloqueLayoutSuenos(<ExperienciaAuthGuard tipo="sueno"><Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando MAIKA...</div>}><Sueno /></Suspense></ExperienciaAuthGuard>)} />
     <Route path="/sueno-premium" element={bloqueLayoutContenido(<ExperienciaAuthGuard tipo="sueno"><Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando MAIKA...</div>}><SuenoPremiumPage /></Suspense></ExperienciaAuthGuard>)} />
     <Route path="/horoscopos" element={bloqueLayoutContenido(<ExperienciaAuthGuard tipo="horoscopo"><Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando MAIKA...</div>}><HoroscoposPage /></Suspense></ExperienciaAuthGuard>)} />

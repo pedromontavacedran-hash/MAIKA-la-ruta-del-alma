@@ -1,14 +1,22 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { CHECKOUT_CONFIG } from "../config/checkoutConfig";
 import { THEME } from "../config";
+import { RUTA_TAROT_EVOLUTIVO } from "./tarotEvolutivoRuta";
 
 const URL_WHATSAPP_CONSULTA = `https://wa.me/${CHECKOUT_CONFIG.whatsappNumber}?text=${encodeURIComponent(
   "Hola Maika, no sé cuál servicio elegir, ¿me puedes orientar?"
 )}`;
 
+/** Único caso especial: la tarjeta "Tarot Evolutivo" abre su propia pantalla con las 4 modalidades. */
+function esTarjetaTarotEvolutivo(titulo: string): boolean {
+  return /tarot evolutivo/i.test(titulo);
+}
+
 export default function ServiciosPage() {
   const { serviciosInicio } = useApp();
+  const navigate = useNavigate();
 
   /*
    * Escritorio (≥900px): con las 3 tarjetas compactadas la página ya cabe en pantalla, así que
@@ -34,63 +42,110 @@ export default function ServiciosPage() {
 
       <section className="inicio-servicios-bloque servicios-page__bloque-tarjetas" data-maika="services-section" aria-labelledby="pagina-servicios-titulo">
         <div className="inicio-servicios-bloque__grid inicio-servicios-bloque__grid--servicios">
-          {serviciosInicio.map((s, idx) => (
-            <div
-              key={idx}
-              className={`card inicio-servicio-card inicio-servicio-card--pagina-servicios${s.fraseBreve?.trim() ? " inicio-servicio-card--con-frase" : ""}`}
-              style={{ display: "flex", flexDirection: "column", minHeight: 230 }}
-            >
-              <h3
-                className="inicio-servicio-titulo"
-                style={{
-                  color: THEME.goldMain,
-                  fontSize: 18,
-                  textAlign: "center",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center"
-                }}
+          {serviciosInicio.map((s, idx) => {
+            const esTarot = esTarjetaTarotEvolutivo(s.titulo);
+            const irATarot = () => navigate(RUTA_TAROT_EVOLUTIVO);
+            return (
+              <div
+                key={idx}
+                className={`card inicio-servicio-card inicio-servicio-card--pagina-servicios${s.fraseBreve?.trim() ? " inicio-servicio-card--con-frase" : ""}`}
+                style={{ display: "flex", flexDirection: "column", minHeight: 230, cursor: esTarot ? "pointer" : undefined }}
+                onClick={esTarot ? irATarot : undefined}
+                role={esTarot ? "button" : undefined}
+                tabIndex={esTarot ? 0 : undefined}
+                onKeyDown={
+                  esTarot
+                    ? (e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          irATarot();
+                        }
+                      }
+                    : undefined
+                }
               >
-                {s.titulo}
-              </h3>
-              {s.fraseBreve?.trim() ? (
-                <p className="inicio-servicio-card__frase">{s.fraseBreve.trim()}</p>
-              ) : null}
-              <img
-                src={s.imagen.startsWith("/") ? s.imagen : `/${s.imagen}`}
-                alt={s.titulo.replace(/[\u{1F300}-\u{1F9FF}]/gu, "").trim() || `Servicio ${idx + 1}`}
-                width={480}
-                height={276}
-                loading="lazy"
-                decoding="async"
-                style={{ width: "100%", height: 78, objectFit: "cover", borderRadius: 10, border: "1px solid gold", display: "block" }}
-              />
-              <p className="inicio-servicio-duracion" style={{ color: "white", fontSize: 14, textAlign: "center" }}>{s.duracion}</p>
-              <p className="inicio-servicio-precio-linea" style={{ color: THEME.goldMain, fontSize: 18, fontWeight: "bold", textAlign: "center" }}>{s.precio}</p>
-              <a
-                href={s.urlWhatsApp}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: "block",
-                  width: "100%",
-                  marginTop: "auto",
-                  padding: "8px 16px",
-                  background: THEME.goldGradient,
-                  color: THEME.bg,
-                  fontSize: 16,
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  borderRadius: 20,
-                  textDecoration: "none",
-                  border: `1px solid ${THEME.goldMain}`,
-                  cursor: "pointer"
-                }}
-              >
-                {s.textoBoton}
-              </a>
-            </div>
-          ))}
+                <h3
+                  className="inicio-servicio-titulo"
+                  style={{
+                    color: THEME.goldMain,
+                    fontSize: 18,
+                    textAlign: "center",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center"
+                  }}
+                >
+                  {s.titulo}
+                </h3>
+                {s.fraseBreve?.trim() ? (
+                  <p className="inicio-servicio-card__frase">{s.fraseBreve.trim()}</p>
+                ) : null}
+                <img
+                  src={s.imagen.startsWith("/") ? s.imagen : `/${s.imagen}`}
+                  alt={s.titulo.replace(/[\u{1F300}-\u{1F9FF}]/gu, "").trim() || `Servicio ${idx + 1}`}
+                  width={480}
+                  height={276}
+                  loading="lazy"
+                  decoding="async"
+                  style={{ width: "100%", height: 78, objectFit: "cover", borderRadius: 10, border: "1px solid gold", display: "block" }}
+                />
+                {esTarot ? null : (
+                  <>
+                    <p className="inicio-servicio-duracion" style={{ color: "white", fontSize: 14, textAlign: "center" }}>{s.duracion}</p>
+                    <p className="inicio-servicio-precio-linea" style={{ color: THEME.goldMain, fontSize: 18, fontWeight: "bold", textAlign: "center" }}>{s.precio}</p>
+                  </>
+                )}
+                {esTarot ? (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      irATarot();
+                    }}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      marginTop: "auto",
+                      padding: "8px 16px",
+                      background: THEME.goldGradient,
+                      color: THEME.bg,
+                      fontSize: 16,
+                      fontWeight: "bold",
+                      textAlign: "center",
+                      borderRadius: 20,
+                      border: `1px solid ${THEME.goldMain}`,
+                      cursor: "pointer"
+                    }}
+                  >
+                    Ver opciones
+                  </button>
+                ) : (
+                  <a
+                    href={s.urlWhatsApp}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      marginTop: "auto",
+                      padding: "8px 16px",
+                      background: THEME.goldGradient,
+                      color: THEME.bg,
+                      fontSize: 16,
+                      fontWeight: "bold",
+                      textAlign: "center",
+                      borderRadius: 20,
+                      textDecoration: "none",
+                      border: `1px solid ${THEME.goldMain}`,
+                      cursor: "pointer"
+                    }}
+                  >
+                    {s.textoBoton}
+                  </a>
+                )}
+              </div>
+            );
+          })}
         </div>
       </section>
 
