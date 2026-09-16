@@ -98,21 +98,29 @@ export async function deleteAdminCategoriaApi(id: string): Promise<void> {
   if (!res.ok) throw new Error(await readErrorMessage(res, `No se pudo eliminar la categoría (${res.status})`));
 }
 
-export async function postAdminSubcategoriaApi(categoriaId: string, nombre: string): Promise<SubcategoriaEntrada> {
+export async function postAdminSubcategoriaApi(
+  categoriaId: string,
+  nombre: string,
+  padreSubcategoriaId?: string
+): Promise<SubcategoriaEntrada> {
   const res = await fetchAdminAutenticado(`${getApiBaseUrl()}/admin/subcategorias`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify({ categoriaId, nombre })
+    body: JSON.stringify({ categoriaId, nombre, padreSubcategoriaId: padreSubcategoriaId || undefined })
   });
   if (!res.ok) throw new Error(await readErrorMessage(res, `No se pudo crear la subcategoría (${res.status})`));
   return (await res.json()) as SubcategoriaEntrada;
 }
 
-export async function putAdminSubcategoriaApi(id: string, nombre: string): Promise<SubcategoriaEntrada> {
+export async function putAdminSubcategoriaApi(
+  id: string,
+  nombre: string,
+  padreSubcategoriaId?: string
+): Promise<SubcategoriaEntrada> {
   const res = await fetchAdminAutenticado(`${getApiBaseUrl()}/admin/subcategorias/${encodeURIComponent(id)}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify({ nombre })
+    body: JSON.stringify({ nombre, padreSubcategoriaId: padreSubcategoriaId || undefined })
   });
   if (!res.ok) throw new Error(await readErrorMessage(res, `No se pudo guardar la subcategoría (${res.status})`));
   return (await res.json()) as SubcategoriaEntrada;

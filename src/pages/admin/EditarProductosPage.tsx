@@ -8,6 +8,7 @@ import { notificarExito } from "../../utils/ui/notificaciones";
 import { putAdminProductoApi, deleteAdminProductoApi, aplicarCatalogoActivoEnEstado } from "../../services/apiAdminProductos";
 import ModalBase from "../../components/ModalBase";
 import ProductoForm from "../../components/admin/ProductoForm";
+import ProductoEnriquecimientoPanel from "../../components/admin/ProductoEnriquecimientoPanel";
 
 export interface EditarProductosPageProps {
   setPagina: (p: Pagina) => void;
@@ -540,6 +541,13 @@ export default function EditarProductosPage(props: EditarProductosPageProps) {
             </div>
           </section>
         ) : null}
+        <ProductoEnriquecimientoPanel
+          producto={productoCompleto}
+          onProductoActualizado={() =>
+            aplicarCatalogoActivoEnEstado(setVelas, setInciensos, setFiguras, setKits, setJoyas)
+          }
+          mostrarNotificacion={mostrarNotificacion}
+        />
       </ProductoForm>
     </div>
   );

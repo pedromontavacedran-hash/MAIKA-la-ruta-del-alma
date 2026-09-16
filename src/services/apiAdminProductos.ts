@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
 import { getApiBaseUrl } from "../config/apiBaseUrl";
-import type { Producto } from "../types";
+import type { CampoEnriquecimientoProducto, Producto } from "../types";
 import { listaProductosSegura } from "../utils/listaProductosSegura";
 import { clearAdminAuthorization } from "../utils/adminAuth";
 import { fetchMaikaApi } from "../utils/fetchMaikaApi";
@@ -55,6 +55,47 @@ export async function postAdminProductoApi(body: Record<string, unknown>): Promi
   });
   if (!res.ok) {
     throw new Error(await readErrorMessage(res, `No se pudo crear el producto (${res.status})`));
+  }
+  return (await res.json()) as Producto;
+}
+
+/**
+ * Lanza el importador sobre un producto (`POST /admin/productos/:id/enriquecer`).
+ * `body`: { url?, ean?, marca?, sourceType? } — si se omite, usa lo ya guardado en el producto.
+ */
+export async function postAdminEnriquecerProductoApi(
+  id: number,
+  body: Record<string, unknown>
+): Promise<Producto> {
+  const url = `${getApiBaseUrl()}/admin/productos/${encodeURIComponent(String(id))}/enriquecer`;
+  const res = await fetchAdminAutenticado(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    throw new Error(await readErrorMessage(res, `No se pudo enriquecer el producto (${res.status})`));
+  }
+  return (await res.json()) as Producto;
+}
+
+/**
+ * Revisión humana de un campo importado (`PATCH /admin/productos/:id/enriquecimiento/:campo`).
+ * action "accept" admite sourceUrl/value para elegir alternativa en conflicto; "correct" exige value.
+ */
+export async function patchAdminEnriquecimientoCampoApi(
+  id: number,
+  campo: CampoEnriquecimientoProducto,
+  body: { action: "accept" | "reject" | "correct"; value?: unknown; sourceUrl?: string }
+): Promise<Producto> {
+  const url = `${getApiBaseUrl()}/admin/productos/${encodeURIComponent(String(id))}/enriquecimiento/${encodeURIComponent(campo)}`;
+  const res = await fetchAdminAutenticado(url, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    throw new Error(await readErrorMessage(res, `No se pudo actualizar el dato (${res.status})`));
   }
   return (await res.json()) as Producto;
 }

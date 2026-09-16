@@ -1,5 +1,5 @@
 import type { EditUsuarioForm } from "../App";
-import { useRef, useState, type Dispatch, type SetStateAction } from "react";
+import { useRef, useState, useEffect, type Dispatch, type SetStateAction } from "react";
 import { THEME } from "../config";
 import ModalBase from "./ModalBase";
 import { checkoutInputStyle } from "../styles/inputStyle";
@@ -11,7 +11,7 @@ interface EditUsuarioModalProps {
   editUsuarioForm: EditUsuarioForm | null;
   setEditUsuarioForm: Dispatch<SetStateAction<EditUsuarioForm | null>>;
   onClose: () => void;
-  onSave: () => void;
+  onSave: () => void | Promise<void>;
 }
 
 const editModalInputStyle: React.CSSProperties = {
@@ -47,7 +47,6 @@ function abrirWhatsappTemporal(telefono: string, email: string, password: string
     "",
     "Caduca en 10 minutos. Entra y cámbiala desde Mi Cuenta > Cambiar contraseña."
   ].join("\n");
-  void navigator.clipboard?.writeText(texto).catch(() => {});
   if (telIntl) {
     window.open(`https://wa.me/${telIntl}?text=${encodeURIComponent(texto)}`, "_blank", "noopener,noreferrer");
   }
@@ -61,7 +60,13 @@ export default function EditUsuarioModal({
   onSave
 }: EditUsuarioModalProps) {
   const [mostrarPassword, setMostrarPassword] = useState(false);
+  const [nombreDesbloqueado, setNombreDesbloqueado] = useState(false);
+  useEffect(() => {
+    if (!abierto) setNombreDesbloqueado(false);
+  }, [abierto]);
   const [buscandoCalle, setBuscandoCalle] = useState(false);
+  const [confirmarTemporal, setConfirmarTemporal] = useState<null | { telefono: string; email: string; password: string }>(null);
+  const [guardandoTemporal, setGuardandoTemporal] = useState(false);
   const dniRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const telefonoRef = useRef<HTMLInputElement>(null);
@@ -82,6 +87,7 @@ export default function EditUsuarioModal({
   if (!abierto || !editUsuarioForm) return null;
 
   return (
+    <>
     <ModalBase
       abierto
       onClose={onClose}
@@ -116,24 +122,48 @@ export default function EditUsuarioModal({
           }}
         >
           <div>
-            <label style={{ fontSize: 13, color: "rgba(255,255,255,0.65)", display: "block", marginBottom: 6 }}>
-              Nombre 🔒
-            </label>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+              <span style={{ fontSize: 13, color: "rgba(255,255,255,0.65)" }}>
+                Nombre *
+              </span>
+              <button
+                type="button"
+                onClick={() => setNombreDesbloqueado((v) => !v)}
+                title={nombreDesbloqueado ? "Volver a bloquear el nombre" : "Desbloquear para corregir el nombre"}
+                style={{
+                  background: "transparent",
+                  border: `1px solid ${nombreDesbloqueado ? "#7ecd8f" : THEME.goldMain}`,
+                  color: nombreDesbloqueado ? "#7ecd8f" : THEME.goldMain,
+                  borderRadius: 8,
+                  padding: "2px 7px",
+                  cursor: "pointer",
+                  fontSize: 12,
+                  lineHeight: 1.2
+                }}
+              >
+                {nombreDesbloqueado ? "🔓" : "🔒"}
+              </button>
+            </div>
             <input
               type="text"
               placeholder="Nombre y apellidos"
               value={editUsuarioForm.nombre}
-              disabled
-              readOnly
-              aria-readonly="true"
+              disabled={!nombreDesbloqueado}
+              readOnly={!nombreDesbloqueado}
+              onChange={(e) => {
+                if (!nombreDesbloqueado) return;
+                setEditUsuarioForm({ ...editUsuarioForm, nombre: e.target.value });
+              }}
               style={{
                 ...editModalInputStyle,
-                opacity: 0.88,
-                cursor: "not-allowed"
+                opacity: nombreDesbloqueado ? 1 : 0.88,
+                cursor: nombreDesbloqueado ? "text" : "not-allowed"
               }}
             />
             <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginTop: 6 }}>
-              No editable (asociado al pedido / cuenta)
+              {nombreDesbloqueado
+                ? "Nombre y apellidos completos (sale en pedidos y facturas)"
+                : "Bloqueado (asociado a pedidos). Pulsa 🔒 solo para corregir errores"}
             </div>
           </div>
           <div>
@@ -224,13 +254,13 @@ export default function EditUsuarioModal({
           onClick={() => {
             const pwd = generarPasswordTemporalMaika(editUsuarioForm.nombre);
             setEditUsuarioForm({ ...editUsuarioForm, password: pwd, passwordTemporal: true });
-            abrirWhatsappTemporal(editUsuarioForm.telefono, editUsuarioForm.email, pwd);
+            setConfirmarTemporal({ telefono: editUsuarioForm.telefono, email: editUsuarioForm.email, password: pwd });
           }}
           style={{
             width: "100%",
             padding: "10px 12px",
             marginTop: -6,
-            marginBottom: 14,
+            marginBottom: 8,
             borderRadius: 10,
             border: `1px solid ${THEME.goldMain}`,
             background: "rgba(212,175,55,0.1)",
@@ -242,9 +272,25 @@ export default function EditUsuarioModal({
           Generar acceso temporal WhatsApp (10 min)
         </button>
         {editUsuarioForm.passwordTemporal && editUsuarioForm.password ? (
-          <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 11, marginTop: -8, marginBottom: 14 }}>
-            Se guardará como contraseña temporal: caduca en 10 minutos y el cliente deberá cambiarla al entrar.
-          </p>
+          <div
+            role="alert"
+            style={{
+              marginTop: 0,
+              marginBottom: 14,
+              padding: "10px 12px",
+              borderRadius: 10,
+              border: `1px solid ${THEME.goldMain}`,
+              background: "rgba(212,175,55,0.18)",
+              color: THEME.goldMain,
+              fontSize: 12,
+              lineHeight: 1.45,
+              fontWeight: 700
+            }}
+          >
+            ⚠️ Contraseña temporal generada. Confirma el envío por WhatsApp: se guardará en el
+            servidor y se abrirá WhatsApp con el mensaje. Caduca en 10 minutos y el cliente deberá
+            cambiarla al entrar.
+          </div>
         ) : null}
 
         <p style={{ fontSize: 13, color: THEME.goldMain, fontWeight: 700, letterSpacing: 0.4, marginBottom: 6, marginTop: 10 }}>
@@ -440,6 +486,188 @@ export default function EditUsuarioModal({
           </button>
         </div>
     </ModalBase>
+
+    {confirmarTemporal && (
+      <ModalBase
+        abierto
+        onClose={() => setConfirmarTemporal(null)}
+        zIndex={12000}
+        maxWidth="560px"
+        styleCard={{
+          background: THEME.bg,
+          border: `3px solid ${THEME.goldMain}`,
+          borderRadius: 20,
+          padding: 0,
+          width: "96%",
+          maxHeight: "96vh",
+          overflowY: "auto",
+          boxShadow: "0 24px 80px rgba(0,0,0,0.85)"
+        }}
+      >
+        {/* Cabecera explícita */}
+        <div
+          style={{
+            background: "linear-gradient(135deg, rgba(212,175,55,0.22), rgba(212,175,55,0.08))",
+            borderBottom: `2px solid ${THEME.goldMain}`,
+            padding: "22px 24px",
+            borderTopLeftRadius: 18,
+            borderTopRightRadius: 18,
+            textAlign: "center"
+          }}
+        >
+          <div style={{ fontSize: 40, lineHeight: 1, marginBottom: 6 }}>🔐</div>
+          <h2 style={{ color: THEME.goldMain, margin: 0, fontSize: 22, fontWeight: 800, letterSpacing: 0.5 }}>
+            ACCESO TEMPORAL
+          </h2>
+          <p style={{ color: "rgba(255,255,255,0.75)", margin: "6px 0 0", fontSize: 12, letterSpacing: 0.3 }}>
+            Vas a guardar una contraseña temporal y enviarla por WhatsApp
+          </p>
+        </div>
+
+        {/* Cuerpo con datos del cliente y contraseña */}
+        <div style={{ padding: "20px 24px" }}>
+          <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 11, margin: "0 0 14px", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700 }}>
+            Cliente
+          </p>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr",
+              gap: 8,
+              padding: "14px 16px",
+              borderRadius: 12,
+              border: `1px solid rgba(255,255,255,0.18)`,
+              background: "rgba(255,255,255,0.04)",
+              marginBottom: 18
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: 13 }}>
+              <span style={{ color: "rgba(255,255,255,0.55)" }}>Nombre</span>
+              <span style={{ color: "#fff", fontWeight: 600, textAlign: "right" }}>{editUsuarioForm.nombre || "—"}</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: 13 }}>
+              <span style={{ color: "rgba(255,255,255,0.55)" }}>Teléfono</span>
+              <span style={{ color: "#fff", fontWeight: 600, textAlign: "right" }}>{confirmarTemporal.telefono || "—"}</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: 13 }}>
+              <span style={{ color: "rgba(255,255,255,0.55)" }}>Email</span>
+              <span style={{ color: "#fff", fontWeight: 600, textAlign: "right", overflowWrap: "anywhere" }}>{confirmarTemporal.email || "—"}</span>
+            </div>
+          </div>
+
+          <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 11, margin: "0 0 10px", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700 }}>
+            Contraseña temporal (caduca en 10 min)
+          </p>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "12px 14px",
+              borderRadius: 12,
+              border: `2px solid ${THEME.goldMain}`,
+              background: "rgba(212,175,55,0.12)",
+              marginBottom: 18
+            }}
+          >
+            <code style={{ color: THEME.goldMain, fontSize: 16, fontWeight: 700, flex: 1, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", overflowWrap: "anywhere" }}>
+              {confirmarTemporal.password}
+            </code>
+            <button
+              type="button"
+              onClick={() => { void navigator.clipboard?.writeText(confirmarTemporal.password).catch(() => {}); }}
+              aria-label="Copiar contraseña"
+              title="Copiar contraseña"
+              style={{
+                background: "transparent",
+                border: `1px solid ${THEME.goldMain}`,
+                color: THEME.goldMain,
+                borderRadius: 8,
+                padding: "6px 10px",
+                cursor: "pointer",
+                fontSize: 13,
+                fontWeight: 700
+              }}
+            >
+              Copiar
+            </button>
+          </div>
+
+          <div
+            role="alert"
+            style={{
+              padding: "12px 14px",
+              borderRadius: 10,
+              border: `1px solid rgba(255,180,80,0.4)`,
+              background: "rgba(255,180,80,0.08)",
+              color: "#ffcc80",
+              fontSize: 12.5,
+              lineHeight: 1.5,
+              marginBottom: 18
+            }}
+          >
+            ⚠️ Al confirmar se <strong>guardará en el servidor</strong> y se abrirá WhatsApp con el mensaje.
+            El cliente deberá cambiarla al entrar. Si cancelas, no se guarda nada.
+          </div>
+        </div>
+
+        {/* Botones grandes */}
+        <div style={{ display: "flex", gap: 12, padding: "0 24px 22px" }}>
+          <button
+            type="button"
+            onClick={() => setConfirmarTemporal(null)}
+            disabled={guardandoTemporal}
+            style={{
+              flex: 1,
+              padding: "14px 16px",
+              borderRadius: 14,
+              border: `1px solid rgba(255,255,255,0.3)`,
+              background: "transparent",
+              color: "rgba(255,255,255,0.8)",
+              cursor: guardandoTemporal ? "not-allowed" : "pointer",
+              fontWeight: 700,
+              fontSize: 15
+            }}
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            disabled={guardandoTemporal}
+            onClick={async () => {
+              const datos = confirmarTemporal;
+              if (!datos) return;
+              setGuardandoTemporal(true);
+              try {
+                await onSave();
+                abrirWhatsappTemporal(datos.telefono, datos.email, datos.password);
+              } catch {
+                /* onSave ya notifica errores; no abrimos WhatsApp si falla */
+              } finally {
+                setGuardandoTemporal(false);
+                setConfirmarTemporal(null);
+              }
+            }}
+            style={{
+              flex: 1.4,
+              padding: "14px 16px",
+              borderRadius: 14,
+              border: `2px solid ${THEME.goldMain}`,
+              background: "linear-gradient(135deg, rgba(212,175,55,0.25), rgba(212,175,55,0.1))",
+              color: THEME.goldMain,
+              cursor: guardandoTemporal ? "not-allowed" : "pointer",
+              fontWeight: 800,
+              fontSize: 15,
+              letterSpacing: 0.3,
+              opacity: guardandoTemporal ? 0.6 : 1
+            }}
+          >
+            {guardandoTemporal ? "Guardando…" : "✓ Guardar y enviar por WhatsApp"}
+          </button>
+        </div>
+      </ModalBase>
+    )}
+    </>
   );
 }
 

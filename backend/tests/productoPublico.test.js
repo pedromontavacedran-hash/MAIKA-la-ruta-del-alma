@@ -42,3 +42,23 @@ test("productoPublicoTienda preserva campos publicos", () => {
   assert.equal(pub.descripcion, "Vela ritual");
   assert.equal(pub.imagen, "vela.jpg");
 });
+
+test("productoPublicoTienda no expone enriquecimiento sin revisar", () => {
+  const p = {
+    id: 1,
+    nombre: "Incienso",
+    precio: 5,
+    stock: 3,
+    categoria: "inciensos",
+    activo: true,
+    marca: "ALAUKIK",
+    enriquecimiento: {
+      status: "imported",
+      fields: { marca: { value: "CandidatoSinRevisar", status: "found" } },
+      sources: [{ url: "https://proveedor.example.com/x" }]
+    }
+  };
+  const pub = productoPublicoTienda(p);
+  assert.equal("enriquecimiento" in pub, false, "los candidatos importados son solo de administración");
+  assert.equal(pub.marca, "ALAUKIK", "los campos planos aprobados sí se exponen");
+});

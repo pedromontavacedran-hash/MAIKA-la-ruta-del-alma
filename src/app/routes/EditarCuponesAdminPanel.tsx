@@ -5,6 +5,7 @@ import { inputStyle } from "../../styles/inputStyle";
 import type { Pagina } from "../../types";
 import { getAdminSessionRemainingMs } from "../../utils/adminAuth";
 import { notificarError, notificarExito } from "../../utils/ui/notificaciones";
+import { programarPublicacionDisenoWeb } from "../../services/apiDisenoWeb";
 
 export type CuponAdminEntrada = { tipo: "porcentaje" | "envio_gratis"; valor: number };
 
@@ -132,6 +133,7 @@ export function EditarCuponesAdminPanel({
           type="button"
           onClick={() => {
             localStorage.setItem(CUPONES_MAIKA_KEY, JSON.stringify(cuponesAdmin));
+            programarPublicacionDisenoWeb();
             if (getAdminSessionRemainingMs() > 0) {
               setPagina("admin");
             }

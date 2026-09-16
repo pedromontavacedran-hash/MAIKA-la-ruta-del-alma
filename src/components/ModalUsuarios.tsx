@@ -3,7 +3,7 @@ import type { Usuario } from "../App";
 import ModalConfirmacion from "../ModalConfirmacion";
 import AdminPageNav from "./admin/AdminPageNav";
 import { THEME } from "../config";
-import { eliminarUsuarioBackendApi, getJwtTokenParaOperacionesUsuarios } from "../services/apiAuth";
+import { eliminarUsuarioBackendApi, bloquearUsuarioBackendApi, getJwtTokenParaOperacionesUsuarios } from "../services/apiAuth";
 import { lineaCompletaDesdeDatosEnvio } from "../utils/pedidos/direccionPedidoVista";
 import { notificarExito } from "../utils/ui/notificaciones";
 
@@ -126,6 +126,28 @@ export default function ModalUsuarios({
 
   const handleEliminar = (usuario: Usuario) => {
     setUsuarioAEliminar(usuario);
+  };
+
+  const handleBloquear = async (usuario: Usuario) => {
+    const bloquear = !usuario.bloqueado;
+    const r = await bloquearUsuarioBackendApi(usuario.id, bloquear);
+    if (r.ok === false) {
+      mostrarNotificacion("❌ No se pudo bloquear/desbloquear en el servidor.", "error");
+      return;
+    }
+    const nuevos = usuariosState.map((u: Usuario) =>
+      u.id === usuario.id
+        ? { ...u, bloqueado: bloquear, bloqueadoMotivo: bloquear ? "Bloqueado por administrador" : undefined, bloqueadoEn: bloquear ? new Date().toISOString() : undefined }
+        : u
+    );
+    setUsuariosState(nuevos);
+    if (onUpdateUsuario) {
+      onUpdateUsuario(nuevos);
+    }
+    notificarExito(
+      mostrarNotificacion,
+      bloquear ? `🚫 Usuario ${usuario.nombre} bloqueado` : `✅ Usuario ${usuario.nombre} desbloqueado`
+    );
   };
 
   const handleVerificar = (usuario: Usuario) => {
@@ -408,8 +430,11 @@ export default function ModalUsuarios({
 
                     <td style={{ padding: "12px 12px", verticalAlign: "top", textAlign: "left" }}>
                       <div style={{ minWidth: 0, flex: 1, lineHeight: 1.35, fontSize: 12 }}>
-                        <div style={{ color: "white", fontWeight: "bold", fontSize: 12, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", height: 16 }}>
+                        <div style={{ color: "white", fontWeight: "bold", fontSize: 12, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", height: 16, display: "flex", alignItems: "center", gap: 6 }}>
                           {usuario.nombre}
+                          {usuario.bloqueado ? (
+                            <span style={{ fontSize: 10, color: "#ff4444", border: "1px solid #ff4444", borderRadius: 6, padding: "1px 5px", fontWeight: 700, letterSpacing: 0.5 }}>BLOQUEADO</span>
+                          ) : null}
                         </div>
                         <div style={{ color: THEME.goldMain, fontSize: 11, height: 16, marginTop: 2 }}>
                           ID: {String(usuario.id).slice(-6)}
@@ -468,6 +493,25 @@ export default function ModalUsuarios({
                           title={onVerDetalle ? "Ver ficha (detalle cliente)" : "Editar"}
                         >
                           🔎
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            void handleBloquear(usuario);
+                          }}
+                          style={{
+                            background: "transparent",
+                            border: `1px solid ${usuario.bloqueado ? "#ff4444" : "#ff9944"}`,
+                            color: usuario.bloqueado ? "#ff4444" : "#ff9944",
+                            padding: "5px 8px",
+                            borderRadius: 10,
+                            cursor: "pointer",
+                            fontSize: 12
+                          }}
+                          title={usuario.bloqueado ? "Desbloquear usuario" : "Bloquear usuario (no podrá iniciar sesión)"}
+                        >
+                          {usuario.bloqueado ? "🔒" : "🔓"}
                         </button>
 
                         <button

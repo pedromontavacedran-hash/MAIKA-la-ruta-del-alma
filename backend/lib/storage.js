@@ -354,7 +354,10 @@ export function usuarioPublicoPerfil(u) {
       direcciones: [],
       verificado: false,
       mustChangePassword: false,
-      hasPassword: false
+      hasPassword: false,
+      bloqueado: false,
+      bloqueadoMotivo: "",
+      bloqueadoEn: ""
     };
   }
   return {
@@ -378,7 +381,10 @@ export function usuarioPublicoPerfil(u) {
     direcciones: Array.isArray(u.direcciones) ? u.direcciones : [],
     verificado: !!u.verificado,
     mustChangePassword: !!u.mustChangePassword,
-    hasPassword: !!String(u.password || "").trim()
+    hasPassword: !!String(u.password || "").trim(),
+    bloqueado: !!u.bloqueado,
+    bloqueadoMotivo: String(u.bloqueadoMotivo || ""),
+    bloqueadoEn: u.bloqueadoEn || ""
   };
 }
 
@@ -406,6 +412,19 @@ export async function writeProductos(productos) {
   await ensureStorage();
   const list = Array.isArray(productos) ? productos : [];
   await fs.writeFile(productosFile, JSON.stringify(list, null, 2), "utf8");
+}
+
+/**
+ * Igual que `updateUsuarios`: lectura + mutación + escritura de `productos.json` en una única
+ * sección crítica. Usar para enriquecimiento/revisión, donde dos admins podrían pisarse cambios.
+ */
+export async function updateProductos(fn) {
+  return withFileLock(productosFile, async () => {
+    const productos = await readProductos();
+    const result = await fn(productos);
+    await writeProductos(Array.isArray(result) ? result : productos);
+    return result;
+  });
 }
 
 export async function readCategorias() {
@@ -440,7 +459,12 @@ export async function readSubcategorias() {
     if (!Array.isArray(parsed)) return [...SUBCATEGORIAS_DEFAULT];
     return parsed
       .filter((s) => s != null && typeof s === "object" && s.id && s.categoriaId && s.nombre)
-      .map((s) => ({ id: String(s.id), categoriaId: String(s.categoriaId), nombre: String(s.nombre) }));
+      .map((s) => ({
+        id: String(s.id),
+        categoriaId: String(s.categoriaId),
+        nombre: String(s.nombre),
+        ...(s.padreSubcategoriaId ? { padreSubcategoriaId: String(s.padreSubcategoriaId) } : {})
+      }));
   } catch {
     return [...SUBCATEGORIAS_DEFAULT];
   }
@@ -463,9 +487,24 @@ export function categoriaProductoValida(c) {
   return s.length > 0 && s.length <= 60;
 }
 
-/** Respuesta pública: sin campo `activo` (solo se listan activos). */
+/**
+ * Respuesta pública: sin `activo` (solo se listan activos), sin coste, sin `enriquecimiento`
+ * (candidatos importados sin revisar: solo administración) y sin metadatos de trazabilidad
+ * (`urlOrigen`, `fuentesInformacion`, `estadoVerificacion`): la fuente se mantiene interna.
+ * Los campos planos aprobados (marca, aroma, peso…) sí se exponen porque solo se escriben
+ * tras aceptación/manual.
+ */
 export function productoPublicoTienda(p) {
-  const { activo: _a, precioCosteIvaIncluido: _c, ...rest } = p;
+  const {
+    activo: _a,
+    precioCosteIvaIncluido: _c,
+    enriquecimiento: _e,
+    urlOrigen: _u,
+    fuentesInformacion: _f,
+    estadoVerificacion: _v,
+    fechaUltimaComprobacion: _fc,
+    ...rest
+  } = p;
   return rest;
 }
 

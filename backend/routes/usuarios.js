@@ -19,6 +19,7 @@ import {
   idempotencyConflictBody
 } from "../lib/storage.js";
 import { authMiddleware, authMiddlewareCheckoutOk, usuariosAccessMiddleware } from "../lib/auth.js";
+import { marcarDesbloqueoReciente } from "../lib/rateLimits.js";
 import { pickUsuarioPerfilServidor } from "../utils/pickUsuarioPerfilServidor.js";
 
 export const usuariosRouter = Router();
@@ -191,4 +192,39 @@ usuariosRouter.delete("/usuarios/:id", usuariosAccessMiddleware, async (req, res
     await writeCarritos(carritosFiltrados);
   }
   res.json({ ok: true });
+});
+
+/** Bloquear/desbloquear un usuario (no se borra; no puede hacer login mientras esté bloqueado). */
+usuariosRouter.patch("/usuarios/:id/bloqueo", usuariosAccessMiddleware, async (req, res) => {
+  const rawId = String(req.params.id ?? "").trim();
+  if (!rawId) {
+    res.status(400).json({ error: "Id requerido" });
+    return;
+  }
+  const bloquear = req.body?.bloquear === true;
+  const motivo = String(req.body?.motivo ?? "").trim().slice(0, 200);
+  let desbloqueadoIdentificadores = null;
+  const actualizado = await updateUsuarios((usuarios) => {
+    const u = usuarios.find((x) => String(x?.id) === rawId);
+    if (!u) return false;
+    if (bloquear) {
+      u.bloqueado = true;
+      u.bloqueadoMotivo = motivo;
+      u.bloqueadoEn = new Date().toISOString();
+    } else {
+      delete u.bloqueado;
+      delete u.bloqueadoMotivo;
+      delete u.bloqueadoEn;
+      desbloqueadoIdentificadores = [u.email, u.telefono];
+    }
+    return true;
+  });
+  if (!actualizado) {
+    res.status(404).json({ error: "No encontrado" });
+    return;
+  }
+  if (desbloqueadoIdentificadores) {
+    marcarDesbloqueoReciente(...desbloqueadoIdentificadores);
+  }
+  res.json({ ok: true, bloqueado: bloquear });
 });

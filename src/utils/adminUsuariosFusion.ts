@@ -74,7 +74,10 @@ export function mapearUsuarioApiAGestion(u: UsuarioListItemApi): Usuario {
     direccionPredeterminadaId: String(u.direccionPredeterminadaId || "").trim(),
     password: "",
     hasPassword: !!u.hasPassword,
-    dni: String(u.dni || "").trim()
+    dni: String(u.dni || "").trim(),
+    bloqueado: !!u.bloqueado,
+    bloqueadoMotivo: String(u.bloqueadoMotivo || "").trim(),
+    bloqueadoEn: String(u.bloqueadoEn || "").trim()
   } as Usuario;
 }
 

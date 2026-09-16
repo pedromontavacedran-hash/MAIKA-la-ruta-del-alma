@@ -121,7 +121,14 @@ categoriasRouter.post("/admin/subcategorias", usuariosAccessMiddleware, async (r
   }
   let id = slugificar(nombre) || `sub-${Date.now()}`;
   if (list.some((s) => s.id === id)) id = `${id}-${Date.now()}`;
+  const padreRaw = String(req.body?.padreSubcategoriaId ?? "").trim();
+  const padre = padreRaw ? list.find((s) => s.id === padreRaw && s.categoriaId === categoriaId) : null;
+  if (padreRaw && (!padre || padre.padreSubcategoriaId)) {
+    res.status(400).json({ error: "La carpeta padre no es válida" });
+    return;
+  }
   const nueva = { id, categoriaId, nombre };
+  if (padre) nueva.padreSubcategoriaId = padre.id;
   const siguiente = [...list, nueva];
   await writeSubcategorias(siguiente);
   await crearCarpetaSubcategoria(categoriaId, id);
@@ -131,6 +138,7 @@ categoriasRouter.post("/admin/subcategorias", usuariosAccessMiddleware, async (r
 categoriasRouter.put("/admin/subcategorias/:id", usuariosAccessMiddleware, async (req, res) => {
   const id = String(req.params.id);
   const nombre = String(req.body?.nombre ?? "").trim();
+  const padreRaw = String(req.body?.padreSubcategoriaId ?? "").trim();
   if (!nombre) {
     res.status(400).json({ error: "Nombre requerido" });
     return;
@@ -141,9 +149,21 @@ categoriasRouter.put("/admin/subcategorias/:id", usuariosAccessMiddleware, async
     res.status(404).json({ error: "No encontrada" });
     return;
   }
-  const siguiente = list.map((s) => (s.id === id ? { ...s, nombre } : s));
+  const actual = list[idx];
+  const padre = padreRaw ? list.find((s) => s.id === padreRaw && s.categoriaId === actual.categoriaId) : null;
+  if (padreRaw && (!padre || padre.id === id || padre.padreSubcategoriaId || list.some((s) => s.padreSubcategoriaId === id))) {
+    res.status(400).json({ error: "La carpeta padre no es válida" });
+    return;
+  }
+  const actualizada = { ...actual, nombre };
+  if (padre) {
+    actualizada.padreSubcategoriaId = padre.id;
+  } else {
+    delete actualizada.padreSubcategoriaId;
+  }
+  const siguiente = list.map((s) => (s.id === id ? actualizada : s));
   await writeSubcategorias(siguiente);
-  res.json(siguiente[idx]);
+  res.json(actualizada);
 });
 
 categoriasRouter.delete("/admin/subcategorias/:id", usuariosAccessMiddleware, async (req, res) => {
@@ -151,6 +171,10 @@ categoriasRouter.delete("/admin/subcategorias/:id", usuariosAccessMiddleware, as
   const list = await readSubcategorias();
   if (!list.some((s) => s.id === id)) {
     res.status(404).json({ error: "No encontrada" });
+    return;
+  }
+  if (list.some((s) => s.padreSubcategoriaId === id)) {
+    res.status(409).json({ error: "La subcategoría contiene subcarpetas" });
     return;
   }
   const enUso = (await readProductos()).some((p) => p.subcategoriaId === id);

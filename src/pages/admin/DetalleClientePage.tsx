@@ -16,210 +16,20 @@ import type { UsuarioListItemApi } from "../../services/apiAuth";
 import { lineaCompletaDesdeDatosEnvio, textoDireccionVistaAdmin } from "../../utils/pedidos/direccionPedidoVista";
 import { construirDireccionCompleta } from "../../utils/direccion";
 import { scrollElementIntoMaikaScrollPort } from "../../utils/maikaScrollPort";
-
-function buscarPedidoCompletoEnMap(map: Map<string, Pedido>, idPed: string): Pedido | undefined {
-  const k = idPed.trim();
-  if (!k) return undefined;
-  const direct = map.get(k) ?? map.get(k.toUpperCase());
-  if (direct) return direct;
-  const lower = k.toLowerCase();
-  for (const [key, val] of map) {
-    if (key.toLowerCase() === lower) return val;
-  }
-  return undefined;
-}
-
-function notificarErrorSyncServidor(
-  mostrarNotificacion: (msg: string, tipo?: "normal" | "exito" | "error") => void,
-  r: { ok: boolean; error?: string }
-) {
-  if (r.error) console.warn("[syncMaikaUsuario]", r.error);
-  const msg =
-    /\(401\)|Token inválido|No token/i.test(r.error || "")
-      ? "Guardado local. Sesión caducada o sin permisos: vuelve a iniciar sesión como administrador."
-      : "Guardado local; no se pudo sincronizar el servidor.";
-  notificarError(mostrarNotificacion, msg);
-}
-
-function formatearFechaEs(fecha: string) {
-  const d = new Date(fecha);
-  if (Number.isNaN(d.getTime())) return fecha;
-  return d.toLocaleString("es-ES", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
-}
-
-function estadoTexto(estado?: string) {
-  if (estado === "enviado") return "🚚 Enviado";
-  if (estado === "entregado") return "✅ Entregado";
-  return "🛒 Pendiente";
-}
-
-function normalizarTextoComparacion(s: string) {
-  return String(s || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^A-Z0-9]+/gi, " ")
-    .trim()
-    .toUpperCase();
-}
-
-function extraerTipoVia(calleRaw: string): "CARRER" | "CARRERA" | null {
-  const c = String(calleRaw || "").trim().toUpperCase();
-  if (!c) return null;
-  const limpio = c
-    .replace(/^C\.?\s*\/\s*/g, " ")
-    .replace(/^C\s*\/\s*/g, " ")
-    .replace(/^C\.?\s*/g, " ")
-    .replace(/^CALLE\s+/g, "")
-    .trim();
-  const m = limpio.match(/^(CARRER|CARRERA)(?:\b|[\s\-.,/])/);
-  return m ? (m[1] as "CARRER" | "CARRERA") : null;
-}
-
-function titleCaseWords(inputRaw: string): string {
-  const input = String(inputRaw || "").trim();
-  if (!input) return "";
-  return input
-    .toLowerCase()
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
-}
-
-function limpiaDireccionParaPerfil(d: DireccionUsuario): DireccionUsuario | null {
-  const o: DireccionUsuario = {
-    ...d,
-    calle: String(d.calle || "").trim().toUpperCase(),
-    numero: String(d.numero || "").trim().toUpperCase(),
-    bloque: String(d.bloque || "").trim().toUpperCase(),
-    escalera: String(d.escalera || "").trim().toUpperCase(),
-    piso: String(d.piso || "").trim().toUpperCase(),
-    puerta: String(d.puerta || "").trim().toUpperCase(),
-    cp: String(d.cp || "").trim().replace(/\D/g, "").slice(0, 5),
-    poblacion: String(d.poblacion || "").trim().toUpperCase(),
-    provincia: String(d.provincia || "").trim().toUpperCase(),
-    pais: String(d.pais || "").trim().toUpperCase() || "ESPAÑA",
-    alias: String(d.alias || "").trim() || "Dirección"
-  };
-  if (!o.calle || !o.numero || !o.cp || !o.poblacion || !o.provincia || !o.pais) return null;
-  return o;
-}
-
-function lineaCpUbicacionMostrar(d: Pick<DireccionUsuario, "cp" | "poblacion" | "provincia" | "pais">): string {
-  const cp = String(d.cp || "").trim();
-  const pob = titleCaseWords(String(d.poblacion || ""));
-  const prov = titleCaseWords(String(d.provincia || ""));
-  const pais = titleCaseWords(String(d.pais || ""));
-  const cola = [prov, pais].filter(Boolean).join(", ");
-  const trasCp = [cp, pob].filter(Boolean).join(" ");
-  if (!trasCp && !cola) return "";
-  const nucleo = trasCp ? `📍C.P ${trasCp}` : "📍C.P";
-  return cola ? `${nucleo}, ${cola}` : nucleo;
-}
-
-function saneadoDireccionesEstructural(
-  raw: unknown,
-  predIdRaw: string,
-  maxDirecciones: number
-): { direcciones: DireccionUsuario[]; direccionPredeterminadaId: string } {
-  const arr = Array.isArray(raw) ? raw as Partial<DireccionUsuario>[] : [];
-  const out: DireccionUsuario[] = [];
-  const claves = new Set<string>();
-  const ids = new Set<string>();
-
-  for (let i = 0; i < arr.length; i += 1) {
-    const d = arr[i];
-    if (!d || typeof d !== "object") continue;
-
-    const calle = String(d.calle || "").trim().toUpperCase();
-    const cp = String(d.cp || "").trim().replace(/\D/g, "").slice(0, 5);
-    const poblacion = String(d.poblacion || "").trim().toUpperCase();
-    const provincia = String(d.provincia || "").trim().toUpperCase();
-    const pais = String(d.pais || "").trim().toUpperCase() || "ESPAÑA";
-    const numero = String(d.numero || "").trim().toUpperCase();
-
-    // Mínimo obligatorio (decisión ejecutiva): calle + población + CP.
-    if (!calle || !poblacion || !cp) continue;
-
-    /** Misma clave que checkout: número, piso, puerta, bloque y escalera distinguen viviendas en la misma calle/CP. */
-    const clave = direccionClave({
-      calle,
-      numero,
-      cp,
-      poblacion,
-      provincia,
-      pais,
-      bloque: String(d.bloque || "").trim().toUpperCase(),
-      escalera: String(d.escalera || "").trim().toUpperCase(),
-      piso: String(d.piso || "").trim().toUpperCase(),
-      puerta: String(d.puerta || "").trim().toUpperCase()
-    });
-    if (claves.has(clave)) continue;
-    claves.add(clave);
-
-    let id = String(d.id || "").trim();
-    if (!id || ids.has(id)) id = `dir_fix_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 8)}`;
-    ids.add(id);
-
-    out.push({
-      id,
-      alias: String(d.alias || "").trim() || `Dirección ${out.length + 1}`,
-      calle,
-      numero,
-      bloque: String(d.bloque || "").trim().toUpperCase(),
-      escalera: String(d.escalera || "").trim().toUpperCase(),
-      piso: String(d.piso || "").trim().toUpperCase(),
-      puerta: String(d.puerta || "").trim().toUpperCase(),
-      cp,
-      poblacion,
-      provincia,
-      pais
-    });
-
-    if (out.length >= maxDirecciones) break;
-  }
-
-  let pred = String(predIdRaw || "").trim();
-  if (!out.some((d) => d.id === pred)) pred = out[0]?.id || "";
-
-  return { direcciones: out, direccionPredeterminadaId: pred };
-}
-
-/** Remoto (servidor) primero; se añaden filas solo locales que no choquen por clave. */
-function mergeDireccionesPorClavePreferirRemoto(
-  remotos: DireccionUsuario[],
-  locales: DireccionUsuario[],
-  max: number
-): DireccionUsuario[] {
-  const map = new Map<string, DireccionUsuario>();
-  for (const d of remotos) {
-    map.set(direccionClave(d), d);
-  }
-  for (const d of locales) {
-    const k = direccionClave(d);
-    if (!map.has(k)) map.set(k, d);
-  }
-  return Array.from(map.values()).slice(0, max);
-}
-
-function direccionesMaikaFusionadasServidor(
-  maikaRow: { direcciones?: unknown; direccionPredeterminadaId?: string } | null,
-  usuarioApiRow: UsuarioListItemApi | null | undefined,
-  maxDirecciones: number
-): DireccionUsuario[] {
-  const fromMaika = saneadoDireccionesEstructural(
-    maikaRow?.direcciones,
-    String(maikaRow?.direccionPredeterminadaId || ""),
-    maxDirecciones
-  ).direcciones;
-  if (usuarioApiRow === undefined || usuarioApiRow === null) return fromMaika;
-  const apiSane = saneadoDireccionesEstructural(
-    usuarioApiRow.direcciones,
-    String(usuarioApiRow.direccionPredeterminadaId || ""),
-    maxDirecciones
-  );
-  return mergeDireccionesPorClavePreferirRemoto(apiSane.direcciones, fromMaika, maxDirecciones);
-}
+import {
+  buscarPedidoCompletoEnMap,
+  notificarErrorSyncServidor,
+  formatearFechaEs,
+  estadoTexto,
+  normalizarTextoComparacion,
+  extraerTipoVia,
+  titleCaseWords,
+  limpiaDireccionParaPerfil,
+  lineaCpUbicacionMostrar,
+  saneadoDireccionesEstructural,
+  direccionesMaikaFusionadasServidor,
+  filaMaikaConDireccionPrincipal
+} from "./detalleCliente/detalleClienteHelpers";
 
 export default function DetalleClientePage({
   mostrarNotificacion,
@@ -564,23 +374,8 @@ export default function DetalleClientePage({
     if (!predNext || !dirsNext.some((d) => d.id === predNext)) {
       predNext = dirsNext[0]?.id || "";
     }
-    const dirPred = dirsNext.find((d) => d.id === predNext) || dirsNext[0];
 
-    usuariosLS[idx] = {
-      ...prev,
-      direcciones: dirsNext,
-      direccionPredeterminadaId: predNext,
-      calle: dirPred?.calle || prev.calle,
-      numero: dirPred?.numero || prev.numero,
-      bloque: dirPred?.bloque || prev.bloque,
-      escalera: dirPred?.escalera || prev.escalera,
-      piso: dirPred?.piso || prev.piso,
-      puerta: dirPred?.puerta || prev.puerta,
-      cp: dirPred?.cp || prev.cp,
-      poblacion: dirPred?.poblacion || prev.poblacion,
-      provincia: dirPred?.provincia || prev.provincia,
-      pais: dirPred?.pais || prev.pais
-    };
+    usuariosLS[idx] = filaMaikaConDireccionPrincipal(prev, dirsNext, predNext);
 
     guardarMaikaUsuarios(usuariosLS, normalizarTelefonoES9);
     const telSync = normalizarTelefonoES9(String(maika.telefono || ""));
@@ -659,21 +454,8 @@ export default function DetalleClientePage({
   const guardarDireccionIndividual = () => {
     if (!formDireccion || !maika) return;
 
-    const limpia: DireccionUsuario = {
-      ...formDireccion,
-      calle: String(formDireccion.calle || "").trim().toUpperCase(),
-      numero: String(formDireccion.numero || "").trim().toUpperCase(),
-      bloque: String(formDireccion.bloque || "").trim().toUpperCase(),
-      escalera: String(formDireccion.escalera || "").trim().toUpperCase(),
-      piso: String(formDireccion.piso || "").trim().toUpperCase(),
-      puerta: String(formDireccion.puerta || "").trim().toUpperCase(),
-      cp: String(formDireccion.cp || "").trim().replace(/\D/g, "").slice(0, 5),
-      poblacion: String(formDireccion.poblacion || "").trim().toUpperCase(),
-      provincia: String(formDireccion.provincia || "").trim().toUpperCase(),
-      pais: String(formDireccion.pais || "").trim().toUpperCase()
-    };
-
-    if (!limpia.calle || !limpia.numero || !limpia.cp || !limpia.poblacion || !limpia.provincia || !limpia.pais) {
+    const limpia = limpiaDireccionParaPerfil(formDireccion);
+    if (!limpia) {
       notificarError(mostrarNotificacion, "Completa calle, número, CP, población, provincia y país");
       return;
     }
@@ -719,22 +501,7 @@ export default function DetalleClientePage({
       if (!predNext) predNext = nuevaId;
     }
 
-    const dirPred = dirsNext.find((d) => d.id === predNext) || dirsNext[0];
-    usuariosLS[idx] = {
-      ...prev,
-      direcciones: dirsNext,
-      direccionPredeterminadaId: dirPred?.id || "",
-      calle: dirPred?.calle || prev.calle,
-      numero: dirPred?.numero || prev.numero,
-      bloque: dirPred?.bloque || prev.bloque,
-      escalera: dirPred?.escalera || prev.escalera,
-      piso: dirPred?.piso || prev.piso,
-      puerta: dirPred?.puerta || prev.puerta,
-      cp: dirPred?.cp || prev.cp,
-      poblacion: dirPred?.poblacion || prev.poblacion,
-      provincia: dirPred?.provincia || prev.provincia,
-      pais: dirPred?.pais || prev.pais
-    };
+    usuariosLS[idx] = filaMaikaConDireccionPrincipal(prev, dirsNext, predNext);
 
     guardarMaikaUsuarios(usuariosLS, normalizarTelefonoES9);
     const telSync = normalizarTelefonoES9(String(maika.telefono || ""));
@@ -759,23 +526,8 @@ export default function DetalleClientePage({
       const dirsNext = dirsPrev.filter((d) => d.id !== idDir);
       const predPrev = String(prev?.direccionPredeterminadaId || "").trim();
       const predNext = dirsNext.some((d) => d.id === predPrev) ? predPrev : (dirsNext[0]?.id || "");
-      const dirPred = dirsNext.find((d) => d.id === predNext) || null;
 
-      usuariosLS[idx] = {
-        ...prev,
-        direcciones: dirsNext,
-        direccionPredeterminadaId: predNext,
-        calle: dirPred?.calle || "",
-        numero: dirPred?.numero || "",
-        bloque: dirPred?.bloque || "",
-        escalera: dirPred?.escalera || "",
-        piso: dirPred?.piso || "",
-        puerta: dirPred?.puerta || "",
-        cp: dirPred?.cp || "",
-        poblacion: dirPred?.poblacion || "",
-        provincia: dirPred?.provincia || "",
-        pais: dirPred?.pais || ""
-      };
+      usuariosLS[idx] = filaMaikaConDireccionPrincipal(prev, dirsNext, predNext, { limpiarSiSinDireccion: true });
       guardarMaikaUsuarios(usuariosLS, normalizarTelefonoES9);
       void sincronizarMaikaUsuarioEnServidorSiHayToken(telRef).then((r) => {
         if (!r.ok) notificarErrorSyncServidor(mostrarNotificacion, r);
@@ -849,21 +601,7 @@ export default function DetalleClientePage({
 
     if (!dirPred) return;
 
-    usuariosLS[idx] = {
-      ...prev,
-      direcciones: dirsPrev,
-      direccionPredeterminadaId: dirPred.id,
-      calle: dirPred.calle,
-      numero: dirPred.numero,
-      bloque: dirPred.bloque || "",
-      escalera: dirPred.escalera || "",
-      piso: dirPred.piso || "",
-      puerta: dirPred.puerta || "",
-      cp: dirPred.cp,
-      poblacion: dirPred.poblacion,
-      provincia: dirPred.provincia,
-      pais: dirPred.pais
-    };
+    usuariosLS[idx] = filaMaikaConDireccionPrincipal(prev, dirsPrev, dirPred.id, { limpiarSiSinDireccion: true });
     guardarMaikaUsuarios(usuariosLS, normalizarTelefonoES9);
     const telPr = normalizarTelefonoES9(String(maika.telefono || ""));
     void sincronizarMaikaUsuarioEnServidorSiHayToken(telPr).then((r) => {

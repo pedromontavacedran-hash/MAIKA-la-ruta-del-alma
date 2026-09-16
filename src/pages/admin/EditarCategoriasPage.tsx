@@ -38,8 +38,8 @@ export interface EditarCategoriasPageProps {
   joyas: Producto[];
   subcategoriasCatalogo: SubcategoriaEntrada[];
   subcategoriasDe: (categoriaId: string) => SubcategoriaEntrada[];
-  agregarSubcategoria: (categoriaId: string, nombre: string) => Promise<SubcategoriaEntrada>;
-  renombrarSubcategoria: (id: string, nombre: string) => Promise<void>;
+  agregarSubcategoria: (categoriaId: string, nombre: string, padreSubcategoriaId?: string) => Promise<SubcategoriaEntrada>;
+  renombrarSubcategoria: (id: string, nombre: string, padreSubcategoriaId?: string) => Promise<void>;
   eliminarSubcategoria: (id: string) => Promise<void>;
 }
 
@@ -76,6 +76,9 @@ function listaProductosPorCategoriaId(
 }
 
 type Nivel = "categorias" | "subcategorias";
+
+const SUB_PADRE_SIN_SELECCION = "__sin_seleccionar__";
+const SUB_PADRE_RAIZ = "__nivel_principal__";
 
 /**
  * "Editar categorías" solo gestiona categorías y subcategorías (taxonomía).
@@ -127,13 +130,21 @@ export default function EditarCategoriasPage(props: EditarCategoriasPageProps) {
 
   const [nivel, setNivel] = useState<Nivel>("categorias");
   const [nuevaSubNombre, setNuevaSubNombre] = useState("");
+  const [nuevaSubPadre, setNuevaSubPadre] = useState<string>(SUB_PADRE_SIN_SELECCION);
   const [subEditandoId, setSubEditandoId] = useState<string | null>(null);
   const [nombreSubEditado, setNombreSubEditado] = useState("");
+  const [padreSubEditado, setPadreSubEditado] = useState<string>("");
+  /** Categoría destino de la nueva subcategoría (local, para no resetear el nivel al cambiarla). */
+  const [subTargetCategoria, setSubTargetCategoria] = useState(valorSelect);
 
   useEffect(() => {
     setNivel("categorias");
     // Volver siempre al nivel 1 si cambia la categoría activa desde el selector.
   }, [valorSelect]);
+
+  useEffect(() => {
+    if (nivel === "subcategorias") setSubTargetCategoria(valorSelect);
+  }, [nivel, valorSelect]);
 
   const volverDesdeEditarCategorias = () => {
     if (isAdminAuthorized()) {
@@ -145,6 +156,8 @@ export default function EditarCategoriasPage(props: EditarCategoriasPageProps) {
 
   const subcategoriasDeCategoriaActual = subcategoriasDe(valorSelect);
   const nombreCategoriaActual = categoriasCatalogo.find((c) => c.id === valorSelect)?.nombre ?? valorSelect;
+  const nombreSubTargetCategoria = categoriasCatalogo.find((c) => c.id === subTargetCategoria)?.nombre ?? subTargetCategoria;
+  const nuevaSubPadreEntrada = subcategoriasDe(subTargetCategoria).find((s) => s.id === nuevaSubPadre);
 
   return (
     <div
@@ -411,8 +424,22 @@ export default function EditarCategoriasPage(props: EditarCategoriasPageProps) {
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {categoriasCatalogo.map((c) => {
                   const subs = subcategoriasCatalogo.filter((s) => s.categoriaId === c.id);
-                  if (subs.length === 0) return null;
+                  const raices = subs
+                    .filter((s) => !s.padreSubcategoriaId || !subs.some((otra) => otra.id === s.padreSubcategoriaId))
+                    .sort((a, b) => {
+                      const posicionGrupo = (raiz: SubcategoriaEntrada) => Math.min(
+                        ...subs
+                          .map((s, index) => (s.id === raiz.id || s.padreSubcategoriaId === raiz.id ? index : Number.POSITIVE_INFINITY))
+                      );
+                      return posicionGrupo(a) - posicionGrupo(b);
+                    });
+                  const subsOrdenadas = raices.flatMap((raiz) => [
+                    raiz,
+                    ...subs.filter((s) => s.padreSubcategoriaId === raiz.id)
+                  ]);
                   const todosProductos = [...velas, ...inciensos, ...figuras, ...kits, ...joyas];
+                  const productosCategoria = todosProductos.filter((p) => p.categoria === c.id);
+                  const numeroSubcarpetas = subs.filter((s) => s.padreSubcategoriaId).length;
                   return (
                     <details key={c.id} style={{ border: `1px solid ${THEME.goldMain}`, borderRadius: 10 }}>
                       <summary
@@ -426,122 +453,167 @@ export default function EditarCategoriasPage(props: EditarCategoriasPageProps) {
                       >
                         {c.nombre}{" "}
                         <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 12, fontWeight: "normal" }}>
-                          ({subs.length} {subs.length === 1 ? "subcategoría" : "subcategorías"})
+                          ({raices.length} {raices.length === 1 ? "carpeta" : "carpetas"}
+                          {numeroSubcarpetas > 0 ? ` + ${numeroSubcarpetas} ${numeroSubcarpetas === 1 ? "subcarpeta" : "subcarpetas"}` : ""}
+                          {` · ${productosCategoria.length} ${productosCategoria.length === 1 ? "producto" : "productos"}`})
                         </span>
                       </summary>
                       <ul style={{ listStyle: "none", margin: 0, padding: "0 14px 14px", display: "flex", flexDirection: "column", gap: 10 }}>
-                        {subs.map((sub) => {
-                          const enUso = todosProductos.filter((p) => p.subcategoriaId === sub.id).length;
+                        {subs.length === 0 ? (
+                          <li style={{ color: "rgba(255,255,255,0.5)", fontSize: 12 }}>Sin subcategorías todavía.</li>
+                        ) : null}
+                        {subsOrdenadas.map((sub) => {
+                          const hijasIds = subs.filter((s) => s.padreSubcategoriaId === sub.id).map((s) => s.id);
+                          const enUsoDirecto = todosProductos.filter((p) => p.subcategoriaId === sub.id).length;
+                          const enUsoHijas = todosProductos.filter((p) => p.subcategoriaId && hijasIds.includes(p.subcategoriaId)).length;
+                          const enUso = enUsoDirecto + enUsoHijas;
                           const editando = subEditandoId === sub.id;
+                          const esHija = Boolean(sub.padreSubcategoriaId && subs.some((s) => s.id === sub.padreSubcategoriaId));
                           return (
                             <li
                               key={sub.id}
                               style={{
                                 display: "flex",
-                                alignItems: "center",
-                                gap: 10,
-                                padding: "10px 12px",
-                                border: `1px solid ${THEME.goldMain}`,
-                                borderRadius: 10
+                                flexDirection: "column",
+                                gap: esHija ? 6 : 8,
+                                padding: esHija ? "7px 9px" : "10px 12px",
+                                marginLeft: esHija ? 18 : 0,
+                                marginRight: esHija ? 18 : 0,
+                                border: esHija ? "none" : `1px solid ${THEME.goldMain}`,
+                                borderRadius: esHija ? 0 : 10,
+                                background: "transparent"
                               }}
                             >
-                              {editando ? (
-                                <input
-                                  type="text"
-                                  className="categoria-text-input"
-                                  autoFocus
-                                  value={nombreSubEditado}
-                                  onChange={(e) => setNombreSubEditado(e.target.value)}
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                      void (async () => {
-                                        try {
-                                          await renombrarSubcategoria(sub.id, nombreSubEditado);
-                                          setSubEditandoId(null);
-                                          notificarExito(mostrarNotificacion, "Subcategoría renombrada");
-                                        } catch (e) {
-                                          notificarError(mostrarNotificacion, e instanceof Error ? e.message : "No se pudo renombrar la subcategoría");
-                                        }
-                                      })();
-                                    } else if (e.key === "Escape") {
-                                      setSubEditandoId(null);
-                                    }
-                                  }}
-                                  style={{ flex: 1, minWidth: 0 }}
-                                />
-                              ) : (
-                                <span style={{ flex: 1, color: "white" }}>
-                                  {sub.nombre}{" "}
-                                  <span style={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>
-                                    ({enUso} {enUso === 1 ? "producto" : "productos"})
-                                  </span>
-                                </span>
-                              )}
-                              {editando ? (
-                                <>
-                                  <button
-                                    type="button"
-                                    className="editar-productos-acciones__btn editar-productos-acciones__btn--primary"
-                                    onClick={() => {
-                                      void (async () => {
-                                        try {
-                                          await renombrarSubcategoria(sub.id, nombreSubEditado);
-                                          setSubEditandoId(null);
-                                          notificarExito(mostrarNotificacion, "Subcategoría renombrada");
-                                        } catch (e) {
-                                          notificarError(mostrarNotificacion, e instanceof Error ? e.message : "No se pudo renombrar la subcategoría");
-                                        }
-                                      })();
-                                    }}
-                                  >
-                                    Guardar
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="editar-productos-acciones__btn editar-productos-acciones__btn--ghost"
-                                    onClick={() => setSubEditandoId(null)}
-                                  >
-                                    Cancelar
-                                  </button>
-                                </>
-                              ) : (
-                                <>
-                                  <button
-                                    type="button"
-                                    className="editar-productos-acciones__btn editar-productos-acciones__btn--ghost"
-                                    onClick={() => {
-                                      setSubEditandoId(sub.id);
-                                      setNombreSubEditado(sub.nombre);
-                                    }}
-                                  >
-                                    Renombrar
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="editar-productos-acciones__btn editar-productos-acciones__btn--danger"
-                                    onClick={() => {
-                                      if (enUso > 0) {
-                                        notificarError(
-                                          mostrarNotificacion,
-                                          `No se puede eliminar: ${enUso} ${enUso === 1 ? "producto usa" : "productos usan"} esta subcategoría.`
-                                        );
-                                        return;
+                              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                {editando ? (
+                                  <input
+                                    type="text"
+                                    className="categoria-text-input"
+                                    autoFocus
+                                    value={nombreSubEditado}
+                                    onChange={(e) => setNombreSubEditado(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") {
+                                        void (async () => {
+                                          try {
+                                            await renombrarSubcategoria(sub.id, nombreSubEditado, padreSubEditado || undefined);
+                                            setSubEditandoId(null);
+                                            notificarExito(mostrarNotificacion, "Subcategoría guardada");
+                                          } catch (e) {
+                                            notificarError(mostrarNotificacion, e instanceof Error ? e.message : "No se pudo guardar la subcategoría");
+                                          }
+                                        })();
+                                      } else if (e.key === "Escape") {
+                                        setSubEditandoId(null);
                                       }
-                                      if (!window.confirm(`¿Eliminar la subcategoría "${sub.nombre}"?`)) return;
-                                      void (async () => {
-                                        try {
-                                          await eliminarSubcategoria(sub.id);
-                                          notificarExito(mostrarNotificacion, "Subcategoría eliminada");
-                                        } catch (e) {
-                                          notificarError(mostrarNotificacion, e instanceof Error ? e.message : "No se pudo eliminar la subcategoría");
-                                        }
-                                      })();
                                     }}
+                                    style={{ flex: 1, minWidth: 0 }}
+                                  />
+                                ) : (
+                                  <span style={{ flex: 1, color: "white", fontSize: esHija ? 11 : 13 }}>
+                                    {esHija ? "↳ " : ""}{sub.nombre}{" "}
+                                    <span style={{ color: "rgba(255,255,255,0.55)", fontSize: esHija ? 10 : 12 }}>
+                                      ({enUso} {enUso === 1 ? "producto" : "productos"})
+                                    </span>
+                                  </span>
+                                )}
+                                {editando ? (
+                                  <>
+                                    <button
+                                      type="button"
+                                      className="editar-productos-acciones__btn editar-productos-acciones__btn--primary"
+                                      onClick={() => {
+                                        void (async () => {
+                                          try {
+                                            await renombrarSubcategoria(sub.id, nombreSubEditado, padreSubEditado || undefined);
+                                            setSubEditandoId(null);
+                                            notificarExito(mostrarNotificacion, "Subcategoría guardada");
+                                          } catch (e) {
+                                            notificarError(mostrarNotificacion, e instanceof Error ? e.message : "No se pudo guardar la subcategoría");
+                                          }
+                                        })();
+                                      }}
+                                    >
+                                      Guardar
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="editar-productos-acciones__btn editar-productos-acciones__btn--ghost"
+                                      onClick={() => setSubEditandoId(null)}
+                                    >
+                                      Cancelar
+                                    </button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <button
+                                      type="button"
+                                      className="editar-productos-acciones__btn editar-productos-acciones__btn--ghost"
+                                      style={esHija ? { padding: "4px 7px", fontSize: 9 } : undefined}
+                                      onClick={() => {
+                                        setSubEditandoId(sub.id);
+                                        setNombreSubEditado(sub.nombre);
+                                        setPadreSubEditado(sub.padreSubcategoriaId ?? "");
+                                      }}
+                                    >
+                                      Renombrar
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="editar-productos-acciones__btn editar-productos-acciones__btn--danger"
+                                      style={esHija ? { padding: "4px 7px", fontSize: 9 } : undefined}
+                                      onClick={() => {
+                                        if (hijasIds.length > 0) {
+                                          notificarError(
+                                            mostrarNotificacion,
+                                            `No se puede eliminar: contiene ${hijasIds.length} ${hijasIds.length === 1 ? "subcarpeta" : "subcarpetas"}.`
+                                          );
+                                          return;
+                                        }
+                                        if (enUso > 0) {
+                                          notificarError(
+                                            mostrarNotificacion,
+                                            `No se puede eliminar: ${enUso} ${enUso === 1 ? "producto usa" : "productos usan"} esta subcategoría.`
+                                          );
+                                          return;
+                                        }
+                                        if (!window.confirm(`¿Eliminar la subcategoría "${sub.nombre}"?`)) return;
+                                        void (async () => {
+                                          try {
+                                            await eliminarSubcategoria(sub.id);
+                                            notificarExito(mostrarNotificacion, "Subcategoría eliminada");
+                                          } catch (e) {
+                                            notificarError(mostrarNotificacion, e instanceof Error ? e.message : "No se pudo eliminar la subcategoría");
+                                          }
+                                        })();
+                                      }}
+                                    >
+                                      Eliminar
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                              {editando ? (
+                                <div className="editar-productos-campo" style={{ margin: 0 }}>
+                                  <label className="editar-productos-label" style={{ fontSize: 12, marginBottom: 4 }}>
+                                    Subcategoría padre
+                                  </label>
+                                  <select
+                                    className="categoria-select editar-productos-select-entrada"
+                                    value={padreSubEditado}
+                                    onChange={(e) => setPadreSubEditado(e.target.value)}
                                   >
-                                    Eliminar
-                                  </button>
-                                </>
-                              )}
+                                    <option value="">Sin padre (nivel raíz)</option>
+                                    {hijasIds.length === 0
+                                      ? subs
+                                          .filter((s) => s.id !== sub.id && !s.padreSubcategoriaId)
+                                          .map((s) => (
+                                            <option key={s.id} value={s.id}>{s.nombre}</option>
+                                          ))
+                                      : null}
+                                  </select>
+                                </div>
+                              ) : null}
                             </li>
                           );
                         })}
@@ -556,6 +628,52 @@ export default function EditarCategoriasPage(props: EditarCategoriasPageProps) {
           <section className="editar-productos-seccion">
             <div className="editar-productos-seccion__titulo">Añadir subcategoría</div>
             <div className="editar-productos-campo">
+              <label className="editar-productos-label" htmlFor="ec-sub-cat">
+                Categoría destino
+              </label>
+              <select
+                id="ec-sub-cat"
+                className="categoria-select editar-productos-select-entrada"
+                value={subTargetCategoria}
+                onChange={(e) => {
+                  setSubTargetCategoria(e.target.value);
+                  setNuevaSubPadre(SUB_PADRE_SIN_SELECCION);
+                }}
+              >
+                {categoriasCatalogo.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nombre.charAt(0).toUpperCase() + c.nombre.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="editar-productos-campo">
+              <label className="editar-productos-label" htmlFor="ec-sub-padre">
+                Subcategoría padre (opcional)
+              </label>
+              <select
+                id="ec-sub-padre"
+                className="categoria-select editar-productos-select-entrada"
+                value={nuevaSubPadre}
+                onChange={(e) => setNuevaSubPadre(e.target.value)}
+              >
+                <option value={SUB_PADRE_SIN_SELECCION} disabled>Selecciona dónde guardarla</option>
+                <option value={SUB_PADRE_RAIZ}>Nivel principal de la categoría</option>
+                {subcategoriasDe(subTargetCategoria)
+                  .filter((s) => !s.padreSubcategoriaId)
+                  .map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.nombre}
+                    </option>
+                  ))}
+              </select>
+              <p style={{ margin: "7px 0 0", color: THEME.goldMain, fontSize: 12, fontWeight: 600 }}>
+                {nuevaSubPadre === SUB_PADRE_SIN_SELECCION
+                  ? "Elige el destino antes de añadir"
+                  : `Destino: ${nombreSubTargetCategoria} → ${nuevaSubPadreEntrada?.nombre ?? "nivel principal"}`}
+              </p>
+            </div>
+            <div className="editar-productos-campo">
               <input
                 type="text"
                 className="categoria-text-input"
@@ -566,8 +684,11 @@ export default function EditarCategoriasPage(props: EditarCategoriasPageProps) {
                   if (e.key !== "Enter") return;
                   void (async () => {
                     try {
-                      await agregarSubcategoria(valorSelect, nuevaSubNombre);
+                      if (nuevaSubPadre === SUB_PADRE_SIN_SELECCION) throw new Error("Selecciona dónde guardar la subcategoría");
+                      const padreId = nuevaSubPadre === SUB_PADRE_RAIZ ? undefined : nuevaSubPadre;
+                      await agregarSubcategoria(subTargetCategoria, nuevaSubNombre, padreId);
                       setNuevaSubNombre("");
+                      setNuevaSubPadre(SUB_PADRE_SIN_SELECCION);
                       notificarExito(mostrarNotificacion, "✅ Subcategoría añadida");
                     } catch (e) {
                       notificarError(mostrarNotificacion, e instanceof Error ? e.message : "No se pudo crear la subcategoría");
@@ -583,8 +704,11 @@ export default function EditarCategoriasPage(props: EditarCategoriasPageProps) {
                 onClick={() => {
                   void (async () => {
                     try {
-                      await agregarSubcategoria(valorSelect, nuevaSubNombre);
+                      if (nuevaSubPadre === SUB_PADRE_SIN_SELECCION) throw new Error("Selecciona dónde guardar la subcategoría");
+                      const padreId = nuevaSubPadre === SUB_PADRE_RAIZ ? undefined : nuevaSubPadre;
+                      await agregarSubcategoria(subTargetCategoria, nuevaSubNombre, padreId);
                       setNuevaSubNombre("");
+                      setNuevaSubPadre(SUB_PADRE_SIN_SELECCION);
                       notificarExito(mostrarNotificacion, "✅ Subcategoría añadida");
                     } catch (e) {
                       notificarError(mostrarNotificacion, e instanceof Error ? e.message : "No se pudo crear la subcategoría");
