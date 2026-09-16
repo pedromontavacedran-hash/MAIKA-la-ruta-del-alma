@@ -189,7 +189,7 @@ export function DetalleProductoGenerico({
             </p>
           )}
           <p style={{ color: disponibles > 0 ? THEME.goldMain : "#ff8a80", fontWeight: "bold", margin: "0 0 14px" }}>
-            {disponibles > 0 ? `${disponibles} ${disponibles === 1 ? "unidad disponible" : "unidades disponibles"}` : limiteCarrito ? "Todo el stock está en tu carrito" : "Producto agotado"}
+            {disponibles > 0 ? `${disponibles} ${disponibles === 1 ? "unidad disponible" : "unidades disponibles"}` : limiteCarrito ? "No puedes añadir más" : "Producto agotado"}
           </p>
           <button
             type="button"

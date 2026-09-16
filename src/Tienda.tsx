@@ -605,49 +605,21 @@ export default function Tienda({
               <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.62rem", margin: "2px 0 4px", letterSpacing: "0.04em" }}>IVA incluido</p>
 
               {(() => {
-                /** Unidades que aún puedes añadir (coherente con insignia / botón). */
-                const pocoDisponible = disponibles > 0 && disponibles <= 3;
                 const todoEnCarrito = stockCatalogo > 0 && disponibles === 0 && enCarrito > 0;
-                if (enCarrito <= 0) return null;
-                const sinStockReal = stockCatalogo === 0;
-                const stockLineColor =
-                  sinStockReal || pocoDisponible
-                    ? "#ff5252"
-                    : todoEnCarrito
-                      ? "rgba(255,255,255,0.9)"
-                      : "rgba(255,255,255,0.88)";
+                if (enCarrito <= 0 || todoEnCarrito) return null;
                 return (
-                  <p
-                    style={{
-                      fontSize: "0.85rem",
-                      margin: "4px 0 6px",
-                      color: stockLineColor,
-                      fontWeight: pocoDisponible ? 600 : 400,
-                      lineHeight: 1.35
-                    }}
-                  >
-                    {todoEnCarrito && (
-                      <>
-                        En almacén: {stockCatalogo} {stockCatalogo === 1 ? "unidad" : "unidades"} (no baja hasta que
-                        confirmes el pago).
-                      </>
-                    )}
-                    {enCarrito > 0 && (
-                      <span
-                        style={{
-                          display: "block",
-                          marginTop: 4,
-                          fontSize: "0.78rem",
-                          fontWeight: 500,
-                          color: THEME.goldMain,
-                          opacity: 0.95
-                        }}
-                      >
-                        {todoEnCarrito
-                          ? "Todo el stock está en tu carrito (no puedes añadir más)."
-                          : `En carrito: ${enCarrito} · Puedes añadir ${disponibles} más.`}
-                      </span>
-                    )}
+                  <p style={{ fontSize: "0.85rem", margin: "4px 0 6px", lineHeight: 1.35 }}>
+                    <span
+                      style={{
+                        display: "block",
+                        fontSize: "0.78rem",
+                        fontWeight: 500,
+                        color: THEME.goldMain,
+                        opacity: 0.95
+                      }}
+                    >
+                      En carrito: {enCarrito} · Puedes añadir {disponibles} más.
+                    </span>
                   </p>
                 );
               })()}
@@ -673,7 +645,7 @@ export default function Tienda({
                     </div>
                   </>
                 ) : (
-                  <span>{limiteCarrito ? "No puedes añadir más unidades" : "❌ Sin stock"}</span>
+                  <span>{limiteCarrito ? "No puedes añadir más" : "❌ Sin stock"}</span>
                 )}
               </div>
 

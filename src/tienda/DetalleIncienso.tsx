@@ -162,7 +162,7 @@ export function DetalleIncienso({
               display: "inline-block",
               flexShrink: 0
             }} />
-            {disponibles > 0 ? `${disponibles} ${disponibles === 1 ? "unidad disponible" : "unidades disponibles"}` : limiteCarrito ? "Todo el stock está en tu carrito" : "Producto agotado"}
+            {disponibles > 0 ? `${disponibles} ${disponibles === 1 ? "unidad disponible" : "unidades disponibles"}` : limiteCarrito ? "No puedes añadir más" : "Producto agotado"}
           </p>
 
           {/* Botón añadir al carrito */}
