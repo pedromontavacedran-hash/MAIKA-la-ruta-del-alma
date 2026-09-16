@@ -21,8 +21,7 @@ import {
   LOGO_POS_X_REL_MIN,
   type BarraTopPedidoExitoCfg,
   guardarBarraTopPedidoExitoCfg,
-  leerBarraTopPedidoExitoCfg,
-  logoTamanoDesdeAlturaBarra
+  leerBarraTopPedidoExitoCfg
 } from "../../utils/barraTopPedidoExito/barraTopPedidoExitoCfg";
 import {
   guardarHeroLogoConfig,
@@ -59,8 +58,8 @@ import {
   asegurarCheckoutVisualRestoreBaselineDesdeLocalStorageSiPrimeraVez,
   borrarCheckoutVisualRestoreBaseline,
   buildCheckoutVisualDefaultsPayload,
+  buildCheckoutVisualPayloadFromPanelState,
   cargarCheckoutVisualPresetPorNombre,
-  CHECKOUT_VISUAL_PRESET_REVISION,
   eliminarCheckoutVisualPresetPorNombre,
   guardarCheckoutVisualPreset,
   guardarCheckoutVisualRestoreBaseline,
@@ -75,79 +74,16 @@ import {
   limpiarHeroIframePreviewSession
 } from "../../utils/heroWebPreviewEmbed";
 import { comprimirDataUrlHeroSiHaceFalta } from "../../utils/heroImageCompress";
-import { leerWebLayoutConfig } from "../../utils/webLayoutConfig";
 import { mountAdminRangeWheelScrollPassthrough } from "../../utils/adminRangeWheelScrollPassthrough";
 import { getMaikaScrollPortEl } from "../../utils/maikaScrollPort";
 import { THEME } from "../../config";
+import { quitarFondoSolidoLogoBarra } from "./diseno-web/logoFondoHelpers";
 
 /** Sub-bloques de «Hero diseño web completa» (pestañas + presets). */
 export type AdminSeccionCheckoutHero = "barra" | "fondo" | "hero" | "heroLogo";
 export type AdminHeroDisenoWebTab = "ajustes" | AdminSeccionCheckoutHero | "espaciado" | "boton";
 
 export type HeroBannerUndoSnapshot = { src: string; zoom: number; stretchX: number; nombreArchivo: string };
-
-function cargarImagenDataUrl(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("imagen"));
-    img.src = src;
-  });
-}
-
-async function quitarFondoSolidoLogoBarra(dataUrl: string): Promise<string> {
-  if (typeof document === "undefined" || !/^data:image\/(png|webp)/i.test(dataUrl)) return dataUrl;
-  const img = await cargarImagenDataUrl(dataUrl);
-  const w = img.naturalWidth || img.width;
-  const h = img.naturalHeight || img.height;
-  if (!w || !h) return dataUrl;
-
-  const canvas = document.createElement("canvas");
-  canvas.width = w;
-  canvas.height = h;
-  const ctx = canvas.getContext("2d", { willReadFrequently: true });
-  if (!ctx) return dataUrl;
-  ctx.drawImage(img, 0, 0);
-
-  const imageData = ctx.getImageData(0, 0, w, h);
-  const data = imageData.data;
-  const esquinas = [
-    [0, 0],
-    [w - 1, 0],
-    [0, h - 1],
-    [w - 1, h - 1]
-  ] as const;
-  let r = 0;
-  let g = 0;
-  let b = 0;
-  for (const [x, y] of esquinas) {
-    const i = (y * w + x) * 4;
-    r += data[i] ?? 0;
-    g += data[i + 1] ?? 0;
-    b += data[i + 2] ?? 0;
-  }
-  r = Math.round(r / esquinas.length);
-  g = Math.round(g / esquinas.length);
-  b = Math.round(b / esquinas.length);
-
-  const fondoClaro = r > 225 && g > 225 && b > 225;
-  const fondoOscuro = r < 30 && g < 30 && b < 30;
-  if (!fondoClaro && !fondoOscuro) return dataUrl;
-
-  const tolerancia = fondoClaro ? 78 : 54;
-  for (let i = 0; i < data.length; i += 4) {
-    const dr = (data[i] ?? 0) - r;
-    const dg = (data[i + 1] ?? 0) - g;
-    const db = (data[i + 2] ?? 0) - b;
-    const distancia = Math.sqrt(dr * dr + dg * dg + db * db);
-    if (distancia <= tolerancia) {
-      data[i + 3] = Math.round((distancia / tolerancia) * 255);
-    }
-  }
-
-  ctx.putImageData(imageData, 0, 0);
-  return canvas.toDataURL("image/png");
-}
 
 export type UseAdminDisenoWebEditorParams = {
   esAdmin: boolean;
@@ -758,44 +694,27 @@ export function useAdminDisenoWebEditor({ esAdmin, accesoAdmin, mostrarNotificac
     limpiarHeroBannerUndo();
   }, []);
 
-  const construirCheckoutVisualPresetPayloadDesdePanel = (): CheckoutVisualPresetPayload => {
-    const alturaBarraSuperior = Math.max(
-      ALTURA_BARRA_TOP_MIN,
-      Math.min(ALTURA_BARRA_TOP_MAX, Math.round(alturaBarraTemporal))
-    );
-    return {
-      revision: CHECKOUT_VISUAL_PRESET_REVISION,
-      barra: {
-        ...barraTopPedidoExitoCfg,
-        fondoBarraSuperior: colorFondoBarraTemporal,
-        colorIconosBarraSuperior: colorIconosBarraTemporal,
-        alturaBarraSuperior,
-        iconosEscalaPct: Math.max(
-          ICONOS_BARRA_ESCALA_MIN,
-          Math.min(ICONOS_BARRA_ESCALA_MAX, Math.round(iconosEscalaTemporal))
-        ),
-        logoTamano: logoTamanoDesdeAlturaBarra(alturaBarraSuperior),
-        ...(logoUrlDataPendienteBarra ? { logoUrl: logoUrlDataPendienteBarra } : {})
-      },
-      fondo: {
-        pantallaUrl: fondoPantallaPreviewUrl,
-        oscuridad: fondoPantallaOscuridad,
-        tono: fondoPantallaTono,
-        estrellasDensidad: fondoEstrellasDensidad,
-        estrellasColor: fondoEstrellasColor,
-        estrellasMovimiento: fondoEstrellasMovimiento,
-        appCapaPreset: fondoAppCapaPreset
-      },
-      hero: {
-        bannerSrc: heroBannerSrc,
-        zoom: heroBannerZoom,
-        stretchX: heroBannerStretchX,
-        ctaOffset: heroBannerCtaOffset
-      },
-      heroLogo: { ...heroLogoEdicion },
-      layout: { ...leerWebLayoutConfig() }
-    };
-  };
+  const construirCheckoutVisualPresetPayloadDesdePanel = (): CheckoutVisualPresetPayload =>
+    buildCheckoutVisualPayloadFromPanelState({
+      barraCfg: barraTopPedidoExitoCfg,
+      colorFondoBarra: colorFondoBarraTemporal,
+      colorIconosBarra: colorIconosBarraTemporal,
+      alturaBarra: alturaBarraTemporal,
+      iconosEscalaPct: iconosEscalaTemporal,
+      logoUrlDataPendiente: logoUrlDataPendienteBarra,
+      fondoPantallaUrl: fondoPantallaPreviewUrl,
+      fondoOscuridad: fondoPantallaOscuridad,
+      fondoTono: fondoPantallaTono,
+      estrellasDensidad: fondoEstrellasDensidad,
+      estrellasColor: fondoEstrellasColor,
+      estrellasMovimiento: fondoEstrellasMovimiento,
+      appCapaPreset: fondoAppCapaPreset,
+      heroBannerSrc,
+      heroBannerZoom,
+      heroBannerStretchX,
+      heroBannerCtaOffset,
+      heroLogo: heroLogoEdicion
+    });
 
   const guardarCheckoutVisualPresetDesdePanel = () => {
     void (async () => {
