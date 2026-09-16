@@ -1,4 +1,36 @@
 import rateLimit from "express-rate-limit";
+import { normalizarTelefono } from "./validacion.js";
+
+/**
+ * Tras desbloquear un usuario desde admin, sus intentos anteriores no deben contar:
+ * marcamos su email/teléfono durante 30 min y los limiters saltan el conteo para esos
+ * identificadores (el límite sigue activo para el resto de IPs/identificadores).
+ */
+const DESBLOQUEO_GRACIA_MS = 30 * 60 * 1000;
+const desbloqueosRecientes = new Map(); // identificador normalizado -> timestamp fin de gracia
+
+export function marcarDesbloqueoReciente(...identificadores) {
+  const hasta = Date.now() + DESBLOQUEO_GRACIA_MS;
+  for (const id of identificadores) {
+    const k = String(id || "").trim().toLowerCase();
+    if (k) desbloqueosRecientes.set(k, hasta);
+  }
+}
+
+function recienDesbloqueado(req) {
+  const now = Date.now();
+  const emailRaw = String(req.body?.email || "").trim().toLowerCase();
+  const telRaw = String(req.body?.telefono || "").trim();
+  // En /auth/login el campo `email` puede llevar teléfono; en forgot-password puede ir en `telefono`.
+  const candidatos = [emailRaw, normalizarTelefono(emailRaw), normalizarTelefono(telRaw)];
+  for (const k of candidatos) {
+    if (!k) continue;
+    const exp = desbloqueosRecientes.get(k);
+    if (exp && exp > now) return true;
+    if (exp && exp <= now) desbloqueosRecientes.delete(k);
+  }
+  return false;
+}
 
 export const adminLoginRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -25,8 +57,9 @@ export const forgotPasswordLimiter = rateLimit({
   limit: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: recienDesbloqueado,
   message: {
-    error: "Datos inválidos"
+    error: "Demasiados intentos de recuperación. Espera unos minutos o escríbenos por WhatsApp."
   }
 });
 
@@ -35,6 +68,7 @@ export const resetPasswordLimiter = rateLimit({
   limit: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: recienDesbloqueado,
   message: {
     error: "Datos inválidos"
   }
@@ -62,6 +96,7 @@ export const loginLimiter = rateLimit({
   limit: 10,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: recienDesbloqueado,
   message: {
     error: "Demasiados intentos, prueba más tarde"
   }

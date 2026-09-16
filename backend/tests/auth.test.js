@@ -1,24 +1,28 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import request from "supertest";
 import { app, ensureStorage } from "../app.js";
+import { ADMIN_PANEL_PASSWORD } from "../lib/env.js";
 
 const TEST_PASSWORD = "testpass1234";
 const NEW_PASSWORD_AFTER_RESET = "resetpass9876";
 
 describe.sequential("Auth API", () => {
   let testEmail;
+  let testPhone;
   let agent;
 
   beforeAll(async () => {
     agent = request.agent(app);
     testEmail = `vitest-${Date.now()}-${Math.random().toString(16).slice(2)}@maika.test`;
+    testPhone = `6${String(Date.now()).slice(-8)}`;
     await ensureStorage();
     const reg = await agent
       .post("/auth/register")
       .send({
         email: testEmail,
         password: TEST_PASSWORD,
-        nombre: "Vitest"
+        nombre: "Vitest",
+        telefono: testPhone
       });
     expect(reg.status).toBe(200);
     expect(reg.body.ok).toBe(true);
@@ -37,6 +41,31 @@ describe.sequential("Auth API", () => {
     const res = await request(app).post("/auth/login").send({ email: testEmail, password: "mala12345" });
     expect(res.status).toBe(401);
     expect(res.body).toEqual({ error: "Credenciales incorrectas" });
+  });
+
+  it("la consulta por teléfono no expone el email y la recuperación sigue funcionando", async () => {
+    const estado = await request(app).post("/auth/estado-telefono").send({ telefono: testPhone });
+    expect(estado.status).toBe(200);
+    expect(estado.body).toEqual({ existe: true, hasEmail: true, hasPassword: true });
+    expect(estado.body.email).toBeUndefined();
+
+    const forgot = await request(app).post("/auth/forgot-password").send({ telefono: testPhone });
+    expect(forgot.status).toBe(200);
+    expect(globalThis.__MAIKA_TEST_LAST_RESET_TOKEN__).toBeTruthy();
+  });
+
+  it("el logout admin revoca también las sesiones admin de otros navegadores", async () => {
+    const adminA = request.agent(app);
+    const adminB = request.agent(app);
+    const loginA = await adminA.post("/auth/admin-panel-token").send({ password: ADMIN_PANEL_PASSWORD });
+    const loginB = await adminB.post("/auth/admin-panel-token").send({ password: ADMIN_PANEL_PASSWORD });
+    expect(loginA.status).toBe(200);
+    expect(loginB.status).toBe(200);
+
+    expect((await adminA.get("/auth/admin/me")).status).toBe(200);
+    expect((await adminB.get("/auth/admin/me")).status).toBe(200);
+    expect((await adminA.post("/auth/admin/logout")).status).toBe(200);
+    expect((await adminB.get("/auth/admin/me")).status).toBe(403);
   });
 
   it("flujo reset password completo", async () => {

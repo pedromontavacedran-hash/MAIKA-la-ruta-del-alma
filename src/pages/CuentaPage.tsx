@@ -3,16 +3,14 @@ import type { CSSProperties, Dispatch, SetStateAction } from "react";
 import type { AuthForm, Usuario, Pedido, Pagina, Cliente, DireccionUsuario } from "../types";
 import { checkoutInputStyle, checkoutPrimaryButtonStyleNoShadow } from "../styles/inputStyle";
 import BotonCerrar from "../components/BotonCerrar";
-import ModalBase from "../components/ModalBase";
 import { GUEST_CART_PENDING_KEY, THEME } from "../config";
-import { parseFechaPedido, textoFechaPedido } from "../utils/fechaPedido";
+import { parseFechaPedido } from "../utils/fechaPedido";
 import {
   cambiarPasswordAutenticadoApi,
   hasClientSession,
 } from "../services/apiAuth";
 import { limpiarClavesSesionEnLocalStorage } from "../services/apiAuth";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { lineasTextoSeleccionDireccion } from "../utils/direccion";
 import { DIRECCIONES_MAX } from "../app/routing/routeMaps";
 import { normalizarDireccionesUsuario } from "../utils/direcciones";
 import { resolverUsoDireccionCheckout } from "../utils/checkoutDireccionesActions";
@@ -28,13 +26,17 @@ import {
   marcarActivacionIdentidadVerificada,
 } from "../utils/activacionIdentidadSession";
 import {
-  normalizarCodigoUltimoPedidoInput,
   validarCodigoUltimoPedido
 } from "../utils/accesoRapidoVerificacion";
 import { crearFormAuthRegistroDesdeAcceso } from "../utils/authForms";
 import { tieneEmailRealMaika } from "../utils/emailTecnicoMaika";
 
-import RequisitosPasswordHint from "../components/RequisitosPasswordHint";
+import CambioPasswordTemporalModal from "../components/CambioPasswordTemporalModal";
+import CambioPasswordSection from "./cuenta/CambioPasswordSection";
+import DireccionesSection from "./cuenta/DireccionesSection";
+import MisPedidosSection from "./cuenta/MisPedidosSection";
+import PedidoDetalleModal from "./cuenta/PedidoDetalleModal";
+import ActivarEmailModal from "./cuenta/ActivarEmailModal";
 import CuentaAuthView from "./CuentaAuthView";
 import {
   normalizarTelefono,
@@ -114,6 +116,7 @@ export default function CuentaPage(props: CuentaPageProps) {
   const [showPasswordNuevaCuenta, setShowPasswordNuevaCuenta] = useState(false);
   const [showPasswordConfirmarCuenta, setShowPasswordConfirmarCuenta] = useState(false);
   const [cambioPasswordCargando, setCambioPasswordCargando] = useState(false);
+  const [modalPasswordTemporalAbierto, setModalPasswordTemporalAbierto] = useState(false);
   const prevModoRef = useRef<"login" | "register" | null>(null);
 
   // Estados para recuperar contraseña
@@ -269,19 +272,6 @@ export default function CuentaPage(props: CuentaPageProps) {
     boxSizing: "border-box"
   };
   const cuentaInputWithEyeStyle: CSSProperties = { ...cuentaInputStyle, paddingRight: 44 };
-  const passwordWrapperStyle = { position: "relative" as const, marginBottom: 12 };
-  const eyeBtnStyle = {
-    position: "absolute" as const,
-    right: 10,
-    top: "50%",
-    transform: "translateY(-50%)",
-    background: "none",
-    border: "none",
-    cursor: "pointer",
-    fontSize: 18,
-    padding: 4,
-    color: THEME.goldMain
-  };
   const cuentaBotonAuth: CSSProperties = {
     width: "100%",
     padding: "12px 14px",
@@ -398,7 +388,7 @@ export default function CuentaPage(props: CuentaPageProps) {
 
   useEffect(() => {
     if (!usuario?.mustChangePassword) return;
-    setCambioPasswordAbierto(true);
+    setModalPasswordTemporalAbierto(true);
   }, [usuario?.mustChangePassword]);
 
   /** Sin barra de scroll visible en la página (sigue el desplazamiento con rueda/táctil). */
@@ -410,6 +400,14 @@ export default function CuentaPage(props: CuentaPageProps) {
       document.documentElement.classList.remove("cuenta-maika-sin-scrollbar");
       document.body.classList.remove("cuenta-maika-sin-scrollbar");
     };
+  }, [embedPanelGestion]);
+
+  /** Bloquear la rueda del ratón en Mi Cuenta (el contenido cabe sin scroll). */
+  useEffect(() => {
+    if (embedPanelGestion) return;
+    const bloquearRueda = (e: WheelEvent) => e.preventDefault();
+    window.addEventListener("wheel", bloquearRueda, { passive: false });
+    return () => window.removeEventListener("wheel", bloquearRueda);
   }, [embedPanelGestion]);
 
   /** Tras enlace de recuperación: mensaje claro y URL limpia. */
@@ -457,11 +455,6 @@ export default function CuentaPage(props: CuentaPageProps) {
     return <CuentaAuthView {...props} />;
   }
 
-  const estadoTexto = (estado?: MaikaPedidoLS["estado"]) => {
-    if (estado === "enviado") return "🚚 Enviado";
-    if (estado === "entregado") return "✅ Entregado";
-    return "🛒 Pendiente";
-  };
   const direccionDosLineas = direccionCuentaEnDosLineas(usuario);
   const obtenerCodigoUltimoPedidoDesdeCuenta = () => {
     const ultimo = maikaPedidosUsuario[0];
@@ -564,123 +557,6 @@ export default function CuentaPage(props: CuentaPageProps) {
       setActivacionEmailOk(false);
     }, 800);
   };
-  const renderOrdenMesDropdown = (grupo: { key: string; titulo: string }) => {
-    const ordenActual = ordenPedidosPorMes[grupo.key] ?? "desc";
-    const abierto = dropdownOrdenMesAbierto === grupo.key;
-    return (
-      <span
-        style={{ position: "relative", flexShrink: 0, width: 128 }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          type="button"
-          aria-label={`Ordenar pedidos de ${grupo.titulo}`}
-          aria-expanded={abierto}
-          onClick={() => setDropdownOrdenMesAbierto((prev) => (prev === grupo.key ? null : grupo.key))}
-          style={{
-            width: "100%",
-            padding: "6px 8px",
-            borderRadius: 8,
-            border: "1px solid rgba(212, 175, 55, 0.5)",
-            background: "rgba(27, 23, 69, 0.96)",
-            color: "#fff",
-            fontSize: 11,
-            fontWeight: 800,
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 6
-          }}
-        >
-          <span>{ordenActual === "desc" ? "Más recientes" : "Más antiguos"}</span>
-          <span style={{ transform: abierto ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.16s ease" }}>▾</span>
-        </button>
-        {abierto ? (
-          <span
-            style={{
-              position: "absolute",
-              top: "calc(100% + 5px)",
-              right: 0,
-              width: "100%",
-              borderRadius: 9,
-              overflow: "hidden",
-              border: "1px solid rgba(212, 175, 55, 0.55)",
-              background: "rgba(34, 28, 82, 0.98)",
-              boxShadow: "0 12px 26px rgba(0,0,0,0.38)",
-              zIndex: 20
-            }}
-          >
-            {(["desc", "asc"] as const).map((orden) => (
-              <button
-                key={orden}
-                type="button"
-                onClick={() => {
-                  setOrdenPedidosPorMes((prev) => ({ ...prev, [grupo.key]: orden }));
-                  setDropdownOrdenMesAbierto(null);
-                }}
-                style={{
-                  width: "100%",
-                  padding: "8px 9px",
-                  border: "none",
-                  borderBottom: orden === "desc" ? "1px solid rgba(212, 175, 55, 0.16)" : "none",
-                  background: ordenActual === orden ? "rgba(212, 175, 55, 0.18)" : "transparent",
-                  color: "#fff",
-                  cursor: "pointer",
-                  fontSize: 12,
-                  fontWeight: 800,
-                  textAlign: "left"
-                }}
-              >
-                {orden === "desc" ? "Más recientes" : "Más antiguos"}
-              </button>
-            ))}
-          </span>
-        ) : null}
-      </span>
-    );
-  };
-  const renderPedidoCuentaCard = (p: MaikaPedidoLS) => {
-    const resumenProductos = (p.productos || []).reduce((sum, pr) => sum + (Number(pr.cantidad) || 0), 0);
-    return (
-      <div key={p.idPedido} className="cuenta-maika-pedido-card" style={{ padding: 15, marginBottom: 10 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
-          <strong style={{ color: THEME.goldMain }}>
-            {textoFechaPedido(p.fecha, false)}
-          </strong>
-          <span style={{ color: "white", fontSize: 12 }}>{estadoTexto(p.estado)}</span>
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
-          <span style={{ color: "white" }}>Total: {Number(p.total || 0).toFixed(2)} €</span>
-          <span style={{ color: "white" }}>{resumenProductos} productos</span>
-        </div>
-        <div style={{ marginTop: 12, display: "flex", gap: 10 }}>
-          <button
-            onClick={() => setPedidoDetalleAbierto(p)}
-            style={{ flex: 1, minWidth: 0, padding: "12px 10px", background: "transparent", color: "rgba(255,255,255,0.92)", border: "1px solid rgba(212, 175, 55, 0.45)", borderRadius: 10, cursor: "pointer", fontWeight: 600 }}
-          >
-            Ver detalles
-          </button>
-          <button
-            type="button"
-            className="checkout-boton-finalizar"
-            onClick={() => onRepetirPedido(p)}
-            style={{
-              flex: 1,
-              minWidth: 0,
-              padding: "12px 10px",
-              borderRadius: 10,
-              cursor: "pointer",
-              ...checkoutPrimaryButtonStyleNoShadow
-            }}
-          >
-            Repetir pedido
-          </button>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="cuenta-maika-page maika-anchor" style={cuentaShellOuter}>
       <div className="maika-page-content maika-page-content--narrow" style={{ maxWidth: 480, marginLeft: "auto", marginRight: "auto", marginTop: 0, marginBottom: 0, width: "100%", position: "relative", flex: "0 1 auto", boxSizing: "border-box" }}>
@@ -778,275 +654,46 @@ export default function CuentaPage(props: CuentaPageProps) {
           </div>
         )}
         {tieneEmailRealMaika(usuario.email || "") ? (
-          <div style={{ marginTop: 12, marginBottom: 14 }}>
-            <button
-              type="button"
-              onClick={() => {
-                if (usuario.mustChangePassword) {
-                  setCambioPasswordAbierto(true);
-                  return;
-                }
-                setCambioPasswordAbierto((v) => {
-                  if (v) limpiarCambioPasswordCuenta();
-                  return !v;
-                });
-              }}
-              style={{
-                ...cuentaBotonAuth,
-                padding: "10px 12px",
-                fontSize: 13,
-                background: "rgba(255,255,255,0.04)",
-                color: THEME.goldMain,
-                border: "1px solid rgba(212, 175, 55, 0.45)"
-              }}
-            >
-              {usuario.mustChangePassword
-                ? "Debes cambiar tu contraseña"
-                : cambioPasswordAbierto
-                  ? "Cancelar cambio de contraseña"
-                  : "Cambiar contraseña"}
-            </button>
-            {cambioPasswordAbierto ? (
-              <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
-                {usuario.mustChangePassword ? (
-                  <p style={{ margin: 0, color: "#ffd98a", fontSize: 12, lineHeight: 1.35 }}>
-                    Has entrado con una contraseña temporal. Cámbiala ahora por una que solo sepas tú.
-                  </p>
-                ) : null}
-                <div style={{ ...passwordWrapperStyle, marginBottom: 0 }}>
-                  <input
-                    type={showPasswordActualCuenta ? "text" : "password"}
-                    placeholder="Contraseña actual"
-                    value={passwordActualCuenta}
-                    onChange={(e) => setPasswordActualCuenta(e.target.value)}
-                    style={{ ...cuentaInputWithEyeStyle, marginBottom: 0 }}
-                    autoComplete="current-password"
-                    name="cuenta-password-actual"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPasswordActualCuenta((v) => !v)}
-                    style={eyeBtnStyle}
-                    title={showPasswordActualCuenta ? "Ocultar contraseña" : "Ver contraseña"}
-                    aria-label={showPasswordActualCuenta ? "Ocultar contraseña" : "Ver contraseña"}
-                  >
-                    {showPasswordActualCuenta ? "🙈" : "👁"}
-                  </button>
-                </div>
-                <div style={{ ...passwordWrapperStyle, marginBottom: 0 }}>
-                  <input
-                    type={showPasswordNuevaCuenta ? "text" : "password"}
-                    placeholder="Nueva contraseña"
-                    value={passwordNuevaCuenta}
-                    onChange={(e) => setPasswordNuevaCuenta(e.target.value)}
-                    style={{ ...cuentaInputWithEyeStyle, marginBottom: 0 }}
-                    autoComplete="new-password"
-                    name="cuenta-password-nueva"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPasswordNuevaCuenta((v) => !v)}
-                    style={eyeBtnStyle}
-                    title={showPasswordNuevaCuenta ? "Ocultar contraseña" : "Ver contraseña"}
-                    aria-label={showPasswordNuevaCuenta ? "Ocultar contraseña" : "Ver contraseña"}
-                  >
-                    {showPasswordNuevaCuenta ? "🙈" : "👁"}
-                  </button>
-                </div>
-                <div style={{ ...passwordWrapperStyle, marginBottom: 0 }}>
-                  <input
-                    type={showPasswordConfirmarCuenta ? "text" : "password"}
-                    placeholder="Confirmar nueva contraseña"
-                    value={passwordConfirmarCuenta}
-                    onChange={(e) => setPasswordConfirmarCuenta(e.target.value)}
-                    style={{ ...cuentaInputWithEyeStyle, marginBottom: 0 }}
-                    autoComplete="new-password"
-                    name="cuenta-password-confirmar"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPasswordConfirmarCuenta((v) => !v)}
-                    style={eyeBtnStyle}
-                    title={showPasswordConfirmarCuenta ? "Ocultar contraseña" : "Ver contraseña"}
-                    aria-label={showPasswordConfirmarCuenta ? "Ocultar contraseña" : "Ver contraseña"}
-                  >
-                    {showPasswordConfirmarCuenta ? "🙈" : "👁"}
-                  </button>
-                </div>
-                <RequisitosPasswordHint password={passwordNuevaCuenta} compact />
-                <button
-                  type="button"
-                  disabled={cambioPasswordCargando}
-                  onClick={() => void guardarCambioPasswordCuenta()}
-                  className="checkout-boton-finalizar"
-                  style={{
-                    ...cuentaCtaPrincipalStyle,
-                    padding: "10px 12px",
-                    opacity: cambioPasswordCargando ? 0.85 : 1,
-                    cursor: cambioPasswordCargando ? "wait" : "pointer"
-                  }}
-                >
-                  {cambioPasswordCargando ? "Guardando..." : "Guardar nueva contraseña"}
-                </button>
-              </div>
-            ) : null}
-          </div>
+          <CambioPasswordSection
+            mustChangePassword={!!usuario.mustChangePassword}
+            abierto={cambioPasswordAbierto}
+            onToggle={() => {
+              if (usuario.mustChangePassword) {
+                setModalPasswordTemporalAbierto(true);
+                return;
+              }
+              setCambioPasswordAbierto((v) => {
+                if (v) limpiarCambioPasswordCuenta();
+                return !v;
+              });
+            }}
+            passwordActual={passwordActualCuenta}
+            setPasswordActual={setPasswordActualCuenta}
+            passwordNueva={passwordNuevaCuenta}
+            setPasswordNueva={setPasswordNuevaCuenta}
+            passwordConfirmar={passwordConfirmarCuenta}
+            setPasswordConfirmar={setPasswordConfirmarCuenta}
+            showActual={showPasswordActualCuenta}
+            setShowActual={setShowPasswordActualCuenta}
+            showNueva={showPasswordNuevaCuenta}
+            setShowNueva={setShowPasswordNuevaCuenta}
+            showConfirmar={showPasswordConfirmarCuenta}
+            setShowConfirmar={setShowPasswordConfirmarCuenta}
+            cargando={cambioPasswordCargando}
+            onGuardar={() => void guardarCambioPasswordCuenta()}
+            cuentaBotonAuth={cuentaBotonAuth}
+            cuentaInputWithEyeStyle={cuentaInputWithEyeStyle}
+            cuentaCtaPrincipalStyle={cuentaCtaPrincipalStyle}
+          />
         ) : null}
-        <div style={{ marginTop: 12 }}>
-          <label style={{ fontSize: 14, color: "rgba(255,255,255,0.65)", display: "block", marginBottom: 6 }}>
-            Dirección 📍
-            {dirsCuentaNormalizadas.length > 0 ? (
-              <span style={{ fontWeight: 500, opacity: 0.7, fontSize: 11, marginLeft: 6 }}>
-                ({dirsCuentaNormalizadas.length}/{DIRECCIONES_MAX})
-              </span>
-            ) : null}
-          </label>
-          {dirsCuentaNormalizadas.length > 0 ? (
-            <>
-              <div style={{ display: "grid", gap: 7 }}>
-                {dirsCuentaNormalizadas.map((d) => {
-                  const predId = String(usuario.direccionPredeterminadaId || "").trim();
-                  const primeraId = dirsCuentaNormalizadas[0]?.id || "";
-                  const esPrincipal = (predId && d.id === predId) || (!predId && d.id === primeraId);
-                  const { linea1, linea2 } = lineasTextoSeleccionDireccion(d);
-                  return (
-                    <button
-                      key={d.id}
-                      type="button"
-                      aria-current={esPrincipal ? "true" : undefined}
-                      onClick={() => {
-                        if (esPrincipal) return;
-                        aplicarDireccionPrincipalDesdeCuenta(d.id);
-                      }}
-                      style={{
-                        width: "100%",
-                        textAlign: "left",
-                        padding: "10px 12px",
-                        borderRadius: 10,
-                        border: esPrincipal ? `2px solid ${THEME.goldMain}` : "1px solid rgba(212,175,55,0.22)",
-                        background: esPrincipal ? "rgba(201,162,74,0.1)" : "rgba(255,255,255,0.04)",
-                        cursor: esPrincipal ? "default" : "pointer",
-                        boxSizing: "border-box"
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "flex-start",
-                          gap: 8
-                        }}
-                      >
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div
-                            style={{
-                              fontWeight: 700,
-                              fontSize: 13,
-                              color: "rgba(255,255,255,0.94)",
-                              lineHeight: 1.35
-                            }}
-                          >
-                            {linea1 || "—"}
-                          </div>
-                          {linea2 ? (
-                            <div
-                              style={{
-                                marginTop: 4,
-                                fontSize: 11,
-                                fontWeight: 500,
-                                color: "rgba(190,185,230,0.85)",
-                                lineHeight: 1.35
-                              }}
-                            >
-                              {linea2}
-                            </div>
-                          ) : null}
-                          {!esPrincipal ? (
-                            <div style={{ marginTop: 8, fontSize: 10, color: "rgba(255,255,255,0.45)" }}>
-                              Toca para usarla como principal
-                            </div>
-                          ) : null}
-                        </div>
-                        {esPrincipal ? (
-                          <span
-                            style={{
-                              flexShrink: 0,
-                              fontSize: 9,
-                              fontWeight: 800,
-                              letterSpacing: "0.06em",
-                              color: THEME.goldMain,
-                              border: `1px solid ${THEME.goldMain}`,
-                              borderRadius: 8,
-                              padding: "3px 8px"
-                            }}
-                          >
-                            PRINCIPAL
-                          </span>
-                        ) : null}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-              {dirsCuentaNormalizadas.length > 1 ? (
-                <p style={{ margin: "8px 0 0", fontSize: 11, color: "rgba(255,255,255,0.5)", lineHeight: 1.4 }}>
-                  Elige otra fila para cambiar la dirección principal.
-                </p>
-              ) : null}
-              <button
-                type="button"
-                className="checkout-boton-finalizar"
-                onClick={() => navigate("/cuenta?modo=direccion")}
-                disabled={dirsCuentaNormalizadas.length >= DIRECCIONES_MAX}
-                style={{
-                  ...cuentaCtaPrincipalStyle,
-                  marginTop: 10,
-                  opacity: dirsCuentaNormalizadas.length >= DIRECCIONES_MAX ? 0.55 : 1,
-                  cursor: dirsCuentaNormalizadas.length >= DIRECCIONES_MAX ? "not-allowed" : "pointer"
-                }}
-              >
-                + Añadir otra dirección
-              </button>
-            </>
-          ) : (
-            <>
-              <div
-                style={{
-                  padding: "10px 12px",
-                  borderRadius: 9,
-                  border: "1px solid rgba(212, 175, 55, 0.25)",
-                  background: "rgba(255, 255, 255, 0.04)",
-                  color: "rgba(255,255,255,0.88)",
-                  minHeight: 44,
-                  whiteSpace: "pre-wrap",
-                  lineHeight: 1.45,
-                  cursor: "not-allowed",
-                  boxSizing: "border-box"
-                }}
-                title="Dirección bloqueada. Pulsa «Cambiar dirección» para editar o añadir."
-              >
-                {direccionDosLineas.linea1 ? (
-                  <>
-                    <div>{direccionDosLineas.linea1}</div>
-                    {direccionDosLineas.linea2 && (
-                      <div style={{ marginTop: 2, opacity: 0.9 }}>{direccionDosLineas.linea2}</div>
-                    )}
-                  </>
-                ) : (
-                  "Sin dirección guardada"
-                )}
-              </div>
-              <button
-                type="button"
-                className="checkout-boton-finalizar"
-                onClick={() => navigate("/cuenta?modo=direccion")}
-                style={{ ...cuentaCtaPrincipalStyle, marginTop: 10 }}
-              >
-                Cambiar dirección
-              </button>
-            </>
-          )}
-        </div>
+        <DireccionesSection
+          dirsCuentaNormalizadas={dirsCuentaNormalizadas}
+          direccionPredeterminadaId={usuario.direccionPredeterminadaId}
+          direccionDosLineas={direccionDosLineas}
+          onElegirPrincipal={aplicarDireccionPrincipalDesdeCuenta}
+          onIrADireccion={() => navigate("/cuenta?modo=direccion")}
+          cuentaCtaPrincipalStyle={cuentaCtaPrincipalStyle}
+        />
         <button
           type="button"
           className="checkout-boton-finalizar"
@@ -1069,194 +716,51 @@ export default function CuentaPage(props: CuentaPageProps) {
           Cerrar Sesión
         </button>
       </div>
-      <h3 style={{ color: THEME.goldMain, marginBottom: 15 }}>📦 Mis Pedidos</h3>
-      {!claveUsuario && (
-        <p className="cuenta-maika-hint" style={{ color: "#ffb3b3", textAlign: "center", padding: 12, fontSize: 13, marginBottom: 12 }}>
-          Tu cuenta no tiene un teléfono móvil válido (9 dígitos, 6 o 7). Los pedidos se asocian al teléfono; revisa tus datos o contacta si falta.
-        </p>
-      )}
-      {maikaPedidosUsuario.length === 0 ? (
-        <p className="cuenta-maika-hint" style={{ color: "rgba(255,255,255,0.92)", textAlign: "center", padding: 20 }}>No tienes pedidos aún</p>
-      ) : (
-        <>
-          <div
-            className="cuenta-maika-hint"
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: 12,
-              padding: "12px 14px",
-              marginBottom: 14,
-              color: "rgba(255,255,255,0.92)",
-              fontSize: 13,
-              lineHeight: 1.35
-            }}
-          >
-            <span>Pedidos totales: <strong>{maikaPedidosUsuario.length}</strong></span>
-            <span>Último pedido: <strong>{textoFechaPedido(maikaPedidosUsuario[0]?.fecha || "", false)}</strong></span>
-          </div>
-
-          <h4 style={{ color: THEME.goldMain, margin: "0 0 10px", fontSize: 15 }}>Últimos 3 pedidos</h4>
-          {ultimosPedidosCuenta.map(renderPedidoCuentaCard)}
-
-          {pedidosHistoricoPorMes.length > 0 ? (
-            <div style={{ marginTop: 18 }}>
-              <h4 style={{ color: THEME.goldMain, margin: "0 0 10px", fontSize: 15 }}>Ver pedidos por meses</h4>
-              {pedidosHistoricoPorMes.map((grupo, idx) => (
-                <details
-                  key={grupo.key}
-                  open={idx === 0}
-                  className="cuenta-maika-hint"
-                  style={{
-                    padding: "10px 12px",
-                    marginBottom: 10,
-                    color: "rgba(255,255,255,0.92)"
-                  }}
-                >
-                  <summary
-                    style={{
-                      cursor: "pointer",
-                      color: THEME.goldMain,
-                      fontWeight: 800,
-                      fontSize: 14
-                    }}
-                  >
-                    <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "space-between", gap: 8, width: "calc(100% - 18px)", verticalAlign: "middle" }}>
-                      <span>
-                        {grupo.titulo} · {grupo.pedidos.length} {grupo.pedidos.length === 1 ? "pedido" : "pedidos"}
-                      </span>
-                      {renderOrdenMesDropdown(grupo)}
-                    </span>
-                  </summary>
-                  <div style={{ marginTop: 12 }}>
-                    {grupo.pedidos.map(renderPedidoCuentaCard)}
-                  </div>
-                </details>
-              ))}
-            </div>
-          ) : null}
-        </>
-      )}
+      <MisPedidosSection
+        claveUsuario={claveUsuario}
+        maikaPedidosUsuario={maikaPedidosUsuario}
+        ultimosPedidosCuenta={ultimosPedidosCuenta}
+        pedidosHistoricoPorMes={pedidosHistoricoPorMes}
+        ordenPedidosPorMes={ordenPedidosPorMes}
+        setOrdenPedidosPorMes={setOrdenPedidosPorMes}
+        dropdownOrdenMesAbierto={dropdownOrdenMesAbierto}
+        setDropdownOrdenMesAbierto={setDropdownOrdenMesAbierto}
+        onVerDetalles={setPedidoDetalleAbierto}
+        onRepetirPedido={onRepetirPedido}
+      />
 
       {pedidoDetalleAbierto && (
-        <ModalBase
-          abierto
+        <PedidoDetalleModal
+          pedido={pedidoDetalleAbierto}
           onClose={() => setPedidoDetalleAbierto(null)}
-          zIndex={12000}
-          maxWidth="520px"
-          classNameCard="cuenta-maika-card modal-card"
-          styleCard={{
-            border: "1px solid rgba(212, 175, 55, 0.3)",
-            borderRadius: 16,
-            padding: "28px 22px 18px",
-            width: "90%",
-            textAlign: "center",
-            boxSizing: "border-box"
-          }}
-        >
-            <div style={{ fontSize: 44, marginBottom: 6 }}>🧾</div>
-            <h3 style={{ color: THEME.goldMain, marginBottom: 10 }}>
-              Detalles del pedido ({String(pedidoDetalleAbierto.idPedido ?? "").slice(-6)})
-            </h3>
-            <p style={{ color: "white", marginBottom: 10 }}>
-              Fecha: {textoFechaPedido(pedidoDetalleAbierto.fecha, true)}
-            </p>
-            <p style={{ color: "white", marginBottom: 10 }}>
-              Dirección: {pedidoDetalleAbierto.direccionCompleta || "—"}
-            </p>
-            <div style={{ color: "white", textAlign: "left", marginTop: 12 }}>
-              {(pedidoDetalleAbierto.productos || []).map((pr, idx) => (
-                <div key={`${pr.idProducto}-${idx}`} style={{ display: "flex", justifyContent: "space-between", gap: 12, marginBottom: 6 }}>
-                  <span>{pr.nombre} x {pr.cantidad}</span>
-                  <span>{Number(pr.precio || 0).toFixed(2)} €</span>
-                </div>
-              ))}
-            </div>
-            <p className="checkout-total-precio" style={{ marginTop: 12 }}>
-              Total: {Number(pedidoDetalleAbierto.total || 0).toFixed(2)} €
-            </p>
-            {pedidoDetalleAbierto.nota && (
-              <p style={{ color: "white", marginTop: 10, opacity: 0.95 }}>
-                Nota: {pedidoDetalleAbierto.nota}
-              </p>
-            )}
-            <button
-              type="button"
-              onClick={() => setPedidoDetalleAbierto(null)}
-              style={{ ...cuentaBotonAuth, marginTop: 16, background: "transparent", color: THEME.goldMain, border: "1px solid rgba(212, 175, 55, 0.45)" }}
-            >
-              Cerrar
-            </button>
-        </ModalBase>
+          cuentaBotonAuth={cuentaBotonAuth}
+        />
       )}
       {modalActivarEmailAbierto && (
-        <ModalBase
+        <ActivarEmailModal
+          codigoPedidoActivacion={codigoPedidoActivacion}
+          setCodigoPedidoActivacion={setCodigoPedidoActivacion}
+          errorActivacionEmail={errorActivacionEmail}
+          setErrorActivacionEmail={setErrorActivacionEmail}
+          intentosActivacionEmail={intentosActivacionEmail}
+          activacionEmailOk={activacionEmailOk}
+          setActivacionEmailOk={setActivacionEmailOk}
+          onVerificar={verificarPedidoYActivarCuenta}
+          onClose={() => setModalActivarEmailAbierto(false)}
+          cuentaBotonAuth={cuentaBotonAuth}
+          cuentaCtaPrincipalStyle={cuentaCtaPrincipalStyle}
+        />
+      )}
+      {modalPasswordTemporalAbierto && (
+        <CambioPasswordTemporalModal
           abierto
-          onClose={() => {
-            setModalActivarEmailAbierto(false);
-            setCodigoPedidoActivacion("");
-            setErrorActivacionEmail("");
-            setActivacionEmailOk(false);
+          onClose={() => setModalPasswordTemporalAbierto(false)}
+          onExito={() => {
+            setModalPasswordTemporalAbierto(false);
+            setUsuario((prev) => (prev ? { ...prev, mustChangePassword: false } : prev));
           }}
-          zIndex={12000}
-          maxWidth="440px"
-          classNameCard="cuenta-maika-card modal-card"
-          styleCard={{
-            border: "1px solid rgba(212, 175, 55, 0.35)",
-            borderRadius: 16,
-            padding: "26px 22px 18px",
-            width: "90%",
-            textAlign: "center",
-            boxSizing: "border-box"
-          }}
-        >
-          <div style={{ fontSize: 38, marginBottom: 6 }}>🔐</div>
-          <h3 style={{ color: THEME.goldMain, marginBottom: 8 }}>Activar cuenta</h3>
-          <p style={{ color: "rgba(255,255,255,0.84)", fontSize: 13, lineHeight: 1.45, marginBottom: 12 }}>
-            Introduce el código de tu último pedido para vincular un email a tus pedidos.
-          </p>
-          <input
-            value={codigoPedidoActivacion}
-            disabled={activacionEmailOk || intentosActivacionEmail >= 3}
-            onChange={(e) => {
-              setCodigoPedidoActivacion(normalizarCodigoUltimoPedidoInput(e.target.value));
-              if (errorActivacionEmail) setErrorActivacionEmail("");
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") verificarPedidoYActivarCuenta();
-            }}
-            placeholder="Código del último pedido"
-            style={{ ...checkoutInputStyle, marginBottom: 10, boxSizing: "border-box", textTransform: "uppercase", opacity: activacionEmailOk || intentosActivacionEmail >= 3 ? 0.72 : 1 }}
-            autoComplete="off"
-          />
-          <button
-            type="button"
-            className="checkout-boton-finalizar"
-            disabled={activacionEmailOk || intentosActivacionEmail >= 3}
-            onClick={verificarPedidoYActivarCuenta}
-            style={{ ...cuentaCtaPrincipalStyle, width: "100%", opacity: activacionEmailOk || intentosActivacionEmail >= 3 ? 0.72 : 1, cursor: activacionEmailOk || intentosActivacionEmail >= 3 ? "not-allowed" : "pointer" }}
-          >
-            {activacionEmailOk ? "Verificación correcta ✓" : "Verificar y continuar"}
-          </button>
-          {activacionEmailOk ? (
-            <p style={{ color: "#9be7bd", margin: "10px 0 0", fontSize: 12 }}>Abriendo activación de cuenta...</p>
-          ) : null}
-          {errorActivacionEmail ? (
-            <p style={{ color: "#ffb3b3", margin: "10px 0 0", fontSize: 12 }}>{errorActivacionEmail}</p>
-          ) : null}
-          <button
-            type="button"
-            onClick={() => {
-              setModalActivarEmailAbierto(false);
-              setCodigoPedidoActivacion("");
-              setErrorActivacionEmail("");
-              setActivacionEmailOk(false);
-            }}
-            style={{ ...cuentaBotonAuth, marginTop: 12, background: "transparent", color: THEME.goldMain, border: "1px solid rgba(212, 175, 55, 0.45)" }}
-          >
-            Cancelar
-          </button>
-        </ModalBase>
+          mostrarNotificacion={mostrarNotificacion}
+        />
       )}
       </div>
     </div>

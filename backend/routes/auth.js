@@ -29,6 +29,9 @@ import {
   adminTokenDesdeCookie,
   authMiddleware,
   requireAdmin,
+  getAdminTokenVersion,
+  revocarSesionesAdmin,
+  tokenAdminEsVigente,
   delayRespuestaFallida,
   generateResetToken,
   hashResetToken,
@@ -43,8 +46,7 @@ import {
   buildResetPasswordPageUrl,
   buildResetEmailClickHref
 } from "../lib/origins.js";
-import { getSmtpTransporter, enviarEmailResetPassword, escapeHtml } from "../lib/email.js";
-import { openUrlInChrome } from "../utils/openChromeUrl.js";
+import { getSmtpTransporter, enviarEmailResetPassword } from "../lib/email.js";
 import { pickUsuarioPerfilServidor } from "../utils/pickUsuarioPerfilServidor.js";
 import {
   adminLoginRateLimit,
@@ -111,13 +113,19 @@ authRouter.post("/auth/admin-panel-token", adminLoginRateLimit, (req, res) => {
     return;
   }
   const token = jwt.sign(
-    { id: 0, email: "panel@maika.local", role: "admin", panelAdmin: true },
+    {
+      id: 0,
+      email: "panel@maika.local",
+      role: "admin",
+      panelAdmin: true,
+      adminTokenVersion: getAdminTokenVersion()
+    },
     JWT_SECRET,
     { expiresIn: Math.floor(ADMIN_COOKIE_MAX_AGE_MS / 1000) }
   );
   res.cookie(ADMIN_COOKIE_NAME, token, {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "strict",
     secure: IS_PRODUCTION,
     maxAge: ADMIN_COOKIE_MAX_AGE_MS,
     path: "/"
@@ -125,9 +133,10 @@ authRouter.post("/auth/admin-panel-token", adminLoginRateLimit, (req, res) => {
   res.json({ ok: true });
 });
 
-authRouter.post("/auth/admin/logout", (_req, res) => {
+authRouter.post("/auth/admin/logout", requireAdmin, (_req, res) => {
+  revocarSesionesAdmin();
   res.clearCookie(ADMIN_COOKIE_NAME, {
-    sameSite: "lax",
+    sameSite: "strict",
     secure: IS_PRODUCTION,
     path: "/"
   });
@@ -142,13 +151,17 @@ authRouter.get("/auth/admin/session", (req, res) => {
   }
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    if (decoded?.role !== "admin" && decoded?.panelAdmin !== true) {
+    if (
+      (decoded?.role !== "admin" && decoded?.panelAdmin !== true) ||
+      !tokenAdminEsVigente(decoded)
+    ) {
+      res.clearCookie(ADMIN_COOKIE_NAME, { sameSite: "strict", secure: IS_PRODUCTION, path: "/" });
       res.json({ ok: true, authorized: false });
       return;
     }
     res.json({ ok: true, authorized: true });
   } catch {
-    res.clearCookie(ADMIN_COOKIE_NAME, { sameSite: "lax", secure: IS_PRODUCTION, path: "/" });
+    res.clearCookie(ADMIN_COOKIE_NAME, { sameSite: "strict", secure: IS_PRODUCTION, path: "/" });
     res.json({ ok: true, authorized: false });
   }
 });
@@ -354,13 +367,12 @@ authRouter.post("/auth/estado-telefono", estadoTelefonoLimiter, async (req, res)
     return;
   }
 
-  // NOTA: el frontend reutiliza este email también como identificador de `/auth/login` (acceso rápido de
-  // checkout) y para el envío de código por EmailJS cuando la cuenta no tiene contraseña; enmascararlo aquí
-  // rompería ambos flujos (quedaría fuera del alcance de esta corrección tocar "login normal"). El rate limit
-  // de arriba es la mitigación aplicada para esta ruta; ver informe de seguridad para el riesgo residual documentado.
+  // Esta ruta se consulta sin autenticación: nunca entregar el email completo evita que un teléfono pueda
+  // usarse para averiguar datos personales. Los flujos de acceso usan el teléfono como identificador y el
+  // backend resuelve el email internamente si necesita enviar una recuperación.
   res.json({
     existe: true,
-    email: String(user.email || "").trim().toLowerCase(),
+    hasEmail: tieneEmailRealMaika(user.email),
     hasPassword: !!String(user.password || "").trim()
   });
 });
@@ -393,6 +405,10 @@ authRouter.post("/auth/login", loginLimiter, async (req, res) => {
   const valid = await bcrypt.compare(passwordStr, hashCompare);
   if (!user || !valid) {
     res.status(401).json({ error: "Credenciales incorrectas" });
+    return;
+  }
+  if (user.bloqueado) {
+    res.status(403).json({ error: "Tu cuenta está bloqueada. Contacta con MAIKA por WhatsApp para más información." });
     return;
   }
   if (user.passwordTemporal && Number(user.passwordTemporalExpiresAt || 0) <= Date.now()) {
@@ -485,36 +501,7 @@ authRouter.get("/auth/open-reset", openResetLinkLimiter, async (req, res) => {
       return;
     }
     const destino = buildResetPasswordPageUrl(frontBase, token);
-    const chromeAbierto =
-      !IS_PRODUCTION && process.env.NODE_ENV !== "test" ? openUrlInChrome(destino) : false;
-    const safeDestino = escapeHtml(destino);
-    if (chromeAbierto) {
-      res.type("html").send(`<!DOCTYPE html>
-<html lang="es"><head><meta charset="utf-8"><title>MAIKA</title></head>
-<body style="font-family:system-ui,sans-serif;max-width:520px;margin:48px auto;padding:0 20px;line-height:1.5;">
-  <script>
-  (function () {
-    function cerrarPestanaCorreo() {
-      try { window.open("", "_self"); } catch (e) {}
-      try { window.close(); } catch (e) {}
-    }
-    cerrarPestanaCorreo();
-    setTimeout(cerrarPestanaCorreo, 400);
-    setTimeout(cerrarPestanaCorreo, 1000);
-  })();
-  </script>
-  <h1 style="font-size:1.2rem;color:#8f6e28;">MAIKA</h1>
-  <p>Hemos abierto la página para restablecer tu contraseña en <strong>Google Chrome</strong>. Si esta pestaña no se ha cerrado sola, puedes cerrarla.</p>
-  <p><a href="${safeDestino}" style="color:#bfa15a;">Continuar en este navegador</a></p>
-</body></html>`);
-      return;
-    }
-    res.type("html").send(`<!DOCTYPE html>
-<html lang="es"><head><meta charset="utf-8"><title>MAIKA</title></head>
-<body style="font-family:system-ui,sans-serif;max-width:520px;margin:48px auto;padding:0 20px;line-height:1.5;">
-  <h1 style="font-size:1.2rem;color:#8f6e28;">MAIKA</h1>
-  <p><a href="${safeDestino}" style="color:#bfa15a;">Continuar en este navegador</a></p>
-</body></html>`);
+    res.redirect(destino);
   } catch {
     res.status(500).type("html").send("<p>Error al abrir el enlace.</p>");
   }
@@ -524,16 +511,20 @@ authRouter.post("/auth/forgot-password", forgotPasswordLimiter, async (req, res)
   const response = { message: "Si existe una cuenta, enviaremos instrucciones" };
   try {
     const emailNorm = normalizarEmailParaBusquedaLogin(String(req.body?.email || ""));
-    if (!emailNorm) {
+    const telNorm = normalizarTelefono(req.body?.telefono || "");
+    if (!emailNorm && !/^[67]\d{8}$/.test(telNorm)) {
       res.json(response);
       return;
     }
 
     const activado = await updateUsuarios((usuarios) => {
       const idx = usuarios.findIndex(
-        (u) => normalizarEmailParaBusquedaLogin(String(u?.email || "")) === emailNorm
+        (u) => emailNorm
+          ? normalizarEmailParaBusquedaLogin(String(u?.email || "")) === emailNorm
+          : normalizarTelefono(String(u?.telefono || "")) === telNorm
       );
       if (idx === -1) return null;
+      if (usuarios[idx].bloqueado) return { bloqueado: true };
       const token = generateResetToken();
       usuarios[idx] = {
         ...usuarios[idx],
@@ -543,6 +534,14 @@ authRouter.post("/auth/forgot-password", forgotPasswordLimiter, async (req, res)
       return { token, email: usuarios[idx].email };
     });
     if (!activado) {
+      response.cuentaNoExiste = true;
+      response.message = "No hay ninguna cuenta registrada con ese e-mail.";
+      res.json(response);
+      return;
+    }
+    if (activado.bloqueado) {
+      response.cuentaBloqueada = true;
+      response.message = "Tu cuenta está bloqueada. Contacta con MAIKA por WhatsApp para más información.";
       res.json(response);
       return;
     }

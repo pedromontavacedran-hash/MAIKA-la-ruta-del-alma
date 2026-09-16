@@ -22,6 +22,7 @@ import {
   normalizarDireccionesUsuario as normalizarDireccionesUsuarioUtil
 } from "../utils/direcciones";
 import type { MaikaUsuarioLS } from "../utils/maikaUsuarios";
+import { repartirNombreApellidos } from "../utils/appIdentity";
 import { perfilUsuarioPayloadDesdeMaika } from "../utils/perfilPayloadDesdeMaika";
 import { prepareDireccionesParaGuardar } from "../utils/prepareDireccionesParaGuardar";
 import { proyectarUsuariosDesdeMaika, esEmailVerificable } from "../utils/proyectarUsuariosDesdeMaika";
@@ -64,6 +65,10 @@ export async function guardarEdicionUsuarioMaika(d: GuardarEdicionUsuarioMaikaDe
 
   if (!editUsuarioForm.nombre.trim() || !editUsuarioForm.telefono?.trim()) {
     notificarError(mostrarNotificacion, "Nombre y teléfono son obligatorios");
+    return;
+  }
+  if (editUsuarioForm.nombre.trim().split(/\s+/).filter(Boolean).length < 2) {
+    notificarError(mostrarNotificacion, "Escribe el nombre y apellidos completos (ej.: Pedro Montava Cedran)");
     return;
   }
   const passwordEdit = editUsuarioForm.password.trim();
@@ -133,7 +138,7 @@ export async function guardarEdicionUsuarioMaika(d: GuardarEdicionUsuarioMaikaDe
     huboActualizacion = true;
     return {
       ...u,
-      nombre: u.nombre,
+      nombre: editUsuarioForm.nombre.trim(),
       email: editUsuarioForm.email.trim(),
       dni: (editUsuarioForm.dni || "").trim(),
       telefono: editUsuarioForm.telefono.trim(),
@@ -254,6 +259,8 @@ export async function guardarEdicionUsuarioMaika(d: GuardarEdicionUsuarioMaikaDe
 
         maikaUsuariosLS[idxMaika] = {
           ...prevMaika,
+          nombre: repartirNombreApellidos(editUsuarioForm.nombre.trim(), "").nombre || prevMaika.nombre,
+          apellidos: repartirNombreApellidos(editUsuarioForm.nombre.trim(), "").apellidos || prevMaika.apellidos,
           telefono: tel9Admin,
           email: editUsuarioForm.email.trim(),
           dni: (editUsuarioForm.dni || "").trim(),

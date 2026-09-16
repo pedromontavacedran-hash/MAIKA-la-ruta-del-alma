@@ -380,6 +380,9 @@ export type UsuarioPerfilCompletoApi = {
   verificado: boolean;
   mustChangePassword?: boolean;
   hasPassword?: boolean;
+  bloqueado?: boolean;
+  bloqueadoMotivo?: string;
+  bloqueadoEn?: string;
 };
 
 export type LoginApiResponse = {
@@ -391,10 +394,12 @@ export type LoginApiResponse = {
 /** Respuesta HTTP del login (401/403 = credenciales; otros = servidor/ruta). */
 export class LoginApiError extends Error {
   readonly status: number;
-  constructor(status: number) {
-    super(`Login fallido (${status})`);
+  readonly serverMessage: string;
+  constructor(status: number, serverMessage = "") {
+    super(serverMessage || `Login fallido (${status})`);
     this.name = "LoginApiError";
     this.status = status;
+    this.serverMessage = serverMessage;
   }
 }
 
@@ -405,7 +410,14 @@ export async function loginApi(email: string, password: string): Promise<LoginAp
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: ident, password })
   });
-  if (!res.ok) throw new LoginApiError(res.status);
+  if (!res.ok) {
+    let msg = "";
+    try {
+      const j = (await res.json()) as { error?: string };
+      msg = typeof j?.error === "string" ? j.error : "";
+    } catch { /* cuerpo no JSON */ }
+    throw new LoginApiError(res.status, msg);
+  }
   const body = (await res.json()) as LoginApiResponse;
   markClientSessionActive();
   if (body.token) syncJwtSessionFromLogin(body.token);
@@ -440,7 +452,7 @@ export async function iniciarSesionCheckoutApi(telefono: string): Promise<{ ok: 
 
 export type EstadoUsuarioTelefonoApi =
   | { existe: false }
-  | { existe: true; email: string; hasPassword: boolean };
+  | { existe: true; hasEmail: boolean; hasPassword: boolean };
 
 export async function obtenerEstadoUsuarioPorTelefonoApi(telefono: string): Promise<EstadoUsuarioTelefonoApi> {
   const res = await fetchMaikaApi(`${getApiBaseUrl()}/auth/estado-telefono`, {
@@ -583,27 +595,44 @@ export async function cambiarPasswordAutenticadoApi(data: {
   return out;
 }
 
-export async function solicitarRecuperacionPasswordApi(email: string): Promise<{
+export async function solicitarRecuperacionPasswordApi(email: string, telefono?: string): Promise<{
   message: string;
   devResetLink?: string;
   devEmailFallo?: boolean;
   sameBrowserResetLink?: string;
+  cuentaNoExiste?: boolean;
+  cuentaBloqueada?: boolean;
 }> {
   const emailNorm = normalizarIdentificadorLoginCliente(String(email ?? ""));
   const res = await fetchMaikaApi(`${getApiBaseUrl()}/auth/forgot-password`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify({
-      email: emailNorm,
+      // El acceso rápido identifica la cuenta por teléfono; así no depende de un email antiguo guardado en el navegador.
+      email: telefono ? "" : emailNorm,
+      ...(telefono ? { telefono } : {}),
       ...(typeof window !== "undefined" ? { frontendOrigin: window.location.origin } : {})
     })
   });
-  if (!res.ok) throw new Error(`Solicitud de recuperación fallida (${res.status})`);
+  if (!res.ok) {
+    let msg = `Solicitud de recuperación fallida (${res.status})`;
+    try {
+      const j = (await res.json()) as { error?: string };
+      if (typeof j?.error === "string" && j.error.trim()) {
+        msg = j.error.trim();
+      }
+    } catch {
+      /* cuerpo no JSON */
+    }
+    throw new Error(msg);
+  }
   return (await res.json()) as {
     message: string;
     devResetLink?: string;
     devEmailFallo?: boolean;
     sameBrowserResetLink?: string;
+    cuentaNoExiste?: boolean;
+    cuentaBloqueada?: boolean;
   };
 }
 
@@ -713,5 +742,26 @@ export async function eliminarUsuarioBackendApi(
   }
   if (res.status === 404) return { ok: true };
   if (res.ok) return { ok: true };
+  return { ok: false, status: res.status };
+}
+
+/** Bloquea o desbloquea un usuario en el servidor. Requiere JWT. */
+export async function bloquearUsuarioBackendApi(
+  id: string | number,
+  bloquear: boolean,
+  motivo?: string
+): Promise<{ ok: true; bloqueado: boolean } | { ok: false; status: number }> {
+  const res = await fetchMaikaApi(`${getApiBaseUrl()}/usuarios/${encodeURIComponent(String(id))}/bloqueo`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ bloquear, motivo: motivo ?? "" })
+  });
+  if (res.status === 401 || res.status === 403) {
+    clearAdminSessionLocalAndCache();
+  }
+  if (res.ok) {
+    const j = (await res.json()) as { ok: true; bloqueado: boolean };
+    return { ok: true, bloqueado: j.bloqueado };
+  }
   return { ok: false, status: res.status };
 }

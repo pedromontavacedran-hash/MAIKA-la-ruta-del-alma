@@ -66,6 +66,30 @@ export function adminTokenDesdeCookie(req) {
 }
 
 /**
+ * Versión de las sesiones del panel. Se crea con entropía al arrancar el proceso
+ * para que un reinicio también invalide cookies emitidas por un proceso anterior.
+ * Al cerrar sesión se incrementa, invalidando de inmediato cualquier otra cookie
+ * admin que pudiera haberse copiado.
+ */
+let adminTokenVersion = crypto.randomBytes(6).readUIntBE(0, 6);
+const ADMIN_TOKEN_VERSION_MAX = Number.MAX_SAFE_INTEGER - 1;
+
+export function getAdminTokenVersion() {
+  return adminTokenVersion;
+}
+
+export function revocarSesionesAdmin() {
+  adminTokenVersion = adminTokenVersion >= ADMIN_TOKEN_VERSION_MAX
+    ? crypto.randomBytes(6).readUIntBE(0, 6)
+    : adminTokenVersion + 1;
+}
+
+export function tokenAdminEsVigente(decoded) {
+  return Number.isSafeInteger(decoded?.adminTokenVersion)
+    && decoded.adminTokenVersion === adminTokenVersion;
+}
+
+/**
  * `permitirScopeCheckout`: si es `false` (por defecto), un JWT con `scope: "checkout"` (emitido por
  * `POST /auth/checkout-session`, sin credenciales reales) se rechaza con 403 — esa sesión solo sirve
  * para las rutas del propio checkout (`authMiddlewareCheckoutOk`), nunca para leer perfil/pedidos/admin.
@@ -133,6 +157,10 @@ export function requireAdmin(req, res, next) {
     const decoded = jwt.verify(token, JWT_SECRET);
     if (decoded?.role !== "admin" && decoded?.panelAdmin !== true) {
       res.status(403).json({ error: "Requiere permisos de administrador" });
+      return;
+    }
+    if (!tokenAdminEsVigente(decoded)) {
+      res.status(403).json({ error: "Sesión admin inválida" });
       return;
     }
     req.user = decoded;

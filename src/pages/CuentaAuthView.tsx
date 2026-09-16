@@ -9,8 +9,7 @@ import { THEME } from "../config";
 import {
   loginApi,
   LoginApiError,
-  registerApi,
-  solicitarRecuperacionPasswordApi
+  registerApi
 } from "../services/apiAuth";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { construirDireccionBasica } from "../utils/direccion";
@@ -24,13 +23,14 @@ import {
 } from "../utils/activacionIdentidadSession";
 
 import RequisitosPasswordHint from "../components/RequisitosPasswordHint";
+import RecuperarPasswordView from "./cuenta/RecuperarPasswordView";
+import LoginFormView from "./cuenta/LoginFormView";
+import RegistroVerificarCuentaView from "./cuenta/RegistroVerificarCuentaView";
 import {
-  codigoVerificacionSoloDigitos,
   normalizarTelefono,
   claveTelefonoMaika,
   telefonoRegistradoEnLocal,
   emailRegistradoEnLocal,
-  emailValidoLogin,
   tieneEmailVerificable,
   passwordSeguraBasica,
   textoCapitalizadoEnVivo,
@@ -112,20 +112,17 @@ export default function CuentaAuthView({
       /* ignore */
     }
   };
-  const [registroAdminLoading, setRegistroAdminLoading] = useState(false);
+  const [, setCambioPasswordAbierto] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showPasswordLogin, setShowPasswordLogin] = useState(false);
-  const [, setCambioPasswordAbierto] = useState(false);
-  const [loginCargando, setLoginCargando] = useState(false);
-  const [verificarRegistroCargando, setVerificarRegistroCargando] = useState(false);
+  const [registroAdminLoading, setRegistroAdminLoading] = useState(false);
+  const [envioCodigoRegistroCargando, setEnvioCodigoRegistroCargando] = useState(false);
   const prevModoRef = useRef<"login" | "register" | null>(null);
   const nombreRegistroRef = useRef<HTMLInputElement>(null);
   const emailRegistroRef = useRef<HTMLInputElement>(null);
   const passwordRegistroRef = useRef<HTMLInputElement>(null);
   const confirmPasswordRegistroRef = useRef<HTMLInputElement>(null);
   const botonEnviarCodigoRegistroRef = useRef<HTMLButtonElement>(null);
-  const botonVerificarRegistroCodigoRef = useRef<HTMLButtonElement>(null);
   const botonCrearUsuarioGestionRef = useRef<HTMLButtonElement>(null);
   const inputCalleRegistroRef = useRef<HTMLInputElement>(null);
   const telefonoRegistroRef = useRef<HTMLInputElement>(null);
@@ -135,29 +132,11 @@ export default function CuentaAuthView({
   const puertaRegistroRef = useRef<HTMLInputElement>(null);
   const bloqueRegistroRef = useRef<HTMLInputElement>(null);
   const escaleraRegistroRef = useRef<HTMLInputElement>(null);
-  const emailLoginRef = useRef<HTMLInputElement>(null);
-  const passwordLoginRef = useRef<HTMLInputElement>(null);
-  const botonLoginRef = useRef<HTMLButtonElement>(null);
-  const emailRecuperarRef = useRef<HTMLInputElement>(null);
-  const botonRecuperarRef = useRef<HTMLButtonElement>(null);
-  const codigoRecuperarRef = useRef<HTMLInputElement>(null);
-  const nuevaPasswordRecuperarRef = useRef<HTMLInputElement>(null);
-  const botonActualizarPasswordRef = useRef<HTMLButtonElement>(null);
 
   // Estados para recuperar contraseña
   const [modoRecuperar, setModoRecuperar] = useState(false);
-  const [pasoRecuperar, setPasoRecuperar] = useState(1);
-  const [emailRecuperar, setEmailRecuperar] = useState("");
-  const [codigoRecuperar, setCodigoRecuperar] = useState("");
-  const [codigoIngresadoRecuperar, setCodigoIngresadoRecuperar] = useState("");
-  const [nuevaPassword, setNuevaPassword] = useState("");
-  const [showNuevaPassword, setShowNuevaPassword] = useState(false);
-  const [cuentaAtrasRecuperar, setCuentaAtrasRecuperar] = useState(0);
-  const [recuperarEnlaceEnviando, setRecuperarEnlaceEnviando] = useState(false);
   /** Enlace para abrir en el mismo navegador (Chrome); el correo suele abrir Brave en Windows. */
   const [enlaceRecuperacionMismoNavegador, setEnlaceRecuperacionMismoNavegador] = useState<string | null>(null);
-  const [envioCodigoRegistroCargando, setEnvioCodigoRegistroCargando] = useState(false);
-  const [reenviandoCodigoRegistro, setReenviandoCodigoRegistro] = useState(false);
   const claveUsuario = claveTelefonoMaika(usuario?.telefono || "");
   const [, setMaikaPedidosUsuario] = useState<MaikaPedidoLS[]>([]);
   const [mostrarCamposOpcionalesRegistro, setMostrarCamposOpcionalesRegistro] = useState(false);
@@ -224,13 +203,6 @@ export default function CuentaAuthView({
   };
   const cuentaRegistroConOjoStyle: CSSProperties = { ...cuentaRegistroDensoInput, paddingRight: 44 };
   const cuentaRegistroPasswordWrap = { position: "relative" as const, marginBottom: 6 };
-  useEffect(() => {
-    if (cuentaAtrasRecuperar <= 0) return;
-    const t = window.setTimeout(() => {
-      setCuentaAtrasRecuperar((prev) => Math.max(0, prev - 1));
-    }, 1000);
-    return () => window.clearTimeout(t);
-  }, [cuentaAtrasRecuperar]);
 
   const telefonoForzadoRegistro = normalizarTelefono(telefonoForzadoRegistroDesdeAcceso || "").slice(0, 9);
   const registroForzadoDesdeAcceso = modoRegistro === "register" && !modoRecuperar && !!telefonoForzadoRegistro;
@@ -270,6 +242,11 @@ export default function CuentaAuthView({
       const requiereDireccion = !registroForzadoDesdeAcceso;
       if (!formAuth.nombre || !formAuth.telefono || !formAuth.password || !formAuth.confirmPassword) {
         notificarError(mostrarNotificacion, "❌ Completa todos los campos obligatorios");
+        return false;
+      }
+      const palabrasNombre = (formAuth.nombre || "").trim().split(/\s+/).filter(Boolean);
+      if (palabrasNombre.length < 2) {
+        notificarError(mostrarNotificacion, "❌ Escribe tu nombre y apellidos completos (ej.: Pedro Montava Cedran)");
         return false;
       }
       const emailParaCodigo = (formAuth.email || formAuth.confirmEmail || "").trim().toLowerCase();
@@ -1242,125 +1219,22 @@ export default function CuentaAuthView({
           {!modoRecuperar &&
             modoRegistro === "register" &&
             formAuth.pasoVerificacion === 2 && (
-            <>
-              <h3 style={{ color: THEME.goldMain, textAlign: "center", marginBottom: 8, fontSize: 15 }}>
-                {activacionForzadaDesdeAcceso ? "Paso 2: Activar cuenta" : "Paso 2: Verificar cuenta"}
-              </h3>
-              <p style={{ color: "white", textAlign: "center", marginBottom: 8, fontSize: 13 }}>{formAuth.email?.trim() ? `Hemos enviado un código a ${formAuth.email}` : "Introduce el código que te hemos mostrado"}</p>
-              <p style={{ color: "white", textAlign: "center", fontSize: 12, marginTop: -4, marginBottom: 10, opacity: 0.85 }}>{formAuth.email?.trim() ? "El mensaje suele llegar en menos de 1 minuto. Revisa también spam." : "Si no lo anotaste, vuelve atrás y pon un email para recibir el código."}</p>
-              <input
-                type="text"
-                placeholder="Código de 6 dígitos"
-                value={formAuth.codigoIngresado || ""}
-                onChange={(e) => setFormAuth({ ...formAuth, codigoIngresado: e.target.value })}
-                onKeyDown={(e) => {
-                  if (e.key !== "Enter") return;
-                  e.preventDefault();
-                  if (!verificarRegistroCargando) botonVerificarRegistroCodigoRef.current?.click();
-                }}
-                style={cuentaRegistroDensoInput}
-              />
-              <button
-                ref={botonVerificarRegistroCodigoRef}
-                type="button"
-                disabled={verificarRegistroCargando}
-                aria-busy={verificarRegistroCargando}
-                onClick={async () => {
-                  const esperado = codigoVerificacionSoloDigitos(formAuth.codigoVerificacion || "");
-                  const ingresado = codigoVerificacionSoloDigitos(formAuth.codigoIngresado || "");
-                  if (!esperado) {
-                    notificarError(
-                      mostrarNotificacion,
-                      "❌ No hay código activo. Vuelve al paso anterior y pulsa «Enviar código» o «Reenviar código»."
-                    );
-                    return;
-                  }
-                  if (ingresado.length < 6 || ingresado !== esperado) {
-                    notificarError(mostrarNotificacion, "❌ Código incorrecto");
-                    return;
-                  }
-                  if (
-                    activacionForzadaDesdeAcceso &&
-                    !confirmacionIdentidadActivacion &&
-                    !esActivacionIdentidadVerificadaEnSession(telefonoForzadoRegistroDesdeAcceso)
-                  ) {
-                    notificarError(
-                      mostrarNotificacion,
-                      "❌ Debes verificar tu identidad desde el acceso rápido del checkout (código del último pedido) antes de activar la cuenta."
-                    );
-                    return;
-                  }
-                  setVerificarRegistroCargando(true);
-                  try {
-                    await completarRegistroApiYSesion({ quitarQueryAdmin: false });
-                  } finally {
-                    setVerificarRegistroCargando(false);
-                  }
-                }}
-                className="checkout-boton-finalizar"
-                style={{
-                  ...cuentaCtaPrincipalStyle,
-                  marginTop: 10,
-                  opacity: verificarRegistroCargando ? 0.85 : 1,
-                  cursor: verificarRegistroCargando ? "wait" : "pointer"
-                }}
-              >
-                {verificarRegistroCargando
-                  ? "Procesando…"
-                  : activacionForzadaDesdeAcceso
-                    ? "Verificar y activar cuenta"
-                    : "Verificar y completar registro"}
-              </button>
-              <button
-                onClick={async () => {
-                  if (reenvioDisponibleEn > 0 || reenviandoCodigoRegistro) return;
-                  const codigo = Math.floor(100000 + Math.random() * 900000).toString();
-                  const emailR = (formAuth.email || "").trim().toLowerCase();
-                  if (!tieneEmailVerificable(emailR)) {
-                    notificarError(mostrarNotificacion, "❌ Debes indicar un email válido para reenviar el código");
-                    return;
-                  }
-                  setReenviandoCodigoRegistro(true);
-                  try {
-                    const enviado = await enviarCodigoEmail(emailR, formAuth.nombre, codigo);
-                    if (enviado) {
-                      setFormAuth((prev) => ({
-                        ...prev,
-                        email: emailR,
-                        confirmEmail: emailR,
-                        codigoVerificacion: codigo,
-                        codigoIngresado: "",
-                        pasoVerificacion: 2
-                      }));
-                      setReenvioDisponibleEn(60);
-                      notificarExito(mostrarNotificacion, `✅ Nuevo código enviado a ${emailR}`);
-                    } else {
-                      notificarError(mostrarNotificacion, "❌ No se pudo reenviar el código");
-                    }
-                  } finally {
-                    setReenviandoCodigoRegistro(false);
-                  }
-                }}
-                disabled={reenvioDisponibleEn > 0 || reenviandoCodigoRegistro}
-                style={{
-                  ...cuentaBotonAuth,
-                  background: reenvioDisponibleEn > 0 ? "#666" : "rgba(255,255,255,0.04)",
-                  color: THEME.goldMain,
-                  border: "1px solid rgba(212, 175, 55, 0.45)",
-                  cursor: reenvioDisponibleEn > 0 || reenviandoCodigoRegistro ? "wait" : "pointer",
-                  fontSize: 14,
-                  marginTop: 10,
-                  opacity: reenvioDisponibleEn > 0 || reenviandoCodigoRegistro ? 0.85 : 1
-                }}
-              >
-                {reenviandoCodigoRegistro
-                  ? "Reenviando…"
-                  : reenvioDisponibleEn > 0
-                    ? `Reenviar código en ${reenvioDisponibleEn}s`
-                    : "Reenviar código"}
-              </button>
-              <button type="button" onClick={() => { setFormAuth((prev) => ({ ...prev, pasoVerificacion: 1, codigoIngresado: "" })); setReenvioDisponibleEn(0); }} style={{ ...cuentaBotonAuth, background: "transparent", color: THEME.goldMain, border: "1px solid rgba(212, 175, 55, 0.45)", marginTop: 10 }}>← Volver</button>
-            </>
+            <RegistroVerificarCuentaView
+              formAuth={formAuth}
+              setFormAuth={setFormAuth}
+              activacionForzadaDesdeAcceso={activacionForzadaDesdeAcceso}
+              confirmacionIdentidadActivacion={confirmacionIdentidadActivacion}
+              telefonoForzadoRegistroDesdeAcceso={telefonoForzadoRegistroDesdeAcceso}
+              reenvioDisponibleEn={reenvioDisponibleEn}
+              setReenvioDisponibleEn={setReenvioDisponibleEn}
+              mostrarNotificacion={mostrarNotificacion}
+              enviarCodigoEmail={enviarCodigoEmail}
+              onCompletarRegistro={async () => { await completarRegistroApiYSesion({ quitarQueryAdmin: false }); }}
+              onVolver={() => { setFormAuth((prev) => ({ ...prev, pasoVerificacion: 1, codigoIngresado: "" })); setReenvioDisponibleEn(0); }}
+              cuentaRegistroDensoInput={cuentaRegistroDensoInput}
+              cuentaCtaPrincipalStyle={cuentaCtaPrincipalStyle}
+              cuentaBotonAuth={cuentaBotonAuth}
+            />
           )}
           {!modoRecuperar &&
             modoRegistro === "register" &&
@@ -1380,401 +1254,51 @@ export default function CuentaAuthView({
               </button>
             </div>
           )}
-          {!modoRecuperar && modoRegistro === "login" && enlaceRecuperacionMismoNavegador ? (
-            <div
-              role="region"
-              aria-label="Enlace de recuperación en este navegador"
-              style={{
-                marginBottom: 16,
-                padding: "14px 16px",
-                borderRadius: 12,
-                border: `1px solid ${THEME.goldMain}`,
-                background: "rgba(11, 11, 13, 0.92)",
-                textAlign: "center"
-              }}
-            >
-              <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 14, lineHeight: 1.45, margin: "0 0 12px" }}>
-                El correo no se pudo enviar. Abre el enlace en <strong>este navegador</strong>:
-              </p>
-              <a
-                href={enlaceRecuperacionMismoNavegador}
-                className="checkout-boton-finalizar"
-                style={{
-                  ...cuentaCtaPrincipalStyle,
-                  display: "inline-block",
-                  textDecoration: "none",
-                  marginBottom: 10
-                }}
-              >
-                Restablecer contraseña aquí
-              </a>
-              <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    void navigator.clipboard.writeText(enlaceRecuperacionMismoNavegador).then(
-                      () => notificarExito(mostrarNotificacion, "Enlace copiado"),
-                      () => notificarError(mostrarNotificacion, "No se pudo copiar")
-                    );
-                  }}
-                  style={{
-                    background: "transparent",
-                    border: `1px solid ${THEME.goldMain}`,
-                    color: THEME.goldMain,
-                    borderRadius: 8,
-                    padding: "8px 12px",
-                    cursor: "pointer",
-                    fontSize: 13
-                  }}
-                >
-                  Copiar enlace
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEnlaceRecuperacionMismoNavegador(null)}
-                  style={{
-                    background: "transparent",
-                    border: "none",
-                    color: "rgba(255,255,255,0.55)",
-                    cursor: "pointer",
-                    fontSize: 13,
-                    textDecoration: "underline"
-                  }}
-                >
-                  Cerrar
-                </button>
-              </div>
-            </div>
-          ) : null}
           {!modoRecuperar && modoRegistro === "login" && (
-            <form 
-              onSubmit={(e) => {
-                e.preventDefault();
-                void (async () => {
-                const identificadorNorm = (formAuth.email || "").trim().toLowerCase();
-                if (!identificadorNorm || !formAuth.password) {
-                  notificarError(mostrarNotificacion, "❌ Introduce correo/teléfono y contraseña");
-                  return;
-                }
-                setLoginCargando(true);
-                try {
-                  const auth = await loginApi(identificadorNorm, formAuth.password);
-                  marcarReabrirCheckoutTrasAuth();
-                  const usuarioSesion = await iniciarSesionConToken(auth.token);
-                  if (usuarioSesion) {
-                    precargarDatosClienteDesdeUsuario(usuarioSesion);
-                    notificarExito(mostrarNotificacion, `✅ Bienvenido ${usuarioSesion.nombre}`);
-                  } else {
-                    notificarExito(mostrarNotificacion, "Sesión iniciada. Cargando tus datos guardados…");
-                  }
-                  setTelefonoForzadoRegistroDesdeAcceso("");
-                  setModoForzadoRegistroDesdeAcceso("");
-                  setConfirmacionIdentidadActivacion(false);
-                  limpiarActivacionIdentidadVerificada();
-                  setFormAuth(formAuthReset);
-                } catch (err) {
-                  if (err instanceof LoginApiError) {
-                    if (err.status === 401 || err.status === 403) {
-                      notificarError(mostrarNotificacion, "❌ Correo/teléfono o contraseña incorrectos.");
-                    } else if (err.status === 404) {
-                      notificarError(
-                        mostrarNotificacion,
-                        "❌ No existe una cuenta con ese correo/teléfono en el servidor. Regístrate primero."
-                      );
-                    } else {
-                      notificarError(mostrarNotificacion, `❌ Error del servidor (${err.status}).`);
-                    }
-                    return;
-                  }
-                  const e = err instanceof Error ? err : new Error(String(err));
-                  const falloRed =
-                    e instanceof TypeError ||
-                    /failed to fetch|networkerror|load failed|aborted|timeout/i.test(e.message);
-                  if (falloRed) {
-                    notificarError(
-                      mostrarNotificacion,
-                      "❌ No se alcanza la API (:3001). Si solo tienes Vite, arranca también el servidor: «npm run dev:full» o en otra terminal «npm run backend:dev». En red Wi‑Fi, configura apiBaseUrl en public/maika-api.json."
-                    );
-                    return;
-                  }
-                  notificarError(mostrarNotificacion, `❌ ${e.message}`);
-                } finally {
-                  setLoginCargando(false);
-                }
-                })();
-              }} 
-              autoComplete="off"
-            >
-              <input
-                ref={emailLoginRef}
-                type="text"
-                placeholder="Correo o teléfono"
-                value={formAuth.email}
-                disabled={loginCargando}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setFormAuth({ ...formAuth, email: v, confirmEmail: v });
-                }}
-                onKeyDown={(e) => {
-                  if (e.key !== "Enter") return;
-                  e.preventDefault();
-                  passwordLoginRef.current?.focus();
-                }}
-                style={{ ...cuentaInputStyle, opacity: loginCargando ? 0.85 : 1 }}
-                autoComplete="off"
-                name="login-email"
-              />
-              <div style={passwordWrapperStyle}>
-                <input
-                  ref={passwordLoginRef}
-                  type={showPasswordLogin ? "text" : "password"}
-                  placeholder="Contraseña"
-                  value={formAuth.password}
-                  disabled={loginCargando}
-                  onChange={(e) => setFormAuth({ ...formAuth, password: e.target.value })}
-                  onKeyDown={(e) => {
-                    if (e.key !== "Enter") return;
-                    e.preventDefault();
-                    botonLoginRef.current?.click();
-                  }}
-                  style={{ ...cuentaInputWithEyeStyle, opacity: loginCargando ? 0.85 : 1 }}
-                  autoComplete="new-password"
-                  name="login-password"
-                />
-                <button
-                  type="button"
-                  disabled={loginCargando}
-                  onClick={() => setShowPasswordLogin((v) => !v)}
-                  style={{ ...eyeBtnStyle, opacity: loginCargando ? 0.5 : 1, cursor: loginCargando ? "not-allowed" : "pointer" }}
-                  title={showPasswordLogin ? "Ocultar contraseña" : "Ver contraseña"}
-                  aria-label={showPasswordLogin ? "Ocultar contraseña" : "Ver contraseña"}
-                >{showPasswordLogin ? "🙈" : "👁"}</button>
-              </div>
-              {mostrarAvisoAccesoTemporalLogin ? (
-                <p style={{ color: "rgba(255,255,255,0.62)", fontSize: 11, margin: "-4px 0 10px", lineHeight: 1.35 }}>
-                  Acceso temporal activo para esta cuenta: usa la contraseña recibida. Caduca a los 10 minutos y después deberás cambiarla en Mi Cuenta.
-                </p>
-              ) : null}
-              <button
-                ref={botonLoginRef}
-                type="submit"
-                disabled={loginCargando}
-                aria-busy={loginCargando}
-                className="checkout-boton-finalizar"
-                style={{
-                  ...cuentaCtaPrincipalStyle,
-                  cursor: loginCargando ? "wait" : "pointer",
-                  marginTop: 10,
-                  opacity: loginCargando ? 0.88 : 1,
-                  filter: loginCargando ? "brightness(0.92)" : undefined
-                }}
-              >{loginCargando ? "Entrando…" : "Iniciar Sesión"}</button>
-              <div style={{ textAlign: "center", marginTop: 15 }}>
-                <button type="button" onClick={() => { 
-                  setModoRecuperar(true); 
-                  setPasoRecuperar(1); 
-                  setEmailRecuperar("");
-                  setCodigoIngresadoRecuperar(""); 
-                  setNuevaPassword("");
-                  setCuentaAtrasRecuperar(0);
-                }} style={{ background: "none", border: "none", color: THEME.goldMain, cursor: "pointer", textDecoration: "underline", fontSize: 14 }}>¿Olvidaste tu contraseña?</button>
-              </div>
-            </form>
+            <LoginFormView
+              formAuth={formAuth}
+              setFormAuth={setFormAuth}
+              formAuthReset={formAuthReset}
+              iniciarSesionConToken={iniciarSesionConToken}
+              precargarDatosClienteDesdeUsuario={precargarDatosClienteDesdeUsuario}
+              mostrarNotificacion={mostrarNotificacion}
+              mostrarAvisoAccesoTemporalLogin={mostrarAvisoAccesoTemporalLogin}
+              enlaceRecuperacionMismoNavegador={enlaceRecuperacionMismoNavegador}
+              onEnlaceCerrar={() => setEnlaceRecuperacionMismoNavegador(null)}
+              onOlvidastePassword={() => { setModoRecuperar(true); }}
+              onPostAuthReset={() => {
+                setTelefonoForzadoRegistroDesdeAcceso("");
+                setModoForzadoRegistroDesdeAcceso("");
+                setConfirmacionIdentidadActivacion(false);
+                limpiarActivacionIdentidadVerificada();
+              }}
+              onMarcarReabrirCheckout={marcarReabrirCheckoutTrasAuth}
+              cuentaInputWithEyeStyle={cuentaInputWithEyeStyle}
+              passwordWrapperStyle={passwordWrapperStyle}
+              eyeBtnStyle={eyeBtnStyle}
+              cuentaCtaPrincipalStyle={cuentaCtaPrincipalStyle}
+            />
           )}
           {modoRecuperar && (
-            <>
-              {pasoRecuperar === 1 && (
-                <form
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    const emailNorm = (emailRecuperar || "").trim().toLowerCase();
-                    if (!emailValidoLogin(emailNorm)) { notificarError(mostrarNotificacion, "❌ Introduce un e-mail válido"); return; }
-                    setRecuperarEnlaceEnviando(true);
-                    try {
-                      const res = await solicitarRecuperacionPasswordApi(emailNorm);
-                      setEmailRecuperar(emailNorm);
-                      setCodigoRecuperar("");
-                      setCodigoIngresadoRecuperar("");
-                      setNuevaPassword("");
-                      setCuentaAtrasRecuperar(0);
-                      if (res.devEmailFallo && (res.sameBrowserResetLink || res.devResetLink)) {
-                        setEnlaceRecuperacionMismoNavegador(
-                          res.sameBrowserResetLink || res.devResetLink || null
-                        );
-                        notificarExito(
-                          mostrarNotificacion,
-                          "⚠️ El correo no se envió. Usa el botón de abajo en este navegador."
-                        );
-                      } else {
-                        setEnlaceRecuperacionMismoNavegador(null);
-                        notificarExito(
-                          mostrarNotificacion,
-                          "✅ Revisa el correo y pulsa el enlace: se abrirá Chrome. Permanece aquí en Mi cuenta."
-                        );
-                      }
-                      setModoRecuperar(false);
-                      setModoRegistro("login");
-                      setFormAuth((prev) => ({ ...prev, email: emailNorm, confirmEmail: emailNorm, password: "" }));
-                    } catch {
-                      notificarError(mostrarNotificacion, "❌ No se pudo solicitar la recuperación. Inténtalo más tarde.");
-                    } finally {
-                      setRecuperarEnlaceEnviando(false);
-                    }
-                  }}
-                  autoComplete="off"
-                >
-                  <h3 style={{ color: THEME.goldMain, textAlign: "center", marginBottom: 20 }}>Recuperar contraseña</h3>
-                  <p style={{ color: "white", textAlign: "center", marginBottom: 20 }}>Introduce el e-mail de tu cuenta y te enviaremos un enlace seguro.</p>
-                  <input
-                    ref={emailRecuperarRef}
-                    type="email"
-                    placeholder="E-mail"
-                    value={emailRecuperar}
-                    onChange={(e) => setEmailRecuperar(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key !== "Enter") return;
-                      e.preventDefault();
-                      botonRecuperarRef.current?.click();
-                    }}
-                    style={cuentaInputStyle}
-                    autoComplete="email"
-                    name="email-recuperacion"
-                  />
-                  <button
-                    ref={botonRecuperarRef}
-                    type="submit"
-                    disabled={recuperarEnlaceEnviando}
-                    className="checkout-boton-finalizar"
-                    style={{
-                      ...cuentaCtaPrincipalStyle,
-                      marginTop: 10,
-                      opacity: recuperarEnlaceEnviando ? 0.88 : 1,
-                      cursor: recuperarEnlaceEnviando ? "wait" : "pointer"
-                    }}
-                  >{recuperarEnlaceEnviando ? "Enviando…" : "Enviar enlace seguro"}</button>
-                  <button type="button" onClick={() => setModoRecuperar(false)} style={{ ...cuentaBotonAuth, background: "transparent", color: THEME.goldMain, border: "1px solid rgba(212, 175, 55, 0.45)", marginTop: 10 }}>← Cancelar</button>
-                </form>
-              )}
-              {pasoRecuperar === 2 && (
-                <>
-                  <h3 style={{ color: THEME.goldMain, textAlign: "center", marginBottom: 20 }}>Cambiar contraseña</h3>
-                  <p style={{ color: "white", textAlign: "center", marginBottom: 8 }}>Introduce el código y tu nueva contraseña</p>
-                  <p style={{ color: "rgba(255,255,255,0.8)", textAlign: "center", marginBottom: 16, fontSize: 13 }}>
-                    Código válido durante {cuentaAtrasRecuperar}s
-                  </p>
-                  {cuentaAtrasRecuperar <= 0 && (
-                    <p style={{ color: "#ffb3b3", textAlign: "center", marginTop: -8, marginBottom: 14, fontSize: 13 }}>
-                      El código ha expirado. Solicita uno nuevo.
-                    </p>
-                  )}
-                  <input
-                    ref={codigoRecuperarRef}
-                    type="text"
-                    placeholder="Código de verificación"
-                    value={codigoIngresadoRecuperar}
-                    onChange={(e) => setCodigoIngresadoRecuperar(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key !== "Enter") return;
-                      e.preventDefault();
-                      nuevaPasswordRecuperarRef.current?.focus();
-                    }}
-                    style={cuentaInputStyle}
-                    autoComplete="off"
-                    name="codigo-recuperacion"
-                  />
-                  <div style={passwordWrapperStyle}>
-                    <input
-                      ref={nuevaPasswordRecuperarRef}
-                      type={showNuevaPassword ? "text" : "password"}
-                      placeholder="Nueva Contraseña"
-                      value={nuevaPassword}
-                      onChange={(e) => setNuevaPassword(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key !== "Enter") return;
-                        e.preventDefault();
-                        botonActualizarPasswordRef.current?.click();
-                      }}
-                      style={cuentaInputWithEyeStyle}
-                      autoComplete="new-password"
-                      name="nueva-password"
-                    />
-                    <button type="button" onClick={() => setShowNuevaPassword((v) => !v)} style={eyeBtnStyle} title={showNuevaPassword ? "Ocultar contraseña" : "Ver contraseña"} aria-label={showNuevaPassword ? "Ocultar contraseña" : "Ver contraseña"}>{showNuevaPassword ? "🙈" : "👁"}</button>
-                  </div>
-                  <RequisitosPasswordHint password={nuevaPassword} />
-                  <button
-                    ref={botonActualizarPasswordRef}
-                    onClick={async () => {
-                      if (!codigoIngresadoRecuperar || !nuevaPassword) { notificarError(mostrarNotificacion, "❌ Completa todos los campos"); return; }
-                      if (cuentaAtrasRecuperar <= 0) { notificarError(mostrarNotificacion, "❌ Código expirado. Reenvía uno nuevo"); return; }
-                      if (!passwordSeguraBasica(nuevaPassword)) {
-                        notificarError(mostrarNotificacion, "❌ La contraseña debe tener mínimo 8 caracteres, con letras y números");
-                        return;
-                      }
-                      if (codigoIngresadoRecuperar !== codigoRecuperar) { notificarError(mostrarNotificacion, "❌ Código incorrecto"); return; }
-                      const emailNorm = (emailRecuperar || "").trim().toLowerCase();
-                      if (!emailValidoLogin(emailNorm)) {
-                        notificarError(mostrarNotificacion, "❌ E-mail no válido");
-                        return;
-                      }
-                      try {
-                        await solicitarRecuperacionPasswordApi(emailNorm);
-                        notificarExito(
-                          mostrarNotificacion,
-                          "✅ Te hemos enviado un enlace seguro para crear tu contraseña. Revisa tu correo."
-                        );
-                        setModoRecuperar(false);
-                        setPasoRecuperar(1);
-                        setCuentaAtrasRecuperar(0);
-                        setCodigoIngresadoRecuperar("");
-                        setNuevaPassword("");
-                        setModoRegistro("login");
-                        setFormAuth((prev) => ({
-                          ...prev,
-                          email: emailNorm,
-                          confirmEmail: emailNorm,
-                          password: ""
-                        }));
-                      } catch (err) {
-                        const msg = err instanceof Error ? err.message : String(err);
-                        if (/\(404\)/.test(msg)) {
-                          notificarError(
-                            mostrarNotificacion,
-                            "❌ No hay cuenta con ese correo en el servidor. Regístrate primero."
-                          );
-                          return;
-                        }
-                        notificarError(mostrarNotificacion, `❌ ${msg}`);
-                      }
-                    }}
-                    className="checkout-boton-finalizar"
-                    style={{ ...cuentaCtaPrincipalStyle, marginTop: 10 }}
-                  >Cambiar contraseña</button>
-                  <button
-                    type="button"
-                    disabled={cuentaAtrasRecuperar > 0}
-                    onClick={async () => {
-                      const emailNorm = (emailRecuperar || "").trim().toLowerCase();
-                      if (!emailValidoLogin(emailNorm)) { notificarError(mostrarNotificacion, "❌ E-mail no válido"); return; }
-                      const codigo = Math.floor(100000 + Math.random() * 900000).toString();
-                      setCodigoRecuperar(codigo);
-                      setCodigoIngresadoRecuperar("");
-                      setCuentaAtrasRecuperar(90);
-                      const enviado = await enviarCodigoEmail(emailNorm, emailNorm.split("@")[0] || "Usuario", codigo);
-                      if (enviado) notificarExito(mostrarNotificacion, `✅ Nuevo código enviado a ${emailNorm}`);
-                      else notificarError(mostrarNotificacion, "❌ Error al reenviar el código");
-                    }}
-                    style={{ ...cuentaBotonAuth, background: cuentaAtrasRecuperar > 0 ? "#666" : "rgba(255,255,255,0.04)", color: THEME.goldMain, border: "1px solid rgba(212, 175, 55, 0.45)", cursor: cuentaAtrasRecuperar > 0 ? "not-allowed" : "pointer", marginTop: 10 }}
-                  >
-                    {cuentaAtrasRecuperar > 0 ? `Reenviar código en ${cuentaAtrasRecuperar}s` : "Reenviar código"}
-                  </button>
-                  <button type="button" onClick={() => { setPasoRecuperar(1); setEmailRecuperar(""); setCuentaAtrasRecuperar(0); }} style={{ ...cuentaBotonAuth, background: "transparent", color: THEME.goldMain, border: "1px solid rgba(212, 175, 55, 0.45)", marginTop: 10 }}>← Volver</button>
-                </>
-              )}
-            </>
+            <RecuperarPasswordView
+              onClose={() => setModoRecuperar(false)}
+              onEnlaceCambiado={(enlace) => setEnlaceRecuperacionMismoNavegador(enlace)}
+              onExitoVolverALogin={(email) => {
+                setModoRegistro("login");
+                setFormAuth((prev) => ({ ...prev, email, confirmEmail: email, password: "" }));
+              }}
+              mostrarNotificacion={mostrarNotificacion}
+              enviarCodigoEmail={enviarCodigoEmail}
+              cuentaInputWithEyeStyle={cuentaInputWithEyeStyle}
+              passwordWrapperStyle={passwordWrapperStyle}
+              eyeBtnStyle={eyeBtnStyle}
+              cuentaBotonAuth={cuentaBotonAuth}
+              cuentaCtaPrincipalStyle={cuentaCtaPrincipalStyle}
+            />
           )}
         </div>
         </div>
         </div>
       </div>
     );
-}
+}

@@ -81,7 +81,7 @@ export async function enviarEmailResetPassword(to, resetLink, { clickHref } = {}
   await transporter.sendMail({
     from: `"MAIKA" <${fromUser}>`,
     to: toEmail,
-    subject: "Restablecer contraseña",
+    subject: "Restablecer contraseña — MAIKA Rutas del Alma",
     text: [
       "MAIKA - Recuperación de contraseña",
       "",
@@ -99,7 +99,7 @@ export async function enviarEmailResetPassword(to, resetLink, { clickHref } = {}
       <h2>MAIKA - Recuperación de contraseña</h2>
       <p>Has solicitado restablecer tu contraseña.</p>
       <p>Este enlace caduca en 15 minutos.</p>
-      <p><a href="${safeLink}" style="color:#bfa15a;">Restablecer contraseña</a></p>
+      <p><a href="${safeLink}" style="color:#bfa15a;">Recuperar contraseña — MAIKA Rutas del Alma</a></p>
       <p style="font-size:13px;color:#555;">En desarrollo, al pulsar el enlace se abrirá <strong>Google Chrome</strong> con la página de restablecimiento. Si el programa de correo deja una pestaña en blanco, ciérrala y continúa en Chrome.</p>
       ${waHtml}
       <p>Si no fuiste tú, ignora este mensaje.</p>
