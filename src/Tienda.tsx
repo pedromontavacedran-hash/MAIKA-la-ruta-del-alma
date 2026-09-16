@@ -304,9 +304,8 @@ export default function Tienda({
                     decoding="async"
                     style={{ width: "100%", height: 150, objectFit: "cover", display: "block" }}
                   />
-                  <div style={{ padding: "16px 20px 22px", display: "flex", flexDirection: "column", alignItems: "center", flexGrow: 1 }}>
-                    <h3 style={{ color: THEME.goldMain, margin: "0 0 6px", minHeight: "2.8em", lineHeight: "1.4em" }}>{sub.nombre}</h3>
-                    <p style={{ color: "white", margin: 0, marginTop: "auto" }}>{prodsEnSubarbol.length} productos</p>
+                  <div style={{ padding: "16px 20px 22px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flexGrow: 1 }}>
+                    <h3 style={{ color: THEME.goldMain, margin: 0, lineHeight: "1.4em" }}>{sub.nombre}</h3>
                   </div>
                 </div>
               );
