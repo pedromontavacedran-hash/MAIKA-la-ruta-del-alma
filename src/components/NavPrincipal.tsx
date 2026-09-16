@@ -31,6 +31,16 @@ import {
   logoTamanoDesdeAlturaBarra,
   type BarraTopAdminPreviewDetail
 } from "../utils/barraTopPedidoExito/barraTopPedidoExitoCfg";
+import {
+  gold,
+  iconAdmin,
+  iconCarrito,
+  iconMenuTresLineas,
+  iconCerrar,
+  iconPersona,
+  linkStyle
+} from "./nav/navIcons";
+import NavAdminModal from "./nav/NavAdminModal";
 
 /** Máximo desliz (px) desde el ancla junto a la hamburguesa; la geometría de la barra puede reducirlo. */
 const LOGO_DESLIZ_DESDE_HAMBURGUESA_MAX_PX = 80;
@@ -41,60 +51,6 @@ interface NavPrincipalProps {
   onPrefetchPagina?: (p: Pagina) => void;
   onTerminarCompra: () => void;
 }
-
-const gold = "#e5c07b";
-
-const iconAdmin = (sizePx?: number) => (
-  <svg className="nav-icon-stroke" width={sizePx ?? "1.45em"} height={sizePx ?? "1.45em"} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.15" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ display: "block", marginRight: 0 }}>
-    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-  </svg>
-);
-
-const iconCarrito = (sizePx?: number) => (
-  <svg width={sizePx ?? "1.8em"} height={sizePx ?? "1.8em"} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ display: "block" }}>
-    <circle cx="9" cy="21" r="1" />
-    <circle cx="20" cy="21" r="1" />
-    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-  </svg>
-);
-
-const iconMenuTresLineas = (sizePx?: number) => (
-  <svg width={sizePx ?? "1.8em"} height={sizePx ?? "1.8em"} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ display: "block" }}>
-    <line x1="3" y1="6" x2="21" y2="6" />
-    <line x1="3" y1="12" x2="21" y2="12" />
-    <line x1="3" y1="18" x2="21" y2="18" />
-  </svg>
-);
-
-
-const iconCerrar = (
-  <svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ display: "block" }}>
-    <line x1="18" y1="6" x2="6" y2="18" />
-    <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-);
-
-const iconPersona = (sizePx?: number) => (
-  <svg className="nav-icon-filled" width={sizePx ?? "2em"} height={sizePx ?? "2em"} viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true" style={{ display: "block" }}>
-    <path d="M12 12c2.76 0 5-2.46 5-5.5S14.76 1 12 1 7 3.46 7 6.5 9.24 12 12 12z" />
-    <path d="M12 14c-4.42 0-8 2.69-8 6v2h16v-2c0-3.31-3.58-6-8-6z" />
-  </svg>
-);
-
-const linkStyle = (active: boolean, size = 16) => ({
-  color: "var(--barra-iconos-color, #e5c07b)",
-  background: "none",
-  border: "none",
-  padding: 0,
-  cursor: "pointer",
-  fontSize: size,
-  fontWeight: active ? 600 : 500,
-  textDecoration: "none",
-  textTransform: "uppercase" as const,
-  letterSpacing: "0.06em",
-  whiteSpace: "nowrap" as const,
-  transition: "color 0.2s ease"
-});
 
 export default function NavPrincipal({
   pagina,
@@ -945,146 +901,20 @@ export default function NavPrincipal({
       </div>
     )}
     {modalAdminAbierto && (
-      <div
-        onClick={cerrarModalAdmin}
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 10030,
-          background: "rgba(0,0,0,0.55)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 16
-        }}
-      >
-        <div
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            position: "relative",
-            width: "100%",
-            maxWidth: 360,
-            background: THEME.bg,
-            border: `2px solid ${THEME.goldMain}`,
-            borderRadius: 14,
-            padding: 16,
-            color: "white"
-          }}
-        >
-          <button
-            type="button"
-            onClick={cerrarModalAdmin}
-            style={{
-              position: "absolute",
-              top: 8,
-              right: 8,
-              width: 28,
-              height: 28,
-              borderRadius: 999,
-              border: `1px solid ${THEME.goldMain}`,
-              background: "rgba(0,0,0,0.6)",
-              color: THEME.goldMain,
-              cursor: "pointer",
-              fontSize: 18,
-              lineHeight: 1
-            }}
-            aria-label="Cerrar acceso admin"
-            title="Cerrar"
-          >
-            ×
-          </button>
-          <h3 style={{ margin: "0 0 12px", color: THEME.goldMain, textAlign: "center" }}>Acceso admin</h3>
-          <div style={{ position: "relative" }}>
-            <input
-              type={mostrarClaveAdminNav ? "text" : "password"}
-              placeholder="Introduce contraseña"
-              value={claveAdminInput}
-              onChange={(e) => {
-                setClaveAdminInput(e.target.value);
-                if (errorClaveAdmin) setErrorClaveAdmin(false);
-                setMensajeErrorClaveAdmin("Contraseña incorrecta");
-                setAdminRateLimitBloqueado(false);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !adminRateLimitBloqueado) confirmarAccesoAdmin();
-              }}
-              disabled={adminRateLimitBloqueado}
-              autoFocus
-              autoComplete="current-password"
-              style={{
-                width: "100%",
-                padding: "10px 44px 10px 12px",
-                borderRadius: 10,
-                border: `2px solid ${errorClaveAdmin ? "#ff4d4d" : THEME.goldMain}`,
-                background: "transparent",
-                color: "white",
-                opacity: adminRateLimitBloqueado ? 0.58 : 1,
-                cursor: adminRateLimitBloqueado ? "not-allowed" : "text",
-                boxSizing: "border-box"
-              }}
-            />
-            <button
-              type="button"
-              onClick={() => setMostrarClaveAdminNav((v) => !v)}
-              style={{
-                position: "absolute",
-                right: 6,
-                top: "50%",
-                transform: "translateY(-50%)",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                fontSize: 18,
-                padding: 4,
-                color: THEME.goldMain
-              }}
-              title={mostrarClaveAdminNav ? "Ocultar contraseña" : "Ver contraseña"}
-              aria-label={mostrarClaveAdminNav ? "Ocultar contraseña" : "Ver contraseña"}
-              disabled={adminRateLimitBloqueado}
-            >
-              {mostrarClaveAdminNav ? "🙈" : "👁"}
-            </button>
-          </div>
-          {errorClaveAdmin && (
-            <p style={{ margin: "8px 0 0", color: "#ff8a8a", fontSize: 13 }}>{mensajeErrorClaveAdmin}</p>
-          )}
-          <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
-            <button
-              type="button"
-              onClick={cerrarModalAdmin}
-              style={{
-                flex: 1,
-                padding: "10px 12px",
-                borderRadius: 10,
-                border: `1px solid ${THEME.goldMain}`,
-                background: "transparent",
-                color: THEME.goldMain,
-                cursor: "pointer"
-              }}
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              onClick={confirmarAccesoAdmin}
-              disabled={adminRateLimitBloqueado}
-              style={{
-                flex: 1,
-                padding: "10px 12px",
-                borderRadius: 10,
-                border: "none",
-                background: THEME.goldMain,
-                color: "#1b1745",
-                fontWeight: "bold",
-                cursor: adminRateLimitBloqueado ? "not-allowed" : "pointer",
-                opacity: adminRateLimitBloqueado ? 0.58 : 1
-              }}
-            >
-              Entrar
-            </button>
-          </div>
-        </div>
-      </div>
+      <NavAdminModal
+        claveAdminInput={claveAdminInput}
+        setClaveAdminInput={setClaveAdminInput}
+        mostrarClaveAdminNav={mostrarClaveAdminNav}
+        setMostrarClaveAdminNav={setMostrarClaveAdminNav}
+        errorClaveAdmin={errorClaveAdmin}
+        setErrorClaveAdmin={setErrorClaveAdmin}
+        mensajeErrorClaveAdmin={mensajeErrorClaveAdmin}
+        setMensajeErrorClaveAdmin={setMensajeErrorClaveAdmin}
+        adminRateLimitBloqueado={adminRateLimitBloqueado}
+        setAdminRateLimitBloqueado={setAdminRateLimitBloqueado}
+        cerrarModalAdmin={cerrarModalAdmin}
+        confirmarAccesoAdmin={confirmarAccesoAdmin}
+      />
     )}
     </>
   );

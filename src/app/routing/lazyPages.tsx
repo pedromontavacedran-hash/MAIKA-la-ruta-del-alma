@@ -76,3 +76,4 @@ export const ContabilidadPage = lazy(loadContabilidadPage);
 
 export const loadConfigMetricasPage = () => import("../../pages/admin/ConfigMetricasPage");
 export const ConfigMetricasPage = lazy(loadConfigMetricasPage);
+
