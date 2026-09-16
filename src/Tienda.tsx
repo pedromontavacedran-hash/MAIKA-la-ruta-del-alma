@@ -280,6 +280,37 @@ export default function Tienda({
             const prodsEnSubarbol = productosCategoria.filter(
               (p) => p.subcategoriaId === sub.id || subcategoriasCategoriaActual.some((h) => h.padreSubcategoriaId === sub.id && h.id === p.subcategoriaId)
             );
+            if (sub.imagen) {
+              return (
+                <div
+                  key={sub.id}
+                  onClick={() => setSubcategoriaAbierta(sub.id)}
+                  style={{
+                    cursor: "pointer",
+                    background: fondoServicios,
+                    borderRadius: 20,
+                    overflow: "hidden",
+                    border: `2px solid ${THEME.goldMain}`,
+                    textAlign: "center",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "stretch"
+                  }}
+                >
+                  <img
+                    src={sub.imagen}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    style={{ width: "100%", height: 150, objectFit: "cover", display: "block" }}
+                  />
+                  <div style={{ padding: "16px 20px 22px", display: "flex", flexDirection: "column", alignItems: "center", flexGrow: 1 }}>
+                    <h3 style={{ color: THEME.goldMain, margin: "0 0 6px", minHeight: "2.8em", lineHeight: "1.4em" }}>{sub.nombre}</h3>
+                    <p style={{ color: "white", margin: 0, marginTop: "auto" }}>{prodsEnSubarbol.length} productos</p>
+                  </div>
+                </div>
+              );
+            }
             return (
               <div
                 key={sub.id}

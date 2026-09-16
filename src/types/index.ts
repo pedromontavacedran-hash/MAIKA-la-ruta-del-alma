@@ -361,7 +361,7 @@ export interface PerfilCompraRapida {
 export type CategoriaEntrada = { id: string; nombre: string; imagen?: string };
 
 /** Subcategoría real: pertenece a una categoría principal (`categoriaId`), gestionable desde admin. */
-export type SubcategoriaEntrada = { id: string; categoriaId: string; nombre: string; padreSubcategoriaId?: string };
+export type SubcategoriaEntrada = { id: string; categoriaId: string; nombre: string; padreSubcategoriaId?: string; imagen?: string };
 
 /** Pack armado por el cliente (reservado para futuro). */
 export type TipoPackCampana = "fijo" | "dinamico";

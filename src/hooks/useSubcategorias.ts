@@ -29,6 +29,9 @@ function normalizarSubcategoriasCatalogo(raw: unknown): SubcategoriaEntrada[] {
             nombre: String((s as SubcategoriaEntrada).nombre),
             ...(s && typeof s === "object" && "padreSubcategoriaId" in s && (s as { padreSubcategoriaId?: unknown }).padreSubcategoriaId
               ? { padreSubcategoriaId: String((s as { padreSubcategoriaId: unknown }).padreSubcategoriaId) }
+              : {}),
+            ...(s && typeof s === "object" && "imagen" in s && (s as { imagen?: unknown }).imagen
+              ? { imagen: String((s as { imagen: unknown }).imagen) }
               : {})
           }
         : null

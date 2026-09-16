@@ -463,7 +463,8 @@ export async function readSubcategorias() {
         id: String(s.id),
         categoriaId: String(s.categoriaId),
         nombre: String(s.nombre),
-        ...(s.padreSubcategoriaId ? { padreSubcategoriaId: String(s.padreSubcategoriaId) } : {})
+        ...(s.padreSubcategoriaId ? { padreSubcategoriaId: String(s.padreSubcategoriaId) } : {}),
+        ...(s.imagen ? { imagen: String(s.imagen) } : {})
       }));
   } catch {
     return [...SUBCATEGORIAS_DEFAULT];
