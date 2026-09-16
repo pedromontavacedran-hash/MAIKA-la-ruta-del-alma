@@ -496,11 +496,11 @@ export default function Tienda({
         )}
 
         <div
+          className="tienda-grid-principal"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(180px, 220px))",
             justifyContent: "center",
-            gap: 12,
           }}
         >
           {productos.map((prod) => {
@@ -728,7 +728,7 @@ export default function Tienda({
           {productosBusqueda.length === 0 ? (
             <p style={{ color: "rgba(255,255,255,0.8)", textAlign: "center", margin: 20 }}>No hay productos que coincidan con tu búsqueda.</p>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 220px))", justifyContent: "center", gap: 12 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 220px))", justifyContent: "center", gap: 20 }}>
               {productosBusqueda.map((prod) => {
                 const { disponibles, limiteCarrito: limiteCarritoBusq, prodKey: prodKeyBusq, recienAnadido: recienAnadidoBusq } = calcularEstadoTarjeta(prod, cantidadEnCarrito, anadirCarritoOkKey);
                 return (
@@ -813,7 +813,7 @@ export default function Tienda({
         <div style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-          gap: 12,
+          gap: 20,
         }}>
           {masVendidos.map(({ producto: p, cantidad }) => {
             const emoji = getEmoji(p.categoria);

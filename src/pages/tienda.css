@@ -1,5 +1,16 @@
 /* Módulo extraído de App.css (líneas 4215–4852). Tienda lightbox, cerrar modal global, carrito layout (hasta fin bloque carrito) */
 
+/* Espaciado del grid principal de tarjetas de producto: más aire en escritorio, compacto en móvil */
+.tienda-grid-principal {
+  gap: 24px;
+}
+
+@media (max-width: 900px) {
+  .tienda-grid-principal {
+    gap: 16px;
+  }
+}
+
 .tienda-vista img[src$="/inciensos/alaukik-atrae-dinero.jpg"],
 .tienda-lightbox-overlay img[src$="/inciensos/alaukik-atrae-dinero.jpg"] {
   background-color: #fff;
