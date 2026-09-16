@@ -1,43 +1,30 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import type { CSSProperties } from "react";
+﻿import { useState, useEffect, useRef, useCallback } from "react";
 import type { Producto } from "./App";
 import { INTENCIONES_OPCIONES } from "./types";
 import type { SubcategoriaEntrada, Pedido } from "./types";
 import BotonCerrar from "./components/BotonCerrar";
 import { THEME } from "./config";
+import {
+  TIENDA_THUMB_WRAP,
+  TIENDA_THUMB_IMG,
+  TIENDA_CATEG_THUMB_WRAP,
+  animarProductoAlCarrito as animarProductoAlCarritoDom,
+  calcularMasVendidos,
+  categoriasPorDefecto,
+  calcularEstadoTarjeta,
+  construirFichaTecnica,
+  getEmoji,
+  getProductosForCategoria,
+  getProductImageSrc,
+  precioConDescuento,
+  type CategoriaEntrada,
+  type ItemCarritoRef
+} from "./tienda/tiendaHelpers";
+import { TiendaLightbox } from "./tienda/TiendaLightbox";
+import { DetalleIncienso } from "./tienda/DetalleIncienso";
+import { DetalleProductoGenerico } from "./tienda/DetalleProductoGenerico";
 
-export type CategoriaEntrada = { id: string; nombre: string; imagen?: string };
-
-const TIENDA_THUMB_WRAP: CSSProperties = {
-  marginBottom: 12,
-  width: "100%",
-  aspectRatio: "1 / 1",
-  maxHeight: 168,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-};
-
-const TIENDA_THUMB_IMG: CSSProperties = {
-  width: "100%",
-  height: "100%",
-  objectFit: "cover",
-  borderRadius: 10,
-  border: "1px solid rgba(212,175,55,0.5)",
-};
-
-const TIENDA_CATEG_THUMB_WRAP: CSSProperties = {
-  marginBottom: 12,
-  width: "100%",
-  aspectRatio: "1 / 1",
-  maxHeight: 148,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-};
-
-/** Item mínimo del carrito para calcular disponibles = stock - en carrito */
-type ItemCarritoRef = { id: number; cantidad: number };
+export type { CategoriaEntrada };
 
 /** Props: velas, inciensos, figuras y kits son la base real del catálogo (misma fuente que Inventario). */
 interface Props {
@@ -67,133 +54,6 @@ interface Props {
   catalogoTrasPackHero?: boolean;
   /** Pedidos históricos para calcular «Los más vendidos» dinámicamente. */
   pedidos?: Pedido[];
-}
-
-function getProductosForCategoria(
-  cat: string,
-  velas: Producto[],
-  inciensos: Producto[],
-  figuras: Producto[],
-  kits: Producto[] = [],
-  joyas: Producto[] = []
-): Producto[] {
-  const v = Array.isArray(velas) ? velas : [];
-  const i = Array.isArray(inciensos) ? inciensos : [];
-  const f = Array.isArray(figuras) ? figuras : [];
-  const k = Array.isArray(kits) ? kits : [];
-  const j = Array.isArray(joyas) ? joyas : [];
-  const c = cat.toLowerCase();
-  if (c === "velas") return v;
-  if (c === "inciensos") return i;
-  if (c === "figuras") return f;
-  if (c === "kits") return k;
-  if (c === "joyas") return j;
-  return [];
-}
-
-function getEmoji(cat: string): string {
-  const c = cat.toLowerCase();
-  if (c === "velas") return "🕯️";
-  if (c === "inciensos") return "🌿";
-  if (c === "figuras") return "🪷";
-  if (c === "kits") return "📦";
-  if (c === "joyas") return "✨";
-  return "📦";
-}
-
-/** Precio de venta con descuento aplicado (igual que en Inventario y useCatalogo). */
-function precioConDescuento(p: Producto): number {
-  const base = Number(p.precio) || 0;
-  const d = p.descuentoPorcentaje != null ? Math.min(100, Math.max(0, Number(p.descuentoPorcentaje))) : 0;
-  if (d <= 0) return base;
-  return Math.round(base * (1 - d / 100) * 100) / 100;
-}
-
-/** Estado compartido por las tarjetas de producto (catalogo, busqueda, mas vendidos). */
-type EstadoTarjeta = {
-  enCarrito: number;
-  disponibles: number;
-  stockCatalogo: number;
-  limiteCarrito: boolean;
-  prodKey: string;
-  recienAnadido: boolean;
-};
-
-function calcularEstadoTarjeta(
-  prod: Producto,
-  cantidadEnCarrito: (id: number) => number,
-  anadirCarritoOkKey: string | null
-): EstadoTarjeta {
-  const enCarrito = cantidadEnCarrito(Number(prod.id));
-  const disponibles = Math.max(0, Number(prod.stock) - enCarrito);
-  const stockCatalogo = Math.max(0, Math.floor(Number(prod.stock)) || 0);
-  const limiteCarrito = disponibles === 0 && stockCatalogo > 0;
-  const prodKey = `${prod.categoria}-${prod.id}`;
-  const recienAnadido = anadirCarritoOkKey === prodKey;
-  return { enCarrito, disponibles, stockCatalogo, limiteCarrito, prodKey, recienAnadido };
-}
-
-/** Convierte el nombre del producto en nombre de archivo: "Vela Blanca" → "vela-blanca.jpg" */
-function nombreProductoToImagen(nombre: string): string {
-  const slug = nombre
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-]/g, "");
-  return slug ? `/${slug}.jpg` : "";
-}
-
-const categoriasPorDefecto: CategoriaEntrada[] = [
-  { id: "velas", nombre: "velas" },
-  { id: "inciensos", nombre: "inciensos" },
-  { id: "figuras", nombre: "figuras" },
-  { id: "kits", nombre: "kits" },
-  { id: "joyas", nombre: "joyería del alma" }
-];
-
-type ImagenLightbox = { src: string; alt: string };
-
-function TiendaLightbox({ imagen, onClose }: { imagen: ImagenLightbox | null; onClose: () => void }) {
-  if (!imagen) return null;
-  return (
-    <div
-      className="tienda-lightbox-overlay"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Imagen ampliada"
-      onClick={onClose}
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 9999,
-        background: "rgba(0,0,0,0.9)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 24,
-        cursor: "pointer",
-      }}
-    >
-      <BotonCerrar
-        onClick={(e) => { e?.stopPropagation(); onClose(); }}
-        ariaLabel="Cerrar"
-        title="Cerrar"
-      />
-      <img
-        src={imagen.src}
-        alt={imagen.alt}
-        decoding="async"
-        onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: "100%", maxHeight: "85vh", objectFit: "contain", borderRadius: 12 }}
-      />
-      <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.9rem", marginTop: 12 }}>
-        Clic fuera o tecla Escape para cerrar
-      </p>
-    </div>
-  );
 }
 
 export default function Tienda({
@@ -238,33 +98,12 @@ export default function Tienda({
     : [];
   const fondoServicios = THEME.bg;
   const [lightboxImagen, setLightboxImagen] = useState<{ src: string; alt: string } | null>(null);
+  const [productoDetalle, setProductoDetalle] = useState<Producto | null>(null);
   const [anadirCarritoOkKey, setAnadirCarritoOkKey] = useState<string | null>(null);
   const anadirCarritoOkTimeoutRef = useRef<number | null>(null);
 
   /** Top 3 productos más vendidos según pedidos reales. Si no hay pedidos, fallback a los 3 primeros del catálogo. */
-  const masVendidos = (() => {
-    const acumulado = new Map<number, number>();
-    for (const pedido of pedidos) {
-      for (const item of pedido.items ?? []) {
-        const id = Number(item.id);
-        if (!Number.isFinite(id) || id <= 0) continue;
-        const cantidad = Number(item.cantidad) || 0;
-        if (cantidad <= 0) continue;
-        acumulado.set(id, (acumulado.get(id) ?? 0) + cantidad);
-      }
-    }
-    const catalogo = [...velas, ...inciensos, ...figuras, ...kits, ...joyas];
-    const porId = new Map(catalogo.map((p) => [Number(p.id), p]));
-    const top = [...acumulado.entries()]
-      .map(([id, cantidad]) => ({ producto: porId.get(id), cantidad }))
-      .filter((x): x is { producto: Producto; cantidad: number } => x.producto != null)
-      .sort((a, b) => b.cantidad - a.cantidad)
-      .slice(0, 3);
-    if (top.length === 0) {
-      return catalogo.slice(0, 3).map((p) => ({ producto: p, cantidad: 0 }));
-    }
-    return top;
-  })();
+  const masVendidos = calcularMasVendidos(pedidos, todosProductos);
 
   const marcarAnadirCarritoOk = useCallback((producto: Producto) => {
     const key = `${producto.categoria}-${producto.id}`;
@@ -278,33 +117,10 @@ export default function Tienda({
     }, 190);
   }, []);
 
-  const animarProductoAlCarrito = useCallback((origen: HTMLElement | null) => {
-    const carrito = document.querySelector<HTMLElement>("[data-maika-cart-icon]");
-    if (!origen || !carrito || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    const origenRect = origen.getBoundingClientRect();
-    const carritoRect = carrito.getBoundingClientRect();
-    const burbuja = document.createElement("div");
-
-    burbuja.className = "maika-fly-to-cart";
-    burbuja.textContent = "Añadido";
-    burbuja.style.left = `${origenRect.left + origenRect.width / 2 - 42}px`;
-    burbuja.style.top = `${origenRect.top + origenRect.height / 2 - 18}px`;
-    document.body.appendChild(burbuja);
-
-    requestAnimationFrame(() => {
-      burbuja.style.transform = `translate(${carritoRect.left + carritoRect.width / 2 - origenRect.left - origenRect.width / 2}px, ${carritoRect.top + carritoRect.height / 2 - origenRect.top - origenRect.height / 2}px) scale(0.35)`;
-      burbuja.style.opacity = "0.2";
-    });
-
-    window.setTimeout(() => {
-      carrito.classList.remove("maika-cart-pulse");
-      void carrito.offsetWidth;
-      carrito.classList.add("maika-cart-pulse");
-    }, 820);
-    window.setTimeout(() => burbuja.remove(), 1020);
-    window.setTimeout(() => carrito.classList.remove("maika-cart-pulse"), 1220);
-  }, []);
+  const animarProductoAlCarrito = useCallback(
+    (origen: HTMLElement | null) => animarProductoAlCarritoDom(origen),
+    []
+  );
 
   const intentarAnadirAlCarrito = useCallback(
     (producto: Producto, origen?: HTMLElement | null) => {
@@ -324,13 +140,6 @@ export default function Tienda({
     },
     []
   );
-
-  const getProductImageSrc = (prod: Producto): string =>
-    prod.imagen && (prod.imagen.startsWith("data:") || prod.imagen.startsWith("http") || prod.imagen.startsWith("/"))
-      ? prod.imagen
-      : prod.imagen
-        ? `/${prod.imagen.replace(/^\//, "")}`
-        : nombreProductoToImagen(prod.nombre) || `/${prod.categoria}-${prod.id}.jpg`;
 
   const cerrarLightbox = () => setLightboxImagen(null);
 
@@ -358,17 +167,73 @@ export default function Tienda({
     cart.find((it) => Number(it.id) === idProducto)?.cantidad ?? 0;
 
   useEffect(() => {
-    if (!lightboxImagen) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setLightboxImagen(null); };
+    if (!lightboxImagen && !productoDetalle) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (lightboxImagen) setLightboxImagen(null);
+      else setProductoDetalle(null);
+    };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [lightboxImagen]);
+  }, [lightboxImagen, productoDetalle]);
+
+  if (productoDetalle) {
+    const { disponibles, limiteCarrito, recienAnadido } = calcularEstadoTarjeta(
+      productoDetalle,
+      cantidadEnCarrito,
+      anadirCarritoOkKey
+    );
+    const categoriaDetalle = categoriasCatalogo.find((c) => c.id === productoDetalle.categoria);
+    const subcategoriaDetalle = subcategoriasCatalogo.find((s) => s.id === productoDetalle.subcategoriaId);
+    const pd = productoDetalle;
+    const fichaTecnica = construirFichaTecnica(pd);
+
+    // ===== Ficha profesional específica para INCIENSOS =====
+    if (productoDetalle.categoria === "inciensos") {
+      return (
+        <DetalleIncienso
+          producto={productoDetalle}
+          categoriaDetalle={categoriaDetalle}
+          subcategoriaDetalle={subcategoriaDetalle}
+          disponibles={disponibles}
+          limiteCarrito={limiteCarrito}
+          recienAnadido={recienAnadido}
+          imgSrc={getProductImageSrc(productoDetalle)}
+          onVolver={() => setProductoDetalle(null)}
+          onAbrirLightbox={(src, alt) => setLightboxImagen({ src, alt })}
+          onAnadirAlCarrito={intentarAnadirAlCarrito}
+          lightboxImagen={lightboxImagen}
+          onCerrarLightbox={cerrarLightbox}
+        />
+      );
+    }
+
+    // ===== Ficha genérica para otras categorías (sin cambios) =====
+    return (
+      <DetalleProductoGenerico
+        producto={productoDetalle}
+        categoriaDetalle={categoriaDetalle}
+        subcategoriaDetalle={subcategoriaDetalle}
+        disponibles={disponibles}
+        limiteCarrito={limiteCarrito}
+        recienAnadido={recienAnadido}
+        imgSrc={getProductImageSrc(productoDetalle)}
+        fichaTecnica={fichaTecnica}
+        onVolver={() => setProductoDetalle(null)}
+        onAbrirLightbox={(src, alt) => setLightboxImagen({ src, alt })}
+        onAnadirAlCarrito={intentarAnadirAlCarrito}
+        lightboxImagen={lightboxImagen}
+        onCerrarLightbox={cerrarLightbox}
+      />
+    );
+  }
 
   if (mostrarCategoria && subcategoriasCategoriaActual.length > 0 && !subcategoriaAbierta) {
     const productosCategoria = getProductosForCategoria(mostrarCategoria, velas, inciensos, figuras, kits, joyas);
     const entradaCat = categoriasCatalogo.find((c) => c.id === mostrarCategoria);
     const nombreCat = entradaCat?.nombre ?? mostrarCategoria;
     const tituloCat = getEmoji(mostrarCategoria) + " " + nombreCat.charAt(0).toUpperCase() + nombreCat.slice(1);
+    const subsRaiz = subcategoriasCategoriaActual.filter((s) => !s.padreSubcategoriaId);
     return (
       <div className="tienda-vista tienda-vista--categoria-abierta tienda-page-layout maika-anchor" style={{ padding: 40 }}>
         <header className="tienda-vista__cabecera-categoria">
@@ -411,8 +276,10 @@ export default function Tienda({
               <p style={{ color: "white", margin: 0, marginTop: "auto" }}>{productosCategoria.length} productos</p>
             </div>
           )}
-          {subcategoriasCategoriaActual.map((sub) => {
-            const count = productosCategoria.filter((p) => p.subcategoriaId === sub.id).length;
+          {subsRaiz.map((sub) => {
+            const prodsEnSubarbol = productosCategoria.filter(
+              (p) => p.subcategoriaId === sub.id || subcategoriasCategoriaActual.some((h) => h.padreSubcategoriaId === sub.id && h.id === p.subcategoriaId)
+            );
             return (
               <div
                 key={sub.id}
@@ -431,7 +298,7 @@ export default function Tienda({
               >
                 <div style={{ fontSize: "1.8rem", marginBottom: 8 }} aria-hidden>✨</div>
                 <h3 style={{ color: THEME.goldMain, margin: "0 0 6px", minHeight: "2.8em", lineHeight: "1.4em" }}>{sub.nombre}</h3>
-                <p style={{ color: "white", margin: 0, marginTop: "auto" }}>{count} productos</p>
+                <p style={{ color: "white", margin: 0, marginTop: "auto" }}>{prodsEnSubarbol.length} productos</p>
               </div>
             );
           })
@@ -443,22 +310,95 @@ export default function Tienda({
 
   if (mostrarCategoria) {
     const productosCatBase = getProductosForCategoria(mostrarCategoria, velas, inciensos, figuras, kits, joyas);
-    const filtrarPorSubcategoria = subcategoriaAbierta && subcategoriaAbierta !== "__todas__";
-    const productosCat = filtrarPorSubcategoria
-      ? productosCatBase.filter((p) => p.subcategoriaId === subcategoriaAbierta)
-      : productosCatBase;
-    const productos = filtroIntencion
+    const esVerToda = subcategoriaAbierta === "__todas__";
+    const matchPadreTodas = subcategoriaAbierta?.startsWith("__todas__:")
+      ? subcategoriaAbierta.split(":")[1]
+      : null;
+    const filtrarPorSubcategoria = Boolean(subcategoriaAbierta) && !esVerToda;
+    const productosCat = esVerToda
+      ? productosCatBase
+      : matchPadreTodas
+        ? productosCatBase.filter(
+            (p) => {
+              const hijasIds = subcategoriasCategoriaActual
+                .filter((s) => s.padreSubcategoriaId === matchPadreTodas)
+                .map((s) => s.id);
+              return p.subcategoriaId === matchPadreTodas || hijasIds.includes(p.subcategoriaId ?? "");
+            }
+          )
+        : filtrarPorSubcategoria
+          ? productosCatBase.filter((p) => p.subcategoriaId === subcategoriaAbierta)
+          : productosCatBase;
+    const permiteFiltroIntencion = mostrarCategoria !== "inciensos";
+    const productos = permiteFiltroIntencion && filtroIntencion
       ? productosCat.filter((p) => p.intencion === filtroIntencion)
       : productosCat;
     const entrada = categoriasCatalogo.find((c) => c.id === mostrarCategoria);
-    const subcategoriaEntrada = filtrarPorSubcategoria
-      ? subcategoriasCatalogo.find((s) => s.id === subcategoriaAbierta)
+    const subcategoriaActivaId = matchPadreTodas || subcategoriaAbierta || undefined;
+    const subcategoriaEntrada = filtrarPorSubcategoria || matchPadreTodas
+      ? subcategoriasCatalogo.find((s) => s.id === subcategoriaActivaId)
       : undefined;
     const nombreDisplay = subcategoriaEntrada ? subcategoriaEntrada.nombre : entrada?.nombre ?? mostrarCategoria;
     const titulo = subcategoriaEntrada
       ? "✨ " + subcategoriaEntrada.nombre
       : getEmoji(mostrarCategoria) + " " + nombreDisplay.charAt(0).toUpperCase() + nombreDisplay.slice(1);
     const haySubcategoriasEnEstaCategoria = subcategoriasCategoriaActual.length > 0;
+
+    // Si la subcategoría abierta tiene hijas, mostrar una cuadrícula de sub-subcategorías
+    const hijas = subcategoriaAbierta
+      ? subcategoriasCategoriaActual.filter((s) => s.padreSubcategoriaId === subcategoriaAbierta)
+      : [];
+    if (hijas.length > 0) {
+      return (
+        <div className="tienda-vista tienda-vista--categoria-abierta tienda-page-layout maika-anchor" style={{ padding: 40 }}>
+          <header className="tienda-vista__cabecera-categoria">
+            <div className="tienda-vista__cabecera-placeholder" aria-hidden />
+            <h2 className="tienda-vista__titulo-categoria" style={{ color: THEME.goldMain, fontSize: "2rem" }}>
+              {titulo}
+            </h2>
+            <div className="tienda-vista__cabecera-categoria-cerrar">
+              <BotonCerrar
+                onClick={() => setSubcategoriaAbierta(null)}
+                ariaLabel="Volver a subcategorías"
+                title="Volver a subcategorías"
+              />
+            </div>
+          </header>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+              gap: 24,
+            }}
+          >
+            {hijas.map((sub) => {
+              const count = productosCatBase.filter((p) => p.subcategoriaId === sub.id).length;
+              return (
+                <div
+                  key={sub.id}
+                  onClick={() => setSubcategoriaAbierta(sub.id)}
+                  style={{
+                    cursor: "pointer",
+                    background: fondoServicios,
+                    borderRadius: 20,
+                    padding: 26,
+                    border: `2px solid ${THEME.goldMain}`,
+                    textAlign: "center",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center"
+                  }}
+                >
+                  <div style={{ fontSize: "1.8rem", marginBottom: 8 }} aria-hidden>✨</div>
+                  <h3 style={{ color: THEME.goldMain, margin: "0 0 6px", minHeight: "2.8em", lineHeight: "1.4em" }}>{sub.nombre}</h3>
+                  <p style={{ color: "white", margin: 0, marginTop: "auto" }}>{count} productos</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
 
     return (
       <>
@@ -475,50 +415,62 @@ export default function Tienda({
             */}
             <BotonCerrar
               onClick={() => {
-                if (haySubcategoriasEnEstaCategoria && subcategoriaAbierta) {
+                if (!subcategoriaAbierta) {
+                  setMostrarCategoria(null);
+                  setFiltroIntencion("");
+                  return;
+                }
+                if (subcategoriaAbierta.startsWith("__todas__:")) {
+                  const padreId = subcategoriaAbierta.split(":")[1];
+                  setSubcategoriaAbierta(padreId);
+                  return;
+                }
+                if (haySubcategoriasEnEstaCategoria) {
                   setSubcategoriaAbierta(null);
                   return;
                 }
                 setMostrarCategoria(null);
                 setFiltroIntencion("");
               }}
-              ariaLabel={haySubcategoriasEnEstaCategoria && subcategoriaAbierta ? "Volver a subcategorías" : "Volver a categorías"}
-              title={haySubcategoriasEnEstaCategoria && subcategoriaAbierta ? "Volver a subcategorías" : "Volver a categorías"}
+              ariaLabel={subcategoriaAbierta ? (subcategoriaAbierta.startsWith("__todas__:") ? "Volver a subcategorías" : "Volver a categorías") : "Volver a categorías"}
+              title={subcategoriaAbierta ? (subcategoriaAbierta.startsWith("__todas__:") ? "Volver a subcategorías" : "Volver a categorías") : "Volver a categorías"}
             />
           </div>
         </header>
 
-        <div style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <span style={{ color: THEME.goldMain, fontSize: 14 }}>Filtrar por intención:</span>
-          <select
-            value={filtroIntencion}
-            onChange={(e) => setFiltroIntencion(e.target.value)}
-            style={{
-              padding: "8px 12px",
-              borderRadius: 10,
-              border: `2px solid ${THEME.goldMain}`,
-              background: THEME.bg,
-              color: "white",
-              fontSize: 14,
-              minWidth: 180
-            }}
-          >
-            <option value="">Todas</option>
-            {INTENCIONES_OPCIONES.filter((o) => o.value).map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-          {filtroIntencion && (
-            <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 13 }}>{productos.length} productos</span>
-          )}
-        </div>
+        {permiteFiltroIntencion && (
+          <div style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <span style={{ color: THEME.goldMain, fontSize: 14 }}>Filtrar por intención:</span>
+            <select
+              value={filtroIntencion}
+              onChange={(e) => setFiltroIntencion(e.target.value)}
+              style={{
+                padding: "8px 12px",
+                borderRadius: 10,
+                border: `2px solid ${THEME.goldMain}`,
+                background: THEME.bg,
+                color: "white",
+                fontSize: 14,
+                minWidth: 180
+              }}
+            >
+              <option value="">Todas</option>
+              {INTENCIONES_OPCIONES.filter((o) => o.value).map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+            {filtroIntencion && (
+              <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 13 }}>{productos.length} productos</span>
+            )}
+          </div>
+        )}
 
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(236px, 300px))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 220px))",
             justifyContent: "center",
-            gap: 22,
+            gap: 12,
           }}
         >
           {productos.map((prod) => {
@@ -529,12 +481,16 @@ export default function Tienda({
               className="tienda-tarjeta-producto"
               style={{
                 border: `2px solid ${THEME.goldMain}`,
-                padding: 20,
-                borderRadius: 15,
+                padding: 10,
+                borderRadius: 13,
                 textAlign: "center",
                 background: fondoServicios,
                 opacity: disponibles === 0 ? (limiteCarrito ? 0.88 : 0.6) : 1,
-                position: "relative"
+                position: "relative",
+                display: "flex",
+                flexDirection: "column",
+                height: "100%",
+                boxSizing: "border-box"
               }}
             >
               <div style={TIENDA_THUMB_WRAP}>
@@ -547,8 +503,8 @@ export default function Tienda({
                   decoding="async"
                   role="button"
                   tabIndex={0}
-                  onClick={(e) => { e.stopPropagation(); setLightboxImagen({ src: getProductImageSrc(prod), alt: prod.nombre }); }}
-                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setLightboxImagen({ src: getProductImageSrc(prod), alt: prod.nombre }); } }}
+                  onClick={(e) => { e.stopPropagation(); setProductoDetalle(prod); }}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setProductoDetalle(prod); } }}
                   style={{ ...TIENDA_THUMB_IMG, cursor: "pointer" }}
                   onError={(e) => { (e.target as HTMLImageElement).src = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="%231b1745"/><text x="200" y="200" font-size="80" text-anchor="middle" dominant-baseline="central">📦</text></svg>')}`; }}
                 />
@@ -576,55 +532,53 @@ export default function Tienda({
 
               {disponibles > 0 && disponibles <= 3 && (
                 <div style={{
-                  position: "absolute",
-                  top: 10,
-                  right: 10,
                   background: THEME.goldMain,
                   color: "#1b1745",
-                  padding: "4px 10px",
-                  borderRadius: 15,
-                  fontSize: "0.7rem",
-                  fontWeight: "bold"
+                  padding: "3px 8px",
+                  borderRadius: 12,
+                  fontSize: "0.66rem",
+                  fontWeight: "bold",
+                  margin: "5px 0 0",
+                  textAlign: "center",
+                  lineHeight: 1.2
                 }}>
-                  ¡ÚLTIMAS {disponibles}!
+                  {disponibles === 1 ? "🔥 ¡ÚLTIMA UNIDAD!" : `🔥 ¡ÚLTIMAS ${disponibles} UNIDADES!`}
                 </div>
               )}
 
               <h3 style={{
                 color: prod.nombreColor ?? "white",
-                fontSize: prod.nombreTamano ? `${prod.nombreTamano}px` : undefined,
+                fontSize: `${Math.min(17, Number(prod.nombreTamano) || 17)}px`,
                 fontStyle: prod.nombreEstilo === "italic" ? "italic" : undefined,
-                fontWeight: prod.nombreEstilo === "bold" ? "bold" : undefined
+                fontWeight: prod.nombreEstilo === "bold" ? "bold" : undefined,
+                height: "2.75rem",
+                margin: "5px 0 4px",
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "center",
+                overflow: "hidden",
+                lineHeight: 1.2
               }}>
                 {prod.nombre}
               </h3>
-              <p className="tienda-precio-producto" style={{ color: THEME.goldMain }}>
+              <p className="tienda-precio-producto" style={{ color: THEME.goldMain, minHeight: "1.65rem", margin: "0", display: "flex", alignItems: "baseline", justifyContent: "center", flexWrap: "wrap", fontSize: "0.95rem", lineHeight: 1.1 }}>
                 {prod.descuentoPorcentaje != null && prod.descuentoPorcentaje > 0 && (
                   <span style={{ textDecoration: "line-through", opacity: 0.8, marginRight: 8 }}>
                     {Number(prod.precio).toFixed(2)} €
                   </span>
                 )}
-                {precioConDescuento(prod).toFixed(2)} € <span style={{ fontSize: "0.75rem", opacity: 0.9 }}>(IVA incl.)</span>
+                {precioConDescuento(prod).toFixed(2)} €
                 {prod.descuentoPorcentaje != null && prod.descuentoPorcentaje > 0 && (
                   <span style={{ fontSize: "0.75rem", color: "#4caf50", marginLeft: 6 }}>−{prod.descuentoPorcentaje}%</span>
                 )}
               </p>
-
-              {prod.paraQueSirve && (
-                <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.9)", margin: "4px 0", fontStyle: "italic" }}>
-                  ✦ {prod.paraQueSirve}
-                </p>
-              )}
-              {prod.comoUsar && (
-                <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.75)", margin: "2px 0 8px" }}>
-                  {prod.comoUsar}
-                </p>
-              )}
+              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.62rem", margin: "2px 0 4px", letterSpacing: "0.04em" }}>IVA incluido</p>
 
               {(() => {
                 /** Unidades que aún puedes añadir (coherente con insignia / botón). */
                 const pocoDisponible = disponibles > 0 && disponibles <= 3;
                 const todoEnCarrito = stockCatalogo > 0 && disponibles === 0 && enCarrito > 0;
+                if (enCarrito <= 0) return null;
                 const sinStockReal = stockCatalogo === 0;
                 const stockLineColor =
                   sinStockReal || pocoDisponible
@@ -642,20 +596,11 @@ export default function Tienda({
                       lineHeight: 1.35
                     }}
                   >
-                    {todoEnCarrito ? (
+                    {todoEnCarrito && (
                       <>
                         En almacén: {stockCatalogo} {stockCatalogo === 1 ? "unidad" : "unidades"} (no baja hasta que
                         confirmes el pago).
                       </>
-                    ) : (
-                      <>
-                        Stock: {stockCatalogo} {stockCatalogo === 1 ? "unidad" : "unidades"}
-                      </>
-                    )}
-                    {pocoDisponible && (
-                      <span style={{ display: "block", marginTop: 3, fontSize: "0.8rem", fontWeight: "bold", color: "#ff8a80" }}>
-                        ¡Quedan pocas!
-                      </span>
                     )}
                     {enCarrito > 0 && (
                       <span
@@ -677,10 +622,10 @@ export default function Tienda({
                 );
               })()}
 
-              <div style={{ marginBottom: 15, fontSize: "0.8rem", color: disponibles > 5 ? "#4caf50" : disponibles > 0 ? THEME.goldMain : limiteCarrito ? THEME.goldMain : "#ff4444" }}>
+              <div style={{ marginBottom: 6, minHeight: 23, fontSize: "0.72rem", color: disponibles > 5 ? "#4caf50" : disponibles > 0 ? THEME.goldMain : limiteCarrito ? THEME.goldMain : "#ff4444", display: "flex", flexDirection: "column", justifyContent: "center" }}>
                 {disponibles > 0 ? (
                   <>
-                    <span>📦 {disponibles} disponibles</span>
+                    {disponibles >= 4 && <span>📦 {disponibles} disponibles</span>}
                     <div style={{
                       width: "100%",
                       height: 4,
@@ -718,12 +663,14 @@ export default function Tienda({
         ? "#1565c0"
         : "#666",
     border: `2px solid ${recienAnadido ? "rgba(0, 220, 140, 0.85)" : THEME.goldMain}`,
-    padding: "10px 25px",
-    borderRadius: 25,
+    padding: "6px 14px",
+    borderRadius: 18,
+    fontSize: "0.76rem",
     cursor: disponibles > 0 ? "pointer" : "not-allowed",
     fontWeight: "bold",
     color: disponibles > 0 ? (recienAnadido ? "#fff" : THEME.goldMain) : "#ccc",
     width: "100%",
+    marginTop: "auto",
     transition: "background 0.32s ease, border-color 0.32s ease, color 0.32s ease, transform 0.28s ease",
   }}
 >
@@ -778,14 +725,14 @@ export default function Tienda({
           {productosBusqueda.length === 0 ? (
             <p style={{ color: "rgba(255,255,255,0.8)", textAlign: "center", margin: 20 }}>No hay productos que coincidan con tu búsqueda.</p>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(236px, 300px))", justifyContent: "center", gap: 22 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 220px))", justifyContent: "center", gap: 12 }}>
               {productosBusqueda.map((prod) => {
                 const { disponibles, limiteCarrito: limiteCarritoBusq, prodKey: prodKeyBusq, recienAnadido: recienAnadidoBusq } = calcularEstadoTarjeta(prod, cantidadEnCarrito, anadirCarritoOkKey);
                 return (
                   <div
                     key={`busqueda-${prodKeyBusq}`}
                     className="tienda-tarjeta-producto"
-                    style={{ border: `2px solid ${THEME.goldMain}`, padding: 20, borderRadius: 15, textAlign: "center", background: fondoServicios, opacity: disponibles === 0 ? (limiteCarritoBusq ? 0.88 : 0.6) : 1, position: "relative" }}
+                    style={{ border: `2px solid ${THEME.goldMain}`, padding: 10, borderRadius: 13, textAlign: "center", background: fondoServicios, opacity: disponibles === 0 ? (limiteCarritoBusq ? 0.88 : 0.6) : 1, position: "relative", display: "flex", flexDirection: "column", height: "100%", boxSizing: "border-box" }}
                   >
                     <div style={TIENDA_THUMB_WRAP}>
                       <img
@@ -795,12 +742,20 @@ export default function Tienda({
                         height={400}
                         loading="lazy"
                         decoding="async"
-                        style={TIENDA_THUMB_IMG}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => setProductoDetalle(prod)}
+                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setProductoDetalle(prod); } }}
+                        style={{ ...TIENDA_THUMB_IMG, cursor: "pointer" }}
                         onError={(e) => { (e.target as HTMLImageElement).src = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="%231b1745"/><text x="200" y="200" font-size="80" text-anchor="middle" dominant-baseline="central">📦</text></svg>')}`; }}
                       />
                     </div>
-                    <h3 style={{ color: prod.nombreColor ?? "white" }}>{prod.nombre}</h3>
-                    <p className="tienda-precio-producto" style={{ color: THEME.goldMain }}>{precioConDescuento(prod).toFixed(2)} €</p>
+                    <h3 style={{ color: prod.nombreColor ?? "white", height: "2.75rem", margin: "7px 0 4px", display: "flex", alignItems: "flex-start", justifyContent: "center", overflow: "hidden", lineHeight: 1.2, fontSize: `${Math.min(17, Number(prod.nombreTamano) || 17)}px` }}>
+                      {prod.nombre}
+                    </h3>
+                    <p className="tienda-precio-producto" style={{ color: THEME.goldMain, minHeight: "1.65rem", margin: "0 0 4px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.95rem" }}>
+                      {precioConDescuento(prod).toFixed(2)} €
+                    </p>
                     <button
                       type="button"
                       onClick={(e) => {
@@ -810,8 +765,9 @@ export default function Tienda({
                       }}
                       disabled={disponibles === 0}
                       style={{
-                        padding: "10px 25px",
-                        borderRadius: 25,
+                        padding: "6px 14px",
+                        borderRadius: 18,
+                        fontSize: "0.76rem",
                         border: `2px solid ${recienAnadidoBusq ? "rgba(0, 220, 140, 0.85)" : THEME.goldMain}`,
                         background: recienAnadidoBusq
                           ? "linear-gradient(135deg, rgba(0, 200, 120, 0.95), rgba(0, 150, 95, 0.98))"
@@ -822,6 +778,7 @@ export default function Tienda({
                         cursor: disponibles > 0 ? "pointer" : "not-allowed",
                         fontWeight: "bold",
                         width: "100%",
+                        marginTop: "auto",
                         transition: "background 0.32s ease, border-color 0.32s ease, color 0.32s ease, transform 0.28s ease",
                       }}
                     >
@@ -852,8 +809,8 @@ export default function Tienda({
 
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-          gap: 14,
+          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+          gap: 12,
         }}>
           {masVendidos.map(({ producto: p, cantidad }) => {
             const emoji = getEmoji(p.categoria);
@@ -871,6 +828,10 @@ export default function Tienda({
             padding: "10px",
             border: `2px solid ${THEME.goldMain}`,
             position: "relative",
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+            boxSizing: "border-box",
           }}
           >
             {cantidad > 0 && (
@@ -892,11 +853,17 @@ export default function Tienda({
             <h4 style={{
               color: p.nombreColor ?? THEME.goldMain,
               textAlign: "center",
-              fontSize: p.nombreTamano ? `${p.nombreTamano}px` : "1.06rem",
+              fontSize: `${Math.min(17, Number(p.nombreTamano) || 17)}px`,
               fontWeight: "bold",
               lineHeight: 1.2,
               textShadow: "0 1px 2px rgba(0,0,0,0.45)",
-              fontStyle: p.nombreEstilo === "italic" ? "italic" : undefined
+              fontStyle: p.nombreEstilo === "italic" ? "italic" : undefined,
+              height: "2.75rem",
+              margin: "4px 0",
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "center",
+              overflow: "hidden"
             }}>
               {p.nombre}
             </h4>
@@ -905,7 +872,7 @@ export default function Tienda({
               ✦ {p.paraQueSirve}
             </p>
             )}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto", paddingTop: 8 }}>
               <span className="tienda-precio-producto tienda-precio-producto--masvendidos" style={{ color: THEME.goldMain }}>{precio.toFixed(2)}€</span>
               <button
                 type="button"

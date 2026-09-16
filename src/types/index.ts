@@ -42,6 +42,77 @@ export const ACABADOS_JOYA_OPCIONES: { value: AcabadoJoya | ""; label: string }[
   { value: "acero", label: "Acero" }
 ];
 
+export type TipoFuenteProducto = "manufacturer" | "supplier" | "product_label" | "retailer" | "other";
+export type ConfianzaDatoProducto = "high" | "medium" | "low";
+export type EstadoVerificacionProducto = "pending" | "imported" | "needs_review" | "verified";
+export type EstadoDatoProducto = "found" | "not_found" | "conflict" | "accepted" | "rejected";
+export type TipoContenidoProducto = "objective" | "commercial" | "symbolic";
+
+export type CampoEnriquecimientoProducto =
+  | "nombre"
+  | "marca"
+  | "referencia"
+  | "sku"
+  | "ean"
+  | "peso"
+  | "cantidad"
+  | "formato"
+  | "aroma"
+  | "origen"
+  | "fabricante"
+  | "tipoProducto"
+  | "ingredientes"
+  | "dimensiones"
+  | "duracionAproximada"
+  | "descripcionProveedor"
+  | "caracteristicas"
+  | "modoUsoProveedor"
+  | "advertencias"
+  | "imagenes"
+  | "codigoHsTaric";
+
+export interface FuenteInformacionProducto {
+  url: string;
+  sourceType: TipoFuenteProducto;
+  checkedAt: string;
+  title?: string;
+}
+
+export interface AlternativaDatoProducto {
+  value: string | string[];
+  source: string;
+  sourceType: TipoFuenteProducto;
+  confidence: ConfianzaDatoProducto;
+}
+
+export interface DatoEnriquecidoProducto {
+  value: string | string[] | null;
+  source: string | null;
+  sourceType: TipoFuenteProducto | null;
+  confidence: ConfianzaDatoProducto | null;
+  status: EstadoDatoProducto;
+  contentType: TipoContenidoProducto;
+  alternatives?: AlternativaDatoProducto[];
+  /** True cuando una fuente posterior contradice el valor aceptado; no lo sobrescribe. */
+  hasContradiction?: boolean;
+  /** True cuando el admin introdujo manualmente el valor (Corregir). */
+  correctedByAdmin?: boolean;
+}
+
+export interface EnriquecimientoProducto {
+  status: EstadoVerificacionProducto;
+  checkedAt: string | null;
+  input: {
+    nombre: string;
+    marca: string | null;
+    url: string | null;
+    ean: string | null;
+  };
+  fields: Partial<Record<CampoEnriquecimientoProducto, DatoEnriquecidoProducto>>;
+  sources: FuenteInformacionProducto[];
+  fetchError?: string | null;
+}
+
 export interface Producto {
   id: number;
   nombre: string;
@@ -70,6 +141,31 @@ export interface Producto {
   generoJoya?: GeneroJoya;
   /** Variante de la pieza (oro/acero), no categoría. */
   acabadoJoya?: AcabadoJoya;
+  marca?: string | null;
+  referencia?: string | null;
+  sku?: string | null;
+  ean?: string | null;
+  peso?: string | null;
+  cantidadContenido?: string | null;
+  formato?: string | null;
+  aroma?: string | null;
+  origen?: string | null;
+  fabricante?: string | null;
+  tipoProducto?: string | null;
+  ingredientes?: string | null;
+  dimensiones?: string | null;
+  duracionAproximada?: string | null;
+  descripcionProveedor?: string | null;
+  caracteristicas?: string[] | null;
+  modoUsoProveedor?: string | null;
+  advertencias?: string | null;
+  imagenes?: string[] | null;
+  urlOrigen?: string | null;
+  codigoHsTaric?: string | null;
+  fuentesInformacion?: FuenteInformacionProducto[];
+  fechaUltimaComprobacion?: string | null;
+  estadoVerificacion?: EstadoVerificacionProducto;
+  enriquecimiento?: EnriquecimientoProducto;
   /** Si false, el producto no se muestra en la tienda ni se puede añadir al carrito. */
   activo?: boolean;
 }
@@ -147,6 +243,10 @@ export interface Usuario {
   passwordTemporal?: boolean;
   verificado?: boolean;
   mustChangePassword?: boolean;
+  /** Bloqueado desde admin: no puede hacer login. */
+  bloqueado?: boolean;
+  bloqueadoMotivo?: string;
+  bloqueadoEn?: string;
   pedidos?: Pedido[];
 }
 
@@ -261,7 +361,7 @@ export interface PerfilCompraRapida {
 export type CategoriaEntrada = { id: string; nombre: string; imagen?: string };
 
 /** Subcategoría real: pertenece a una categoría principal (`categoriaId`), gestionable desde admin. */
-export type SubcategoriaEntrada = { id: string; categoriaId: string; nombre: string };
+export type SubcategoriaEntrada = { id: string; categoriaId: string; nombre: string; padreSubcategoriaId?: string };
 
 /** Pack armado por el cliente (reservado para futuro). */
 export type TipoPackCampana = "fijo" | "dinamico";

@@ -78,7 +78,7 @@
     "categoria": "velas",
     "nombre": "Vela Dorada",
     "precio": 18,
-    "stock": 4,
+    "stock": 3,
     "imagen": "/vela-dorada.jpg",
     "descripcion": "Éxito y prosperidad",
     "activo": true
@@ -111,87 +111,6 @@
     "stock": 5,
     "imagen": "/vela-canela.jpg",
     "descripcion": "Abundancia",
-    "activo": true
-  },
-  {
-    "id": 101,
-    "categoria": "inciensos",
-    "nombre": "Incienso Sándalo",
-    "precio": 6.5,
-    "stock": 0,
-    "imagen": "/incienso-sandalo.jpg",
-    "descripcion": "Meditación",
-    "activo": true,
-    "precioCosteIvaIncluido": 0
-  },
-  {
-    "id": 102,
-    "categoria": "inciensos",
-    "nombre": "Incienso Lavanda",
-    "precio": 5.9,
-    "stock": 4,
-    "imagen": "/incienso-lavanda.jpg",
-    "descripcion": "Calma",
-    "activo": true
-  },
-  {
-    "id": 103,
-    "categoria": "inciensos",
-    "nombre": "Incienso Ruda",
-    "precio": 7.2,
-    "stock": 0,
-    "imagen": "/incienso-ruda.jpg",
-    "descripcion": "Protección",
-    "activo": true
-  },
-  {
-    "id": 104,
-    "categoria": "inciensos",
-    "nombre": "Incienso Jazmín",
-    "precio": 6.8,
-    "stock": 2,
-    "imagen": "/incienso-jazmin.jpg",
-    "descripcion": "Amor",
-    "activo": true
-  },
-  {
-    "id": 105,
-    "categoria": "inciensos",
-    "nombre": "Incienso Palo Santo",
-    "precio": 8.5,
-    "stock": 3,
-    "imagen": "/incienso-palosanto.jpg",
-    "descripcion": "Limpieza",
-    "activo": true
-  },
-  {
-    "id": 106,
-    "categoria": "inciensos",
-    "nombre": "Incienso Mirra",
-    "precio": 7.9,
-    "stock": 5,
-    "imagen": "/incienso-mirra.jpg",
-    "descripcion": "Espiritualidad",
-    "activo": true
-  },
-  {
-    "id": 107,
-    "categoria": "inciensos",
-    "nombre": "Incienso Canela",
-    "precio": 6.4,
-    "stock": 5,
-    "imagen": "/incienso-canela.jpg",
-    "descripcion": "Éxito",
-    "activo": true
-  },
-  {
-    "id": 108,
-    "categoria": "inciensos",
-    "nombre": "Incienso Rosa",
-    "precio": 6.1,
-    "stock": 5,
-    "imagen": "/incienso-rosa.jpg",
-    "descripcion": "Armonía",
     "activo": true
   },
   {
@@ -298,5 +217,1609 @@
     "nombreEstilo": "normal",
     "subcategoriaId": "pulseras",
     "acabadoJoya": "oro"
+  },
+  {
+    "id": 304,
+    "categoria": "inciensos",
+    "nombre": "Incienso Árbol Dorado Alaukik",
+    "precio": 4,
+    "stock": 2,
+    "imagen": "/inciensos/alaukik-arbol-dorado.jpg",
+    "descripcion": "Descubre Árbol Dorado, la propuesta Golden Tree de Alaukik para tu selección de inciensos. Su presentación en varillas de 90 g te permite incorporar esta referencia a tus momentos de ambientación.",
+    "activo": true,
+    "precioCosteIvaIncluido": 0,
+    "nombreTamano": 22,
+    "nombreColor": "#ffffff",
+    "nombreEstilo": "normal",
+    "subcategoriaId": "alaukik-90gr",
+    "marca": "Alaukik",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "peso": "90 g",
+    "aroma": "Árbol Dorado",
+    "ean": "8906058544775",
+    "cantidadContenido": "55-65 varillas",
+    "enriquecimiento": {
+      "status": "verified",
+      "checkedAt": null,
+      "input": {
+        "nombre": "Incienso Árbol Dorado Alaukik",
+        "marca": "ALAUKIK",
+        "url": null,
+        "ean": null
+      },
+      "fields": {
+        "marca": {
+          "value": "Alaukik",
+          "source": "https://www.alaukikincense.com/",
+          "sourceType": "manufacturer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "origen": {
+          "value": "India",
+          "source": "https://www.alaukikincense.com/",
+          "sourceType": "manufacturer",
+          "confidence": "high",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "tipoProducto": {
+          "value": "Varillas",
+          "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "peso": {
+          "value": "90 g",
+          "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "aroma": {
+          "value": "Árbol Dorado",
+          "source": "oneshop.co.za",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "ean": {
+          "value": "8906058544775",
+          "source": "oneshop.co.za",
+          "sourceType": "retailer",
+          "confidence": "high",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "cantidad": {
+          "value": "55-65 varillas",
+          "source": "houseofisis.online",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        }
+      },
+      "sources": []
+    },
+    "estadoVerificacion": "verified",
+    "urlOrigen": "https://vipartesanias.com/alaukik/9276-2655-alaukik-incienso-arbol-dorado.html"
+  },
+  {
+    "id": 305,
+    "categoria": "inciensos",
+    "nombre": "Incienso Litchi Alaukik",
+    "precio": 4,
+    "stock": 1,
+    "imagen": "/inciensos/alaukik-litchi.jpg",
+    "descripcion": "Haz un lugar para el aroma Litchi en tu selección de inciensos. Alaukik lo presenta en varillas, en un formato de 90 g para quienes desean disfrutar de esta fragancia al ambientar su espacio.",
+    "activo": true,
+    "precioCosteIvaIncluido": 0,
+    "nombreTamano": 22,
+    "nombreColor": "#ffffff",
+    "nombreEstilo": "normal",
+    "subcategoriaId": "alaukik-90gr",
+    "enriquecimiento": {
+      "status": "verified",
+      "checkedAt": "2026-09-13T21:43:07.344Z",
+      "input": {
+        "nombre": "Incienso Alaukik Litchi 90 g",
+        "marca": "ALAUKIK",
+        "url": "https://oneshop.co.za/products/alaukik-litchi-incense-8906058544805/2052180",
+        "ean": null
+      },
+      "fields": {
+        "nombre": {
+          "value": null,
+          "source": null,
+          "sourceType": null,
+          "confidence": null,
+          "status": "rejected",
+          "contentType": "objective",
+          "alternatives": [
+            {
+              "value": "Alaukik Litchi Incense Sticks 90g",
+              "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+              "sourceType": "retailer",
+              "confidence": "high"
+            },
+            {
+              "value": "Alaukik incense,90gm",
+              "source": "https://houseofisis.online/product/alaukik-incense90gm/",
+              "sourceType": "retailer",
+              "confidence": "high"
+            },
+            {
+              "value": "Alaukik Litchi Incense",
+              "source": "https://oneshop.co.za/products/alaukik-litchi-incense-8906058544805/2052180",
+              "sourceType": "retailer",
+              "confidence": "high"
+            },
+            {
+              "value": "Alaukik Incense",
+              "source": "https://www.alaukikincense.com/",
+              "sourceType": "manufacturer",
+              "confidence": "medium"
+            },
+            {
+              "value": "Estimate Your Idea",
+              "source": "https://www.alaukikincense.com/contact.html",
+              "sourceType": "manufacturer",
+              "confidence": "medium"
+            },
+            {
+              "value": "Alaukik Litchi Incense Sticks 90g - MUR 70",
+              "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+              "sourceType": "retailer",
+              "confidence": "medium"
+            },
+            {
+              "value": "Alaukik Litchi Incense Sticks",
+              "source": "https://www.secretsense.co.za/products/alaukik-litchi-incense-sticks",
+              "sourceType": "retailer",
+              "confidence": "medium"
+            },
+            {
+              "value": "Alaukik incense,90gm - House of Isis",
+              "source": "https://houseofisis.online/product/alaukik-incense90gm/",
+              "sourceType": "retailer",
+              "confidence": "medium"
+            },
+            {
+              "value": "Alaukik Litchi Incense | Alaukik - OneShop",
+              "source": "https://oneshop.co.za/products/alaukik-litchi-incense-8906058544805/2052180",
+              "sourceType": "retailer",
+              "confidence": "medium"
+            }
+          ],
+          "hasContradiction": false
+        },
+        "marca": {
+          "value": "Alaukik",
+          "source": "https://www.alaukikincense.com/",
+          "sourceType": "manufacturer",
+          "confidence": "medium",
+          "contentType": "objective",
+          "status": "accepted",
+          "hasContradiction": false
+        },
+        "referencia": {
+          "value": "8906058544805",
+          "source": "https://oneshop.co.za/products/alaukik-litchi-incense-8906058544805/2052180",
+          "sourceType": "retailer",
+          "confidence": "high",
+          "contentType": "objective",
+          "status": "rejected",
+          "hasContradiction": false
+        },
+        "sku": {
+          "value": null,
+          "source": null,
+          "sourceType": null,
+          "confidence": null,
+          "status": "rejected",
+          "contentType": "objective",
+          "alternatives": [
+            {
+              "value": "RE_IS_IS_10940",
+              "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+              "sourceType": "retailer",
+              "confidence": "high"
+            },
+            {
+              "value": "7385",
+              "source": "https://houseofisis.online/product/alaukik-incense90gm/",
+              "sourceType": "retailer",
+              "confidence": "high"
+            },
+            {
+              "value": "8906058544805",
+              "source": "https://oneshop.co.za/products/alaukik-litchi-incense-8906058544805/2052180",
+              "sourceType": "retailer",
+              "confidence": "high"
+            }
+          ],
+          "hasContradiction": false
+        },
+        "ean": {
+          "value": "8906058544805",
+          "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+          "sourceType": "supplier",
+          "confidence": "medium",
+          "contentType": "objective",
+          "status": "accepted",
+          "hasContradiction": false
+        },
+        "peso": {
+          "value": "90 g",
+          "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+          "sourceType": null,
+          "confidence": null,
+          "status": "accepted",
+          "contentType": "objective",
+          "hasContradiction": false
+        },
+        "cantidad": {
+          "value": "approx 58 sticks",
+          "source": "https://houseofisis.online/product/alaukik-incense90gm/",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "contentType": "objective",
+          "status": "accepted",
+          "hasContradiction": false
+        },
+        "formato": {
+          "value": null,
+          "source": null,
+          "sourceType": null,
+          "confidence": null,
+          "status": "not_found",
+          "contentType": "objective"
+        },
+        "aroma": {
+          "value": "Litchi",
+          "source": "https://oneshop.co.za/products/alaukik-litchi-incense-8906058544805/2052180",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "contentType": "objective",
+          "status": "accepted",
+          "hasContradiction": false
+        },
+        "origen": {
+          "value": "India",
+          "source": "https://www.alaukikincense.com/",
+          "sourceType": null,
+          "confidence": null,
+          "status": "accepted",
+          "contentType": "objective",
+          "hasContradiction": false
+        },
+        "fabricante": {
+          "value": "Alaukik Inc",
+          "source": "https://www.alaukikincense.com/about.html",
+          "sourceType": "manufacturer",
+          "confidence": "high",
+          "contentType": "objective",
+          "status": "rejected",
+          "hasContradiction": false
+        },
+        "tipoProducto": {
+          "value": "Varillas",
+          "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+          "sourceType": null,
+          "confidence": null,
+          "status": "accepted",
+          "contentType": "objective",
+          "hasContradiction": false
+        },
+        "ingredientes": {
+          "value": null,
+          "source": null,
+          "sourceType": null,
+          "confidence": null,
+          "status": "not_found",
+          "contentType": "objective"
+        },
+        "dimensiones": {
+          "value": null,
+          "source": null,
+          "sourceType": null,
+          "confidence": null,
+          "status": "not_found",
+          "contentType": "objective"
+        },
+        "duracionAproximada": {
+          "value": null,
+          "source": null,
+          "sourceType": null,
+          "confidence": null,
+          "status": "not_found",
+          "contentType": "objective"
+        },
+        "descripcionProveedor": {
+          "value": null,
+          "source": null,
+          "sourceType": null,
+          "confidence": null,
+          "status": "rejected",
+          "contentType": "commercial",
+          "alternatives": [
+            {
+              "value": "Welcome to Alaukik Incense Our Success And Company History.",
+              "source": "https://www.alaukikincense.com/about.html",
+              "sourceType": "manufacturer",
+              "confidence": "medium"
+            },
+            {
+              "value": "Alaukik Litchi incense sticks are hand-rolled, export quality sticks with a sweet, fruity litchi fragrance, made in India. Suitable for puja, meditation, or for adding a light fruit-floral scent to any space. Each stick burns cleanly and releases a pleasant, lingering aroma. Each pack contains 90g of incense sticks.",
+              "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+              "sourceType": "retailer",
+              "confidence": "medium"
+            },
+            {
+              "value": "Alaukik incense, 90gm, approx 58 sticks. Made in India",
+              "source": "https://houseofisis.online/product/alaukik-incense90gm/",
+              "sourceType": "retailer",
+              "confidence": "medium"
+            },
+            {
+              "value": "Introducing Alaukik Litchi Incense Sticks: A Fresh Breath of Tradition Dive into the Exotic Aroma of Litchi with Alaukik Handcrafted in the heart of India, thes…",
+              "source": "https://oneshop.co.za/products/alaukik-litchi-incense-8906058544805/2052180",
+              "sourceType": "retailer",
+              "confidence": "medium"
+            },
+            {
+              "value": "Alaukik Litchi hand-rolled incense sticks 90g. Export quality fruity-floral fragrance for puja and home. From MUR 70.",
+              "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+              "sourceType": "retailer",
+              "confidence": "low"
+            },
+            {
+              "value": "Alaukik Litchi Incense Sticks Alaukik Litchi Incense: Exotic Masala Sticks 90g Immerse yourself in the exotic fragrance of Alaukik Litchi Incense Sticks,",
+              "source": "https://www.secretsense.co.za/products/alaukik-litchi-incense-sticks",
+              "sourceType": "retailer",
+              "confidence": "low"
+            }
+          ],
+          "hasContradiction": false
+        },
+        "caracteristicas": {
+          "value": [
+            "Contains under 50 hand-rolled sticks per pack.",
+            "Premium masala blend ensures a deep, lasting fragrance.",
+            "Pack weight: 90g.",
+            "Enriched with the natural essence of litchi.",
+            "Ideal for creating a relaxing and aromatic atmosphere.",
+            "Crafted using traditional and natural ingredients.",
+            "Standard delivery: 3–5 business days",
+            "Free delivery on orders over R750",
+            "Courier delivery to your door"
+          ],
+          "source": "https://www.secretsense.co.za/products/alaukik-litchi-incense-sticks",
+          "sourceType": "retailer",
+          "confidence": "low",
+          "contentType": "commercial",
+          "status": "rejected",
+          "hasContradiction": false
+        },
+        "modoUsoProveedor": {
+          "value": null,
+          "source": null,
+          "sourceType": null,
+          "confidence": null,
+          "status": "not_found",
+          "contentType": "objective"
+        },
+        "advertencias": {
+          "value": null,
+          "source": null,
+          "sourceType": null,
+          "confidence": null,
+          "status": "not_found",
+          "contentType": "objective"
+        },
+        "imagenes": {
+          "value": null,
+          "source": null,
+          "sourceType": null,
+          "confidence": null,
+          "status": "rejected",
+          "contentType": "objective",
+          "alternatives": [
+            {
+              "value": [
+                "https://dashcart.mu/cdn/shop/files/7._ALAUKIK_LITCHI.jpg?v=1774290404&width=1920"
+              ],
+              "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+              "sourceType": "retailer",
+              "confidence": "high"
+            },
+            {
+              "value": [
+                "https://cdn.shopify.com/s/files/1/0945/0409/2028/files/7._ALAUKIK_LITCHI.jpg?v=1774290404"
+              ],
+              "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+              "sourceType": "retailer",
+              "confidence": "high"
+            },
+            {
+              "value": [
+                "https://houseofisis.online/wp-content/uploads/2024/11/20241119_090559_resized-crop.jpg"
+              ],
+              "source": "https://houseofisis.online/product/alaukik-incense90gm/",
+              "sourceType": "retailer",
+              "confidence": "high"
+            },
+            {
+              "value": [
+                "https://img.oneshop.co.za/19554ee2c80a164b304b6c6863ff94ff.jpg"
+              ],
+              "source": "https://oneshop.co.za/products/alaukik-litchi-incense-8906058544805/2052180",
+              "sourceType": "retailer",
+              "confidence": "high"
+            },
+            {
+              "value": [
+                "http://dashcart.mu/cdn/shop/files/7._ALAUKIK_LITCHI.jpg?crop=center&height=1200&v=1774290404&width=1200"
+              ],
+              "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+              "sourceType": "retailer",
+              "confidence": "medium"
+            },
+            {
+              "value": [
+                "https://cdn.shopify.com/s/files/1/0472/3713/6546/files/Untitleddesign-2024-04-10T085542.364.jpg?v=1712732330"
+              ],
+              "source": "https://www.secretsense.co.za/products/alaukik-litchi-incense-sticks",
+              "sourceType": "retailer",
+              "confidence": "medium"
+            }
+          ],
+          "hasContradiction": false
+        },
+        "codigoHsTaric": {
+          "value": null,
+          "source": null,
+          "sourceType": null,
+          "confidence": null,
+          "status": "not_found",
+          "contentType": "objective"
+        }
+      },
+      "sources": [
+        {
+          "url": "https://www.alaukikincense.com/",
+          "sourceType": "manufacturer",
+          "checkedAt": "2026-09-13T21:43:00.468Z",
+          "title": "Alaukik Incense",
+          "official": false
+        },
+        {
+          "url": "https://www.alaukikincense.com/about.html",
+          "sourceType": "manufacturer",
+          "checkedAt": "2026-09-13T21:43:00.734Z",
+          "title": "Alaukik Incense",
+          "official": false
+        },
+        {
+          "url": "https://www.alaukikincense.com/contact.html",
+          "sourceType": "manufacturer",
+          "checkedAt": "2026-09-13T21:43:01.388Z",
+          "title": "Estimate Your Idea",
+          "official": false
+        },
+        {
+          "url": "https://hostenatura.es/en/alaukik-incense/7282-alaukik-lychee-incense-large-pack-90gr-55-65-sticks-made-in-india-8906058544805.html",
+          "sourceType": "supplier",
+          "checkedAt": "2026-09-13T21:43:01.959Z",
+          "official": false
+        },
+        {
+          "url": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+          "sourceType": "retailer",
+          "checkedAt": "2026-09-13T21:43:02.892Z",
+          "official": false
+        },
+        {
+          "url": "https://www.secretsense.co.za/products/alaukik-litchi-incense-sticks",
+          "sourceType": "retailer",
+          "checkedAt": "2026-09-13T21:43:03.328Z",
+          "title": "Alaukik Litchi Incense Sticks",
+          "official": false
+        },
+        {
+          "url": "https://houseofisis.online/product/alaukik-incense90gm/",
+          "sourceType": "retailer",
+          "checkedAt": "2026-09-13T21:43:03.836Z",
+          "official": false
+        },
+        {
+          "url": "https://oneshop.co.za/products/alaukik-litchi-incense-8906058544805/2052180",
+          "sourceType": "retailer",
+          "checkedAt": "2026-09-13T21:43:07.344Z",
+          "official": false
+        }
+      ],
+      "fetchError": null
+    },
+    "fuentesInformacion": [
+      {
+        "url": "https://www.alaukikincense.com/",
+        "sourceType": "manufacturer",
+        "checkedAt": "2026-09-13T21:43:00.468Z",
+        "title": "Alaukik Incense",
+        "official": false
+      },
+      {
+        "url": "https://www.alaukikincense.com/about.html",
+        "sourceType": "manufacturer",
+        "checkedAt": "2026-09-13T21:43:00.734Z",
+        "title": "Alaukik Incense",
+        "official": false
+      },
+      {
+        "url": "https://www.alaukikincense.com/contact.html",
+        "sourceType": "manufacturer",
+        "checkedAt": "2026-09-13T21:43:01.388Z",
+        "title": "Estimate Your Idea",
+        "official": false
+      },
+      {
+        "url": "https://hostenatura.es/en/alaukik-incense/7282-alaukik-lychee-incense-large-pack-90gr-55-65-sticks-made-in-india-8906058544805.html",
+        "sourceType": "supplier",
+        "checkedAt": "2026-09-13T21:43:01.959Z",
+        "official": false
+      },
+      {
+        "url": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+        "sourceType": "retailer",
+        "checkedAt": "2026-09-13T21:43:02.892Z",
+        "official": false
+      },
+      {
+        "url": "https://www.secretsense.co.za/products/alaukik-litchi-incense-sticks",
+        "sourceType": "retailer",
+        "checkedAt": "2026-09-13T21:43:03.328Z",
+        "title": "Alaukik Litchi Incense Sticks",
+        "official": false
+      },
+      {
+        "url": "https://houseofisis.online/product/alaukik-incense90gm/",
+        "sourceType": "retailer",
+        "checkedAt": "2026-09-13T21:43:03.836Z",
+        "official": false
+      },
+      {
+        "url": "https://oneshop.co.za/products/alaukik-litchi-incense-8906058544805/2052180",
+        "sourceType": "retailer",
+        "checkedAt": "2026-09-13T21:43:07.344Z",
+        "official": false
+      }
+    ],
+    "fechaUltimaComprobacion": "2026-09-13T21:43:07.344Z",
+    "estadoVerificacion": "needs_review",
+    "urlOrigen": "https://inciensosnamaste.es/es/varillas-de-incienso/-incienso-alaukik/incienso-litchi-alaukik.html",
+    "marca": "Alaukik",
+    "ean": "8906058544805",
+    "peso": "90 g",
+    "cantidadContenido": "approx 58 sticks",
+    "aroma": "Litchi",
+    "tipoProducto": "Varillas",
+    "origen": "India"
+  },
+  {
+    "id": 306,
+    "categoria": "inciensos",
+    "nombre": "Incienso Almíscar Alaukik",
+    "precio": 4,
+    "stock": 2,
+    "imagen": "/inciensos/alaukik-almiscar.jpg",
+    "descripcion": "Almíscar de Alaukik es una opción para quienes buscan la fragancia Musk en formato de incienso. Descubre esta referencia en varillas, con una presentación de 90 g, y elige el aroma que acompañará tu espacio.",
+    "activo": true,
+    "precioCosteIvaIncluido": 0,
+    "nombreTamano": 22,
+    "nombreColor": "#ffffff",
+    "nombreEstilo": "normal",
+    "subcategoriaId": "alaukik-90gr",
+    "marca": "Alaukik",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "peso": "90 g",
+    "aroma": "Almíscar",
+    "ean": "8906058543365",
+    "enriquecimiento": {
+      "status": "verified",
+      "checkedAt": null,
+      "input": {
+        "nombre": "Incienso Almíscar Alaukik",
+        "marca": "ALAUKIK",
+        "url": null,
+        "ean": null
+      },
+      "fields": {
+        "marca": {
+          "value": "Alaukik",
+          "source": "https://www.alaukikincense.com/",
+          "sourceType": "manufacturer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "origen": {
+          "value": "India",
+          "source": "https://www.alaukikincense.com/",
+          "sourceType": "manufacturer",
+          "confidence": "high",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "tipoProducto": {
+          "value": "Varillas",
+          "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "peso": {
+          "value": "90 g",
+          "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "aroma": {
+          "value": "Almíscar",
+          "source": "oneshop.co.za",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "ean": {
+          "value": "8906058543365",
+          "source": "oneshop.co.za",
+          "sourceType": "retailer",
+          "confidence": "high",
+          "status": "accepted",
+          "contentType": "objective"
+        }
+      },
+      "sources": []
+    },
+    "estadoVerificacion": "verified",
+    "urlOrigen": "https://inciensosnamaste.es/es/varillas-de-incienso/-incienso-alaukik/incienso-musk-alaukik.html"
+  },
+  {
+    "id": 307,
+    "categoria": "inciensos",
+    "nombre": "Incienso Aqua Fresh Alaukik",
+    "precio": 4,
+    "stock": 2,
+    "imagen": "/inciensos/alaukik-aqua-fresh.jpg",
+    "descripcion": "Explora Aqua Fresh, una de las fragancias de incienso de Alaukik. Su formato en varillas de 90 g es una alternativa para variar tu selección de aromas y dar un lugar propio al incienso en casa.",
+    "activo": true,
+    "precioCosteIvaIncluido": 0,
+    "nombreTamano": 22,
+    "nombreColor": "#ffffff",
+    "nombreEstilo": "normal",
+    "subcategoriaId": "alaukik-90gr",
+    "marca": "Alaukik",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "peso": "90 g",
+    "aroma": "Aqua Fresh",
+    "ean": "8906058544737",
+    "enriquecimiento": {
+      "status": "verified",
+      "checkedAt": null,
+      "input": {
+        "nombre": "Incienso Aqua Fresh Alaukik",
+        "marca": "ALAUKIK",
+        "url": null,
+        "ean": null
+      },
+      "fields": {
+        "marca": {
+          "value": "Alaukik",
+          "source": "https://www.alaukikincense.com/",
+          "sourceType": "manufacturer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "origen": {
+          "value": "India",
+          "source": "https://www.alaukikincense.com/",
+          "sourceType": "manufacturer",
+          "confidence": "high",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "tipoProducto": {
+          "value": "Varillas",
+          "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "peso": {
+          "value": "90 g",
+          "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "aroma": {
+          "value": "Aqua Fresh",
+          "source": "oneshop.co.za",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "ean": {
+          "value": "8906058544737",
+          "source": "oneshop.co.za",
+          "sourceType": "retailer",
+          "confidence": "high",
+          "status": "accepted",
+          "contentType": "objective"
+        }
+      },
+      "sources": []
+    },
+    "estadoVerificacion": "verified",
+    "urlOrigen": "https://inciensosnamaste.es/es/varillas-de-incienso/-incienso-alaukik/incienso-aqua-fresh-alaukik.html"
+  },
+  {
+    "id": 308,
+    "categoria": "inciensos",
+    "nombre": "Incienso Lavanda Alaukik",
+    "precio": 4,
+    "stock": 2,
+    "imagen": "/inciensos/alaukik-lavanda.jpg",
+    "descripcion": "Elige el aroma Lavanda de Alaukik para perfumar tu espacio con una de tus fragancias favoritas. Esta referencia se presenta en varillas de incienso, en un formato de 90 g para incorporar a tu selección personal.",
+    "activo": true,
+    "precioCosteIvaIncluido": 0,
+    "nombreTamano": 22,
+    "nombreColor": "#ffffff",
+    "nombreEstilo": "normal",
+    "subcategoriaId": "alaukik-90gr",
+    "marca": "Alaukik",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "peso": "90 g",
+    "aroma": "Lavanda",
+    "ean": "8906058541583",
+    "enriquecimiento": {
+      "status": "verified",
+      "checkedAt": null,
+      "input": {
+        "nombre": "Incienso Lavanda Alaukik",
+        "marca": "ALAUKIK",
+        "url": null,
+        "ean": null
+      },
+      "fields": {
+        "marca": {
+          "value": "Alaukik",
+          "source": "https://www.alaukikincense.com/",
+          "sourceType": "manufacturer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "origen": {
+          "value": "India",
+          "source": "https://www.alaukikincense.com/",
+          "sourceType": "manufacturer",
+          "confidence": "high",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "tipoProducto": {
+          "value": "Varillas",
+          "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "peso": {
+          "value": "90 g",
+          "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "aroma": {
+          "value": "Lavanda",
+          "source": "oneshop.co.za",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "ean": {
+          "value": "8906058541583",
+          "source": "oneshop.co.za",
+          "sourceType": "retailer",
+          "confidence": "high",
+          "status": "accepted",
+          "contentType": "objective"
+        }
+      },
+      "sources": []
+    },
+    "estadoVerificacion": "verified",
+    "urlOrigen": "https://inciensosnamaste.es/es/varillas-de-incienso/-incienso-alaukik/incienso-lavanda-alaukik.html"
+  },
+  {
+    "id": 309,
+    "categoria": "inciensos",
+    "nombre": "Incienso Musk Melon Alaukik",
+    "precio": 4,
+    "stock": 2,
+    "imagen": "/inciensos/alaukik-musk-melon.jpg",
+    "descripcion": "Dale un lugar a Musk Melon en tu colección de aromas. Este incienso de Alaukik se presenta en varillas y en formato de 90 g: una referencia para descubrir si buscas una alternativa a los aromas que utilizas habitualmente.",
+    "activo": true,
+    "precioCosteIvaIncluido": 0,
+    "nombreTamano": 22,
+    "nombreColor": "#ffffff",
+    "nombreEstilo": "normal",
+    "subcategoriaId": "alaukik-90gr",
+    "marca": "Alaukik",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "peso": "90 g",
+    "aroma": "Musk Melon",
+    "ean": "8906058544041",
+    "cantidadContenido": "56 varillas",
+    "duracionAproximada": "40 minutos",
+    "enriquecimiento": {
+      "status": "verified",
+      "checkedAt": null,
+      "input": {
+        "nombre": "Incienso Musk Melon Alaukik",
+        "marca": "ALAUKIK",
+        "url": null,
+        "ean": null
+      },
+      "fields": {
+        "marca": {
+          "value": "Alaukik",
+          "source": "https://www.alaukikincense.com/",
+          "sourceType": "manufacturer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "origen": {
+          "value": "India",
+          "source": "https://www.alaukikincense.com/",
+          "sourceType": "manufacturer",
+          "confidence": "high",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "tipoProducto": {
+          "value": "Varillas",
+          "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "peso": {
+          "value": "90 g",
+          "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "aroma": {
+          "value": "Musk Melon",
+          "source": "oneshop.co.za",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "ean": {
+          "value": "8906058544041",
+          "source": "oneshop.co.za",
+          "sourceType": "retailer",
+          "confidence": "high",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "cantidad": {
+          "value": "56 varillas",
+          "source": "houseofisis.online",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "duracionAproximada": {
+          "value": "40 minutos",
+          "source": "oneshop.co.za",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        }
+      },
+      "sources": []
+    },
+    "estadoVerificacion": "verified",
+    "urlOrigen": "https://inciensosnamaste.es/es/varillas-de-incienso/-incienso-alaukik/incienso-musk-melon.html"
+  },
+  {
+    "id": 310,
+    "categoria": "inciensos",
+    "nombre": "Incienso Canela Alaukik",
+    "precio": 4,
+    "stock": 2,
+    "imagen": "/inciensos/alaukik-canela.jpg",
+    "descripcion": "Si la canela está entre tus aromas favoritos, descubre esta propuesta de Alaukik para ambientar tu hogar. Un incienso con fragancia Canela, presentado en varillas y en formato de 90 g.",
+    "activo": true,
+    "precioCosteIvaIncluido": 0,
+    "nombreTamano": 22,
+    "nombreColor": "#ffffff",
+    "nombreEstilo": "normal",
+    "subcategoriaId": "alaukik-90gr",
+    "marca": "Alaukik",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "peso": "90 g",
+    "aroma": "Canela",
+    "ean": "8906058546779",
+    "cantidadContenido": "55-65 varillas",
+    "enriquecimiento": {
+      "status": "verified",
+      "checkedAt": null,
+      "input": {
+        "nombre": "Incienso Canela Alaukik",
+        "marca": "ALAUKIK",
+        "url": null,
+        "ean": null
+      },
+      "fields": {
+        "marca": {
+          "value": "Alaukik",
+          "source": "https://www.alaukikincense.com/",
+          "sourceType": "manufacturer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "origen": {
+          "value": "India",
+          "source": "https://www.alaukikincense.com/",
+          "sourceType": "manufacturer",
+          "confidence": "high",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "tipoProducto": {
+          "value": "Varillas",
+          "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "peso": {
+          "value": "90 g",
+          "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "aroma": {
+          "value": "Canela",
+          "source": "oneshop.co.za",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "ean": {
+          "value": "8906058546779",
+          "source": "oneshop.co.za",
+          "sourceType": "retailer",
+          "confidence": "high",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "cantidad": {
+          "value": "55-65 varillas",
+          "source": "houseofisis.online",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        }
+      },
+      "sources": []
+    },
+    "estadoVerificacion": "verified",
+    "urlOrigen": "https://inciensosnamaste.es/es/varillas-de-incienso/-incienso-alaukik/incienso-canela-alaukik.html"
+  },
+  {
+    "id": 311,
+    "categoria": "inciensos",
+    "nombre": "Incienso Nirvana Alaukik",
+    "precio": 4,
+    "stock": 2,
+    "imagen": "/inciensos/alaukik-nirvana.jpg",
+    "descripcion": "Conoce Nirvana, una de las referencias de incienso de Alaukik. Disponible en varillas y en presentación de 90 g, es una opción para ampliar tu selección y descubrir un aroma diferente a tu propio ritmo.",
+    "activo": true,
+    "precioCosteIvaIncluido": 0,
+    "nombreTamano": 22,
+    "nombreColor": "#ffffff",
+    "nombreEstilo": "normal",
+    "subcategoriaId": "alaukik-90gr",
+    "marca": "Alaukik",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "peso": "90 g",
+    "aroma": "Nirvana",
+    "enriquecimiento": {
+      "status": "verified",
+      "checkedAt": null,
+      "input": {
+        "nombre": "Incienso Nirvana Alaukik",
+        "marca": "ALAUKIK",
+        "url": null,
+        "ean": null
+      },
+      "fields": {
+        "marca": {
+          "value": "Alaukik",
+          "source": "https://www.alaukikincense.com/",
+          "sourceType": "manufacturer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "origen": {
+          "value": "India",
+          "source": "https://www.alaukikincense.com/",
+          "sourceType": "manufacturer",
+          "confidence": "high",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "tipoProducto": {
+          "value": "Varillas",
+          "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "peso": {
+          "value": "90 g",
+          "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "aroma": {
+          "value": "Nirvana",
+          "source": "oneshop.co.za",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        }
+      },
+      "sources": []
+    },
+    "estadoVerificacion": "verified",
+    "urlOrigen": "https://sahumerios.com/nirvana-alaukik-sahumerios-xl/"
+  },
+  {
+    "id": 312,
+    "categoria": "inciensos",
+    "nombre": "Incienso Atrae Dinero Alaukik",
+    "precio": 4,
+    "stock": 2,
+    "imagen": "/inciensos/alaukik-atrae-dinero.jpg",
+    "descripcion": "Descubre la referencia Atrae Dinero de Alaukik dentro de nuestra selección de inciensos. Elige esta propuesta para ambientar tu espacio; su nombre identifica el producto y no supone una promesa de resultados económicos.",
+    "activo": true,
+    "precioCosteIvaIncluido": 0,
+    "nombreTamano": 22,
+    "nombreColor": "#ffffff",
+    "nombreEstilo": "normal",
+    "subcategoriaId": "alaukik-90gr",
+    "marca": "Alaukik",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "peso": "90 g",
+    "aroma": "Atrae Dinero",
+    "enriquecimiento": {
+      "status": "verified",
+      "checkedAt": null,
+      "input": {
+        "nombre": "Incienso Atrae Dinero Alaukik",
+        "marca": "ALAUKIK",
+        "url": null,
+        "ean": null
+      },
+      "fields": {
+        "marca": {
+          "value": "Alaukik",
+          "source": "https://www.alaukikincense.com/",
+          "sourceType": "manufacturer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "origen": {
+          "value": "India",
+          "source": "https://www.alaukikincense.com/",
+          "sourceType": "manufacturer",
+          "confidence": "high",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "tipoProducto": {
+          "value": "Varillas",
+          "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "peso": {
+          "value": "90 g",
+          "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "aroma": {
+          "value": "Atrae Dinero",
+          "source": "oneshop.co.za",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        }
+      },
+      "sources": []
+    },
+    "estadoVerificacion": "verified",
+    "urlOrigen": "https://vipartesanias.com/alaukik/11454-2575-alaukik-incienso-atractor-de-dinero-8906058548940.html"
+  },
+  {
+    "id": 313,
+    "categoria": "inciensos",
+    "nombre": "Incienso Limpia Casas Alaukik 30g",
+    "precio": 2.5,
+    "stock": 1,
+    "imagen": "/inciensos/alaukik-limpia-casas.jpg",
+    "descripcion": "Limpia Casas de Alaukik llega en una presentación de 30 g para quienes desean incorporar esta referencia a su selección de inciensos. Una propuesta para perfumar el hogar, sin confundir su nombre con una acción de limpieza o desinfección.",
+    "activo": true,
+    "precioCosteIvaIncluido": 0,
+    "nombreTamano": 22,
+    "nombreColor": "#ffffff",
+    "nombreEstilo": "normal",
+    "subcategoriaId": "alaukik-30gr",
+    "marca": "Alaukik",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "aroma": "Limpia Casas",
+    "ean": "8906058549183",
+    "cantidadContenido": "approx 20 varillas",
+    "enriquecimiento": {
+      "status": "verified",
+      "checkedAt": null,
+      "input": {
+        "nombre": "Incienso Limpia Casas Alaukik 30g",
+        "marca": "ALAUKIK",
+        "url": null,
+        "ean": null
+      },
+      "fields": {
+        "marca": {
+          "value": "Alaukik",
+          "source": "https://www.alaukikincense.com/",
+          "sourceType": "manufacturer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "origen": {
+          "value": "India",
+          "source": "https://www.alaukikincense.com/",
+          "sourceType": "manufacturer",
+          "confidence": "high",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "tipoProducto": {
+          "value": "Varillas",
+          "source": "https://dashcart.mu/products/alaukik-litchi-incense-sticks-90g",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "aroma": {
+          "value": "Limpia Casas",
+          "source": "oneshop.co.za",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "ean": {
+          "value": "8906058549183",
+          "source": "oneshop.co.za",
+          "sourceType": "retailer",
+          "confidence": "high",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "cantidad": {
+          "value": "approx 20 varillas",
+          "source": "houseofisis.online",
+          "sourceType": "retailer",
+          "confidence": "medium",
+          "status": "accepted",
+          "contentType": "objective"
+        },
+        "peso": {
+          "value": "30 g",
+          "source": "https://hostenatura.es/en/alaukik-incense/8780-alaukik-house-clean-incense-30gr-masala-incense-8906058549183.html",
+          "sourceType": "supplier",
+          "confidence": "high",
+          "status": "accepted",
+          "contentType": "objective"
+        }
+      },
+      "sources": []
+    },
+    "estadoVerificacion": "verified",
+    "peso": "30 g",
+    "urlOrigen": "https://vipartesanias.com/alaukik/11468-2603-alaukik-incienso-limpia-casas-8906058549183.html"
+  },
+  {
+    "id": 314,
+    "categoria": "inciensos",
+    "nombre": "Incienso Nature Canela Naranja 25g",
+    "precio": 2.75,
+    "stock": 1,
+    "imagen": "/tienda/inciensos/la-casa-de-los-aromas/063634-canela-naranja-caja.jpg",
+    "descripcion": "Un torbellino cálido y especiado que se entrelaza con la chispa cítrica de la naranja. Este aroma vibrante evoca un hogar acogedor en una tarde de invierno, lleno de energía y alegría. Inspira calidez y un toque de nostalgia reconfortante. Colección Nature de La Casa de los Aromas — paquete de 25 g.",
+    "activo": true,
+    "subcategoriaId": "la-casa-de-los-aromas",
+    "marca": "La Casa de los Aromas",
+    "peso": "25 g",
+    "aroma": "Canela Naranja",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "urlOrigen": "https://lacasadelosaromas.com/producto/incienso-nature-canela-naranja",
+    "cantidadContenido": "8 sticks"
+  },
+  {
+    "id": 315,
+    "categoria": "inciensos",
+    "nombre": "Incienso Nature Vainilla 25g",
+    "precio": 2.75,
+    "stock": 1,
+    "imagen": "/tienda/inciensos/la-casa-de-los-aromas/063665-vainilla-caja.jpg",
+    "descripcion": "Un susurro dulce y aterciopelado que envuelve el espacio con su calidez gourmand. La vainilla evoca tardes acogedoras y momentos de indulgencia, como un abrazo suave que reconforta el corazón. Inspira dulzura y una calma que acaricia el alma. Colección Nature de La Casa de los Aromas — paquete de 25 g.",
+    "activo": true,
+    "subcategoriaId": "la-casa-de-los-aromas",
+    "marca": "La Casa de los Aromas",
+    "peso": "25 g",
+    "aroma": "Vainilla",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "urlOrigen": "https://lacasadelosaromas.com/producto/incienso-nature-vainilla",
+    "cantidadContenido": "8 sticks"
+  },
+  {
+    "id": 316,
+    "categoria": "inciensos",
+    "nombre": "Incienso Nature Romero 25g",
+    "precio": 2.75,
+    "stock": 1,
+    "imagen": "/tienda/inciensos/la-casa-de-los-aromas/063672-romero-caja.jpg",
+    "descripcion": "Un destello fresco y herbal que despierta la mente con su toque alcanforado. El romero transporta a un jardín mediterráneo, evocando vitalidad y enfoque. Es un aroma que inspira claridad mental y una sensación de renovación en cada rincón. Colección Nature de La Casa de los Aromas — paquete de 25 g.",
+    "activo": true,
+    "subcategoriaId": "la-casa-de-los-aromas",
+    "marca": "La Casa de los Aromas",
+    "peso": "25 g",
+    "aroma": "Romero",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "urlOrigen": "https://lacasadelosaromas.com/producto/incienso-nature-romero",
+    "cantidadContenido": "8 sticks"
+  },
+  {
+    "id": 317,
+    "categoria": "inciensos",
+    "nombre": "Incienso Nature Sándalo 25g",
+    "precio": 2.75,
+    "stock": 1,
+    "imagen": "/tienda/inciensos/la-casa-de-los-aromas/063603-sandalo-caja.jpg",
+    "descripcion": "Un abrazo cálido y amaderado que envuelve el aire con su suavidad cremosa. El sándalo susurra calma y espiritualidad, evocando templos antiguos y momentos de reflexión profunda. Inspira una serenidad atemporal. Colección Nature de La Casa de los Aromas — paquete de 25 g.",
+    "activo": true,
+    "subcategoriaId": "la-casa-de-los-aromas",
+    "marca": "La Casa de los Aromas",
+    "peso": "25 g",
+    "aroma": "Sándalo",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "urlOrigen": "https://lacasadelosaromas.com/producto/incienso-nature-sandalo",
+    "cantidadContenido": "8 sticks",
+    "precioCosteIvaIncluido": 0,
+    "nombreTamano": 22,
+    "nombreColor": "#ffffff",
+    "nombreEstilo": "normal"
+  },
+  {
+    "id": 318,
+    "categoria": "inciensos",
+    "nombre": "Incienso Smudge Romero Suami 25g",
+    "precio": 2.25,
+    "stock": 1,
+    "imagen": "/tienda/inciensos/suami/smudge-romero.jpg",
+    "descripcion": "El aroma herbal del romero actúa como un escudo natural: rompe el estancamiento, disipa las malas vibraciones y devuelve la claridad al ambiente. Un clásico de la limpieza energética que purifica el hogar y despierta la mente. Incienso smudge orgánico artesanal Suami — paquete de 25 g.",
+    "activo": true,
+    "subcategoriaId": "suami-fragance-1789310643756",
+    "marca": "Suami Fragrance",
+    "peso": "25 g",
+    "aroma": "Romero",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "urlOrigen": "https://palaciodeincienso.com/products/incienso-smudge-romero-para-abundancia-prosperidad-y-limpieza-energetica"
+  },
+  {
+    "id": 319,
+    "categoria": "inciensos",
+    "nombre": "Incienso Smudge Sanación Cuerpo y Alma Suami 25g",
+    "precio": 2.25,
+    "stock": 1,
+    "imagen": "/tienda/inciensos/suami/smudge-sanacion-cuerpo-alma.jpg",
+    "descripcion": "Una fragancia envolvente creada para acompañar procesos de sanación y descanso profundo. Limpia energías densas, eleva la vibración y envuelve el espacio en calma — ideal para meditación, reiki y momentos de reencuentro contigo. Incienso smudge orgánico artesanal Suami — paquete de 25 g.",
+    "activo": true,
+    "subcategoriaId": "suami-fragance-1789310643756",
+    "marca": "Suami Fragrance",
+    "peso": "25 g",
+    "aroma": "Sanación Cuerpo y Alma",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "urlOrigen": "https://palaciodeincienso.com/products/incienso-smudge-sanacion-cuerpo-y-alma"
+  },
+  {
+    "id": 320,
+    "categoria": "inciensos",
+    "nombre": "Incienso Smudge Limpieza Suami 25g",
+    "precio": 2.25,
+    "stock": 1,
+    "imagen": "/tienda/inciensos/suami/smudge-limpieza.jpg",
+    "descripcion": "Pensado para renovar la energía del hogar y apartar la pesadez acumulada. Un ritual de purificación que despeja ambientes cargados, envidias y mal de ojo, dejando el espacio ligero y protegido. Incienso smudge orgánico artesanal Suami — paquete de 25 g.",
+    "activo": true,
+    "subcategoriaId": "suami-fragance-1789310643756",
+    "marca": "Suami Fragrance",
+    "peso": "25 g",
+    "aroma": "Limpieza",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "urlOrigen": "https://palaciodeincienso.com/products/incienso-smudge-limpieza-energetica-para-mala-energia-y-mal-de-ojo"
+  },
+  {
+    "id": 321,
+    "categoria": "inciensos",
+    "nombre": "Incienso Smudge Eucalipto Suami 25g",
+    "precio": 2.25,
+    "stock": 1,
+    "imagen": "/tienda/inciensos/suami/smudge-eucalipto.jpg",
+    "descripcion": "Aroma fresco, limpio y penetrante que despeja el ambiente y renueva la vibración del espacio. El eucalipto es el aliado de la protección energética: purifica el aire, despeja la mente y aporta una sensación de frescura y equilibrio. Incienso smudge orgánico artesanal Suami — paquete de 25 g.",
+    "activo": true,
+    "subcategoriaId": "suami-fragance-1789310643756",
+    "marca": "Suami Fragrance",
+    "peso": "25 g",
+    "aroma": "Eucalipto",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "urlOrigen": "https://palaciodeincienso.com/products/incienso-smudge-eucalipto-para-proteccion-y-limpieza-energetica"
+  },
+  {
+    "id": 322,
+    "categoria": "inciensos",
+    "nombre": "Incienso Orgánico Mirra Ullas 25g",
+    "precio": 2.99,
+    "stock": 1,
+    "imagen": "/tienda/inciensos/ullas/ullas-mirra.jpg",
+    "descripcion": "La resina sagrada por excelencia. Su aroma dulce, profundo y envolvente purifica el ambiente y acompaña la meditación y la introspección desde la antigüedad. Incienso orgánico artesanal Ullas, hecho a mano en India — paquete de 25 g.",
+    "activo": true,
+    "subcategoriaId": "ullas-organico",
+    "marca": "Ullas",
+    "peso": "25 g",
+    "aroma": "Mirra",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "urlOrigen": "https://www.ethike.es/incienso-organico-ullas/4036-mirra-12-uds-incienso-ullas.html"
+  },
+  {
+    "id": 323,
+    "categoria": "inciensos",
+    "nombre": "Incienso Orgánico Canela Ullas 25g",
+    "precio": 2.99,
+    "stock": 1,
+    "imagen": "/tienda/inciensos/ullas/ullas-canela.jpg",
+    "descripcion": "Un aroma cálido, especiado y ligeramente dulce que envuelve el hogar de confort. La canela despierta los sentidos y atrae energía positiva, protección y bienestar. Incienso orgánico artesanal Ullas, hecho a mano en India — paquete de 25 g.",
+    "activo": true,
+    "subcategoriaId": "ullas-organico",
+    "marca": "Ullas",
+    "peso": "25 g",
+    "aroma": "Canela",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "urlOrigen": "https://www.ethike.es/incienso-organico-ullas/4390-canela-12-uds-incienso-ullas.html"
+  },
+  {
+    "id": 324,
+    "categoria": "inciensos",
+    "nombre": "Incienso Orgánico Ruda Ullas 25g",
+    "precio": 2.99,
+    "stock": 1,
+    "imagen": "/tienda/inciensos/ullas/ullas-ruda.jpg",
+    "descripcion": "La hierba protectora clásica. Su aroma intenso y refrescante limpia de energías densas, armoniza las emociones y relaja cuerpo y mente — y de paso ahuyenta insectos. Incienso orgánico artesanal Ullas, hecho a mano en India — paquete de 25 g.",
+    "activo": true,
+    "subcategoriaId": "ullas-organico",
+    "marca": "Ullas",
+    "peso": "25 g",
+    "aroma": "Ruda",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "urlOrigen": "https://www.ethike.es/incienso-organico-ullas/4180-ruda12-uds-incienso-ullas.html"
+  },
+  {
+    "id": 325,
+    "categoria": "inciensos",
+    "nombre": "Incienso Orgánico Laurel Ullas 25g",
+    "precio": 2.99,
+    "stock": 1,
+    "imagen": "/tienda/inciensos/ullas/ullas-laurel.jpg",
+    "descripcion": "El laurel del triunfo: purificador del aire que aleja energías negativas y atrae éxito, prosperidad y buena suerte. Un aroma noble para abrir caminos y celebrar logros. Incienso orgánico artesanal Ullas, hecho a mano en India — paquete de 25 g.",
+    "activo": true,
+    "subcategoriaId": "ullas-organico",
+    "marca": "Ullas",
+    "peso": "25 g",
+    "aroma": "Laurel",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "urlOrigen": "https://www.ethike.es/incienso-organico-ullas/4027-laurel-12-uds-incienso-ullas.html"
+  },
+  {
+    "id": 326,
+    "categoria": "inciensos",
+    "nombre": "Incienso Orgánico Rosa Ullas 25g",
+    "precio": 2.99,
+    "stock": 1,
+    "imagen": "/tienda/inciensos/ullas/ullas-rosa.jpg",
+    "descripcion": "Un delicado aroma floral que envuelve el espacio de calma y armonía, como un jardín en plena floración. El incienso del amor, la suavidad y el bienestar emocional. Incienso orgánico artesanal Ullas, hecho a mano en India — paquete de 25 g.",
+    "activo": true,
+    "subcategoriaId": "ullas-organico",
+    "marca": "Ullas",
+    "peso": "25 g",
+    "aroma": "Rosa",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "urlOrigen": "https://www.ethike.es/incienso-organico-ullas/4306-rosa-12-uds-incienso-ullas.html"
+  },
+  {
+    "id": 327,
+    "categoria": "inciensos",
+    "nombre": "Incienso Mystic Balance Jade 20g",
+    "precio": 3,
+    "stock": 1,
+    "imagen": "/tienda/inciensos/la-casa-de-los-aromas/063597-balance-caja.jpg",
+    "descripcion": "Una ráfaga de especias cálidas y audaces que enciende los sentidos. Aroma picante y acogedor que invita a un equilibrio profundo — incluye piedra de jade. Colección Mystic de La Casa de los Aromas — paquete de 20 g.",
+    "activo": true,
+    "subcategoriaId": "la-casa-de-los-aromas",
+    "marca": "La Casa de los Aromas",
+    "peso": "20 g",
+    "aroma": "Balance · Especias",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "urlOrigen": "https://lacasadelosaromas.com/producto/incienso-mystic-balance",
+    "cantidadContenido": "8 sticks"
+  },
+  {
+    "id": 328,
+    "categoria": "inciensos",
+    "nombre": "Incienso Mystic Aura Lapislázuli 20g",
+    "precio": 3,
+    "stock": 1,
+    "imagen": "/tienda/inciensos/la-casa-de-los-aromas/063542-aura-caja.jpg",
+    "descripcion": "Un velo de almizcle profundo y envolvente que susurra misterio y sofisticación. Su aroma cálido evoca noches estrelladas y secretos antiguos — incluye piedra de lapislázuli. Colección Mystic — paquete de 20 g.",
+    "activo": true,
+    "subcategoriaId": "la-casa-de-los-aromas",
+    "marca": "La Casa de los Aromas",
+    "peso": "20 g",
+    "aroma": "Aura · Almizcle",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "urlOrigen": "https://lacasadelosaromas.com/producto/incienso-mystic-aura",
+    "cantidadContenido": "8 sticks"
+  },
+  {
+    "id": 329,
+    "categoria": "inciensos",
+    "nombre": "Incienso Mystic Zen Ágata 20g",
+    "precio": 3,
+    "stock": 1,
+    "imagen": "/tienda/inciensos/la-casa-de-los-aromas/063559-zen-caja.jpg",
+    "descripcion": "Un destello dorado de azafrán, dulce y especiado, que acaricia el alma como un amanecer tranquilo. Un soplo de serenidad que equilibra el espíritu — incluye piedra de ágata. Colección Mystic — paquete de 20 g.",
+    "activo": true,
+    "subcategoriaId": "la-casa-de-los-aromas",
+    "marca": "La Casa de los Aromas",
+    "peso": "20 g",
+    "aroma": "Zen · Azafrán",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "urlOrigen": "https://lacasadelosaromas.com/producto/incienso-mystic-zen",
+    "cantidadContenido": "8 sticks"
+  },
+  {
+    "id": 330,
+    "categoria": "inciensos",
+    "nombre": "Incienso Mystic Focus Amatista 20g",
+    "precio": 3,
+    "stock": 1,
+    "imagen": "/tienda/inciensos/la-casa-de-los-aromas/063573-focus-caja.jpg",
+    "descripcion": "La lavanda fresca y herbal se desliza como un suspiro de alivio, tejiendo un manto de calma y claridad — evoca campos violetas bajo un cielo despejado. Incluye piedra de amatista. Colección Mystic — paquete de 20 g.",
+    "activo": true,
+    "subcategoriaId": "la-casa-de-los-aromas",
+    "marca": "La Casa de los Aromas",
+    "peso": "20 g",
+    "aroma": "Focus · Lavanda",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "urlOrigen": "https://lacasadelosaromas.com/producto/incienso-mystic-focus",
+    "cantidadContenido": "8 sticks"
+  },
+  {
+    "id": 331,
+    "categoria": "inciensos",
+    "nombre": "Incienso Mystic Karma Cuarzo Rosa 20g",
+    "precio": 3,
+    "stock": 1,
+    "imagen": "/tienda/inciensos/la-casa-de-los-aromas/063566-karma-caja.jpg",
+    "descripcion": "El susurro aterciopelado de pétalos de rosa, un abrazo floral suave y reconfortante que despierta el corazón e inspira armonía y ternura — incluye piedra de cuarzo rosa. Colección Mystic — paquete de 20 g.",
+    "activo": true,
+    "subcategoriaId": "la-casa-de-los-aromas",
+    "marca": "La Casa de los Aromas",
+    "peso": "20 g",
+    "aroma": "Karma · Rosa",
+    "origen": "India",
+    "tipoProducto": "Varillas",
+    "urlOrigen": "https://lacasadelosaromas.com/producto/incienso-mystic-karma",
+    "cantidadContenido": "8 sticks"
   }
 ]

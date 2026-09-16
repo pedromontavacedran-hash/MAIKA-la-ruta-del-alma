@@ -1,4 +1,30 @@
-import type { Producto } from "../types";
+import type { EnriquecimientoProducto, FuenteInformacionProducto, Producto } from "../types";
+
+/** Campos planos aprobados de enriquecimiento (solo llegan al producto tras aceptación admin). */
+const CAMPOS_ENR_STRING = [
+  "marca",
+  "referencia",
+  "sku",
+  "ean",
+  "peso",
+  "cantidadContenido",
+  "formato",
+  "aroma",
+  "origen",
+  "fabricante",
+  "tipoProducto",
+  "ingredientes",
+  "dimensiones",
+  "duracionAproximada",
+  "descripcionProveedor",
+  "modoUsoProveedor",
+  "advertencias",
+  "urlOrigen",
+  "codigoHsTaric",
+  "fechaUltimaComprobacion"
+] as const;
+
+const ESTADOS_VERIFICACION = new Set(["pending", "imported", "needs_review", "verified"]);
 
 const CATEGORIAS = new Set<Producto["categoria"]>(["velas", "inciensos", "figuras", "kits", "joyas"]);
 
@@ -63,6 +89,26 @@ export function listaProductosSegura(raw: unknown): Producto[] {
     }
     if (o.acabadoJoya === "oro" || o.acabadoJoya === "acero") {
       base.acabadoJoya = o.acabadoJoya;
+    }
+    for (const k of CAMPOS_ENR_STRING) {
+      const v = o[k];
+      if (typeof v === "string" && v.trim()) base[k] = v.trim();
+    }
+    for (const k of ["caracteristicas", "imagenes"] as const) {
+      const v = o[k];
+      if (Array.isArray(v)) {
+        const arr = v.map((x) => String(x ?? "").trim()).filter(Boolean);
+        if (arr.length) base[k] = arr;
+      }
+    }
+    if (Array.isArray(o.fuentesInformacion)) {
+      base.fuentesInformacion = o.fuentesInformacion as FuenteInformacionProducto[];
+    }
+    if (ESTADOS_VERIFICACION.has(String(o.estadoVerificacion))) {
+      base.estadoVerificacion = o.estadoVerificacion as Producto["estadoVerificacion"];
+    }
+    if (o.enriquecimiento && typeof o.enriquecimiento === "object" && !Array.isArray(o.enriquecimiento)) {
+      base.enriquecimiento = o.enriquecimiento as EnriquecimientoProducto;
     }
     if (typeof o.activo === "boolean") base.activo = o.activo;
     out.push(base);

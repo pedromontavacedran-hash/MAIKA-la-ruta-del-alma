@@ -3,6 +3,7 @@ import { CuentaPage } from "../routing/lazyPages";
 import GestionUsuariosPage from "../../pages/GestionUsuariosPage";
 import AdminPanelShell from "../../components/admin/AdminPanelShell";
 import AdminCampanaPackPanel from "../../components/admin/AdminCampanaPackPanel";
+import AdminWebEstadoToggle from "../../components/admin/AdminWebEstadoToggle";
 import { AdminLecturaPantallaPanel } from "../../components/admin/AdminLecturaPantallaPanel";
 import AdminMetricasPanel from "../../components/admin/AdminMetricasPanel";
 import {
@@ -284,6 +285,7 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
                 🔮 NORIA HORÓSCOPOS (PREVIEW)
               </button>
               <AdminLecturaPantallaPanel />
+              <AdminWebEstadoToggle mostrarNotificacion={mostrarNotificacion} />
             </div>
               </section>
               ) : null}

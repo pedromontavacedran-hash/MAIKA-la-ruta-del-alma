@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "vite",
     "app": "concurrently -k -n front,api,desk -c blue,magenta,green \"npm run dev\" \"npm run backend:dev\" \"wait-on http://127.0.0.1:5173 tcp:127.0.0.1:3001 && electron .\"",
-    "dev:full": "concurrently -n front,api -c blue,magenta \"npm run dev\" \"npm run backend:dev\"",
+    "dev:full": "concurrently -k -n front,api -c blue,magenta \"npm run dev\" \"npm run backend:dev\"",
     "dev:mobile": "vite --host",
     "build": "tsc -b && vite build",
     "predist": "node scripts/gen-icon-ico.mjs && npm run build",
@@ -38,6 +38,7 @@
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.9.1",
     "bcryptjs": "^3.0.3",
+    "cheerio": "^1.1.2",
     "cors": "^2.8.6",
     "dompurify": "^3.4.7",
     "dotenv": "^17.4.2",

@@ -8,11 +8,11 @@ interface NotificacionProps {
   onClose: () => void;
 }
 
-export default function Notificacion({ 
-  mensaje, 
-  tipo = "normal", 
-  duration = 10000, 
-  onClose 
+export default function Notificacion({
+  mensaje,
+  tipo = "normal",
+  duration,
+  onClose
 }: NotificacionProps) {
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
@@ -20,13 +20,16 @@ export default function Notificacion({
   const raw = mensaje ?? "";
   const mensajeLimpio = tipo === "exito" ? raw.replace(/^[\s✅✔]+/, "").trimStart() : raw;
 
+  /** Errores suelen ser más largos y necesitan más tiempo de lectura (bloqueos, recuperación, etc.). */
+  const dur = duration ?? (tipo === "error" ? 20000 : 10000);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       onCloseRef.current();
-    }, duration);
+    }, dur);
 
     return () => clearTimeout(timer);
-  }, [duration]);
+  }, [dur]);
 
   return (
     <div className={`notificacion ${tipo}`}>

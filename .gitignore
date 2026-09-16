@@ -22,6 +22,7 @@ secrets.json
 database.db
 backup.zip
 backend/.env
+backups/
 
 # Editor directories and files
 .vscode/*

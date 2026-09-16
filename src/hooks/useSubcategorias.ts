@@ -26,7 +26,10 @@ function normalizarSubcategoriasCatalogo(raw: unknown): SubcategoriaEntrada[] {
         ? {
             id: String((s as SubcategoriaEntrada).id),
             categoriaId: String((s as SubcategoriaEntrada).categoriaId),
-            nombre: String((s as SubcategoriaEntrada).nombre)
+            nombre: String((s as SubcategoriaEntrada).nombre),
+            ...(s && typeof s === "object" && "padreSubcategoriaId" in s && (s as { padreSubcategoriaId?: unknown }).padreSubcategoriaId
+              ? { padreSubcategoriaId: String((s as { padreSubcategoriaId: unknown }).padreSubcategoriaId) }
+              : {})
           }
         : null
     )
@@ -80,24 +83,24 @@ export function useSubcategorias() {
 
   /** Lanza con el mensaje real (validación local, o el error que devuelva el servidor) si falla. */
   const agregarSubcategoria = useCallback(
-    async (categoriaId: string, nombre: string): Promise<SubcategoriaEntrada> => {
+    async (categoriaId: string, nombre: string, padreSubcategoriaId?: string): Promise<SubcategoriaEntrada> => {
       const nombreTrim = nombre.trim();
       if (!nombreTrim) throw new Error("Escribe un nombre para la subcategoría");
       const nombreNorm = nombreTrim.toLowerCase();
       if (subcategoriasCatalogo.some((s) => s.categoriaId === categoriaId && s.nombre.trim().toLowerCase() === nombreNorm)) {
         throw new Error("Ya existe una subcategoría con ese nombre en esta categoría");
       }
-      const creada = await postAdminSubcategoriaApi(categoriaId, nombreTrim);
+      const creada = await postAdminSubcategoriaApi(categoriaId, nombreTrim, padreSubcategoriaId);
       setSubcategoriasCatalogo((prev) => [...prev, creada]);
       return creada;
     },
     [subcategoriasCatalogo]
   );
 
-  const renombrarSubcategoria = useCallback(async (id: string, nombre: string): Promise<void> => {
+  const renombrarSubcategoria = useCallback(async (id: string, nombre: string, padreSubcategoriaId?: string): Promise<void> => {
     const nombreTrim = nombre.trim();
     if (!nombreTrim) throw new Error("Escribe un nombre para la subcategoría");
-    const actualizada = await putAdminSubcategoriaApi(id, nombreTrim);
+    const actualizada = await putAdminSubcategoriaApi(id, nombreTrim, padreSubcategoriaId);
     setSubcategoriasCatalogo((prev) => prev.map((s) => (s.id === id ? actualizada : s)));
   }, []);
 

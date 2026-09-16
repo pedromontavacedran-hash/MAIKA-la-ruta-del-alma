@@ -13,6 +13,9 @@ import { productosRouter } from "./routes/productos.js";
 import { categoriasRouter } from "./routes/categorias.js";
 import { suenoRouter } from "./routes/sueno.js";
 import { horoscopoRouter } from "./routes/horoscopo.js";
+import { webEstadoRouter } from "./routes/webEstado.js";
+import { disenoWebRouter } from "./routes/disenoWeb.js";
+import { preciosCompetenciaRouter } from "./routes/preciosCompetencia.js";
 
 const app = express();
 
@@ -36,6 +39,9 @@ app.use(productosRouter);
 app.use(categoriasRouter);
 app.use(suenoRouter);
 app.use(horoscopoRouter);
+app.use(webEstadoRouter);
+app.use(disenoWebRouter);
+app.use(preciosCompetenciaRouter);
 
 const serveMaikaDist = process.env.MAIKA_SERVE_DIST === "1";
 if (serveMaikaDist) {

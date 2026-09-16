@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useSyncStatus } from "../app/hooks/useSyncStatus";
 import type { SyncStatus } from "../utils/maikaSyncStatus";
+import { isAdminAuthorized } from "../utils/adminAuth";
 import "./SyncIndicator.css";
 
 const FLASH_MS = 250;
@@ -177,6 +178,18 @@ export default function SyncIndicator({ placement = "topbar" }: SyncIndicatorPro
   const [isFlashing, setIsFlashing] = useState(false);
   const prevStatusRef = useRef<SyncStatus | null>(null);
 
+  /** El indicador es herramienta interna: solo visible con sesión admin; los visitantes no lo ven. */
+  const [esAdmin, setEsAdmin] = useState(() => isAdminAuthorized());
+  useEffect(() => {
+    const onAuthChanged = () => setEsAdmin(isAdminAuthorized());
+    window.addEventListener("maika_admin_auth_changed", onAuthChanged);
+    window.addEventListener("focus", onAuthChanged);
+    return () => {
+      window.removeEventListener("maika_admin_auth_changed", onAuthChanged);
+      window.removeEventListener("focus", onAuthChanged);
+    };
+  }, []);
+
   const etiqueta = SYNC_ETIQUETA[status];
   const lineaTiempo = lineaTiempoSync(status, etiqueta, tiempoRelativo, queueLength);
   const { esVerde, esAmarillo, esOffline } = syncColors(status);
@@ -203,6 +216,8 @@ export default function SyncIndicator({ placement = "topbar" }: SyncIndicatorPro
     const t = window.setTimeout(() => setIsFlashing(false), FLASH_MS);
     return () => window.clearTimeout(t);
   }, [status, reducedMotion]);
+
+  if (!esAdmin) return null;
 
   /**
    * Móvil + cabecera: ocultar cuando todo va bien; tampoco mostrar «Pend.» mientras el probe
