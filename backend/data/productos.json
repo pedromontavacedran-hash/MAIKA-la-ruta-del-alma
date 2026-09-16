@@ -1965,5 +1965,61 @@
     "tipoProducto": "Varillas",
     "urlOrigen": "https://www.ancientwisdom.biz/banjsi-01",
     "cantidadContenido": "10 varillas aprox."
+  },
+  {
+    "id": 340,
+    "categoria": "inciensos",
+    "nombre": "Incienso Calma",
+    "precio": 3.5,
+    "stock": 1,
+    "imagen": "/tienda/inciensos/maika-intencionado/calma.jpg",
+    "descripcion": "Intención: reducir el estrés, calmar la mente y encontrar paz interior. Mezcla de lavanda (relaja y reduce la ansiedad), vainilla (aporta dulzura y serenidad) y sándalo (induce paz y conexión interior). Ideal para dormir mejor, meditar y crear un ambiente tranquilo. Incienso intencionado MAIKA, varillas artesanales.",
+    "activo": true,
+    "subcategoriaId": "inciensos-intencionado-maika",
+    "marca": "MAIKA",
+    "aroma": "Lavanda · Vainilla · Sándalo",
+    "tipoProducto": "Varillas"
+  },
+  {
+    "id": 341,
+    "categoria": "inciensos",
+    "nombre": "Incienso Abundancia",
+    "precio": 3.5,
+    "stock": 1,
+    "imagen": "/tienda/inciensos/maika-intencionado/abundancia.jpg",
+    "descripcion": "Intención: atraer prosperidad, éxito y flujo constante en tu vida. Mezcla de canela (activa la prosperidad y el éxito), pachulí (atrae abundancia y fortuna) y sándalo (potencia la energía de prosperidad). Ideal para atraer oportunidades y mejorar la situación económica. Incienso intencionado MAIKA, varillas artesanales.",
+    "activo": true,
+    "subcategoriaId": "inciensos-intencionado-maika",
+    "marca": "MAIKA",
+    "aroma": "Canela · Pachulí · Sándalo",
+    "tipoProducto": "Varillas"
+  },
+  {
+    "id": 342,
+    "categoria": "inciensos",
+    "nombre": "Incienso Amor",
+    "precio": 3.5,
+    "stock": 1,
+    "imagen": "/tienda/inciensos/maika-intencionado/amor.jpg",
+    "descripcion": "Intención: abrir el corazón, atraer y cultivar el amor en todas sus formas. Mezcla de rosa (amor propio y armonía emocional), jazmín (atracción y energía amorosa) y sándalo (eleva la vibración del amor). Ideal para fortalecer vínculos, sanar heridas del corazón y atraer amor verdadero. Incienso intencionado MAIKA, varillas artesanales.",
+    "activo": true,
+    "subcategoriaId": "inciensos-intencionado-maika",
+    "marca": "MAIKA",
+    "aroma": "Rosa · Jazmín · Sándalo",
+    "tipoProducto": "Varillas"
+  },
+  {
+    "id": 343,
+    "categoria": "inciensos",
+    "nombre": "Incienso Bienestar",
+    "precio": 3.5,
+    "stock": 1,
+    "imagen": "/tienda/inciensos/maika-intencionado/bienestar.jpg",
+    "descripcion": "Intención: equilibrar cuerpo, mente y espíritu para vivir en armonía. Mezcla de lavanda (relaja y purifica la energía), romero (revitaliza y aporta claridad) y sándalo (armoniza y eleva la vibración personal). Ideal para mejorar el bienestar general y equilibrar emociones. Incienso intencionado MAIKA, varillas artesanales.",
+    "activo": true,
+    "subcategoriaId": "inciensos-intencionado-maika",
+    "marca": "MAIKA",
+    "aroma": "Lavanda · Romero · Sándalo",
+    "tipoProducto": "Varillas"
   }
 ]
