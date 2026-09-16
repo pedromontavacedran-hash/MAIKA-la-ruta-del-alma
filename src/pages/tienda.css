@@ -1,13 +1,14 @@
 /* Módulo extraído de App.css (líneas 4215–4852). Tienda lightbox, cerrar modal global, carrito layout (hasta fin bloque carrito) */
 
+.tienda-vista img[src$="/inciensos/alaukik-atrae-dinero.jpg"],
+.tienda-lightbox-overlay img[src$="/inciensos/alaukik-atrae-dinero.jpg"] {
+  background-color: #fff;
+}
+
 .tienda-entrada-hero {
   position: relative;
   isolation: isolate;
-  animation:
-    tiendaEntradaHero 420ms cubic-bezier(0.22, 1, 0.36, 1) both,
-    tiendaAuraViva 4.8s cubic-bezier(0.4, 0, 0.2, 1) 420ms infinite;
   transform-origin: center top;
-  will-change: opacity, transform, filter;
 }
 
 .tienda-entrada-hero::before {
@@ -21,43 +22,7 @@
     radial-gradient(circle at 50% 12%, rgba(232, 210, 138, 0.18), transparent 34%),
     radial-gradient(ellipse 82% 58% at 50% 45%, rgba(212, 175, 55, 0.10), transparent 70%);
   filter: blur(18px);
-  opacity: 0;
-  animation: tiendaAuraDoradaViva 4.8s cubic-bezier(0.4, 0, 0.2, 1) 420ms infinite;
-}
-
-@keyframes tiendaEntradaHero {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.985);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes tiendaAuraViva {
-  0%,
-  100% {
-    transform: translateY(0) scale(1);
-    filter: brightness(1) saturate(1);
-  }
-  50% {
-    transform: translateY(-1px) scale(1.015);
-    filter: brightness(1.08) saturate(1.06);
-  }
-}
-
-@keyframes tiendaAuraDoradaViva {
-  0%,
-  100% {
-    opacity: 0.18;
-    transform: scale(0.99);
-  }
-  50% {
-    opacity: 0.34;
-    transform: scale(1.025);
-  }
+  opacity: 0.18;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -89,19 +54,7 @@
 }
 
 .maika-cart-pulse {
-  animation: maika-cart-pulse 0.36s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@keyframes maika-cart-pulse {
-  0% {
-    transform: scale(1);
-  }
-  45% {
-    transform: scale(1.25);
-  }
-  100% {
-    transform: scale(1);
-  }
+  animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

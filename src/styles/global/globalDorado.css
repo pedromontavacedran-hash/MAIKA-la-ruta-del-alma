@@ -1,0 +1,232 @@
+﻿.app-shell h1,
+.app-shell h2,
+.app-shell h3 {
+  color: var(--gold-main);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.03em;
+  font-weight: 600;
+}
+
+.App {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.App-header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 20px;
+  background: linear-gradient(135deg, #e8d9cd 0%, #d4b9a5 100%);
+  border-radius: 10px;
+  color: #2c1810;
+}
+
+.subtitulo {
+  font-style: italic;
+  margin: 10px 0;
+}
+
+nav {
+  margin-top: 20px;
+}
+
+/* 2. Botones principales: degradado dorado */
+nav button {
+  background: var(--gold-gradient);
+  border: none;
+  padding: 10px 25px;
+  margin: 0 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  color: var(--maika-bg);
+  transition: transform var(--maika-transition), box-shadow var(--maika-transition);
+}
+
+nav button:hover {
+  transform: none;
+  box-shadow: var(--gold-hover-shadow);
+}
+
+.productos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  margin: 20px 0;
+}
+
+/* 3. Tarjetas: borde dorado fino 1px */
+.producto-card {
+  background: var(--maika-bg);
+  border: 1px solid var(--gold-border-soft);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  color: var(--maika-text);
+  transition: transform var(--maika-transition), box-shadow var(--maika-transition);
+}
+
+/* 4. Hover: glow dorado suave */
+.producto-card:hover {
+  transform: none;
+  box-shadow: var(--gold-hover-shadow);
+}
+
+.producto-card button {
+  background: var(--gold-gradient);
+  border: none;
+  padding: 8px 20px;
+  border-radius: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+  color: var(--maika-bg);
+  font-weight: bold;
+  transition: box-shadow var(--maika-transition);
+}
+.producto-card button:hover {
+  box-shadow: var(--gold-hover-shadow);
+}
+
+.carrito, .carrito-vacio {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.item-carrito {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.item-carrito input {
+  width: 60px;
+  padding: 5px;
+}
+
+.total-carrito {
+  text-align: right;
+  font-size: 1.2em;
+  margin: 20px 0;
+}
+
+.btn-comprar {
+  background: var(--gold-gradient);
+  border: none;
+  padding: 15px 30px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: bold;
+  width: 100%;
+  font-size: 1.1em;
+  color: var(--maika-bg);
+  transition: box-shadow var(--maika-transition), transform var(--maika-transition);
+}
+.btn-comprar:hover {
+  box-shadow: var(--gold-hover-shadow);
+  transform: none;
+}
+
+.sobre-maika {
+  background: white;
+  border-radius: 10px;
+  padding: 30px;
+  margin-bottom: 30px;
+}
+
+.servicios ul {
+  list-style: none;
+  padding: 10px 0;
+}
+
+.servicios li {
+  padding: 5px 0;
+}
+
+.testimonios blockquote {
+  font-style: italic;
+  margin: 20px 0;
+  padding: 10px 20px;
+  border-left: 4px solid var(--gold-main);
+  background: rgba(11, 11, 13, 0.8);
+  color: #F5E6C8;
+}
+
+.contacto {
+  text-align: center;
+  margin-top: 50px;
+  padding: 30px;
+  background: #e8d9cd;
+  border-radius: 10px;
+}
+
+.btn-whatsapp {
+  display: inline-block;
+  margin-top: 20px;
+  background: #25D366;
+  padding: 12px 30px;
+  border-radius: 25px;
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.btn-whatsapp:hover {
+  background: #128C7E;
+}
+
+body.modal-open .wa-float {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
+}
+
+@media (max-width: 768px) {
+  .item-carrito {
+    grid-template-columns: 1fr;
+    gap: 5px;
+    text-align: center;
+  }
+  
+  .productos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+}@keyframes pulsePedido {
+  0% {
+    box-shadow: 0 0 0 0 rgba(201,162,74,0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgba(201,162,74,0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(201,162,74,0);
+  }
+}
+.pedidoPendiente {
+  animation: pulsePedido 1.4s ease-in-out infinite;
+}
+
+.boton-cosmico {
+  background-image: linear-gradient(rgba(10, 7, 25, 0.45), rgba(10, 7, 25, 0.45)), url('/fondo%20estrellado.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: transform var(--maika-transition), box-shadow var(--maika-transition), filter 0.12s ease;
+}
+
+.boton-cosmico:hover {
+  transform: none;
+  box-shadow: var(--gold-hover-shadow);
+}
+
+.boton-cosmico:active {
+  transform: scale(0.98);
+}
+
+/* Tienda / pÃºblico: pulsaciÃ³n y tÃ¡ctil sin sombra en iconos de cerrar */

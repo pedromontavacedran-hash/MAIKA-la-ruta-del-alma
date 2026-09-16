@@ -1,0 +1,100 @@
+﻿/*
+ * Base sÃ³lida: mÃ­nimo â‰¥ viewport dinÃ¡mico.
+ * `scroll-padding-top` solo en el scrollport real (`.app-shell` o `__content` en layout-shell, y en mÃ³vil aquÃ­ si el documento hace scroll).
+ * Duplicarlo en `html` en escritorio (body overflow hidden) puede interferir con focus/scroll programÃ¡tico y sensaciÃ³n de â€œsaltoâ€.
+ */
+html {
+  min-height: 100vh;
+  min-height: 100svh;
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+  overflow-anchor: none;
+}
+
+@media (max-width: 768px) {
+  html {
+    scroll-padding-top: var(--app-topbar-stack);
+  }
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: var(--maika-bg);
+  color: var(--maika-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  overflow-x: hidden;
+  min-height: 100vh;
+  min-height: 100svh;
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+  overflow-anchor: none;
+}
+
+/* Shell: mismo mÃ­nimo viewport en mÃ³vil y escritorio (refuerzo respecto al inline de Layout). */
+.app-shell {
+  min-height: 100vh;
+  min-height: 100svh;
+  overscroll-behavior-y: none;
+  /* Evita saltos de scroll al mutar altura (desplegables, imÃ¡genes) dentro del scrollport */
+  overflow-anchor: none;
+}
+
+
+/* Legibilidad modo oscuro: texto general */
+.app-shell,
+.app-shell p,
+.app-shell span,
+.app-shell label,
+.app-shell td,
+.app-shell li {
+  color: var(--maika-text);
+  letter-spacing: 0.02em;
+}
+.app-shell p {
+  line-height: 1.6;
+  max-width: 65ch;
+}
+.app-shell strong {
+  color: var(--maika-text);
+  font-weight: 600;
+}
+
+@keyframes fadeInMain {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(1.03);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+#root {
+  animation: fadeInMain 0.38s ease;
+}
+
+/* 1. TÃ­tulos principales en color dorado */

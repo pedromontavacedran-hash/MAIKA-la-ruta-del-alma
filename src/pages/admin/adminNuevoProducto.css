@@ -1,0 +1,139 @@
+﻿.producto-form--modal.editar-productos-page__panel {
+  padding-top: 4px;
+  padding-bottom: 6px;
+  margin-top: 0;
+}
+
+.producto-form--modal .editar-productos-seccion {
+  margin-bottom: 6px;
+}
+
+.producto-form--modal .editar-productos-seccion:last-of-type {
+  margin-bottom: 2px;
+}
+
+.producto-form--modal .editar-productos-seccion__titulo {
+  font-size: 10px;
+  margin-bottom: 4px;
+  letter-spacing: 0.12em;
+  opacity: 0.92;
+}
+
+.producto-form--modal .editar-productos-apariencia-grid {
+  gap: 6px;
+}
+
+.producto-form--modal .editar-productos-apariencia-col {
+  gap: 5px;
+}
+
+.producto-form--modal .editar-productos-preview-nombre {
+  min-height: 24px;
+  padding: 4px 6px;
+}
+
+.producto-form--modal .editar-productos-thumb {
+  width: 56px;
+  height: 56px;
+}
+
+.producto-form--modal .editar-productos-acciones {
+  margin-top: 4px;
+  padding-top: 6px;
+  gap: 5px;
+}
+
+.producto-form--modal .editar-productos-acciones__btn--primary {
+  padding: 8px 18px;
+  font-size: 13px;
+}
+
+.producto-form--modal .editar-productos-acciones__btn--ghost,
+.producto-form--modal .editar-productos-acciones__btn--accent {
+  padding: 6px 12px;
+  font-size: 11px;
+  min-height: 30px;
+}
+
+.producto-form--modal .editar-productos-acciones__btn--danger {
+  font-size: 10px;
+  padding: 3px 6px;
+}
+
+.producto-form--modal .editar-productos-stock-fila {
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 4px 6px;
+}
+
+/* PÃ¡gina Nuevo producto: tarjeta centrada = mismo shell que modal inventario */
+.nuevo-producto-route__card-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  box-sizing: border-box;
+  min-height: 0;
+}
+
+.nuevo-producto-route__card-area .inventario-modal-editar--nuevo-producto {
+  width: min(620px, 96vw) !important;
+  max-width: min(620px, 96vw) !important;
+}
+
+/* Layout compacto compartido (crear + modal): datos y apariencia */
+.producto-form__datos-fila-compacta {
+  grid-template-columns: minmax(0, 1fr) minmax(88px, 112px);
+  align-items: end;
+  gap: 8px;
+}
+
+.producto-form__desc-campo--compact {
+  margin-top: 4px;
+}
+
+.inventario-modal-editar--con-form .producto-form--modal .producto-form__textarea-desc {
+  min-height: 2.25rem;
+  max-height: 3.15rem;
+  padding: 5px 8px;
+  font-size: 12px;
+  line-height: 1.35;
+  resize: none;
+  overflow-y: auto;
+}
+
+.producto-form__fila-tam-estilo {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.producto-form__campo-imagen-compact {
+  margin-top: 2px;
+}
+
+.producto-form__fila-color-compact {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.producto-form__fila-color-compact .editar-productos-label {
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+
+.producto-form__color-input--compact {
+  width: 36px;
+  height: 28px;
+  min-width: 36px;
+  min-height: 28px;
+  padding: 1px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Modal inventario: compacto (menos scroll interno) */

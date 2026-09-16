@@ -1,0 +1,139 @@
+﻿/* MÃ³dulo extraÃ­do de App.css (lÃ­neas 655â€“1401). Variables :root, reset, shell base, tienda/catÃ¡logo (bloque 655â€“1401) */
+
+/* ========== MAIKA â€” Paleta dorada reutilizable ========== */
+:root {
+  /* Fondo general (negro con matiz violeta â€” mÃ¡s â€œcieloâ€ que gris plano) */
+  --maika-bg: #08060f;
+
+  /* Paleta dorada: nÃºcleo algo mÃ¡s apagado + acentos vivos en CTAs (bordes vs botones) */
+  --gold-main: #c6a85a;
+  --gold-light: #e8d28a;
+  --gold-dark: #8f6e28;
+  --gold-glow: rgba(232, 210, 138, 0.38);
+  /* Bordes / marcos: menos saturaciÃ³n (lujo discreto) */
+  --gold-border-soft: rgba(175, 155, 105, 0.38);
+  --gold-border-muted: rgba(145, 128, 88, 0.32);
+  /* Botones y acentos â€œencendidosâ€ */
+  --gold-cta-mid: #e0c068;
+  --gold-cta-bright: #f8ecbc;
+
+  /* Aliases para compatibilidad */
+  --maika-gold: var(--gold-main);
+  --maika-gold-light: var(--gold-light);
+  --maika-gold-dark: var(--gold-dark);
+  --maika-glow: var(--gold-glow);
+  --maika-gradient: linear-gradient(135deg, var(--gold-cta-bright), var(--gold-cta-mid), var(--gold-dark));
+  --gold-gradient: linear-gradient(135deg, var(--gold-cta-bright), var(--gold-cta-mid), var(--gold-dark));
+
+  /* Texto y efectos suaves (elegante, sin exagerar) */
+  --maika-text: #F5E6C8;
+  --maika-text-soft: rgba(245, 230, 200, 0.92);
+  --maika-glow-soft: rgba(242, 222, 138, 0.2);
+  --maika-glow-strong: rgba(242, 222, 138, 0.32);
+  /* Hover: halo dorado mÃ¡s legible */
+  --gold-hover-shadow: 0 0 20px rgba(248, 236, 188, 0.2), 0 0 44px rgba(200, 165, 80, 0.14), 0 0 1px rgba(248, 236, 188, 0.45);
+  --maika-shadow-soft: 0 0 14px var(--gold-glow);
+  --maika-transition: 0.18s ease;
+  /* Altura Ãºtil del header hero (NavPrincipal); reserva de espacio en mÃ³vil bajo la barra fija */
+  --app-topbar-h: 100px;
+  /* Tope = `ALTURA_BARRA_TOP_MAX` en barraTopPedidoExitoCfg.ts (clamp en CSS por si LS antiguo). */
+  --app-topbar-h-max: 128px;
+  /*
+   * `--app-layout-top-offset`: solo en `html` vÃ­a JS (`webLayoutConfig` + `main.tsx`), nunca en stylesheet ni en `body`.
+   * Altura reservada bajo la barra fija + notch. `--app-topbar-h` la fija NavPrincipal / `main.tsx` en runtime.
+   */
+  --app-topbar-stack: calc(
+    min(var(--app-topbar-h, 100px), var(--app-topbar-h-max, 104px)) + env(safe-area-inset-top, 0px) + var(--app-layout-top-offset, 0px)
+  );
+  /* Reserva bajo la topbar en columna de contenido: misma altura que el stack (barra + safe-area + offset admin). */
+  --app-content-pad-bajo-nav: var(--app-topbar-stack);
+  /* Ritmo vertical comÃºn de cabeceras internas (carrito, cuenta, favoritos, etc.). */
+  --maika-page-header-gap: 12px;
+  --maika-page-subheader-gap: 12px;
+  /*
+   * SeparaciÃ³n controlada entre barra fija y hero.
+   * Ãšnica fuente para ajustar el "aire" visual sin tocar mÃºltiples reglas.
+   */
+  --hero-top-gap-desktop: 72px;
+  --hero-top-gap-mobile: 84px;
+  --hero-brand-stack-gap-desktop: 28px;
+  /* Desplazamiento vertical extra del CTA Â«Explorar tiendaÂ» (admin hero); JS escribe en `html`. */
+  --hero-cta-offset: 0px;
+  /* Solo banner hero (`.hero-section__img`): puede llevar aura; no reutilizar en la barra */
+  --maika-hero-logo-filter:
+    drop-shadow(0 0 12px rgba(232, 210, 150, 0.20))
+    drop-shadow(0 0 28px rgba(200, 168, 95, 0.14))
+    drop-shadow(0 0 56px rgba(120, 90, 50, 0.06));
+  --maika-hero-logo-filter-mobile:
+    drop-shadow(0 0 8px rgba(232, 210, 150, 0.16))
+    drop-shadow(0 0 18px rgba(200, 168, 95, 0.10));
+  /* Logo cabecera: presencia dorada corta, sin glow grande ni hover especial. */
+  --maika-topbar-logo-filter:
+    brightness(1.42) saturate(1.22)
+    drop-shadow(0 0 4px rgba(255, 215, 120, 0.35));
+  --maika-topbar-logo-filter-mobile:
+    brightness(1.42) saturate(1.22)
+    drop-shadow(0 0 4px rgba(255, 215, 120, 0.35));
+  --maika-topbar-logo-filter-hover:
+    brightness(1.36) saturate(1.16)
+    drop-shadow(0 2px 4px rgba(0, 0, 0, 0.52)) drop-shadow(0 0 1px rgba(255, 252, 235, 0.28))
+    drop-shadow(0 0 22px rgba(232, 210, 150, 0.22));
+}
+
+:root.maika-spacing-compact {
+  --hero-top-gap-desktop: 56px;
+  --hero-top-gap-mobile: 64px;
+  --hero-brand-stack-gap-desktop: 20px;
+  --maika-page-header-gap: 10px;
+  --maika-page-subheader-gap: 8px;
+}
+
+:root.maika-spacing-airy {
+  --hero-top-gap-desktop: 88px;
+  --hero-top-gap-mobile: 96px;
+  --hero-brand-stack-gap-desktop: 36px;
+  --maika-page-header-gap: 14px;
+  --maika-page-subheader-gap: 14px;
+}
+
+/* 5. Iconos en dorado con opacidad ligera */
+.app-shell [class*="icon"],
+.app-shell svg:not([class]),
+.app-shell .icon {
+  color: var(--gold-main);
+  opacity: 0.88;
+}
+.app-shell svg:not([class]) {
+  fill: var(--gold-main);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Barras de desplazamiento */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 162, 74, 0.5) var(--maika-bg);
+}
+*::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+*::-webkit-scrollbar-track {
+  background: var(--maika-bg);
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(201, 162, 74, 0.5);
+  border-radius: 6px;
+  border: 2px solid var(--maika-bg);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(230, 199, 122, 0.7);
+}
+*::-webkit-scrollbar-corner {
+  background: var(--maika-bg);
+}
+

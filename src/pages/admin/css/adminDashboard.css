@@ -1,0 +1,285 @@
+﻿.admin-page-nav--session-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.admin-session-meta {
+  font-size: 13px;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.78);
+  text-align: right;
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+@media (max-width: 520px) {
+  .admin-page-nav--session-row .admin-session-meta {
+    text-align: left;
+    flex-basis: 100%;
+  }
+}
+
+.admin-boton-volver {
+  width: auto;
+}
+
+.admin-boton-volver:hover {
+  filter: brightness(1.05);
+}
+
+.admin-container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--app-content-pad-bajo-nav) 12px 16px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.app-shell--inventario-admin .admin-container {
+  padding-top: 16px;
+}
+
+/* Nuevo producto: raÃ­z sin `admin-container`; misma reserva superior */
+.nuevo-producto-route {
+  padding-top: var(--app-content-pad-bajo-nav);
+  box-sizing: border-box;
+}
+
+.app-shell--inventario-admin .nuevo-producto-route {
+  padding-top: 12px;
+}
+
+/* GestiÃ³n de usuarios: ancho acotado al layout; la tabla puede hacer scroll horizontal si hace falta. */
+.gestion-usuarios-vista {
+  max-width: 100%;
+}
+
+.gestion-usuarios-info-details summary {
+  list-style: none;
+}
+
+.gestion-usuarios-info-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.btn-admin-limpio {
+  background-image: none !important;
+}
+
+/* Contenedor principal del dashboard admin (sobrescribe padding inline del shell). */
+.admin-dashboard-inner {
+  padding: 14px 16px !important;
+  border-radius: 14px !important;
+}
+
+/* DiseÃ±o web (pantalla limpia): evita â€œcuadrado dentro de cuadradoâ€. */
+.admin-dashboard-inner.admin-dashboard-inner--flat {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* Una columna: tarjetas apiladas con aire entre bloques (panel operativo vertical). */
+.admin-dashboard-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Tarjetas por bloque (Usuarios, Tienda, Pedidos, Negocio, MÃ©tricas): compactas y con unidad visual propia. */
+.admin-dashboard-inner .admin-panel-bloque.admin-card {
+  padding: 10px 12px;
+  margin-bottom: 0;
+  box-shadow: 0 1px 14px rgba(0, 0, 0, 0.22);
+}
+
+.admin-dashboard-stack > .admin-section.admin-panel-bloque,
+.admin-dashboard-stack > .admin-panel-bloque--metricas {
+  margin-bottom: 0;
+}
+
+/* Vista unificada /admin/diseno-web (Ã­ndice y subrutas dedicadas): ancho y padding comunes. */
+.admin-diseno-web-full {
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.admin-panel-bloque .admin-panel-categoria {
+  border-bottom: none;
+  padding-bottom: 0;
+  gap: 10px;
+}
+
+/* TÃ­tulos de bloque: pequeÃ±os, mayÃºsculas, dorado suave, 8px bajo el tÃ­tulo. */
+.admin-panel-bloque .admin-panel-categoria-titulo {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  font-weight: 800;
+  color: rgba(201, 175, 120, 0.92);
+  text-transform: uppercase;
+  margin: 0 0 8px;
+}
+
+.admin-panel-bloque--metricas.admin-panel-dashboard {
+  margin-top: 0;
+  padding-top: 10px;
+  border-top: none;
+}
+
+.admin-panel-bloque--metricas.admin-panel-dashboard .admin-panel-categoria-titulo {
+  margin-bottom: 8px;
+}
+
+/* Botones del dashboard: algo mÃ¡s bajos y menos padding vertical. */
+.admin-dashboard-inner .admin-btn:not(.admin-btn--inline) {
+  padding: 6px 12px !important;
+  font-size: 13px !important;
+}
+
+.admin-dashboard-inner .admin-summary-btn {
+  min-height: 32px;
+  padding: 6px 12px !important;
+  font-size: 13px !important;
+}
+
+.admin-title {
+  text-align: center;
+  color: var(--gold-main, #d4af37);
+  margin: 0 0 var(--admin-page-header-gap);
+  font-size: 19px;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+
+.admin-subtitle {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.78);
+  margin: 0 0 var(--admin-page-subheader-gap);
+  font-size: 12px;
+}
+
+.admin-page-heading {
+  margin: 0 0 var(--admin-page-header-gap);
+}
+
+.admin-page-subheading {
+  margin: 0 0 var(--admin-page-subheader-gap);
+}
+
+.admin-page-section-heading {
+  margin: 0 0 var(--admin-page-subheader-gap);
+}
+
+.admin-section {
+  margin-bottom: 16px;
+}
+
+.admin-card {
+  background: rgba(20, 20, 30, 0.6);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 12px;
+  padding: 12px;
+  backdrop-filter: blur(6px);
+}
+
+/* AgrupaciÃ³n visual del panel admin (solo layout; mismos botones y acordeones). */
+.admin-panel-categoria {
+  display: grid;
+  gap: 8px;
+  padding-bottom: 12px;
+  margin-bottom: 0;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.admin-panel-categoria:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.admin-panel-categoria-titulo {
+  margin: 0 0 6px;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  font-weight: 800;
+  color: rgba(255, 235, 210, 0.82);
+  text-transform: uppercase;
+}
+
+.admin-panel-categoria:not(:first-child) .admin-panel-categoria-titulo {
+  margin-top: 2px;
+}
+
+/* Bloque â€œdashboardâ€ de mÃ©tricas bajo las acciones (solo jerarquÃ­a visual). */
+.admin-panel-dashboard:not(.admin-panel-bloque--metricas) {
+  margin-top: 22px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(212, 175, 55, 0.22);
+}
+
+.admin-panel-dashboard .admin-panel-categoria-titulo {
+  margin-bottom: 8px;
+}
+
+/* Pedidos: acordeÃ³n dorado alineado con admin-btn--gold (texto oscuro) */
+.admin-panel-categoria--pedidos .admin-summary-pedido-oro {
+  background: linear-gradient(135deg, #d4b24a, #c29f34) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Aviso Â«Pedido realizadoÂ»: mismas mayÃºsculas que el resto del panel (tÃ­tulos, etiquetas, botones). */
+.admin-accordion-aviso-pedido h4,
+.admin-accordion-aviso-pedido label,
+.admin-accordion-aviso-pedido button[type="button"] {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.admin-aviso-pedido-logo-etiqueta {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.admin-aviso-pedido-placeholder-logo {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-btn {
+  width: 100%;
+  padding: 8px 13px !important;
+  border-radius: 10px !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  border: none;
+  cursor: pointer;
+  color: white;
+  transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease !important;
+}
+
+/* Botones sÃ³lidos: menos saturaciÃ³n/brillo en reposo; hover mÃ¡s discreto */
+.admin-btn:not(.admin-btn--ghost) {
+  filter: saturate(0.92) brightness(0.96);
+}
+
+.admin-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* Levitación muy suave (p. ej. densidad de estrellas en admin); desactivada si el usuario pide menos movimiento */
+@keyframes admin-btn-sutil-levita {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}

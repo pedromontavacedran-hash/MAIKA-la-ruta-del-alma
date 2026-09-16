@@ -1,0 +1,79 @@
+﻿/* MÃ³dulo extraÃ­do de App.css (lÃ­neas 2426â€“3514). Admin (antes del bloque shell 3515) */
+
+/* Admin: rutas /admin/* como pÃ¡gina (no modal). Reserva superior: misma variable que `.page-top-spacing` (sin duplicar en `__content`). */
+.admin-layout {
+  max-width: min(720px, 100%);
+  margin: 0 auto;
+  width: 100%;
+  padding: var(--app-content-pad-bajo-nav) 12px 20px;
+  box-sizing: border-box;
+}
+
+/* Admin tambiÃ©n consume el ritmo global de cabeceras internas. */
+.admin-layout,
+.admin-container {
+  --admin-page-header-gap: var(--maika-page-header-gap, 12px);
+  --admin-page-subheader-gap: var(--maika-page-subheader-gap, 12px);
+}
+
+/* Inventario: sin topbar global; no usar el stack completo arriba del panel */
+.app-shell--inventario-admin .admin-layout {
+  padding-top: 10px;
+}
+
+/* Inventario sin topbar global: mÃ¡s ancho Ãºtil y aire superior discreto */
+.app-shell--inventario-admin .app-shell__content {
+  padding-top: 10px;
+}
+
+.app-shell--admin-panel-scroll .app-shell__routes-grow {
+  overflow-y: auto !important;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.app-shell--admin-panel-scroll .app-shell__routes-grow::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+
+.app-shell--admin-panel-scroll .admin-layout {
+  padding-bottom: max(28px, env(safe-area-inset-bottom, 0px));
+}
+
+.app-shell--inventario-admin .inventario-page.admin-layout {
+  max-width: min(880px, 100%);
+}
+
+/* Inventario: contenido directo bajo admin-layout (sin tarjeta interior doble) */
+.inventario-page.admin-layout {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.inventario-page .admin-inventario-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 14px;
+  flex-wrap: wrap;
+  margin-bottom: 0;
+}
+
+.inventario-page .inventario-info-details summary {
+  list-style: none;
+}
+
+.inventario-page .inventario-info-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.inventario-page .admin-inventario-header .inventario-titulo-bloque {
+  margin-bottom: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* TÃ­tulo de secciÃ³n: presencia similar a GestiÃ³n de usuarios */

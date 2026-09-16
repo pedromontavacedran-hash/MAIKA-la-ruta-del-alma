@@ -1,0 +1,405 @@
+﻿@media (prefers-reduced-motion: no-preference) {
+  button.admin-btn-sutil-levita:not(:disabled) {
+    animation: admin-btn-sutil-levita 2.6s ease-in-out infinite;
+  }
+
+  button.admin-btn-sutil-levita:not(:disabled):hover {
+    animation: none;
+    transform: translateY(-3px);
+    transition: transform 0.18s ease;
+  }
+}
+
+.admin-btn:not(.admin-btn--ghost):hover {
+  filter: saturate(0.95) brightness(1.03);
+}
+
+.admin-btn--green {
+  background: #4caf50 !important;
+}
+
+.admin-btn--blue {
+  background: #1976d2 !important;
+}
+
+.admin-btn--orange {
+  background: #ff9800 !important;
+  color: #111 !important;
+}
+
+.admin-btn--purple {
+  background: #7b1fa2 !important;
+}
+
+.admin-btn--gold {
+  background: linear-gradient(135deg, #d4af37, #b8962e) !important;
+  color: #111 !important;
+}
+
+.admin-btn--ghost {
+  background: transparent !important;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  color: #d4af37 !important;
+}
+
+.admin-btn--inline {
+  width: auto;
+}
+
+.admin-summary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 35px;
+  margin: 0;
+  box-sizing: border-box;
+  padding: 8px 13px !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  line-height: 1.25;
+  text-align: center;
+  list-style: none;
+  appearance: none;
+  -webkit-appearance: none;
+  filter: saturate(0.92) brightness(0.96);
+}
+
+.admin-summary-btn:hover {
+  filter: saturate(0.95) brightness(1.03);
+}
+
+.admin-summary-btn::marker {
+  content: "";
+}
+
+.admin-summary-btn::-webkit-details-marker {
+  display: none;
+}
+
+.admin-page-nav .admin-boton-volver {
+  /* Mantener compatibilidad con componentes existentes */
+  display: inline-flex;
+  align-items: center;
+}
+
+.admin-page-nav .admin-boton-volver,
+.admin-page-nav .admin-btn {
+  max-width: fit-content;
+}
+
+.admin-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+}
+
+.admin-metricas-root {
+  --admin-gold: #d4af37;
+  --admin-bg: #0b0b0d;
+  max-width: 720px;
+  margin: 0 auto;
+  font-size: 15px !important;
+}
+
+.admin-metricas-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.admin-metricas-title {
+  color: var(--admin-gold);
+  font-weight: 700;
+  margin: 0;
+  font-size: 17px;
+  letter-spacing: 0.02em;
+}
+
+.admin-metricas-subtitle {
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.admin-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.metric-card {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.metric-value {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--admin-gold);
+  line-height: 1.2;
+}
+
+.metric-label {
+  font-size: 11px;
+  opacity: 0.78;
+  margin-bottom: 2px;
+}
+
+.metric-hint {
+  font-size: 10px;
+  line-height: 1.3;
+  opacity: 0.62;
+  margin-bottom: 4px;
+}
+
+/* MÃ©tricas en tarjeta full-width del dashboard: mÃ¡s compactas y sin tope de ancho. */
+.admin-panel-bloque--metricas .admin-metricas-root {
+  max-width: none;
+  margin: 0;
+  font-size: 14px !important;
+}
+
+.admin-panel-bloque--metricas .admin-metricas-header {
+  margin-bottom: 4px;
+}
+
+.admin-panel-bloque--metricas .admin-metricas-title {
+  font-size: 15px;
+}
+
+.admin-panel-bloque--metricas .admin-metricas-subtitle {
+  margin-bottom: 6px;
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+
+.admin-panel-bloque--metricas .admin-metrics-grid {
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.admin-panel-bloque--metricas .metric-card {
+  padding: 6px 8px;
+  border-radius: 7px;
+}
+
+.admin-panel-bloque--metricas .metric-label {
+  font-size: 10px;
+}
+
+.admin-panel-bloque--metricas .metric-value {
+  font-size: 15px;
+}
+
+.admin-panel-bloque--metricas .metric-hint {
+  font-size: 9px;
+  margin-bottom: 2px;
+}
+
+.admin-secondary-section {
+  margin-top: 12px;
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Misma â€œpielâ€ que checkout (.checkout-modal-card); solo ajustes de layout del contenido admin */
+.checkout-modal-card.admin-metricas-config-card {
+  max-width: min(720px, 95vw);
+}
+
+.admin-metricas-btn-config {
+  border-color: rgba(212, 175, 55, 0.5);
+}
+
+.admin-metricas-config-title {
+  color: #d4af37;
+  font-weight: 700;
+  margin-bottom: 12px;
+  font-size: 17px;
+  letter-spacing: 0.02em;
+}
+
+.admin-metricas-config-section {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Ãšltimo bloque de formulario: menos aire antes del pie (mismo lenguaje que checkout-resumen) */
+.admin-metricas-config-section + .admin-metricas-config-section {
+  margin-bottom: 8px;
+}
+
+.admin-metricas-config-section-title {
+  color: #d4af37;
+  font-weight: 700;
+  margin-bottom: 6px;
+  font-size: 13.5px;
+}
+
+.admin-metricas-config-help {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 0 0 12px;
+}
+
+.admin-metricas-config-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--admin-gold);
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.2);
+  opacity: 0.78;
+  list-style: none;
+  transition: opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.admin-link::marker {
+  content: "";
+}
+
+.admin-link::-webkit-details-marker {
+  display: none;
+}
+
+.admin-link:hover {
+  opacity: 1;
+  background: rgba(212, 175, 55, 0.1);
+}
+
+.admin-accordion-content {
+  padding: 10px 12px;
+  margin-top: 4px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: adminAccordionFadeIn 0.2s ease;
+}
+
+/* Compactar acordeones del panel (pisa padding inline del JSX). */
+.admin-card .admin-accordion-content {
+  padding: 10px 12px !important;
+}
+
+.admin-submenu {
+  margin-top: 6px;
+  padding: 2px 8px 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-submenu-group {
+  margin: 0;
+  border: none;
+  background: transparent;
+}
+
+.admin-submenu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-size: 13px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0.82;
+  color: rgba(255, 255, 255, 0.9);
+  background: transparent;
+  border: 1px solid transparent;
+  transition: opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  list-style: none;
+}
+
+.admin-submenu-item::marker {
+  content: "";
+}
+
+.admin-submenu-item::-webkit-details-marker {
+  display: none;
+}
+
+.admin-submenu-item:hover {
+  background: rgba(212, 175, 55, 0.1);
+  border-color: rgba(212, 175, 55, 0.25);
+  opacity: 1;
+}
+
+.admin-submenu-item--button {
+  font: inherit;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.admin-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  color: white;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.admin-accordion-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.admin-btn-small {
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+}
+
+@keyframes adminAccordionFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.btn-admin-demo-granate {
+  background-image: none !important;
+  background: #7b2d3a !important;
+  color: #fff !important;
+}
+
