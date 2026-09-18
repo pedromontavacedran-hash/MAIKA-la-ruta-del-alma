@@ -157,6 +157,33 @@ export function calcularMasVendidos(
   return top;
 }
 
+/** Texto comparable en búsquedas: minúsculas, sin acentos (NFD) y sin espacios sobrantes. */
+export function normalizarTextoBusqueda(texto: string): string {
+  return texto
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+/** Coincidencia en nombre + descripción, insensible a acentos y mayúsculas. */
+export function filtrarProductosBusqueda(productos: Producto[], termino: string): Producto[] {
+  const t = normalizarTextoBusqueda(termino);
+  if (!t) return productos;
+  return productos.filter((p) =>
+    normalizarTextoBusqueda(`${p.nombre} ${p.descripcion ?? ""}`).includes(t)
+  );
+}
+
+/** Orden de la vista de resultados. El precio es el de venta (con descuento aplicado). */
+export type OrdenProductos = "relevancia" | "precio-asc" | "precio-desc";
+
+export function ordenarProductos(productos: Producto[], orden: OrdenProductos): Producto[] {
+  if (orden === "relevancia") return productos;
+  const dir = orden === "precio-asc" ? 1 : -1;
+  return [...productos].sort((a, b) => (precioConDescuento(a) - precioConDescuento(b)) * dir);
+}
+
 /** Pares [etiqueta, valor] no vacíos de la ficha técnica del producto (detalle genérico). */
 export function construirFichaTecnica(pd: Producto): [string, string][] {
   return [

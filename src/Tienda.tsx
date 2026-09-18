@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef, useCallback } from "react";
+﻿import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import type { Producto } from "./App";
 import { INTENCIONES_OPCIONES } from "./types";
 import type { SubcategoriaEntrada, Pedido } from "./types";
@@ -16,7 +16,11 @@ import {
   getEmoji,
   getProductosForCategoria,
   getProductImageSrc,
+  filtrarProductosBusqueda,
+  normalizarTextoBusqueda,
+  ordenarProductos,
   precioConDescuento,
+  type OrdenProductos,
   type CategoriaEntrada,
   type ItemCarritoRef
 } from "./tienda/tiendaHelpers";
@@ -88,14 +92,40 @@ export default function Tienda({
     ? subcategoriasCatalogo.filter((s) => s.categoriaId === mostrarCategoria)
     : [];
   const [filtroIntencion, setFiltroIntencion] = useState<string>("");
-  const terminoBusqueda = (busquedaInicial ?? "").trim();
-  const todosProductos = [...velas, ...inciensos, ...figuras, ...kits, ...joyas];
-  const productosBusqueda = terminoBusqueda
-    ? todosProductos.filter((p) => {
-        const texto = `${p.nombre} ${p.descripcion ?? ""}`.toLowerCase();
-        return texto.includes(terminoBusqueda.toLowerCase());
-      })
-    : [];
+  /** Estado único del buscador: lo alimenta el input de la tienda y `busquedaInicial` (menú). */
+  const [busqueda, setBusqueda] = useState("");
+  const [filtroCatResultados, setFiltroCatResultados] = useState("");
+  const [ordenResultados, setOrdenResultados] = useState<OrdenProductos>("relevancia");
+  const terminoBusqueda = busqueda.trim();
+  const hayTextoBusqueda = normalizarTextoBusqueda(terminoBusqueda) !== "";
+  const todosProductos = useMemo(
+    () => [...velas, ...inciensos, ...figuras, ...kits, ...joyas],
+    [velas, inciensos, figuras, kits, joyas]
+  );
+  /** Vista de resultados activa: hay texto de búsqueda o un chip de categoría seleccionado. */
+  const resultadosActivos = hayTextoBusqueda || filtroCatResultados !== "";
+  /** Base de la vista de resultados: texto aplicado, sin filtrar por categoría (alimenta los contadores de los chips). */
+  const baseResultados = useMemo(
+    () => (hayTextoBusqueda ? filtrarProductosBusqueda(todosProductos, terminoBusqueda) : todosProductos),
+    [todosProductos, terminoBusqueda, hayTextoBusqueda]
+  );
+  /** Contador por categoría sobre la base filtrada por texto (los productos llevan su categoría raíz en `categoria`). */
+  const conteoPorCategoria = useMemo(() => {
+    const mapa = new Map<string, number>();
+    for (const p of baseResultados) mapa.set(p.categoria, (mapa.get(p.categoria) ?? 0) + 1);
+    return mapa;
+  }, [baseResultados]);
+  const productosBusqueda = useMemo(() => {
+    const filtrados = filtroCatResultados
+      ? baseResultados.filter((p) => p.categoria === filtroCatResultados)
+      : baseResultados;
+    return ordenarProductos(filtrados, ordenResultados);
+  }, [baseResultados, filtroCatResultados, ordenResultados]);
+  const limpiarFiltrosBusqueda = useCallback(() => {
+    setBusqueda("");
+    setFiltroCatResultados("");
+    setOrdenResultados("relevancia");
+  }, []);
   const fondoServicios = THEME.bg;
   const [lightboxImagen, setLightboxImagen] = useState<{ src: string; alt: string } | null>(null);
   const [productoDetalle, setProductoDetalle] = useState<Producto | null>(null);
@@ -152,9 +182,28 @@ export default function Tienda({
     }
   }, [categoriaInicial, onCategoriaInicialAplicada]);
 
+  /** La búsqueda del menú principal alimenta el mismo estado del buscador interno
+      (y sale de cualquier vista interna para mostrar los resultados). */
   useEffect(() => {
-    onVistaCategoriaInternaChange?.(mostrarCategoria != null);
-  }, [mostrarCategoria, onVistaCategoriaInternaChange]);
+    const termino = (busquedaInicial ?? "").trim();
+    if (!termino) return;
+    setBusqueda(termino);
+    setMostrarCategoria(null);
+    setSubcategoriaAbierta(null);
+    setProductoDetalle(null);
+    onBusquedaInicialAplicada?.();
+  }, [busquedaInicial, onBusquedaInicialAplicada]);
+
+  /** Si el chip de categoría seleccionado se queda sin resultados tras filtrar, se limpia solo. */
+  useEffect(() => {
+    if (filtroCatResultados && (conteoPorCategoria.get(filtroCatResultados) ?? 0) === 0) {
+      setFiltroCatResultados("");
+    }
+  }, [filtroCatResultados, conteoPorCategoria]);
+
+  useEffect(() => {
+    onVistaCategoriaInternaChange?.(mostrarCategoria != null || resultadosActivos);
+  }, [mostrarCategoria, resultadosActivos, onVistaCategoriaInternaChange]);
 
   useEffect(() => {
     return () => {
@@ -709,24 +758,86 @@ export default function Tienda({
         />
       )}
 
-      {terminoBusqueda && (
+      {/* Buscador interno de la tienda: mismo estado que la búsqueda del menú principal. */}
+      <div className="tienda-buscador" role="search">
+        <input
+          type="search"
+          className="tienda-buscador__input"
+          placeholder="Buscar por nombre o descripción..."
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          aria-label="Buscar productos en la tienda"
+        />
+        {busqueda !== "" && (
+          <button
+            type="button"
+            className="tienda-buscador__limpiar"
+            onClick={() => setBusqueda("")}
+            aria-label="Limpiar búsqueda"
+            title="Limpiar búsqueda"
+          >
+            ✕
+          </button>
+        )}
+      </div>
+
+      {resultadosActivos && (
         <div style={{ marginBottom: 44, background: fondoServicios, padding: "16px 12px", borderRadius: 22, border: `2px solid ${THEME.goldMain}` }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>
             <h3 style={{ color: THEME.goldMain, fontSize: "1.08rem", margin: 0 }}>
-              Resultados para &quot;{terminoBusqueda}&quot;
+              {hayTextoBusqueda ? <>Resultados para &quot;{terminoBusqueda}&quot;</> : "Resultados"}
+              <span style={{ color: "rgba(255,255,255,0.75)", fontWeight: "normal", fontSize: "0.88rem" }}>
+                {" "}· {productosBusqueda.length} {productosBusqueda.length === 1 ? "producto" : "productos"}
+              </span>
             </h3>
-            {onBusquedaInicialAplicada && (
-              <button
-                type="button"
-                onClick={onBusquedaInicialAplicada}
-                style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${THEME.goldMain}`, background: "transparent", color: THEME.goldMain, cursor: "pointer", fontSize: 13 }}
-              >
-                Limpiar búsqueda
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={limpiarFiltrosBusqueda}
+              style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${THEME.goldMain}`, background: "transparent", color: THEME.goldMain, cursor: "pointer", fontSize: 13 }}
+            >
+              Limpiar filtros
+            </button>
+          </div>
+          <div className="tienda-busqueda-filtros">
+            <button
+              type="button"
+              className={`tienda-chip-filtro${filtroCatResultados === "" ? " tienda-chip-filtro--activo" : ""}`}
+              onClick={() => setFiltroCatResultados("")}
+            >
+              Todas ({baseResultados.length})
+            </button>
+            {categoriasCatalogo.map((cat) => {
+              const n = conteoPorCategoria.get(cat.id) ?? 0;
+              if (n === 0 && filtroCatResultados !== cat.id) return null;
+              const activo = filtroCatResultados === cat.id;
+              const nombreCat = cat.nombre.charAt(0).toUpperCase() + cat.nombre.slice(1);
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  className={`tienda-chip-filtro${activo ? " tienda-chip-filtro--activo" : ""}`}
+                  onClick={() => setFiltroCatResultados(activo ? "" : cat.id)}
+                  aria-pressed={activo}
+                >
+                  {getEmoji(cat.id)} {nombreCat} ({n})
+                </button>
+              );
+            })}
+            <select
+              className="tienda-busqueda-orden"
+              value={ordenResultados}
+              onChange={(e) => setOrdenResultados(e.target.value as OrdenProductos)}
+              aria-label="Ordenar resultados"
+            >
+              <option value="relevancia">Relevancia</option>
+              <option value="precio-asc">Precio: menor a mayor</option>
+              <option value="precio-desc">Precio: mayor a menor</option>
+            </select>
           </div>
           {productosBusqueda.length === 0 ? (
-            <p style={{ color: "rgba(255,255,255,0.8)", textAlign: "center", margin: 20 }}>No hay productos que coincidan con tu búsqueda.</p>
+            <p style={{ color: "rgba(255,255,255,0.8)", textAlign: "center", margin: 20 }}>
+              No hay productos que coincidan {hayTextoBusqueda ? "con tu búsqueda" : "con los filtros actuales"}.
+            </p>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 220px))", justifyContent: "center", gap: 20 }}>
               {productosBusqueda.map((prod) => {
