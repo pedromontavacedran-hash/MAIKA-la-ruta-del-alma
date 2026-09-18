@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import "@/styles/global.css";
 import './index.css'
 import App from './App.tsx'
+import { AppErrorBoundary } from './components/AppErrorBoundary'
 import { resolveApiBaseUrl } from './config/apiBaseUrl'
 import {
   leerBarraTopPedidoExitoCfg,
@@ -36,6 +37,19 @@ aplicarLecturaPantallaCssDesdeStorage();
 registrarLecturaPantallaSyncEntrePestanas();
 aplicarHeroCtaOffsetDesdeStorage();
 
+/*
+ * PWA: registra el service worker solo en builds de producción. En dev queda fuera
+ * a propósito (evita interferencias con el dev server/HMR de Vite). sw.js es
+ * passthrough — no cachea nada, solo habilita la instalación como app.
+ */
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {
+      /* la PWA es opcional; si falla el registro la web sigue igual */
+    });
+  });
+}
+
 void (async () => {
   try {
     ;(window as Window & { __MAIKA_API_BASE__?: string }).__MAIKA_API_BASE__ = await resolveApiBaseUrl()
@@ -45,9 +59,11 @@ void (async () => {
   }
 
   const tree = (
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <AppErrorBoundary>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </AppErrorBoundary>
   );
 
   createRoot(document.getElementById('root')!).render(

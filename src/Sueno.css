@@ -1,4 +1,7 @@
 /** Ocultar barras de desplazamiento en la página de sueños (el scroll con rueda/tactil sigue funcionando). */
+.maika-sueno-pagina {
+  padding: 20px;
+}
 .maika-sueno-pagina,
 .maika-sueno-pagina * {
   scrollbar-width: none;
@@ -450,6 +453,85 @@
   object-position: 50% 20%;
   background: rgba(0, 0, 0, 0.6);
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
+}
+
+/*
+ * Móvil: la pregunta extra vive dentro de la caja de resultado; si además lleva su propio
+ * recuadro quedan 3 cajas anidadas y el textarea se ve minúsculo. Se funde visualmente con
+ * la caja madre y la caja crece un poco para dar aire a lectura + chat.
+ */
+@media (max-width: 768px) {
+  /* El wrapper de ruta ya da aire; dobles paddings encogían la caja de lectura en móvil. */
+  .maika-suenos-ruta-wrap {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .maika-sueno-pagina {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  /* La foto de Maika acompaña la lectura centrada en móvil (en escritorio va a la derecha). */
+  .maika-sueno-col-avatar {
+    justify-content: center;
+  }
+
+  .maika-avatar--lg,
+  .maika-avatar {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .maika-sueno-resultado {
+    max-height: 62vh !important;
+  }
+
+  /* Sin borde ni fondo propio: que la pregunta gratis se sienta parte del mismo recuadro de lectura, no un panel aparte. */
+  .maika-sueno-profundizar {
+    margin-top: 18px;
+    padding: 16px 0 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+  }
+
+  /*
+   * La respuesta de Maika a la pregunta gratis: sin burbuja propia (fondo/borde/máx-ancho), para que
+   * se lea como continuación del mismo texto de la lectura y no como un chat con recuadros aparte.
+   * La pregunta del usuario sí mantiene su burbuja dorada: ayuda a distinguir quién dice qué.
+   */
+  .maika-sueno-profundizar-fila.maika {
+    justify-content: flex-start;
+  }
+
+  .maika-sueno-profundizar-fila.maika .maika-sueno-burbuja-maika {
+    max-width: 100%;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+    font-size: 18.5px;
+    font-style: italic;
+    line-height: 1.7;
+    color: #f5e6a3;
+  }
+
+  /* La pregunta a ancho completo y el botón debajo: en fila quedaba un campo minúsculo. */
+  .maika-sueno-profundizar-entrada {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .maika-sueno-profundizar-entrada .maika-sueno-btn-primario {
+    align-self: flex-end !important;
+  }
+
+  .maika-sueno-contexto-textarea {
+    min-height: 88px;
+    font-size: 16px;
+    padding: 12px 14px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

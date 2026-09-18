@@ -55,10 +55,14 @@ export default function Sueno() {
   /** Solo para ir probando voces del navegador; vacío = automática (`elegirVozFemeninaOCercanaEspanol`). */
   const [vocesDisponibles, setVocesDisponibles] = useState<SpeechSynthesisVoice[]>([]);
   const [vozElegidaNombre, setVozElegidaNombre] = useState("");
-  /** Velocidad de narración para pruebas (speechSynthesis `rate`, 0.6–1.4). */
-  const [velocidadVoz, setVelocidadVoz] = useState("1.15");
-  /** Tono de narración para pruebas (speechSynthesis `pitch`, 0.7–1.3). */
-  const [tonoVoz, setTonoVoz] = useState("0.85");
+  /** Velocidad de narración para pruebas (speechSynthesis `rate`, 0.6–1.4). En móvil arranca en 0.9 · Normal. */
+  const [velocidadVoz, setVelocidadVoz] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches ? "0.9" : "1.15"
+  );
+  /** Tono de narración para pruebas (speechSynthesis `pitch`, 0.7–1.3). En móvil arranca en 1.0 · Neutro. */
+  const [tonoVoz, setTonoVoz] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches ? "1" : "0.85"
+  );
   const navigate = useNavigate();
   /** Texto mostrado en el recuadro: se revela letra a letra; `null` = usar `resultado` completo. */
   const [textoRevelado, setTextoRevelado] = useState<string | null>(null);
@@ -120,6 +124,54 @@ export default function Sueno() {
     const top = caja.scrollTop + entrada.getBoundingClientRect().top - caja.getBoundingClientRect().top - caja.clientTop - 18;
     caja.scrollTo({ top, behavior: "instant" });
   }, [premium]);
+
+  /**
+   * Mientras se revela la lectura, la página sigue el final del contenido: en móvil el avatar
+   * empuja la caja fuera de pantalla y sin esto el usuario ve solo negro durante la narración.
+   * Si el usuario sube la página a releer, se deja de seguir; si vuelve abajo, se retoma.
+   */
+  const seguirLecturaRef = useRef(true);
+  const ultimoScrollRef = useRef(0);
+  /**
+   * Cuando el recuadro se vacía al arrancar el revelado (de "Interpretando tu sueño..." a texto
+   * vacío) la página encoge y el propio `scrollTop` forzado más abajo baja de valor: sin esta
+   * bandera el listener de scroll lo confundía con "el usuario subió a releer" y desactivaba el
+   * seguimiento justo al empezar a narrar, dejando la vista clavada en el hueco vacío de abajo
+   * (pantalla en negro) aunque el usuario nunca tocó la pantalla.
+   */
+  const scrollProgramaticoRef = useRef(false);
+
+  useEffect(() => {
+    const sp = document.querySelector<HTMLElement>(".app-shell__routes-grow");
+    if (!sp) return undefined;
+    ultimoScrollRef.current = sp.scrollTop;
+    const onScroll = () => {
+      const st = sp.scrollTop;
+      if (scrollProgramaticoRef.current) {
+        ultimoScrollRef.current = st;
+        return;
+      }
+      if (st < ultimoScrollRef.current - 4) {
+        seguirLecturaRef.current = false;
+      } else if (st >= sp.scrollHeight - sp.clientHeight - 60) {
+        seguirLecturaRef.current = true;
+      }
+      ultimoScrollRef.current = st;
+    };
+    sp.addEventListener("scroll", onScroll, { passive: true });
+    return () => sp.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!resultado || !seguirLecturaRef.current) return;
+    const sp = document.querySelector<HTMLElement>(".app-shell__routes-grow");
+    if (!sp) return;
+    scrollProgramaticoRef.current = true;
+    sp.scrollTop = sp.scrollHeight;
+    window.requestAnimationFrame(() => {
+      scrollProgramaticoRef.current = false;
+    });
+  }, [resultado, textoRevelado, revelaChat, historialProfundizar]);
 
   useEffect(() => {
     if (textoRevelado === null) return;
@@ -299,6 +351,7 @@ export default function Sueno() {
     interpretAbortRef.current = ctl;
     const timeoutId = window.setTimeout(() => ctl.abort(), INTERPRETAR_TIMEOUT_MS);
 
+    seguirLecturaRef.current = true;
     setResultado("Interpretando tu sueño...");
 
     const textoEnviado = contexto.trim()
@@ -476,7 +529,7 @@ export default function Sueno() {
   }, [mostrarCtaPremium]);
 
   return (
-    <div className="maika-sueno-pagina" style={{ padding: 20, color: "white" }}>
+    <div className="maika-sueno-pagina" style={{ color: "white" }}>
       <div className={`maika-sueno-grid${mostrarAvatar ? "" : " maika-sueno-grid--sin-avatar"}`}>
         <div className="maika-sueno-col-principal">
           <h2
@@ -692,6 +745,7 @@ export default function Sueno() {
       {!suenoBloqueado && (
       <div
         ref={cajaResultadoRef}
+        className="maika-sueno-resultado"
         style={{
           marginTop: "20px",
           padding: "18px",
@@ -712,20 +766,26 @@ export default function Sueno() {
 
         {puedeProfundizar(suenoOriginal, resultado) && lecturaTerminada ? (
           <div className="maika-sueno-profundizar">
-            <div className="maika-sueno-profundizar-header">
-              <span aria-hidden>💬</span>
-              <div>
-                <p className="maika-sueno-profundizar-titulo">Pregunta a Maika sobre este sueño</p>
-                <p className="maika-sueno-profundizar-ayuda">
-                  Resuelve una duda concreta sobre algún símbolo, detalle o sensación de tu sueño.
-                </p>
-              </div>
-            </div>
+            {/* Cabecera invitando a preguntar: solo antes de empezar. En cuanto hay hilo, estorba
+                (parece "otro recuadro" en vez de una conversación que sigue bajo la lectura). */}
+            {historialProfundizar.length === 0 && !revelaChat ? (
+              <>
+                <div className="maika-sueno-profundizar-header">
+                  <span aria-hidden>💬</span>
+                  <div>
+                    <p className="maika-sueno-profundizar-titulo">Pregunta a Maika sobre este sueño</p>
+                    <p className="maika-sueno-profundizar-ayuda">
+                      Resuelve una duda concreta sobre algún símbolo, detalle o sensación de tu sueño.
+                    </p>
+                  </div>
+                </div>
 
-            {preguntasProfundizarRestantes > 0 ? (
-              <p className="maika-sueno-profundizar-contador">
-                ✨ Como parte de esta lectura, puedes hacer una pregunta a Maika para profundizar en tu sueño.
-              </p>
+                {preguntasProfundizarRestantes > 0 ? (
+                  <p className="maika-sueno-profundizar-contador">
+                    ✨ Como parte de esta lectura, puedes hacer una pregunta a Maika para profundizar en tu sueño.
+                  </p>
+                ) : null}
+              </>
             ) : null}
 
             {(historialProfundizar.length > 0 || revelaChat) ? (
@@ -762,7 +822,7 @@ export default function Sueno() {
 
             {!limiteProfundizarAlcanzado ? (
               <>
-                <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
+                <div className="maika-sueno-profundizar-entrada" style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
                   <textarea
                     value={preguntaProfundizar}
                     onChange={(e) => setPreguntaProfundizar(e.target.value)}
