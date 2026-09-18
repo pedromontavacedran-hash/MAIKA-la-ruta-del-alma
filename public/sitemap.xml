@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Sitemap de MAIKA · Rutas del Alma.
+  IMPORTANTE: <loc> exige URLs absolutas. Cuando la web tenga dominio,
+  sustituye "https://TU-DOMINIO" por el dominio real (buscar y reemplazar)
+  y activa la línea Sitemap: de robots.txt.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://TU-DOMINIO/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://TU-DOMINIO/tienda</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://TU-DOMINIO/servicios</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://TU-DOMINIO/servicios/tarot-evolutivo</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://TU-DOMINIO/servicios/limpieza-energetica</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://TU-DOMINIO/servicios/ritual-personalizado</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://TU-DOMINIO/ritual-del-mes</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://TU-DOMINIO/suenos</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://TU-DOMINIO/horoscopos</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://TU-DOMINIO/testimonios</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://TU-DOMINIO/sobre-maika</loc><changefreq>yearly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://TU-DOMINIO/envios</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://TU-DOMINIO/contacto</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://TU-DOMINIO/legal</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+</urlset>

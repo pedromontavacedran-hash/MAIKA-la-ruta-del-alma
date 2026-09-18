@@ -61,6 +61,7 @@ import {
   type HeroLogoConfig
 } from "../utils/heroLogoConfig";
 import { PATH_BY_PAGINA } from "./routing/routeMaps";
+import { tituloDocumento } from "./routing/routeTitles";
 import {
   bloqueLayoutContenido,
   bloqueLayoutLectura,
@@ -286,6 +287,11 @@ export function AppRoutes(p: AppRoutesProps) {
       body.classList.remove("inicio-no-scroll");
     };
   }, [pathname, esVistaSoloFondoEstrellasEmbed]);
+
+  /** Título de la pestaña según la ruta (`routeTitles.ts`); index.html deja el de la portada. */
+  useEffect(() => {
+    document.title = tituloDocumento(pathname);
+  }, [pathname]);
 
   useEffect(() => {
     const syncHeroBanner = (event?: Event) => {
