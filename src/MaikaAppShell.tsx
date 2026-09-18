@@ -592,6 +592,7 @@ export default function MaikaAppShell() {
       inventarioAdminSinNav={esInventarioAdmin}
     >
       <AppProvider value={appContextValue}>
+      <a href="#maika-contenido" className="maika-skip-link">Saltar al contenido</a>
       {!esVistaSoloFondoEstrellas ? (
       <AppTopChrome
         omitirNavPrincipal={esInventarioAdmin}
@@ -625,7 +626,7 @@ export default function MaikaAppShell() {
       ) : null}
 
       {/* PÁGINAS: crece en columna (ver `.app-shell__routes-grow` en layout-responsive.css) */}
-      <div className="app-shell__routes-grow">
+      <div id="maika-contenido" role="main" tabIndex={-1} className="app-shell__routes-grow">
         <AppRoutes {...routesProps} />
       </div>
 

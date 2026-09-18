@@ -98,3 +98,31 @@ body {
 }
 
 /* 1. TÃ­tulos principales en color dorado */
+
+/* Skip-link accesible: oculto hasta recibir foco por teclado */
+.maika-skip-link {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 30000;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: #d4af37;
+  color: #1b1745;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  border: 2px solid #1b1745;
+  transform: translateY(-250%);
+  transition: transform 0.18s ease;
+}
+
+.maika-skip-link:focus {
+  transform: none;
+  outline: 3px solid rgba(212, 175, 55, 0.5);
+}
+
+/* El destino del skip-link recibe foco programático: sin outline visible */
+#maika-contenido:focus {
+  outline: none;
+}

@@ -1,5 +1,12 @@
-import { useRef, type CSSProperties, type MouseEvent, type PointerEvent } from "react";
+import { useEffect, useRef, type CSSProperties, type MouseEvent, type PointerEvent } from "react";
 import BotonCerrar from "./BotonCerrar";
+
+/* Pila de modales abiertos en orden de apertura: solo el superior responde a
+   Escape y al focus trap (los flujos de checkout pueden apilar modales). */
+const pilaModalesAbiertos: symbol[] = [];
+
+const SELECTOR_ENFOCABLES =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 export type ModalBaseProps = {
   abierto: boolean;
@@ -38,6 +45,67 @@ export default function ModalBase({
   ariaLabelledBy
 }: ModalBaseProps) {
   const pointerInicioEnFondoRef = useRef(false);
+  const idModalRef = useRef(Symbol("modal-base"));
+  const cardRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  /* Modales no descartables (`cerrarAlPulsarFondo={false}`, p. ej. cambio de
+     contraseña obligatorio) tampoco deben cerrarse con Escape. */
+  const descartableRef = useRef(cerrarAlPulsarFondo);
+  descartableRef.current = cerrarAlPulsarFondo;
+
+  /* Escape (solo el modal superior de la pila), foco inicial, focus trap con
+     Tab/Shift+Tab y restauración del foco al cerrar. */
+  useEffect(() => {
+    if (!abierto) return;
+    const id = idModalRef.current;
+    pilaModalesAbiertos.push(id);
+    const focoPrevio = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+    const card = cardRef.current;
+    const enfocables = () =>
+      card
+        ? Array.from(card.querySelectorAll<HTMLElement>(SELECTOR_ENFOCABLES)).filter(
+            (el) => el.getClientRects().length > 0
+          )
+        : [];
+
+    const inicial = enfocables()[0];
+    if (inicial) inicial.focus();
+    else card?.focus();
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (pilaModalesAbiertos[pilaModalesAbiertos.length - 1] !== id) return;
+      if (e.key === "Escape") {
+        if (e.defaultPrevented || descartableRef.current === false) return;
+        e.preventDefault();
+        onCloseRef.current();
+        return;
+      }
+      if (e.key !== "Tab" || !card) return;
+      const lista = enfocables();
+      if (lista.length === 0) {
+        e.preventDefault();
+        card.focus();
+        return;
+      }
+      const primero = lista[0];
+      const ultimo = lista[lista.length - 1];
+      const activo = document.activeElement;
+      if (e.shiftKey ? activo === primero || !card.contains(activo) : activo === ultimo || !card.contains(activo)) {
+        e.preventDefault();
+        (e.shiftKey ? ultimo : primero).focus();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      const idx = pilaModalesAbiertos.lastIndexOf(id);
+      if (idx >= 0) pilaModalesAbiertos.splice(idx, 1);
+      document.removeEventListener("keydown", onKeyDown);
+      if (focoPrevio && document.contains(focoPrevio)) focoPrevio.focus();
+    };
+  }, [abierto]);
 
   if (!abierto) return null;
 
@@ -69,11 +137,13 @@ export default function ModalBase({
       role="presentation"
     >
       <div
+        ref={cardRef}
         className={cardCls}
         style={{ maxWidth, ...styleCard }}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
+        tabIndex={-1}
         {...(ariaLabelledBy ? { "aria-labelledby": ariaLabelledBy } : {})}
       >
         {mostrarCruz ? (
