@@ -1,0 +1,371 @@
+/* Pantalla de opciones de Ritual Personalizado (misma estética que limpiezaEnergetica.css / tarotEvolutivo.css) */
+
+/*
+ * Escritorio (≥900px): la página cabe entera en pantalla, así que se quita el scroll
+ * de `.app-shell__routes-grow` y el contenido se centra verticalmente (misma técnica
+ * que `limpieza-energetica-no-scroll` y `servicios-no-scroll`). Clase puesta/quitada
+ * solo por RitualPersonalizadoPage. En móvil no se toca: las 4 tarjetas apiladas
+ * necesitan poder desplazarse.
+ */
+@media (min-width: 900px) {
+  /* Scroll sin barra visible (no `hidden`: en ventanas bajas o landscape ≥900px la página
+     debe poder desplazarse igualmente; con `auto` + barra oculta el aspecto es el mismo). */
+  html.ritual-personalizado-no-scroll .app-shell__routes-grow {
+    overflow-y: auto !important;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  html.ritual-personalizado-no-scroll .app-shell__routes-grow::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    background: transparent;
+  }
+
+  html.ritual-personalizado-no-scroll .ritual-personalizado-page {
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+}
+
+.ritual-personalizado-page {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  min-height: 0;
+  padding: 0 0 clamp(20px, 4vh, 48px);
+  background:
+    radial-gradient(ellipse 110% 65% at 50% -5%, rgba(78, 62, 118, 0.26) 0%, transparent 52%),
+    radial-gradient(ellipse 90% 45% at 50% 105%, rgba(36, 28, 62, 0.2) 0%, transparent 55%);
+}
+
+.ritual-personalizado-page__intro {
+  max-width: 560px;
+  margin: 0 auto clamp(20px, 3.6vw, 32px);
+  padding: clamp(4px, 1.5vw, 12px) clamp(12px, 3vw, 20px) 0;
+}
+
+.ritual-personalizado-page__titulo {
+  margin: 0 0 clamp(6px, 1.2vw, 10px);
+  font-size: clamp(1.6rem, 4.2vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--gold-main);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  line-height: 1.15;
+}
+
+.ritual-personalizado-page__subtitulo {
+  margin: 0;
+  font-size: clamp(1rem, 2.4vw, 1.2rem);
+  line-height: 1.5;
+  color: var(--maika-text-soft);
+  font-weight: 400;
+}
+
+.ritual-personalizado-page .inicio-servicios-bloque.ritual-personalizado-page__bloque-tarjetas {
+  margin: clamp(6px, 1.4vw, 12px) auto clamp(24px, 4vw, 36px);
+  padding: clamp(14px, 2vw, 20px) clamp(14px, 2.4vw, 24px);
+  max-width: min(760px, 98vw);
+  border-radius: 28px;
+  background: linear-gradient(165deg, rgba(14, 11, 26, 0.3) 0%, rgba(6, 5, 12, 0.18) 100%);
+  border: 1px solid rgba(175, 155, 105, 0.14);
+  box-shadow:
+    0 10px 36px rgba(0, 0, 0, 0.14),
+    0 0 44px rgba(88, 60, 140, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  backdrop-filter: blur(14px) saturate(1.06);
+  -webkit-backdrop-filter: blur(14px) saturate(1.06);
+}
+
+.ritual-personalizado-page__grid {
+  display: grid !important;
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  gap: clamp(10px, 1.8vw, 16px) !important;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  align-items: stretch;
+}
+
+/* Escritorio/tablet: 2 × 2 (mismo patrón que limpieza-energetica y tarot-evolutivo). */
+@media (min-width: 700px) {
+  .ritual-personalizado-page__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    justify-items: stretch;
+  }
+}
+
+.ritual-personalizado-page .inicio-servicio-card--ritual-personalizado {
+  width: min(320px, 100%) !important;
+  max-width: 100%;
+  padding: clamp(14px, 2vw, 20px) clamp(14px, 2vw, 18px) !important;
+  gap: clamp(6px, 1.2vw, 10px);
+  box-sizing: border-box;
+  transition:
+    transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.24s ease,
+    border-color 0.24s ease,
+    filter 0.24s ease;
+}
+
+@media (min-width: 700px) {
+  .ritual-personalizado-page .inicio-servicio-card--ritual-personalizado {
+    width: 100% !important;
+  }
+}
+
+/* Título de las 4 modalidades a altura fija (2 líneas máx.): si alguna tarjeta tiene el
+   título en 1 línea y otra en 2, el bloque meta sigue empezando a la misma altura. */
+.ritual-personalizado-page .inicio-servicio-card--ritual-personalizado .inicio-servicio-titulo {
+  height: 56px !important;
+  min-height: 56px !important;
+}
+
+/* Alto fijo del bloque descripción + duración + precio: la descripción crece con flex
+   y duración/precio quedan a exactamente la misma altura en las 4 tarjetas. */
+.ritual-personalizado-page__meta {
+  display: flex;
+  flex-direction: column;
+  height: 96px;
+}
+
+.ritual-personalizado-page__descripcion {
+  margin: 0;
+  padding: clamp(8px, 1.4vw, 14px) 2px 0;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  font-weight: 500;
+  color: rgba(235, 228, 255, 0.82);
+  text-align: center;
+  /* Ocupa el espacio sobrante del bloque __meta (≤2 líneas de texto). */
+  flex: 1 1 auto;
+  margin-bottom: 6px;
+}
+
+/* Línea de precio dentro de la tarjeta (más discreta que en la ficha). */
+.ritual-personalizado-page__precio-linea {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: clamp(10px, 2vw, 16px);
+}
+
+.ritual-personalizado-page__precio {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--gold-main);
+}
+
+/* Botón secundario de acceso a la ficha: borde dorado, compacto (no el dorado sólido de
+   WhatsApp). La regla global `.inicio-page .inicio-servicio-card button` fuerza texto
+   oscuro/tamaños para botones dorados sólidos; aquí se revierten con más especificidad. */
+.ritual-personalizado-page .inicio-servicio-card--ritual-personalizado .ritual-personalizado-page__ver-detalle {
+  display: block;
+  width: 100%;
+  padding: 8px 16px !important;
+  min-height: 0;
+  background: rgba(212, 175, 55, 0.08);
+  color: var(--gold-main) !important;
+  font-size: 0.85rem !important;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: center;
+  border-radius: 20px;
+  border: 1px solid rgba(232, 210, 150, 0.55);
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.ritual-personalizado-page .inicio-servicio-card--ritual-personalizado .ritual-personalizado-page__ver-detalle:hover {
+  background: rgba(212, 175, 55, 0.16);
+  border-color: var(--gold-main);
+}
+
+.ritual-personalizado-page .inicio-servicio-card--ritual-personalizado .ritual-personalizado-page__ver-detalle:focus-visible {
+  outline: 2px solid var(--gold-main);
+  outline-offset: 2px;
+}
+
+/* ============ Vista de detalle de cada modalidad ============ */
+
+.ritual-personalizado-page--detalle {
+  align-items: center;
+  padding-top: clamp(8px, 2vh, 20px);
+}
+
+.ritual-personalizado-detalle {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: clamp(16px, 3vw, 28px) clamp(18px, 4vw, 40px);
+  box-sizing: border-box;
+  text-align: center;
+}
+
+/* Escritorio: la ficha debe caber entera sin scroll (la página lleva `no-scroll`),
+   así que se compactan márgenes y huecos para que todo entre en el viewport. */
+@media (min-width: 900px) {
+  html.ritual-personalizado-no-scroll .ritual-personalizado-detalle {
+    padding-top: clamp(14px, 2.4vh, 24px);
+    padding-bottom: clamp(14px, 2.4vh, 24px);
+  }
+
+  html.ritual-personalizado-no-scroll .ritual-personalizado-detalle__titulo {
+    margin-bottom: clamp(8px, 1.4vh, 14px);
+    font-size: clamp(1.3rem, 2.6vh, 1.7rem);
+  }
+
+  html.ritual-personalizado-no-scroll .ritual-personalizado-detalle__descripcion {
+    margin-bottom: clamp(12px, 2vh, 18px);
+    font-size: clamp(0.85rem, 1.7vh, 0.95rem);
+    line-height: 1.45;
+  }
+
+  html.ritual-personalizado-no-scroll .ritual-personalizado-detalle__subtitulo {
+    margin-bottom: clamp(8px, 1.4vh, 12px);
+  }
+
+  html.ritual-personalizado-no-scroll .ritual-personalizado-detalle__lista {
+    margin-bottom: clamp(12px, 2vh, 18px);
+    gap: clamp(5px, 1vh, 9px);
+  }
+
+  html.ritual-personalizado-no-scroll .ritual-personalizado-detalle__paso {
+    font-size: clamp(0.82rem, 1.6vh, 0.92rem);
+    line-height: 1.4;
+  }
+
+  html.ritual-personalizado-no-scroll .ritual-personalizado-detalle__meta {
+    margin-bottom: clamp(12px, 2vh, 18px);
+  }
+
+  html.ritual-personalizado-no-scroll .ritual-personalizado-detalle .ritual-personalizado-detalle__volver {
+    margin-top: clamp(10px, 1.8vh, 16px);
+  }
+}
+
+.ritual-personalizado-detalle__titulo {
+  margin: 0 0 clamp(10px, 2vw, 16px);
+  font-size: clamp(1.4rem, 4vw, 1.9rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--gold-main);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  line-height: 1.2;
+}
+
+.ritual-personalizado-detalle__descripcion {
+  margin: 0 auto clamp(16px, 3vw, 24px);
+  max-width: 540px;
+  font-size: clamp(0.92rem, 2vw, 1rem);
+  line-height: 1.55;
+  color: rgba(235, 228, 255, 0.85);
+}
+
+.ritual-personalizado-detalle__subtitulo {
+  margin: 0 0 clamp(10px, 2vw, 16px);
+  font-size: clamp(1.05rem, 2.4vw, 1.25rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--gold-main);
+}
+
+.ritual-personalizado-detalle__lista {
+  margin: 0 auto clamp(16px, 3vw, 24px);
+  padding: 0;
+  max-width: 500px;
+  list-style: none;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.6vw, 12px);
+}
+
+.ritual-personalizado-detalle__paso {
+  font-size: clamp(0.88rem, 1.8vw, 0.95rem);
+  line-height: 1.5;
+  color: rgba(235, 228, 255, 0.82);
+}
+
+.ritual-personalizado-detalle__paso-texto {
+  font-weight: 400;
+}
+
+.ritual-personalizado-detalle__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: clamp(14px, 3vw, 24px);
+  margin: 0 0 clamp(16px, 3vw, 24px);
+}
+
+.ritual-personalizado-detalle__precio {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--gold-main);
+}
+
+/* Enlace de navegación secundario de la ficha (volver al grid): sin fondo ni borde,
+   texto dorado pequeño. La acción principal sigue siendo el botón de WhatsApp. */
+.ritual-personalizado-detalle__volver {
+  display: inline-block;
+  margin: clamp(14px, 2.6vw, 22px) auto 0;
+  padding: 4px 8px;
+  background: transparent;
+  border: none;
+  color: var(--gold-main);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-align: center;
+  cursor: pointer;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.ritual-personalizado-detalle__volver:hover {
+  color: rgba(232, 210, 150, 0.75);
+  text-decoration: underline;
+}
+
+.ritual-personalizado-detalle__volver:focus-visible {
+  outline: 2px solid var(--gold-main);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.ritual-personalizado-page__cierre {
+  text-align: center;
+}
+
+/* Enlace secundario «Volver a Servicios»: sin fondo ni borde, texto dorado pequeño
+   (mismo tratamiento que el «Volver a las opciones» de la ficha). */
+.ritual-personalizado-page__volver {
+  display: inline-block;
+  margin: clamp(10px, 2vw, 18px) auto 0;
+  padding: 4px 8px;
+  background: transparent;
+  border: none;
+  color: var(--gold-main);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-align: center;
+  cursor: pointer;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.ritual-personalizado-page__volver:hover {
+  color: rgba(232, 210, 150, 0.75);
+  text-decoration: underline;
+}
+
+.ritual-personalizado-page__volver:focus-visible {
+  outline: 2px solid var(--gold-main);
+  outline-offset: 2px;
+  border-radius: 4px;
+}

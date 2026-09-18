@@ -1,4 +1,30 @@
-/* Pantalla de modalidades de Tarot Evolutivo (misma estética que servicios.css) */
+/* Pantalla de modalidades de Tarot Evolutivo (misma estética que servicios.css / limpiezaEnergetica.css) */
+
+/*
+ * Escritorio (≥900px): la página cabe entera en pantalla, así que se quita el scroll
+ * de `.app-shell__routes-grow` y el contenido se centra verticalmente (misma técnica
+ * que `limpieza-energetica-no-scroll`). Clase puesta/quitada solo por TarotEvolutivoPage.
+ * En móvil no se toca: las tarjetas/ficha apiladas necesitan poder desplazarse.
+ */
+@media (min-width: 900px) {
+  /* Scroll sin barra visible (no `hidden`: en ventanas bajas o landscape ≥900px la página
+     debe poder desplazarse igualmente; con `auto` + barra oculta el aspecto es el mismo). */
+  html.tarot-evolutivo-no-scroll .app-shell__routes-grow {
+    overflow-y: auto !important;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  html.tarot-evolutivo-no-scroll .app-shell__routes-grow::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    background: transparent;
+  }
+
+  html.tarot-evolutivo-no-scroll .tarot-evolutivo-page {
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+}
 
 .tarot-evolutivo-page {
   display: flex;
@@ -90,54 +116,251 @@
   }
 }
 
-.tarot-evolutivo-page .inicio-servicio-card--tarot-evolutivo:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.03);
-  box-shadow:
-    0 10px 28px rgba(0, 0, 0, 0.16),
-    0 0 32px rgba(248, 236, 188, 0.16),
-    0 0 48px rgba(232, 200, 120, 0.1),
-    inset 0 0 0 1px rgba(255, 248, 220, 0.06) !important;
-  border-color: rgba(232, 210, 150, 0.45) !important;
+/* Título de las 4 modalidades a altura fija (2 líneas máx.): si alguna tarjeta tiene el
+   título en 1 línea y otra en 2, el bloque meta sigue empezando a la misma altura. */
+.tarot-evolutivo-page .inicio-servicio-card--tarot-evolutivo .inicio-servicio-titulo {
+  height: 56px !important;
+  min-height: 56px !important;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .tarot-evolutivo-page .inicio-servicio-card--tarot-evolutivo:hover {
-    transform: none;
-    filter: none;
-  }
+/* Alto fijo del bloque descripción + precio: la descripción crece con flex
+   y el precio queda a exactamente la misma altura en las 4 tarjetas. */
+.tarot-evolutivo-page__meta {
+  display: flex;
+  flex-direction: column;
+  height: 96px;
 }
 
 .tarot-evolutivo-page__descripcion {
   margin: 0;
-  padding: 0 2px;
+  padding: clamp(8px, 1.4vw, 14px) 2px 0;
   font-size: 0.85rem;
   line-height: 1.4;
   font-weight: 500;
   color: rgba(235, 228, 255, 0.82);
   text-align: center;
+  /* Ocupa el espacio sobrante del bloque __meta. */
+  flex: 1 1 auto;
+  margin-bottom: 6px;
+}
+
+/* Botón secundario de acceso a la ficha: borde dorado, compacto (no el dorado sólido de
+   WhatsApp). La regla global `.inicio-page .inicio-servicio-card button` fuerza texto
+   oscuro/tamaños para botones dorados sólidos; aquí se revierten con más especificidad. */
+.tarot-evolutivo-page .inicio-servicio-card--tarot-evolutivo .tarot-evolutivo-page__ver-detalle {
+  display: block;
+  width: 100%;
+  padding: 8px 16px !important;
+  min-height: 0;
+  background: rgba(212, 175, 55, 0.08);
+  color: var(--gold-main) !important;
+  font-size: 0.85rem !important;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: center;
+  border-radius: 20px;
+  border: 1px solid rgba(232, 210, 150, 0.55);
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.tarot-evolutivo-page .inicio-servicio-card--tarot-evolutivo .tarot-evolutivo-page__ver-detalle:hover {
+  background: rgba(212, 175, 55, 0.16);
+  border-color: var(--gold-main);
+}
+
+.tarot-evolutivo-page .inicio-servicio-card--tarot-evolutivo .tarot-evolutivo-page__ver-detalle:focus-visible {
+  outline: 2px solid var(--gold-main);
+  outline-offset: 2px;
+}
+
+/* ============ Vista de detalle de cada modalidad ============ */
+
+.tarot-evolutivo-page--detalle {
+  align-items: center;
+  padding-top: clamp(8px, 2vh, 20px);
+}
+
+.tarot-evolutivo-detalle {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: clamp(16px, 3vw, 28px) clamp(18px, 4vw, 40px);
+  box-sizing: border-box;
+  text-align: center;
+}
+
+/* Escritorio: la ficha debe caber entera sin scroll (la página lleva `no-scroll`),
+   así que se compactan márgenes y huecos para que todo entre en el viewport. */
+@media (min-width: 900px) {
+  html.tarot-evolutivo-no-scroll .tarot-evolutivo-detalle {
+    padding-top: clamp(14px, 2.4vh, 24px);
+    padding-bottom: clamp(14px, 2.4vh, 24px);
+  }
+
+  html.tarot-evolutivo-no-scroll .tarot-evolutivo-detalle__titulo {
+    margin-bottom: clamp(8px, 1.4vh, 14px);
+    font-size: clamp(1.3rem, 2.6vh, 1.7rem);
+  }
+
+  html.tarot-evolutivo-no-scroll .tarot-evolutivo-detalle__descripcion {
+    margin-bottom: clamp(12px, 2vh, 18px);
+    font-size: clamp(0.85rem, 1.7vh, 0.95rem);
+    line-height: 1.45;
+  }
+
+  html.tarot-evolutivo-no-scroll .tarot-evolutivo-detalle__subtitulo {
+    margin-bottom: clamp(8px, 1.4vh, 12px);
+  }
+
+  html.tarot-evolutivo-no-scroll .tarot-evolutivo-detalle__lista {
+    margin-bottom: clamp(12px, 2vh, 18px);
+    gap: clamp(5px, 1vh, 9px);
+  }
+
+  html.tarot-evolutivo-no-scroll .tarot-evolutivo-detalle__paso {
+    font-size: clamp(0.82rem, 1.6vh, 0.92rem);
+    line-height: 1.4;
+  }
+
+  html.tarot-evolutivo-no-scroll .tarot-evolutivo-detalle__meta {
+    margin-bottom: clamp(12px, 2vh, 18px);
+  }
+
+  html.tarot-evolutivo-no-scroll .tarot-evolutivo-detalle .tarot-evolutivo-detalle__volver {
+    margin-top: clamp(10px, 1.8vh, 16px);
+  }
+}
+
+.tarot-evolutivo-detalle__titulo {
+  margin: 0 0 clamp(10px, 2vw, 16px);
+  font-size: clamp(1.4rem, 4vw, 1.9rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--gold-main);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  line-height: 1.2;
+}
+
+.tarot-evolutivo-detalle__descripcion {
+  margin: 0 auto clamp(16px, 3vw, 24px);
+  max-width: 540px;
+  font-size: clamp(0.92rem, 2vw, 1rem);
+  line-height: 1.55;
+  color: rgba(235, 228, 255, 0.85);
+}
+
+.tarot-evolutivo-detalle__subtitulo {
+  margin: 0 0 clamp(10px, 2vw, 16px);
+  font-size: clamp(1.05rem, 2.4vw, 1.25rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--gold-main);
+}
+
+.tarot-evolutivo-detalle__lista {
+  margin: 0 auto clamp(16px, 3vw, 24px);
+  padding: 0;
+  max-width: 500px;
+  list-style: none;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.6vw, 12px);
+}
+
+.tarot-evolutivo-detalle__paso {
+  font-size: clamp(0.88rem, 1.8vw, 0.95rem);
+  line-height: 1.5;
+  color: rgba(235, 228, 255, 0.82);
+}
+
+.tarot-evolutivo-detalle__paso-bloque {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tarot-evolutivo-detalle__paso-titulo {
+  font-weight: 700;
+  color: rgba(232, 210, 150, 0.95);
+}
+
+.tarot-evolutivo-detalle__paso-texto {
+  font-weight: 400;
+}
+
+.tarot-evolutivo-detalle__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: clamp(14px, 3vw, 24px);
+  margin: 0 0 clamp(16px, 3vw, 24px);
+}
+
+.tarot-evolutivo-detalle__precio {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--gold-main);
+}
+
+/* Enlace de navegación secundario de la ficha (volver al grid): sin fondo ni borde,
+   texto dorado pequeño. La acción principal sigue siendo el botón de WhatsApp. */
+.tarot-evolutivo-detalle__volver {
+  display: inline-block;
+  margin: clamp(14px, 2.6vw, 22px) auto 0;
+  padding: 4px 8px;
+  background: transparent;
+  border: none;
+  color: var(--gold-main);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-align: center;
+  cursor: pointer;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.tarot-evolutivo-detalle__volver:hover {
+  color: rgba(232, 210, 150, 0.75);
+  text-decoration: underline;
+}
+
+.tarot-evolutivo-detalle__volver:focus-visible {
+  outline: 2px solid var(--gold-main);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .tarot-evolutivo-page__cierre {
   text-align: center;
 }
 
+/* Enlace secundario «Volver a Servicios»: sin fondo ni borde, texto dorado pequeño
+   (mismo tratamiento que el «Volver a las opciones» de la ficha). */
 .tarot-evolutivo-page__volver {
   display: inline-block;
-  margin: clamp(8px, 2vw, 16px) auto 0;
-  padding: 10px 26px;
+  margin: clamp(10px, 2vw, 18px) auto 0;
+  padding: 4px 8px;
   background: transparent;
+  border: none;
   color: var(--gold-main);
-  font-size: 15px;
-  font-weight: bold;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
   text-align: center;
-  border-radius: 20px;
-  border: 2px solid var(--gold-main);
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: color 0.2s ease, opacity 0.2s ease;
 }
 
 .tarot-evolutivo-page__volver:hover {
-  background: var(--gold-main);
-  color: var(--maika-bg);
+  color: rgba(232, 210, 150, 0.75);
+  text-decoration: underline;
+}
+
+.tarot-evolutivo-page__volver:focus-visible {
+  outline: 2px solid var(--gold-main);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
