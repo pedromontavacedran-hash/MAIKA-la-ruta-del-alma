@@ -483,8 +483,11 @@
     margin-right: auto;
   }
 
+  /* `contain`: al llegar arriba/abajo del todo dentro del recuadro, el gesto de scroll no se
+     "derrama" hacia la pantalla general y la arrastra entera hacia arriba. */
   .maika-sueno-resultado {
     max-height: 62vh !important;
+    overscroll-behavior: contain;
   }
 
   /* Sin borde ni fondo propio: que la pregunta gratis se sienta parte del mismo recuadro de lectura, no un panel aparte. */
@@ -515,6 +518,12 @@
     font-style: italic;
     line-height: 1.7;
     color: #f5e6a3;
+  }
+
+  /* Selectores de velocidad/tono: solo para pruebas de escritorio. En móvil se queda fijo en
+     0.9 · Normal / 1.0 · Neutro (el valor por defecto ya calculado en Sueno.tsx). */
+  .maika-sueno-row-voz--ajustes {
+    display: none !important;
   }
 
   /* La pregunta a ancho completo y el botón debajo: en fila quedaba un campo minúsculo. */

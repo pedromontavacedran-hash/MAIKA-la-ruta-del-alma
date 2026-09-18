@@ -171,7 +171,14 @@ export default function Sueno() {
     window.requestAnimationFrame(() => {
       scrollProgramaticoRef.current = false;
     });
-  }, [resultado, textoRevelado, revelaChat, historialProfundizar]);
+    /*
+     * `lecturaTerminada` entra aquí aunque no se lea dentro: al terminar la narración aparece el
+     * bloque "Pregunta a Maika" (crece el recuadro), pero `textoRevelado` ya suele valer lo mismo
+     * justo antes de ese cambio (el revelado ya había alcanzado el texto final), así que sin esta
+     * dependencia el efecto no se repetía y la pantalla general se quedaba clavada donde estaba
+     * mientras el recuadro interior sí bajaba.
+     */
+  }, [resultado, textoRevelado, revelaChat, historialProfundizar, lecturaTerminada]);
 
   useEffect(() => {
     if (textoRevelado === null) return;
@@ -684,7 +691,7 @@ export default function Sueno() {
           )}
 
           {!suenoBloqueado && narrarVoz && vocesDisponibles.length > 0 && (
-            <div className="maika-sueno-row-voz" style={{ marginTop: "6px" }}>
+            <div className="maika-sueno-row-voz maika-sueno-row-voz--ajustes" style={{ marginTop: "6px" }}>
               <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 Velocidad:
             <select
