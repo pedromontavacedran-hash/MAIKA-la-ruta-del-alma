@@ -43,7 +43,9 @@ export function urlImagenArcanoMayorRws(indice: number): string {
   const base = import.meta.env.BASE_URL.endsWith("/")
     ? import.meta.env.BASE_URL
     : `${import.meta.env.BASE_URL}/`;
-  return `${base}${CARPETA_MAIKA_MAYORES}/${encodeURIComponent(archivoJpg)}`;
+  /* Los JPG originales (~3MB) se sirven como WebP (~200KB) del mismo nombre. */
+  const archivoWebp = archivoJpg.replace(/\.jpg$/i, ".webp");
+  return `${base}${CARPETA_MAIKA_MAYORES}/${encodeURIComponent(archivoWebp)}`;
 }
 
 export function infoArcanoMayorRws(indice: number): ArcanoMayorRws {

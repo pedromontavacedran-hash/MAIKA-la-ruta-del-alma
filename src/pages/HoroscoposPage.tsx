@@ -214,20 +214,20 @@ async function registrarUsoHoroscopo(signo: SignoId): Promise<void> {
 }
 
 const CARTA_TRASERA_POR_SIGNO: Record<SignoId, string> = {
-  aries: "/tarot/Aries.jpg",
-  tauro: "/tarot/Tauro.jpg",
-  geminis: "/tarot/Géminis.jpg",
-  cancer: "/tarot/Cáncer.jpg",
-  leo: "/tarot/Leo.jpg",
-  virgo: "/tarot/Virgo.jpg",
-  libra: "/tarot/Libra.jpg",
-  escorpio: "/tarot/Escorpio.jpg",
-  sagitario: "/tarot/Sagitario.jpg",
-  capricornio: "/tarot/Capricornio.jpg",
-  acuario: "/tarot/Acuario.jpg",
-  piscis: "/tarot/Piscis.jpg",
+  aries: "/tarot/Aries.webp",
+  tauro: "/tarot/Tauro.webp",
+  geminis: "/tarot/Géminis.webp",
+  cancer: "/tarot/Cáncer.webp",
+  leo: "/tarot/Leo.webp",
+  virgo: "/tarot/Virgo.webp",
+  libra: "/tarot/Libra.webp",
+  escorpio: "/tarot/Escorpio.webp",
+  sagitario: "/tarot/Sagitario.webp",
+  capricornio: "/tarot/Capricornio.webp",
+  acuario: "/tarot/Acuario.webp",
+  piscis: "/tarot/Piscis.webp",
 };
-const CARTA_REVERSO_BASE = "/tarot/reverso-base.jpg";
+const CARTA_REVERSO_BASE = "/tarot/reverso-base.webp";
 const CARTA_TRASERA_FALLBACK = CARTA_REVERSO_BASE;
 
 export default function HoroscoposPage() {
