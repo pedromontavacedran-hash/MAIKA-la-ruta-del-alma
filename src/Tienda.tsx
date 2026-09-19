@@ -815,7 +815,7 @@ export default function Tienda({
           onClick={volver}
           ariaLabel="Volver al inicio"
           title="Volver al inicio"
-          anclaje="viewport"
+          anclaje="viewport-dcha"
         />
       )}
 
@@ -988,7 +988,6 @@ export default function Tienda({
           gap: 20,
         }}>
           {masVendidos.map(({ producto: p, cantidad }) => {
-            const emoji = getEmoji(p.categoria);
             const precio = precioConDescuento(p);
             const stock = Math.max(0, Math.floor(Number(p.stock)) || 0);
             const prodKey = `${p.categoria}-${p.id}`;
@@ -997,6 +996,10 @@ export default function Tienda({
           <div
             key={prodKey}
             className="tienda-tarjeta-producto"
+            role="button"
+            tabIndex={0}
+            onClick={() => setProductoDetalle(p)}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setProductoDetalle(p); } }}
             style={{
             background: fondoServicios,
             borderRadius: 16,
@@ -1007,6 +1010,7 @@ export default function Tienda({
             flexDirection: "column",
             height: "100%",
             boxSizing: "border-box",
+            cursor: "pointer",
           }}
           >
             {cantidad > 0 && (
@@ -1024,7 +1028,18 @@ export default function Tienda({
               🔥 {cantidad} vendidos
             </div>
             )}
-            <div style={{ fontSize: "1.7rem", textAlign: "center", marginBottom: 6 }}>{emoji}</div>
+            <div style={TIENDA_THUMB_WRAP}>
+              <img
+                src={getProductImageSrc(p)}
+                alt={p.nombre}
+                width={400}
+                height={400}
+                loading="lazy"
+                decoding="async"
+                style={TIENDA_THUMB_IMG}
+                onError={(e) => { (e.target as HTMLImageElement).src = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="%231b1745"/><text x="200" y="200" font-size="80" text-anchor="middle" dominant-baseline="central">📦</text></svg>')}`; }}
+              />
+            </div>
             <h4 style={{
               color: p.nombreColor ?? THEME.goldMain,
               textAlign: "center",
@@ -1053,6 +1068,7 @@ export default function Tienda({
                 type="button"
                 className={`btn-mas-vendidos ${stock ? "btn-anadir-dorado" : ""}`}
                 onClick={(e) => {
+                  e.stopPropagation();
                   if (stock > 0) {
                     intentarAnadirAlCarrito(p, e.currentTarget.closest(".tienda-tarjeta-producto"));
                   }

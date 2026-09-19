@@ -755,6 +755,10 @@ body.cuenta-maika-sin-scrollbar::-webkit-scrollbar {
   box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18);
 }
 
+.tienda-buscador__input::-webkit-search-cancel-button {
+  display: none;
+}
+
 .tienda-buscador__limpiar {
   position: absolute;
   right: 8px;
