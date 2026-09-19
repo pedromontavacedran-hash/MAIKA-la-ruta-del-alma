@@ -781,12 +781,12 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  min-height: 34px;
+  min-height: 30px;
 }
 
 .tienda-vista--categoria-abierta .tienda-vista__cabecera-placeholder {
-  min-width: 34px;
-  min-height: 34px;
+  min-width: 30px;
+  min-height: 30px;
   pointer-events: none;
 }
 
@@ -795,8 +795,8 @@
   position: relative !important;
   top: auto !important;
   right: auto !important;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: 30px;
+  min-height: 30px;
 }
 
 .tienda-vista button:not(.boton-cerrar-modal) {

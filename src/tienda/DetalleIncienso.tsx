@@ -56,21 +56,15 @@ export function DetalleIncienso({
 
   return (
     <>
+    {/* Cruz fija al viewport: único control de «volver»; visible también al hacer scroll por la ficha */}
+    <BotonCerrar anclaje="viewport-dcha" onClick={onVolver} ariaLabel="Volver a productos" title="Volver a productos" />
     <div className="tienda-vista tienda-vista--categoria-abierta tienda-page-layout maika-anchor" style={{ padding: "40px 20px" }}>
       <header className="tienda-vista__cabecera-categoria">
-        <button
-          type="button"
-          onClick={onVolver}
-          style={{ border: "none", background: "transparent", color: THEME.goldMain, cursor: "pointer", fontWeight: "bold", fontSize: 14 }}
-        >
-          ← Volver
-        </button>
+        <div className="tienda-vista__cabecera-placeholder" aria-hidden />
         <h2 className="tienda-vista__titulo-categoria" style={{ color: THEME.goldMain, fontSize: "2rem" }}>
           {(categoriaDetalle?.nombre ?? "Inciensos").charAt(0).toUpperCase() + (categoriaDetalle?.nombre ?? "Inciensos").slice(1)}
         </h2>
-        <div className="tienda-vista__cabecera-categoria-cerrar">
-          <BotonCerrar onClick={onVolver} ariaLabel="Volver a productos" title="Volver a productos" />
-        </div>
+        <div className="tienda-vista__cabecera-placeholder" aria-hidden />
       </header>
 
       {/* Contenedor principal: galería + info */}
@@ -85,7 +79,7 @@ export function DetalleIncienso({
         }}
       >
         {/* === GALERÍA === */}
-        <div style={{ position: "sticky", top: 20, alignSelf: "start" }}>
+        <div className="tienda-detalle-galeria" style={{ position: "sticky", top: 20, alignSelf: "start" }}>
           <div
             style={{
               position: "relative",

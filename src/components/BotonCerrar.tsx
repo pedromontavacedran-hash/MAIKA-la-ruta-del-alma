@@ -13,7 +13,8 @@ interface BotonCerrarProps {
   disabled?: boolean;
   /** Misma apariencia; conserva clase para reglas del carrito (z-index / safe area). */
   variante?: "default" | "discreto";
-  anclaje?: "modal" | "viewport";
+  /** `viewport` fija la cruz a la izquierda bajo la barra; `viewport-dcha` a la derecha. */
+  anclaje?: "modal" | "viewport" | "viewport-dcha";
   style?: CSSProperties;
 }
 
@@ -29,7 +30,8 @@ export default function BotonCerrar({
   const className = [
     "boton-cerrar-modal",
     variante === "discreto" ? "boton-cerrar-modal--discreto" : "",
-    anclaje === "viewport" ? "boton-cerrar-modal--viewport" : ""
+    anclaje === "viewport" ? "boton-cerrar-modal--viewport" : "",
+    anclaje === "viewport-dcha" ? "boton-cerrar-modal--viewport-dcha" : ""
   ]
     .filter(Boolean)
     .join(" ");

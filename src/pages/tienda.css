@@ -82,10 +82,10 @@
   position: absolute;
   top: 12px;
   right: 12px;
-  width: 34px;
-  height: 34px;
-  min-width: 34px;
-  min-height: 34px;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -97,7 +97,7 @@
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.25);
   color: #fff;
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1;
   font: inherit;
   transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease, opacity 0.18s ease;
@@ -137,8 +137,29 @@
   right: auto !important;
   z-index: 9500;
   pointer-events: auto;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: 30px;
+  min-height: 30px;
+}
+
+/* Ficha de incienso: la galería sticky solo aplica en escritorio (rejilla de 2 columnas).
+   En móvil (1 columna) el sticky deja la imagen clavada arriba y el texto pasa por debajo. */
+@media (max-width: 768px) {
+  .tienda-detalle-galeria {
+    position: static !important;
+  }
+}
+
+/* Igual que `--viewport` pero a la derecha: fichas de producto (la cruz fija sustituye al «← Volver»). */
+.boton-cerrar-modal--viewport-dcha,
+.boton-cerrar-modal--viewport-dcha.boton-cerrar-modal--discreto {
+  position: fixed !important;
+  top: calc(var(--app-topbar-stack) + 10px) !important;
+  right: max(12px, env(safe-area-inset-right, 0px)) !important;
+  left: auto !important;
+  z-index: 9500;
+  pointer-events: auto;
+  min-width: 30px;
+  min-height: 30px;
 }
 
 .tienda-lightbox-overlay .boton-cerrar-modal,
@@ -328,8 +349,8 @@ body.cuenta-maika-sin-scrollbar::-webkit-scrollbar {
   margin-left: auto;
   align-self: center;
   z-index: 2;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: 30px;
+  min-height: 30px;
 }
 
 .carrito-vista--con-banda-superior .carrito-layout__grid {
