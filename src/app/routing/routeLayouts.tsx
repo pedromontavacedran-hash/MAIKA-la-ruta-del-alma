@@ -39,6 +39,15 @@ export function bloqueLayoutSuenos(children: ReactNode) {
   );
 }
 
+/** Rutas de tarjetas/grids (servicios y derivados): más ancho que las páginas de texto, sin llegar al catálogo. */
+export function bloqueLayoutContenidoAncho(children: ReactNode) {
+  return (
+    <div className="page-top-spacing">
+      <div style={buildScreenStyle(1120, "20px", undefined, "40px")}>{children}</div>
+    </div>
+  );
+}
+
 /** El catálogo aprovecha un ancho mayor que las páginas editoriales. */
 export function bloqueLayoutTienda(children: ReactNode) {
   return (

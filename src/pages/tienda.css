@@ -809,3 +809,13 @@ body.cuenta-maika-sin-scrollbar::-webkit-scrollbar {
     max-width: none;
   }
 }
+
+/* Contenedor de resultados de búsqueda: ancho editorial en escritorio,
+   centrado dentro del layout del catálogo (hasta 1000px). */
+@media (min-width: 900px) {
+  .tienda-busqueda-resultados {
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}

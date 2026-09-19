@@ -1,11 +1,21 @@
 /*
  * /ritual-del-mes — reutiliza los bloques `.inicio-wrapper`/`.inicio-desplegable-productos`
  * de home.css (compartidos con /testimonios), así que todo aquí va scopeado bajo
- * `html.ritual-no-scroll` (puesta/quitada solo por RitualDelMesPage) para no afectar a esa otra ruta.
+ * `html.ritual-del-mes-page` (puesta/quitada solo por RitualDelMesPage) para no afectar a esa otra ruta.
  */
 @media (min-width: 900px) {
-  html.ritual-no-scroll .app-shell__routes-grow {
-    overflow-y: hidden !important;
+  /*
+   * Scroll vertical con rueda activo pero barra invisible (mismo patrón que el panel admin).
+   */
+  html.ritual-del-mes-page .app-shell__routes-grow {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  html.ritual-del-mes-page .app-shell__routes-grow::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    background: transparent;
   }
 
   /*
@@ -13,7 +23,34 @@
    * div para no romper ese `flex:1` — el margen se le pone directamente a él. !important:
    * el componente fija `style={{ margin: "0 auto" }}` inline, que gana a cualquier CSS sin él.
    */
-  html.ritual-no-scroll .inicio-wrapper {
+  html.ritual-del-mes-page .inicio-wrapper {
     margin-top: clamp(48px, 9vh, 110px) !important;
+  }
+
+  /*
+   * El bloque destacado hereda `max-width: 700px` de home.css (compartido con Inicio,
+   * donde va bajo el hero). En esta página es el contenido principal, así que se
+   * amplía solo aquí: ~960px → 4 tarjetas de ~220px, dentro del wrapper ancho de ruta.
+   */
+  html.ritual-del-mes-page .inicio-ritual-mes-destacado {
+    max-width: min(960px, 94vw);
+  }
+
+  /*
+   * Tarjetas un poco más compactas en escritorio para que quepan más en pantalla.
+   * El scroll vertical con rueda sigue activo (`.app-shell__routes-grow` usa `overflow-y: auto`).
+   */
+  html.ritual-del-mes-page .inicio-productos-grid {
+    grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  html.ritual-del-mes-page .inicio-productos-grid > div {
+    padding: 10px !important;
+  }
+
+  html.ritual-del-mes-page .inicio-productos-grid img {
+    max-height: 170px;
+    object-fit: cover;
   }
 }

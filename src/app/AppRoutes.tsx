@@ -11,6 +11,8 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-
 import ExperienciaAuthGuard from "../components/ExperienciaAuthGuard";
 import ServiciosPage from "../pages/ServiciosPage";
 import TarotEvolutivoPage from "../pages/TarotEvolutivoPage";
+import LimpiezaEnergeticaPage from "../pages/LimpiezaEnergeticaPage";
+import RitualPersonalizadoPage from "../pages/RitualPersonalizadoPage";
 import RitualDelMesPage from "../pages/RitualDelMesPage";
 import TestimoniosPage from "../pages/TestimoniosPage";
 import EnviosPage from "../pages/EnviosPage";
@@ -64,6 +66,7 @@ import { PATH_BY_PAGINA } from "./routing/routeMaps";
 import { tituloDocumento } from "./routing/routeTitles";
 import {
   bloqueLayoutContenido,
+  bloqueLayoutContenidoAncho,
   bloqueLayoutLectura,
   bloqueLayoutSuenos,
   bloqueLayoutTienda
@@ -403,12 +406,14 @@ export function AppRoutes(p: AppRoutesProps) {
       </Suspense>
     )} />
 
-    <Route path="/servicios" element={bloqueLayoutContenido(<ServiciosPage />)} />
-    <Route path="/servicios/tarot-evolutivo" element={bloqueLayoutContenido(<TarotEvolutivoPage />)} />
+    <Route path="/servicios" element={bloqueLayoutContenidoAncho(<ServiciosPage />)} />
+    <Route path="/servicios/tarot-evolutivo" element={bloqueLayoutContenidoAncho(<TarotEvolutivoPage />)} />
+    <Route path="/servicios/limpieza-energetica" element={bloqueLayoutContenidoAncho(<LimpiezaEnergeticaPage />)} />
+    <Route path="/servicios/ritual-personalizado" element={bloqueLayoutContenidoAncho(<RitualPersonalizadoPage />)} />
     <Route path="/suenos" element={bloqueLayoutSuenos(<ExperienciaAuthGuard tipo="sueno"><Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando MAIKA...</div>}><Sueno /></Suspense></ExperienciaAuthGuard>)} />
     <Route path="/sueno-premium" element={bloqueLayoutContenido(<ExperienciaAuthGuard tipo="sueno"><Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando MAIKA...</div>}><SuenoPremiumPage /></Suspense></ExperienciaAuthGuard>)} />
     <Route path="/horoscopos" element={bloqueLayoutContenido(<ExperienciaAuthGuard tipo="horoscopo"><Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando MAIKA...</div>}><HoroscoposPage /></Suspense></ExperienciaAuthGuard>)} />
-    <Route path="/ritual-del-mes" element={bloqueLayoutContenido(<RitualDelMesPage />)} />
+    <Route path="/ritual-del-mes" element={bloqueLayoutContenidoAncho(<RitualDelMesPage />)} />
     <Route path="/testimonios" element={bloqueLayoutContenido(<TestimoniosPage />)} />
     <Route path="/lectura" element={bloqueLayoutLectura(<ExperienciaAuthGuard tipo="horoscopo"><Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando MAIKA...</div>}><LecturaPage /></Suspense></ExperienciaAuthGuard>)} />
     <Route path="/envios" element={bloqueLayoutContenido(<EnviosPage />)} />

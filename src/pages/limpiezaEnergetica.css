@@ -374,3 +374,38 @@
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* Imagen WebP de cada opción (original PNG en originales/servicios/).
+   En la tarjeta va arriba a todo lo ancho; en la ficha queda centrada y contenida. */
+.limpieza-energetica-card__imagen {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  margin: 0 0 clamp(10px, 1.8vw, 14px);
+}
+
+.limpieza-energetica-detalle__imagen {
+  display: block;
+  width: min(380px, 100%);
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 18px;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  margin: 0 auto clamp(14px, 2.4vw, 20px);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.4);
+}
+
+/* Escritorio: la ruta usa el wrapper ancho (1120px); el bloque y el grid
+   aprovechan el espacio manteniendo 2 columnas. */
+@media (min-width: 900px) {
+  .limpieza-energetica-page .inicio-servicios-bloque.limpieza-energetica-page__bloque-tarjetas {
+    max-width: min(880px, 98vw);
+  }
+
+  .limpieza-energetica-page__grid {
+    max-width: 760px;
+  }
+}

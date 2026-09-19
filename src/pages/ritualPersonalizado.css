@@ -369,3 +369,15 @@
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* Escritorio: la ruta usa el wrapper ancho (1120px); el bloque y el grid
+   aprovechan el espacio manteniendo 2 columnas. */
+@media (min-width: 900px) {
+  .ritual-personalizado-page .inicio-servicios-bloque.ritual-personalizado-page__bloque-tarjetas {
+    max-width: min(880px, 98vw);
+  }
+
+  .ritual-personalizado-page__grid {
+    max-width: 760px;
+  }
+}

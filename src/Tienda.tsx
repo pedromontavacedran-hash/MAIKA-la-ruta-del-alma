@@ -782,7 +782,7 @@ export default function Tienda({
       </div>
 
       {resultadosActivos && (
-        <div style={{ marginBottom: 44, background: fondoServicios, padding: "16px 12px", borderRadius: 22, border: `2px solid ${THEME.goldMain}` }}>
+        <div className="tienda-busqueda-resultados" style={{ marginBottom: 44, background: fondoServicios, padding: "16px 12px", borderRadius: 22, border: `2px solid ${THEME.goldMain}` }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>
             <h3 style={{ color: THEME.goldMain, fontSize: "1.08rem", margin: 0 }}>
               {hayTextoBusqueda ? <>Resultados para &quot;{terminoBusqueda}&quot;</> : "Resultados"}

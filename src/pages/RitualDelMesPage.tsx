@@ -4,16 +4,15 @@ import "./ritualDelMes.css";
 
 export default function RitualDelMesPage() {
   /*
-   * Escritorio (≥900px, mismo corte que servicios.css): el contenido ya cabe en pantalla, así que
-   * quitamos el scroll de `.app-shell__routes-grow` (el scroll real de escritorio en toda la app,
-   * ver layout-shell.css) y le damos más aire arriba (ver ritualDelMes.css, scopeado bajo esta
-   * misma clase). En móvil no se toca: las tarjetas en columna no caben y necesitan scroll.
+   * Marca la ruta /ritual-del-mes en <html> para que ritualDelMes.css pueda ajustar solo
+   * esta página (aire superior + tarjetas algo más compactas) sin tocar /testimonios,
+   * que reutiliza los mismos bloques. El scroll vertical con rueda queda activo.
    */
   useEffect(() => {
     const html = document.documentElement;
-    html.classList.add("ritual-no-scroll");
+    html.classList.add("ritual-del-mes-page");
     return () => {
-      html.classList.remove("ritual-no-scroll");
+      html.classList.remove("ritual-del-mes-page");
     };
   }, []);
 
