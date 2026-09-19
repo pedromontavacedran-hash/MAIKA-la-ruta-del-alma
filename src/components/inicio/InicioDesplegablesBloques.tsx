@@ -26,7 +26,7 @@ function interpolarSubtituloInicio(subtitulo: string): string {
 
 /** Bloques desplegables de inicio (ritual del mes, ofertas…), mismos datos que edita el admin. */
 export default function InicioDesplegablesBloques() {
-  const { desplegableInicio, velas, inciensos, figuras, kits, joyas, abrirTiendaConCategoria } = useApp();
+  const { desplegableInicio, velas, inciensos, figuras, kits, joyas, abrirTiendaConProducto } = useApp();
 
   const listaCat = useMemo(
     () => [...velas, ...inciensos, ...figuras, ...(kits ?? []), ...(joyas ?? [])],
@@ -63,6 +63,7 @@ export default function InicioDesplegablesBloques() {
                   </p>
                 ) : (
                   <div
+                    className="inicio-productos-grid"
                     style={{
                       display: "grid",
                       gridTemplateColumns: "repeat(auto-fit, minmax(168px, 1fr))",
@@ -78,23 +79,32 @@ export default function InicioDesplegablesBloques() {
                           padding: 16,
                           borderRadius: 14,
                           textAlign: "center",
-                          background: THEME.bg
+                          background: THEME.bg,
+                          display: "flex",
+                          flexDirection: "column",
+                          height: "100%",
+                          boxSizing: "border-box"
                         }}
                       >
                         <img
                           src={normalizarSrcImagenProducto(p.imagen)}
-                          alt=""
+                          alt={p.nombre}
                           width={200}
                           height={200}
                           loading="lazy"
                           decoding="async"
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => abrirTiendaConProducto(p)}
+                          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); abrirTiendaConProducto(p); } }}
                           style={{
                             width: "100%",
                             maxWidth: 200,
                             height: "auto",
                             borderRadius: 10,
                             marginBottom: 10,
-                            objectFit: "cover"
+                            objectFit: "cover",
+                            cursor: "pointer"
                           }}
                         />
                         <div
@@ -111,7 +121,7 @@ export default function InicioDesplegablesBloques() {
                         <button
                           type="button"
                           className="inicio-btn-categoria"
-                          onClick={() => abrirTiendaConCategoria(p.categoria)}
+                          onClick={() => abrirTiendaConProducto(p)}
                           style={{
                             padding: "8px 14px",
                             borderRadius: 10,
@@ -120,7 +130,8 @@ export default function InicioDesplegablesBloques() {
                             color: THEME.goldLight,
                             fontWeight: 700,
                             cursor: "pointer",
-                            fontSize: 13
+                            fontSize: 13,
+                            marginTop: "auto"
                           }}
                         >
                           Ver en tienda

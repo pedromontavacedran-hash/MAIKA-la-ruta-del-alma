@@ -16,6 +16,12 @@ import {
 import { esAdminPermitidoEnEsteCliente, useEsAdminPermitidoEnEsteCliente } from "../utils/adminSoloEscritorio";
 import { esRutaVistaTiendaShellScroll, getMaikaScrollPortEl } from "../utils/maikaScrollPort";
 import {
+  TIENDA_ANCHOR_IDS,
+  emitirTiendaAnchor,
+  guardarTiendaAnchorPendiente,
+  type TiendaAnchorId
+} from "../utils/tiendaAnchors";
+import {
   ALTURA_BARRA_TOP_MAX,
   ALTURA_BARRA_TOP_MIN,
   ALTURA_BARRA_TOP_DEFAULT,
@@ -102,6 +108,20 @@ export default function NavPrincipal({
     setPagina("tienda");
     setInicioMenuAbierto(false);
     setTextoBusqueda("");
+  };
+
+  /**
+   * Entradas del menú que apuntan a una sección concreta de /tienda (packs, más vendidos).
+   * Si ya estamos en tienda se emite el evento (Tienda resetea su vista interna y hace scroll);
+   * si venimos de otra ruta se guarda el ancla y `Tienda` la consume al montar.
+   */
+  const onClickSeccionTienda = (anchorId: TiendaAnchorId) => () => {
+    setInicioMenuAbierto(false);
+    if (esRutaVistaTiendaShellScroll(location.pathname)) {
+      emitirTiendaAnchor(anchorId);
+    } else {
+      guardarTiendaAnchorPendiente(anchorId);
+    }
   };
 
   const itemMenuInicio = {
@@ -789,6 +809,26 @@ export default function NavPrincipal({
             style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: esRutaVistaTiendaShellScroll(location.pathname) ? 700 : itemMenuInicio.fontWeight }}
           >
             Tienda
+          </Link>
+        </div>
+        <div style={{ marginBottom: 6 }}>
+          <Link
+            to={PATH_BY_PAGINA.tienda}
+            onClick={onClickSeccionTienda(TIENDA_ANCHOR_IDS.packsDestacados)}
+            onMouseEnter={() => onPrefetchPagina?.("tienda")}
+            style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: itemMenuInicio.fontWeight }}
+          >
+            🎁 Packs destacados
+          </Link>
+        </div>
+        <div style={{ marginBottom: 6 }}>
+          <Link
+            to={PATH_BY_PAGINA.tienda}
+            onClick={onClickSeccionTienda(TIENDA_ANCHOR_IDS.masVendidos)}
+            onMouseEnter={() => onPrefetchPagina?.("tienda")}
+            style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: itemMenuInicio.fontWeight }}
+          >
+            🔥 Los más vendidos
           </Link>
         </div>
         {!accesoAdmin && (

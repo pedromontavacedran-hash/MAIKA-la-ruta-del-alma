@@ -18,7 +18,8 @@ import {
 } from "../../utils/campanaPack";
 import BotonCerrar from "../../components/BotonCerrar";
 import { useOfertaCountdown } from "../../hooks/useOfertaCountdown";
-import { esRutaVistaTiendaShellScroll } from "../../utils/maikaScrollPort";
+import { esRutaVistaTiendaShellScroll, getMaikaScrollPortEl } from "../../utils/maikaScrollPort";
+import { TIENDA_ANCHOR_IDS } from "../../utils/tiendaAnchors";
 
 type PackLegacyItem = {
   id: string;
@@ -104,6 +105,8 @@ export default function TiendaView() {
     agregarAlCarrito,
     categoriaTiendaAlAbrir,
     setCategoriaTiendaAlAbrir,
+    productoTiendaAlAbrir,
+    setProductoTiendaAlAbrir,
     busquedaTienda,
     setBusquedaTienda,
     mostrarNotificacion,
@@ -177,6 +180,16 @@ export default function TiendaView() {
     setImagenPackAmpliada(false);
     setPantallaCampanaAbierta(false);
   };
+
+  /* La ficha del pack sustituye al catálogo dentro del mismo scrollport (.app-shell):
+     al abrirla/cerrarla hay que volver arriba o se hereda la posición del listado. */
+  useEffect(() => {
+    const port = getMaikaScrollPortEl();
+    if (port) port.scrollTop = 0;
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [pantallaCampanaAbierta]);
 
   const anadirPackAlCarrito = (productos: Array<{ producto: Producto; cantidad: number }>) => {
     let unidadesOk = 0;
@@ -360,6 +373,7 @@ export default function TiendaView() {
     <>
       {!vistaCategoriaInternaAbierta && campanaActivaEnTienda && lineasCampana ? (
         <section
+          id={TIENDA_ANCHOR_IDS.packsDestacados}
           className="maika-anchor tienda-page-layout tienda-pack-destacado-seccion"
           style={{
             width: "100%",
@@ -545,6 +559,7 @@ export default function TiendaView() {
       !(campanaActivaEnTienda && lineasCampana != null) &&
       packsOrdenados.length > 0 ? (
         <section
+          id={TIENDA_ANCHOR_IDS.packsDestacados}
           className="maika-anchor tienda-page-layout tienda-pack-destacado-seccion"
           style={{
             width: "100%",
@@ -730,6 +745,8 @@ export default function TiendaView() {
         mostrarBotonCerrar={!hayBloquePackArriba || vistaCategoriaInternaAbierta}
         categoriaInicial={categoriaTiendaAlAbrir}
         onCategoriaInicialAplicada={() => setCategoriaTiendaAlAbrir(null)}
+        productoInicial={productoTiendaAlAbrir}
+        onProductoInicialAplicado={() => setProductoTiendaAlAbrir(null)}
         busquedaInicial={busquedaTienda}
         onBusquedaInicialAplicada={() => setBusquedaTienda("")}
         onVistaCategoriaInternaChange={setVistaCategoriaInternaAbierta}

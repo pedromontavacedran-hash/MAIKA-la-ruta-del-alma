@@ -7,7 +7,7 @@ import Layout from "./components/Layout";
 import MaikaHydratingScreen from "./components/MaikaHydratingScreen";
 import PerfilSyncOfflineBanner from "./components/PerfilSyncOfflineBanner";
 import { AppProvider } from "./context/AppContext";
-import type { Pagina, Pedido } from "./types";
+import type { Pagina, Pedido, Producto } from "./types";
 import {
   QUICK_CHECKOUT_KEY,
   NOTA_PEDIDO_ENVIO_DEFAULT,
@@ -191,6 +191,7 @@ export default function MaikaAppShell() {
   const [desplegableInicio, setDesplegableInicio] = useState(DESPLEGABLE_INICIO_DEFAULT);
   const [serviciosInicio, setServiciosInicio] = useState<ServicioInicio[]>(SERVICIOS_INICIO_DEFAULT);
   const [categoriaTiendaAlAbrir, setCategoriaTiendaAlAbrir] = useState<string | null>(null);
+  const [productoTiendaAlAbrir, setProductoTiendaAlAbrir] = useState<Producto | null>(null);
   const [busquedaTienda, setBusquedaTienda] = useState("");
   const { perfil: perfilCompraRapida, setPerfil: setPerfilCompraRapida } = usePerfilCompraRapida(QUICK_CHECKOUT_KEY);
 
@@ -318,6 +319,11 @@ export default function MaikaAppShell() {
     setPagina("tienda");
   }, [setPagina]);
 
+  const abrirTiendaConProducto = useCallback((producto: Producto) => {
+    setProductoTiendaAlAbrir(producto);
+    setPagina("tienda");
+  }, [setPagina]);
+
   const esAppNativa = Capacitor.isNativePlatform();
 
   /** Interruptor web abierta/cerrada (panel admin). null = aún sin respuesta del servidor → abierta. */
@@ -435,7 +441,7 @@ export default function MaikaAppShell() {
   const contextInput = useMemo(
     () =>
       packAppContextInput({
-        nav: { setPagina, abrirTiendaConCategoria },
+        nav: { setPagina, abrirTiendaConCategoria, abrirTiendaConProducto },
         catalogo: { velas, inciensos, figuras, kits, joyas, categoriasCatalogo: categorias.categoriasCatalogo, subcategoriasCatalogo: subcategorias.subcategoriasCatalogo },
         carrito: {
           agregarAlCarrito,
@@ -479,6 +485,8 @@ export default function MaikaAppShell() {
         tiendaBusqueda: {
           categoriaTiendaAlAbrir,
           setCategoriaTiendaAlAbrir,
+          productoTiendaAlAbrir,
+          setProductoTiendaAlAbrir,
           busquedaTienda,
           setBusquedaTienda
         },
@@ -488,6 +496,7 @@ export default function MaikaAppShell() {
     [
       setPagina,
       abrirTiendaConCategoria,
+      abrirTiendaConProducto,
       velas,
       inciensos,
       figuras,
@@ -537,6 +546,8 @@ export default function MaikaAppShell() {
       pedidos,
       categoriaTiendaAlAbrir,
       setCategoriaTiendaAlAbrir,
+      productoTiendaAlAbrir,
+      setProductoTiendaAlAbrir,
       busquedaTienda,
       setBusquedaTienda,
       desplegableInicio,

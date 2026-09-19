@@ -8,6 +8,8 @@ export interface AppContextValue {
   setPagina: (p: Pagina) => void;
   /** Abre la tienda con esta categoría ya seleccionada (desde Inicio, accesos rápidos). */
   abrirTiendaConCategoria: (categoria: string) => void;
+  /** Abre la tienda directamente en la ficha de este producto (p. ej. desde Ritual del mes). */
+  abrirTiendaConProducto: (producto: Producto) => void;
   // Tienda
   velas: Producto[];
   inciensos: Producto[];
@@ -73,6 +75,9 @@ export interface AppContextValue {
   /** Categoría a mostrar al abrir la tienda (se limpia tras aplicar). */
   categoriaTiendaAlAbrir: string | null;
   setCategoriaTiendaAlAbrir: (v: string | null) => void;
+  /** Producto cuya ficha se abre al entrar a la tienda (se limpia tras aplicar). */
+  productoTiendaAlAbrir: Producto | null;
+  setProductoTiendaAlAbrir: (v: Producto | null) => void;
   /** Término de búsqueda para la tienda (desde el menú principal). Se limpia al aplicar. */
   busquedaTienda: string;
   setBusquedaTienda: (v: string) => void;

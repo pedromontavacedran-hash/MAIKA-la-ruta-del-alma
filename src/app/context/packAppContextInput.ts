@@ -1,6 +1,9 @@
 import type { UseAppContextValueInput } from "../hooks/useAppContextValue";
 
-export type AppContextNavPack = Pick<UseAppContextValueInput, "setPagina" | "abrirTiendaConCategoria">;
+export type AppContextNavPack = Pick<
+  UseAppContextValueInput,
+  "setPagina" | "abrirTiendaConCategoria" | "abrirTiendaConProducto"
+>;
 
 export type AppContextCatalogoPack = Pick<
   UseAppContextValueInput,
@@ -60,7 +63,12 @@ export type AppContextAdminPedidosPack = Pick<
 
 export type AppContextTiendaBusquedaPack = Pick<
   UseAppContextValueInput,
-  "categoriaTiendaAlAbrir" | "setCategoriaTiendaAlAbrir" | "busquedaTienda" | "setBusquedaTienda"
+  | "categoriaTiendaAlAbrir"
+  | "setCategoriaTiendaAlAbrir"
+  | "productoTiendaAlAbrir"
+  | "setProductoTiendaAlAbrir"
+  | "busquedaTienda"
+  | "setBusquedaTienda"
 >;
 
 export type AppContextInicioPack = Pick<

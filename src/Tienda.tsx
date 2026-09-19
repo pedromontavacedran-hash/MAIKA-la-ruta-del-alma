@@ -27,6 +27,13 @@ import {
 import { TiendaLightbox } from "./tienda/TiendaLightbox";
 import { DetalleIncienso } from "./tienda/DetalleIncienso";
 import { DetalleProductoGenerico } from "./tienda/DetalleProductoGenerico";
+import {
+  TIENDA_ANCHOR_EVENT,
+  TIENDA_ANCHOR_IDS,
+  consumirTiendaAnchorPendiente,
+  scrollATiendaAnchor
+} from "./utils/tiendaAnchors";
+import { getMaikaScrollPortEl } from "./utils/maikaScrollPort";
 
 export type { CategoriaEntrada };
 
@@ -46,6 +53,10 @@ interface Props {
   categoriaInicial?: string | null;
   /** Se llama una vez después de aplicar categoriaInicial para limpiar el estado en el padre. */
   onCategoriaInicialAplicada?: () => void;
+  /** Si se pasa, al aplicar se abre la ficha de este producto (ej. desde Ritual del mes). */
+  productoInicial?: Producto | null;
+  /** Se llama una vez después de aplicar productoInicial para limpiar el estado en el padre. */
+  onProductoInicialAplicado?: () => void;
   /** Término de búsqueda desde el menú principal; se muestran resultados filtrados. */
   busquedaInicial?: string;
   /** Limpiar el término de búsqueda en el padre. */
@@ -73,6 +84,8 @@ export default function Tienda({
   volver,
   categoriaInicial,
   onCategoriaInicialAplicada,
+  productoInicial,
+  onProductoInicialAplicado,
   busquedaInicial,
   onBusquedaInicialAplicada,
   mostrarBotonCerrar = true,
@@ -171,6 +184,17 @@ export default function Tienda({
     []
   );
 
+  /* Las vistas internas (categoría → subcategoría → ficha de producto) sustituyen el listado
+     dentro del mismo scrollport (.app-shell): al cambiar hay que subir arriba o se hereda
+     la posición del catálogo y la cabecera queda cortada. */
+  useEffect(() => {
+    const port = getMaikaScrollPortEl();
+    if (port) port.scrollTop = 0;
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [mostrarCategoria, subcategoriaAbierta, productoDetalle, resultadosActivos]);
+
   const cerrarLightbox = () => setLightboxImagen(null);
 
   useEffect(() => {
@@ -201,15 +225,52 @@ export default function Tienda({
     }
   }, [filtroCatResultados, conteoPorCategoria]);
 
+  /** Entrada directa a la ficha de un producto (p. ej. «Ver en tienda» desde Ritual del mes). */
   useEffect(() => {
-    onVistaCategoriaInternaChange?.(mostrarCategoria != null || resultadosActivos);
-  }, [mostrarCategoria, resultadosActivos, onVistaCategoriaInternaChange]);
+    if (!productoInicial) return;
+    setMostrarCategoria(null);
+    setSubcategoriaAbierta(null);
+    setProductoDetalle(productoInicial);
+    onProductoInicialAplicado?.();
+  }, [productoInicial, onProductoInicialAplicado]);
+
+  /* El hero «Pack destacado» de TiendaView se oculta con cualquier vista interna abierta:
+     categoría, subcategoría o ficha de producto (p. ej. «Ver en tienda» desde Ritual del mes). */
+  useEffect(() => {
+    onVistaCategoriaInternaChange?.(mostrarCategoria != null || productoDetalle != null || resultadosActivos);
+  }, [mostrarCategoria, productoDetalle, resultadosActivos, onVistaCategoriaInternaChange]);
 
   useEffect(() => {
     return () => {
       onVistaCategoriaInternaChange?.(false);
     };
   }, [onVistaCategoriaInternaChange]);
+
+  /**
+   * Entradas del menú principal («Packs destacados», «Los más vendidos»): sale de la
+   * categoría/detalle interno y desplaza el scrollport hasta la sección pedida.
+   */
+  useEffect(() => {
+    let cancelarScroll: (() => void) | null = null;
+    const irA = (id: string) => {
+      setProductoDetalle(null);
+      setMostrarCategoria(null);
+      setSubcategoriaAbierta(null);
+      cancelarScroll?.();
+      cancelarScroll = scrollATiendaAnchor(id);
+    };
+    const pendiente = consumirTiendaAnchorPendiente();
+    if (pendiente) irA(pendiente);
+    const onAnchor = (e: Event) => {
+      const id = (e as CustomEvent<{ id?: string }>).detail?.id;
+      if (typeof id === "string" && id) irA(id);
+    };
+    window.addEventListener(TIENDA_ANCHOR_EVENT, onAnchor);
+    return () => {
+      cancelarScroll?.();
+      window.removeEventListener(TIENDA_ANCHOR_EVENT, onAnchor);
+    };
+  }, []);
 
   /** Cantidad de este producto en el carrito (para mostrar disponibles = stock - en carrito). */
   const cantidadEnCarrito = (idProducto: number) =>
@@ -914,7 +975,7 @@ export default function Tienda({
 
       {/* MÁS VENDIDOS */}
       {masVendidos.length > 0 && (
-      <div className="tienda-mas-vendidos-bloque">
+      <div id={TIENDA_ANCHOR_IDS.masVendidos} className="tienda-mas-vendidos-bloque">
         <h3 className="tienda-mas-vendidos-bloque__titulo">
           <span className="tienda-mas-vendidos-bloque__titulo-ico" aria-hidden>🔥</span>
           LOS MÁS VENDIDOS
