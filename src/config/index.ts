@@ -79,11 +79,12 @@ export const SERVICIOS_INICIO_DEFAULT: ServicioInicio[] = [
     urlWhatsApp: `https://wa.me/${CHECKOUT_CONFIG.whatsappNumber}?text=Hola%20Maika%2C%20quiero%20reservar%20Tarot`
   },
   {
-    titulo: "✨ Limpieza Energética",
+    titulo: "✨ Limpieza Energética Personal",
+    fraseBreve: "Para limpiar, armonizar y recuperar tu equilibrio.",
     imagen: "/limpieza%20energetica.jpg",
     duracion: "Sesión 45 min",
     precio: "35€",
-    textoBoton: "Reservar Limpieza",
+    textoBoton: "Ver opciones",
     urlWhatsApp: `https://wa.me/${CHECKOUT_CONFIG.whatsappNumber}?text=Hola%20Maika%2C%20quiero%20reservar%20Limpieza`
   },
   {
@@ -92,7 +93,7 @@ export const SERVICIOS_INICIO_DEFAULT: ServicioInicio[] = [
     imagen: "/ritual%20personalizado.jpg",
     duracion: "Sesión 60 min",
     precio: "50€",
-    textoBoton: "Reservar Ritual",
+    textoBoton: "Ver opciones",
     urlWhatsApp: `https://wa.me/${CHECKOUT_CONFIG.whatsappNumber}?text=Hola%20Maika%2C%20quiero%20consultar%20Ritual`
   }
 ];

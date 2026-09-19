@@ -38,6 +38,8 @@ export const PAGINA_BY_PATH: Record<string, Pagina> = {
   "/suenos": "suenos",
   "/sueno-premium": "suenos",
   "/servicios": "servicios",
+  "/servicios/limpieza-energetica": "servicios",
+  "/servicios/ritual-personalizado": "servicios",
   "/servicios/tarot-evolutivo": "servicios",
   "/horoscopos": "horoscopos",
   "/ritual-del-mes": "ritualDelMes",

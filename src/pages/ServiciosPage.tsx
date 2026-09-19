@@ -4,14 +4,24 @@ import { useApp } from "../context/AppContext";
 import { CHECKOUT_CONFIG } from "../config/checkoutConfig";
 import { THEME } from "../config";
 import { RUTA_TAROT_EVOLUTIVO } from "./tarotEvolutivoRuta";
+import { RUTA_LIMPIEZA_ENERGETICA } from "./limpiezaEnergeticaRuta";
+import { RUTA_RITUAL_PERSONALIZADO } from "./ritualPersonalizadoRuta";
 
 const URL_WHATSAPP_CONSULTA = `https://wa.me/${CHECKOUT_CONFIG.whatsappNumber}?text=${encodeURIComponent(
   "Hola Maika, no sé cuál servicio elegir, ¿me puedes orientar?"
 )}`;
 
-/** Único caso especial: la tarjeta "Tarot Evolutivo" abre su propia pantalla con las 4 modalidades. */
+/** Casos especiales: las 3 tarjetas abren su propia pantalla de opciones. */
 function esTarjetaTarotEvolutivo(titulo: string): boolean {
   return /tarot evolutivo/i.test(titulo);
+}
+
+function esTarjetaLimpiezaEnergetica(titulo: string): boolean {
+  return /limpieza energ/i.test(titulo);
+}
+
+function esTarjetaRitualPersonalizado(titulo: string): boolean {
+  return /ritual personalizado/i.test(titulo);
 }
 
 export default function ServiciosPage() {
@@ -44,21 +54,28 @@ export default function ServiciosPage() {
         <div className="inicio-servicios-bloque__grid inicio-servicios-bloque__grid--servicios">
           {serviciosInicio.map((s, idx) => {
             const esTarot = esTarjetaTarotEvolutivo(s.titulo);
-            const irATarot = () => navigate(RUTA_TAROT_EVOLUTIVO);
+            const esLimpieza = !esTarot && esTarjetaLimpiezaEnergetica(s.titulo);
+            const esRitual = !esTarot && !esLimpieza && esTarjetaRitualPersonalizado(s.titulo);
+            const conOpciones = esTarot || esLimpieza || esRitual;
+            const irAOpciones = esTarot
+              ? () => navigate(RUTA_TAROT_EVOLUTIVO)
+              : esLimpieza
+                ? () => navigate(RUTA_LIMPIEZA_ENERGETICA)
+                : () => navigate(RUTA_RITUAL_PERSONALIZADO);
             return (
               <div
                 key={idx}
                 className={`card inicio-servicio-card inicio-servicio-card--pagina-servicios${s.fraseBreve?.trim() ? " inicio-servicio-card--con-frase" : ""}`}
-                style={{ display: "flex", flexDirection: "column", minHeight: 230, cursor: esTarot ? "pointer" : undefined }}
-                onClick={esTarot ? irATarot : undefined}
-                role={esTarot ? "button" : undefined}
-                tabIndex={esTarot ? 0 : undefined}
+                style={{ display: "flex", flexDirection: "column", minHeight: 250, cursor: conOpciones ? "pointer" : undefined }}
+                onClick={conOpciones ? irAOpciones : undefined}
+                role={conOpciones ? "button" : undefined}
+                tabIndex={conOpciones ? 0 : undefined}
                 onKeyDown={
-                  esTarot
+                  conOpciones
                     ? (e) => {
                         if (e.key === "Enter" || e.key === " ") {
                           e.preventDefault();
-                          irATarot();
+                          irAOpciones();
                         }
                       }
                     : undefined
@@ -77,9 +94,9 @@ export default function ServiciosPage() {
                 >
                   {s.titulo}
                 </h3>
-                {s.fraseBreve?.trim() ? (
-                  <p className="inicio-servicio-card__frase">{s.fraseBreve.trim()}</p>
-                ) : null}
+                {/* Se renderiza siempre (vacía si no hay frase) para que la imagen quede
+                    a la misma altura en todas las tarjetas — ver servicios.css. */}
+                <p className="inicio-servicio-card__frase">{s.fraseBreve?.trim()}</p>
                 <img
                   src={s.imagen.startsWith("/") ? s.imagen : `/${s.imagen}`}
                   alt={s.titulo.replace(/[\u{1F300}-\u{1F9FF}]/gu, "").trim() || `Servicio ${idx + 1}`}
@@ -87,20 +104,20 @@ export default function ServiciosPage() {
                   height={276}
                   loading="lazy"
                   decoding="async"
-                  style={{ width: "100%", height: 78, objectFit: "cover", borderRadius: 10, border: "1px solid gold", display: "block" }}
+                  style={{ width: "100%", height: 92, objectFit: "cover", borderRadius: 10, border: "1px solid gold", display: "block" }}
                 />
-                {esTarot ? null : (
+                {conOpciones ? null : (
                   <>
                     <p className="inicio-servicio-duracion" style={{ color: "white", fontSize: 14, textAlign: "center" }}>{s.duracion}</p>
                     <p className="inicio-servicio-precio-linea" style={{ color: THEME.goldMain, fontSize: 18, fontWeight: "bold", textAlign: "center" }}>{s.precio}</p>
                   </>
                 )}
-                {esTarot ? (
+                {conOpciones ? (
                   <button
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      irATarot();
+                      irAOpciones();
                     }}
                     style={{
                       display: "block",

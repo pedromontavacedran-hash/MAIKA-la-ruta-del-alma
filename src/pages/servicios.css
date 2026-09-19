@@ -8,8 +8,17 @@
  * apiladas siguen sin caber en una pantalla y necesitan poder desplazarse.
  */
 @media (min-width: 900px) {
+  /* Scroll sin barra visible (no `hidden`: en ventanas bajas o landscape ≥900px la página
+     debe poder desplazarse igualmente; con `auto` + barra oculta el aspecto es el mismo). */
   html.servicios-no-scroll .app-shell__routes-grow {
-    overflow-y: hidden !important;
+    overflow-y: auto !important;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  html.servicios-no-scroll .app-shell__routes-grow::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    background: transparent;
   }
 
   /*
@@ -73,7 +82,7 @@
 .servicios-page .inicio-servicios-bloque.servicios-page__bloque-tarjetas {
   margin: clamp(6px, 1.4vw, 12px) auto clamp(24px, 4vw, 36px);
   padding: clamp(14px, 2vw, 20px) clamp(14px, 2.4vw, 24px);
-  max-width: min(1020px, 98vw);
+  max-width: min(1140px, 98vw);
   border-radius: 28px;
   /* Presencia media: agrupa con peso sin carga pesada */
   background: linear-gradient(165deg, rgba(14, 11, 26, 0.3) 0%, rgba(6, 5, 12, 0.18) 100%);
@@ -88,8 +97,8 @@
 
 @media (min-width: 900px) {
   .servicios-page .inicio-servicios-bloque.servicios-page__bloque-tarjetas {
-    margin: clamp(6px, 1vw, 10px) auto clamp(20px, 3vw, 32px);
-    padding: clamp(14px, 1.8vw, 20px) clamp(18px, 2.6vw, 28px);
+    margin: clamp(6px, 1vw, 10px) auto clamp(26px, 3.4vw, 40px);
+    padding: clamp(18px, 2.4vh, 26px) clamp(24px, 3.4vw, 40px);
   }
 }
 
@@ -100,7 +109,7 @@
   max-width: 880px;
   margin: 0 auto;
   box-sizing: border-box;
-  gap: clamp(10px, 1.8vw, 16px) !important;
+  gap: clamp(16px, 2.4vw, 26px) !important;
   grid-template-columns: minmax(0, 1fr);
   justify-items: center;
   align-items: stretch;
@@ -109,8 +118,8 @@
 @media (min-width: 900px) {
   .servicios-page .inicio-servicios-bloque__grid--servicios {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    max-width: min(900px, 100%);
-    gap: clamp(12px, 1.6vw, 18px) !important;
+    max-width: min(1020px, 100%);
+    gap: clamp(30px, 4vw, 52px) !important;
     justify-items: stretch;
   }
 }
@@ -119,8 +128,8 @@
 .servicios-page .inicio-servicio-card--pagina-servicios {
   width: min(320px, 100%) !important;
   max-width: 100%;
-  padding: clamp(10px, 1.6vw, 14px) clamp(10px, 1.6vw, 14px) !important;
-  gap: clamp(6px, 1.2vw, 10px);
+  padding: clamp(14px, 2vw, 20px) clamp(14px, 2vw, 18px) !important;
+  gap: clamp(10px, 1.5vw, 14px);
   box-sizing: border-box;
   transition:
     transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
@@ -137,10 +146,25 @@
 
 .servicios-page .inicio-servicio-card--pagina-servicios .inicio-servicio-titulo {
   margin: 0 !important;
+  /* Altura uniforme sobre la imagen: 2 líneas de título siempre reservadas,
+     también en tarjetas sin frase (--con-frase lo ponía en auto). */
+  min-height: 52px !important;
+}
+
+@media (min-width: 900px) {
+  /* En la fila de 3 columnas el título más largo («Limpieza Energética Personal»)
+     ocupa 3 líneas: se reserva ese alto en las tres para que las imágenes
+     arranquen exactamente a la misma altura. Texto centrado verticalmente. */
+  .servicios-page .inicio-servicio-card--pagina-servicios .inicio-servicio-titulo {
+    min-height: 78px !important;
+  }
 }
 
 .servicios-page .inicio-servicio-card--pagina-servicios .inicio-servicio-card__frase {
   margin: 0 !important;
+  /* Dos líneas reservadas (la frase más larga, la de Tarot, ocupa 2) aunque la
+     tarjeta no tenga frase o esta sea de una línea — así las imágenes se alinean. */
+  min-height: 2.7em;
 }
 
 .servicios-page .inicio-servicio-card--pagina-servicios img {
@@ -177,12 +201,12 @@
 
 .servicios-page__cierre {
   max-width: 440px;
-  margin: 0 auto 0;
+  margin: clamp(6px, 1.4vw, 14px) auto 0;
   padding: clamp(2px, 1vw, 6px) clamp(16px, 4vw, 24px) 0;
 }
 
 .servicios-page__cierre-texto {
-  margin: 0 0 clamp(10px, 2vw, 16px);
+  margin: 0 0 clamp(14px, 2.4vw, 22px);
   font-size: clamp(0.95rem, 2vw, 1.05rem);
   line-height: 1.45;
   color: rgba(245, 240, 255, 0.82);
