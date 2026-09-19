@@ -1,0 +1,143 @@
+/*
+ * /sobre-maika — estética pergamino antiguo, solo para esta página.
+ * Todo va scopeado bajo `.sobre-maika-page` para no afectar a otras rutas.
+ * El texto sigue siendo HTML real; el efecto es solo fondo/bordes/sombras.
+ */
+
+.sobre-maika-page {
+  padding: clamp(12px, 2.5vw, 28px) 10px clamp(24px, 4vw, 48px);
+  box-sizing: border-box;
+}
+
+/* Zona de contenido: pergamino claro sobre el fondo oscuro MAIKA */
+.sobre-maika-pergamino {
+  position: relative;
+  max-width: 700px;
+  margin: clamp(16px, 4vh, 44px) auto;
+  padding: clamp(30px, 5vw, 58px) clamp(22px, 5.5vw, 64px);
+  color: #332714;
+  font-size: clamp(15.5px, 1.55vw, 17px);
+  line-height: 1.72;
+  text-align: left;
+  background: #d2b98d;
+  border-radius: 14px;
+  box-shadow:
+    0 28px 70px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(122, 92, 32, 0.4),
+    0 0 42px rgba(212, 175, 55, 0.12),
+    inset 0 0 70px rgba(96, 62, 20, 0.07);
+}
+
+/* Textura sutil de papel envejecido (ruido SVG, muy tenue) */
+.sobre-maika-pergamino::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Doble filete interior dorado, típico de pergaminos */
+.sobre-maika-pergamino::after {
+  content: "";
+  position: absolute;
+  inset: 11px;
+  border: 1px solid rgba(122, 92, 32, 0.38);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+/* Ornamento discreto: luna + estrellas en la esquina superior derecha */
+.sobre-maika-deco {
+  position: absolute;
+  top: clamp(16px, 3vw, 26px);
+  right: clamp(20px, 4vw, 34px);
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  color: rgba(122, 92, 32, 0.55);
+  pointer-events: none;
+  user-select: none;
+}
+
+.sobre-maika-deco .luna {
+  font-size: clamp(18px, 2.4vw, 24px);
+}
+
+.sobre-maika-deco .estrella {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+/* Títulos dorados, más presencia */
+.sobre-maika-titulo {
+  margin: 0 0 clamp(18px, 3vw, 26px);
+  font-size: clamp(25px, 4vw, 34px) !important;
+  letter-spacing: 0.6px;
+  color: #7a5c14 !important;
+  text-shadow: 0 1px 0 rgba(255, 250, 235, 0.5), 0 0 18px rgba(160, 122, 40, 0.25);
+  scroll-margin-top: 140px;
+}
+
+.sobre-maika-subtitulo {
+  margin: 0 0 clamp(18px, 3vw, 26px);
+  font-size: clamp(25px, 4vw, 34px);
+  letter-spacing: 0.6px;
+  color: #7a5c14 !important;
+  text-shadow: 0 1px 0 rgba(255, 250, 235, 0.5), 0 0 18px rgba(160, 122, 40, 0.25);
+}
+
+.sobre-maika-page .sobre-maika-texto p {
+  margin: 0 0 14px;
+  color: #332714;
+}
+
+.sobre-maika-texto p:last-child {
+  margin-bottom: 0;
+}
+
+.sobre-maika-texto strong {
+  color: #241a0c;
+}
+
+/* Citas destacadas: dorado antiguo legible sobre pergamino */
+.sobre-maika-page .sobre-maika-cita {
+  font-style: italic;
+  color: #5f450c;
+}
+
+/* Separador ── ✦ ── en dorado antiguo */
+.sobre-maika-separador {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: clamp(26px, 3.6vw, 38px) 0;
+  color: rgba(122, 92, 32, 0.6);
+}
+
+.sobre-maika-separador .linea {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(122, 92, 32, 0.5));
+}
+
+.sobre-maika-separador .linea:last-child {
+  transform: scaleX(-1);
+}
+
+.sobre-maika-separador .estrella {
+  font-size: 12px;
+  line-height: 1;
+}
+
+@media (max-width: 640px) {
+  .sobre-maika-pergamino {
+    padding: 26px 18px;
+  }
+
+  .sobre-maika-pergamino::after {
+    inset: 8px;
+  }
+}
