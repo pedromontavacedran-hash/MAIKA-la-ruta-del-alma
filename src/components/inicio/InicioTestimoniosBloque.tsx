@@ -2,7 +2,7 @@
 export default function InicioTestimoniosBloque() {
   return (
     <div
-      className="inicio-wrapper inicio-page maika-route-fill-column"
+      className="inicio-wrapper inicio-page testimonios-page maika-route-fill-column"
       style={{ maxWidth: 1100, margin: "0 auto", width: "100%" }}
     >
       <div className="inicio-bloques-texto">
@@ -14,17 +14,17 @@ export default function InicioTestimoniosBloque() {
             <blockquote className="testimonio-card">
               «Llegó todo muy bien presentado y con una energía preciosa. Las velas huelen increíble; ya son parte de mi
               ritual nocturno.»
-              <footer style={{ marginTop: 12, fontSize: 14, color: "rgba(255,255,255,0.7)" }}>— Lucía, Madrid</footer>
+              <footer className="testimonio-autor">— Lucía, Madrid</footer>
             </blockquote>
             <blockquote className="testimonio-card">
               «Pedí ayuda para elegir y la atención fue cercana y clara. El incienso y las figuras superaron lo que
               imaginaba por fotos.»
-              <footer style={{ marginTop: 12, fontSize: 14, color: "rgba(255,255,255,0.7)" }}>— Andrea, Valencia</footer>
+              <footer className="testimonio-autor">— Andrea, Valencia</footer>
             </blockquote>
             <blockquote className="testimonio-card">
               «Maika transmite confianza y cuidado en cada detalle. Repito seguro; se nota el mimo en el empaquetado y en
               los mensajes.»
-              <footer style={{ marginTop: 12, fontSize: 14, color: "rgba(255,255,255,0.7)" }}>— Carmen, Barcelona</footer>
+              <footer className="testimonio-autor">— Carmen, Barcelona</footer>
             </blockquote>
           </div>
         </section>
