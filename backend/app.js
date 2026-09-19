@@ -16,6 +16,7 @@ import { horoscopoRouter } from "./routes/horoscopo.js";
 import { webEstadoRouter } from "./routes/webEstado.js";
 import { disenoWebRouter } from "./routes/disenoWeb.js";
 import { preciosCompetenciaRouter } from "./routes/preciosCompetencia.js";
+import { sugerenciasRouter } from "./routes/sugerencias.js";
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.use(horoscopoRouter);
 app.use(webEstadoRouter);
 app.use(disenoWebRouter);
 app.use(preciosCompetenciaRouter);
+app.use(sugerenciasRouter);
 
 const serveMaikaDist = process.env.MAIKA_SERVE_DIST === "1";
 if (serveMaikaDist) {

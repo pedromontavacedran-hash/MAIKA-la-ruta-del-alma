@@ -643,6 +643,12 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
               >
                 📅 CONTABILIDAD
               </button>
+              <button
+                className="btn-admin-limpio admin-btn admin-btn--purple"
+                onClick={() => setPagina("adminSugerencias")}
+              >
+                💡 SUGERENCIAS Y MEJORAS
+              </button>
             </div>
               </section>
 

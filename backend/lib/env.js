@@ -54,6 +54,8 @@ export const idempotenciaPedidosFile = path.join(dataDir, "idempotenciaPedidos.j
 export const idempotenciaPerfilFile = path.join(dataDir, "idempotenciaPerfil.json");
 export const carritosFile = path.join(dataDir, "carritos.json");
 export const usuariosFile = path.join(dataDir, "usuarios.json");
+/** Buzón de "Sugerir una mejora" del menú: escritura solo autenticada; lectura solo admin. */
+export const sugerenciasFile = path.join(dataDir, "sugerencias.json");
 export const productosFile = path.join(dataDir, "productos.json");
 export const categoriasFile = path.join(dataDir, "categorias.json");
 export const subcategoriasFile = path.join(dataDir, "subcategorias.json");

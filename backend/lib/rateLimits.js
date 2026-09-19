@@ -173,3 +173,14 @@ export const registroActivarTecnicaLimiterIp = rateLimit({
     error: "Demasiados intentos. Espera unos minutos y vuelve a intentarlo."
   }
 });
+
+/** POST /sugerencias exige sesión; el límite sigue frenando spam desde cuentas autenticadas. */
+export const sugerenciaLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: "Demasiadas sugerencias seguidas. Espera unos minutos y vuelve a intentarlo."
+  }
+});

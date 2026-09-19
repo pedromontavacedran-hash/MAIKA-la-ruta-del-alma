@@ -363,6 +363,28 @@ export type CategoriaEntrada = { id: string; nombre: string; imagen?: string };
 /** Subcategoría real: pertenece a una categoría principal (`categoriaId`), gestionable desde admin. */
 export type SubcategoriaEntrada = { id: string; categoriaId: string; nombre: string; padreSubcategoriaId?: string; imagen?: string };
 
+/** Buzón "Sugerencias y mejoras" del menú. */
+export type TipoSugerencia =
+  | "Web / diseño"
+  | "Tienda / productos"
+  | "Funcionalidad"
+  | "Experiencia de usuario"
+  | "Contenido"
+  | "Error o problema"
+  | "Otra sugerencia";
+
+export type Sugerencia = {
+  id: string;
+  fecha: string;
+  tipo: TipoSugerencia;
+  mensaje: string;
+  /** Cuenta autenticada que envió la sugerencia (`req.user.id` del JWT; no viene del cliente). */
+  usuarioId?: string;
+  nombre?: string;
+  email?: string;
+  estado: "pendiente" | "revisada";
+};
+
 /** Pack armado por el cliente (reservado para futuro). */
 export type TipoPackCampana = "fijo" | "dinamico";
 
@@ -428,4 +450,5 @@ export type Pagina =
   | "editarCupones"
   | "inventario"
   | "nuevoProducto"
-  | "nuevaCategoria";
+  | "nuevaCategoria"
+  | "adminSugerencias";

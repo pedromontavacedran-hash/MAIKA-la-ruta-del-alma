@@ -74,6 +74,9 @@ export const EditarCuponesAdminPanel = lazy(loadEditarCuponesAdminPanel);
 export const loadContabilidadPage = () => import("../../pages/ContabilidadPage");
 export const ContabilidadPage = lazy(loadContabilidadPage);
 
+export const loadAdminSugerenciasPage = () => import("../../pages/AdminSugerenciasPage");
+export const AdminSugerenciasPage = lazy(loadAdminSugerenciasPage);
+
 export const loadConfigMetricasPage = () => import("../../pages/admin/ConfigMetricasPage");
 export const ConfigMetricasPage = lazy(loadConfigMetricasPage);
 

@@ -9,6 +9,7 @@ import {
 } from "../../config";
 import {
   AdminMainRoute,
+  AdminSugerenciasPage,
   ConfigMetricasPage,
   ContabilidadPage,
   DetalleClientePage,
@@ -393,6 +394,12 @@ export function AdminRoutes(p: AdminRoutesProps) {
       element={p.accesoAdmin ? <Suspense fallback={fallbackAdmin}>{bloqueLayoutContenido(<ContabilidadPage />)}</Suspense> : <Navigate to="/" replace />}
     />
     <Route path="/contabilidad" element={<Navigate to="/admin/contabilidad" replace />} />
+
+    {/* SUGERENCIAS Y MEJORAS (buzón del menú público) */}
+    <Route
+      path="/admin/sugerencias"
+      element={p.accesoAdmin ? <Suspense fallback={fallbackAdmin}>{bloqueLayoutContenido(<AdminSugerenciasPage />)}</Suspense> : <Navigate to="/" replace />}
+    />
     </>
   );
 }

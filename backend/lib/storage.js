@@ -10,6 +10,7 @@ import {
   productosFile,
   categoriasFile,
   subcategoriasFile,
+  sugerenciasFile,
   CATEGORIAS_PRODUCTO,
   IDEMPOTENCIA_TTL_MS,
   IDEMPOTENCIA_PRUNE_INTERVAL_MS,
@@ -80,6 +81,28 @@ export async function ensureStorage() {
     await fs.writeFile(subcategoriasFile, JSON.stringify(SUBCATEGORIAS_DEFAULT, null, 2), "utf8");
     for (const s of SUBCATEGORIAS_DEFAULT) await crearCarpetaSubcategoria(s.categoriaId, s.id);
   }
+  try {
+    await fs.access(sugerenciasFile);
+  } catch {
+    await fs.writeFile(sugerenciasFile, "[]", "utf8");
+  }
+}
+
+export async function readSugerencias() {
+  await ensureStorage();
+  try {
+    const raw = await fs.readFile(sugerenciasFile, "utf8");
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function writeSugerencias(sugerencias) {
+  await ensureStorage();
+  const list = Array.isArray(sugerencias) ? sugerencias : [];
+  await fs.writeFile(sugerenciasFile, JSON.stringify(list, null, 2), "utf8");
 }
 
 export async function readPedidos() {

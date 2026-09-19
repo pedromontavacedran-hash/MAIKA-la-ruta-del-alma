@@ -275,6 +275,27 @@
   justify-content: center !important;
   line-height: 1 !important;
 }
+/* Brillo ✨ de la entrada destacada «Sugerencias y mejoras» del menú */
+@keyframes maika-menu-sparkle {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+.maika-menu-sparkle {
+  display: inline-block;
+  animation: maika-menu-sparkle 1.8s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .maika-menu-sparkle {
+    animation: none;
+  }
+}
 /* Cerrar del desplegable menú: sin borde ni caja */
 .app-inicio-dropdown__close,
 .app-inicio-dropdown__close:hover,

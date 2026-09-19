@@ -29,7 +29,8 @@ export const PATH_BY_PAGINA: Record<Pagina, string> = {
   editarCupones: "/admin/editar-cupones",
   inventario: "/admin/inventario",
   nuevoProducto: "/admin/nuevo-producto",
-  nuevaCategoria: "/admin/nueva-categoria"
+  nuevaCategoria: "/admin/nueva-categoria",
+  adminSugerencias: "/admin/sugerencias"
 };
 
 export const PAGINA_BY_PATH: Record<string, Pagina> = {
@@ -38,9 +39,9 @@ export const PAGINA_BY_PATH: Record<string, Pagina> = {
   "/suenos": "suenos",
   "/sueno-premium": "suenos",
   "/servicios": "servicios",
+  "/servicios/tarot-evolutivo": "servicios",
   "/servicios/limpieza-energetica": "servicios",
   "/servicios/ritual-personalizado": "servicios",
-  "/servicios/tarot-evolutivo": "servicios",
   "/horoscopos": "horoscopos",
   "/ritual-del-mes": "ritualDelMes",
   "/testimonios": "testimonios",
@@ -67,6 +68,7 @@ export const PAGINA_BY_PATH: Record<string, Pagina> = {
   "/admin/inventario": "inventario",
   "/admin/nuevo-producto": "nuevoProducto",
   "/admin/nueva-categoria": "nuevaCategoria",
+  "/admin/sugerencias": "adminSugerencias",
   "/admin/diseno-web": "admin",
   "/admin/diseno-web/imagen": "admin",
   "/admin/diseno-web/fondo": "admin",

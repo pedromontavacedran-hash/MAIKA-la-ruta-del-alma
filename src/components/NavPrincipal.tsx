@@ -47,6 +47,7 @@ import {
   linkStyle
 } from "./nav/navIcons";
 import NavAdminModal from "./nav/NavAdminModal";
+import SugerenciaModal from "./nav/SugerenciaModal";
 
 /** Máximo desliz (px) desde el ancla junto a la hamburguesa; la geometría de la barra puede reducirlo. */
 const LOGO_DESLIZ_DESDE_HAMBURGUESA_MAX_PX = 80;
@@ -75,6 +76,7 @@ export default function NavPrincipal({
   const [inicioMenuAbierto, setInicioMenuAbierto] = useState(false);
   const [textoBusqueda, setTextoBusqueda] = useState("");
   const [modalAdminAbierto, setModalAdminAbierto] = useState(false);
+  const [sugerenciaModalAbierto, setSugerenciaModalAbierto] = useState(false);
   const [claveAdminInput, setClaveAdminInput] = useState("");
   const [errorClaveAdmin, setErrorClaveAdmin] = useState(false);
   const [mensajeErrorClaveAdmin, setMensajeErrorClaveAdmin] = useState("Contraseña incorrecta");
@@ -148,6 +150,14 @@ export default function NavPrincipal({
     fontWeight: 600,
     letterSpacing: "0.14em",
     textTransform: "uppercase" as const
+  };
+  /** Subtítulo opcional bajo una entrada del menú (p. ej. Sugerencias y mejoras). */
+  const subtituloItemMenu = {
+    display: "block",
+    marginTop: 3,
+    fontSize: 12,
+    fontWeight: 400,
+    color: "rgba(229, 192, 123, 0.62)"
   };
 
   useEffect(() => {
@@ -938,6 +948,36 @@ export default function NavPrincipal({
             </div>
           </>
         )}
+
+        <div style={{ marginBottom: 6 }}>
+          <button
+            type="button"
+            onClick={() => {
+              setInicioMenuAbierto(false);
+              setSugerenciaModalAbierto(true);
+            }}
+            style={{
+              ...itemMenuInicio,
+              display: "block",
+              width: "100%",
+              textAlign: "center",
+              background: "linear-gradient(120deg, rgba(212,175,55,0.16), rgba(212,175,55,0.05))",
+              border: "1px solid rgba(212,175,55,0.38)",
+              borderRadius: 12,
+              padding: "14px 14px",
+              color: "#f5e6a3",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              boxShadow: "0 0 18px rgba(212,175,55,0.10), inset 0 1px 0 rgba(245,230,163,0.10)"
+            }}
+          >
+            💡 Ayúdeanos a mejorar <span className="maika-menu-sparkle" aria-hidden>✨</span>
+            <span style={subtituloItemMenu}>Tu opinión nos ayuda</span>
+            <span style={{ ...subtituloItemMenu, marginTop: 6, fontSize: 11.5 }}>
+              🔐 Requiere estar registrado
+            </span>
+          </button>
+        </div>
       </div>
     )}
     {modalAdminAbierto && (
@@ -955,6 +995,9 @@ export default function NavPrincipal({
         cerrarModalAdmin={cerrarModalAdmin}
         confirmarAccesoAdmin={confirmarAccesoAdmin}
       />
+    )}
+    {sugerenciaModalAbierto && (
+      <SugerenciaModal onClose={() => setSugerenciaModalAbierto(false)} />
     )}
     </>
   );
