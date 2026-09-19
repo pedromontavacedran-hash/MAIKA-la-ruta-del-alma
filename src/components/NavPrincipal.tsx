@@ -69,7 +69,7 @@ export default function NavPrincipal({
   const location = useLocation();
   const navigate = useNavigate();
   const adminUiPermitido = useEsAdminPermitidoEnEsteCliente();
-  const { cart, accesoAdmin, usuario, setBusquedaTienda, sesionCarritoLista } = useApp();
+  const { cart, accesoAdmin, setBusquedaTienda, sesionCarritoLista } = useApp();
   const esAdmin = isAdminAuthorized();
   const totalItemsCarrito = cart.reduce((sum, item) => sum + (Number(item.cantidad) || 0), 0);
   const mostrarBadgeCarrito = sesionCarritoLista && totalItemsCarrito > 0;
@@ -158,6 +158,14 @@ export default function NavPrincipal({
     fontSize: 12,
     fontWeight: 400,
     color: "rgba(229, 192, 123, 0.62)"
+  };
+  /** Líneas informativas del bloque «Reglas» del menú: texto, no enlaces. */
+  const lineaReglaMenu = {
+    margin: "0 0 6px",
+    padding: "4px 0",
+    fontSize: 12.5,
+    lineHeight: 1.5,
+    color: "rgba(255, 255, 255, 0.55)"
   };
 
   useEffect(() => {
@@ -332,8 +340,8 @@ export default function NavPrincipal({
   const navIconRightVisualPx = Math.round(navIconVisualPx * 0.84);
   const navIconTouchPx = Math.max(36, Math.round(navIconVisualPx + 8));
   const navIconOffsetBottomPx = Math.max(0, Math.floor((barH - navIconTouchPx) / 2) - 8);
-  /** Baja el logo un poco respecto al centro óptico de la barra (alineación con hamburguesa / iconos). */
-  const logoBarMarkOffsetYPx = Math.min(16, Math.max(4, Math.round(barH * 0.08)));
+  /** Baja el logo respecto al centro óptico de la barra: con la barra más baja el logo besa/asoma por el borde inferior. */
+  const logoBarMarkOffsetYPx = Math.min(20, Math.max(6, Math.round(barH * 0.16)));
 
   useEffect(() => {
     if (esAdmin && adminUiPermitido) preloadAdminOnce();
@@ -770,11 +778,11 @@ export default function NavPrincipal({
         <div style={tituloSeccionMenu}>✨ Experiencias</div>
         <div style={{ marginBottom: 6 }}>
           <Link
-            to={PATH_BY_PAGINA.suenos}
+            to={PATH_BY_PAGINA.servicios}
             onClick={() => setInicioMenuAbierto(false)}
-            style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: location.pathname === PATH_BY_PAGINA.suenos ? 700 : itemMenuInicio.fontWeight }}
+            style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: location.pathname === PATH_BY_PAGINA.servicios ? 700 : itemMenuInicio.fontWeight }}
           >
-            🌙 Sueños
+            ✨ Servicios
           </Link>
         </div>
         <div style={{ marginBottom: 6 }}>
@@ -786,16 +794,18 @@ export default function NavPrincipal({
             🔮 Horóscopos
           </Link>
         </div>
-        <div style={{ marginBottom: 6 }}>
+        <div>
           <Link
-            to={PATH_BY_PAGINA.servicios}
+            to={PATH_BY_PAGINA.suenos}
             onClick={() => setInicioMenuAbierto(false)}
-            style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: location.pathname === PATH_BY_PAGINA.servicios ? 700 : itemMenuInicio.fontWeight }}
+            style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: location.pathname === PATH_BY_PAGINA.suenos ? 700 : itemMenuInicio.fontWeight }}
           >
-            ✨ Servicios
+            🌙 Sueños
           </Link>
         </div>
-        <div>
+
+        <div style={tituloSeccionMenu}>🛍️ Tienda</div>
+        <div style={{ marginBottom: 6 }}>
           <Link
             to={PATH_BY_PAGINA.ritualDelMes}
             onClick={() => setInicioMenuAbierto(false)}
@@ -806,19 +816,7 @@ export default function NavPrincipal({
               fontWeight: location.pathname === PATH_BY_PAGINA.ritualDelMes ? 700 : itemMenuInicio.fontWeight
             }}
           >
-            🕯 Ritual del mes
-          </Link>
-        </div>
-
-        <div style={tituloSeccionMenu}>🛍 Tienda</div>
-        <div style={{ marginBottom: 6 }}>
-          <Link
-            to={PATH_BY_PAGINA.tienda}
-            onClick={() => setInicioMenuAbierto(false)}
-            onMouseEnter={() => onPrefetchPagina?.("tienda")}
-            style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: esRutaVistaTiendaShellScroll(location.pathname) ? 700 : itemMenuInicio.fontWeight }}
-          >
-            Tienda
+            🕯️ Ritual del mes
           </Link>
         </div>
         <div style={{ marginBottom: 6 }}>
@@ -841,6 +839,16 @@ export default function NavPrincipal({
             🔥 Los más vendidos
           </Link>
         </div>
+        <div style={{ marginBottom: 6 }}>
+          <Link
+            to={PATH_BY_PAGINA.tienda}
+            onClick={() => setInicioMenuAbierto(false)}
+            onMouseEnter={() => onPrefetchPagina?.("tienda")}
+            style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: esRutaVistaTiendaShellScroll(location.pathname) ? 700 : itemMenuInicio.fontWeight }}
+          >
+            🛒 Tienda
+          </Link>
+        </div>
         {!accesoAdmin && (
           <div>
             <Link
@@ -849,19 +857,19 @@ export default function NavPrincipal({
               onMouseEnter={() => onPrefetchPagina?.("seguimiento")}
               style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: location.pathname === PATH_BY_PAGINA.seguimiento ? 700 : itemMenuInicio.fontWeight }}
             >
-              Seguimiento de pedidos
+              📦 Seguimiento de pedidos
             </Link>
           </div>
         )}
 
-        <div style={tituloSeccionMenu}>🪷 Sobre Maika</div>
+        <div style={tituloSeccionMenu}>🌿 Sobre Maika</div>
         <div style={{ marginBottom: 6 }}>
           <Link
             to={PATH_BY_PAGINA.sobreMaika}
             onClick={() => setInicioMenuAbierto(false)}
             style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: location.pathname === PATH_BY_PAGINA.sobreMaika ? 700 : itemMenuInicio.fontWeight }}
           >
-            Sobre Maika
+            🌿 Sobre Maika
           </Link>
         </div>
         <div style={{ marginBottom: 6 }}>
@@ -875,7 +883,7 @@ export default function NavPrincipal({
               fontWeight: location.pathname === PATH_BY_PAGINA.testimonios ? 700 : itemMenuInicio.fontWeight
             }}
           >
-            Testimonios
+            💬 Testimonios
           </Link>
         </div>
         <div style={{ marginBottom: 6 }}>
@@ -884,7 +892,7 @@ export default function NavPrincipal({
             onClick={() => setInicioMenuAbierto(false)}
             style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: location.pathname === PATH_BY_PAGINA.contacto ? 700 : itemMenuInicio.fontWeight }}
           >
-            Contacto
+            📩 Contacto
           </Link>
         </div>
         <div style={{ marginBottom: 6 }}>
@@ -893,7 +901,7 @@ export default function NavPrincipal({
             onClick={() => setInicioMenuAbierto(false)}
             style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: location.pathname === PATH_BY_PAGINA.envios ? 700 : itemMenuInicio.fontWeight }}
           >
-            Envíos
+            🚚 Envíos
           </Link>
         </div>
         <div>
@@ -910,51 +918,23 @@ export default function NavPrincipal({
                   : itemMenuInicio.fontWeight
             }}
           >
-            Legal
+            ⚖️ Legal
           </Link>
         </div>
-
-        <div style={tituloSeccionMenu}>👤 Mi cuenta</div>
-        {usuario ? (
-          <div>
-            <Link
-              to={PATH_BY_PAGINA.cuenta}
-              onClick={() => setInicioMenuAbierto(false)}
-              onMouseEnter={() => onPrefetchPagina?.("cuenta")}
-              style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: location.pathname === PATH_BY_PAGINA.cuenta ? 700 : itemMenuInicio.fontWeight }}
-            >
-              Mi cuenta
-            </Link>
-          </div>
-        ) : (
-          <>
-            <div style={{ marginBottom: 6 }}>
-              <Link
-                to="/cuenta?vista=login"
-                onClick={() => setInicioMenuAbierto(false)}
-                style={{ ...itemMenuInicio, textDecoration: "none", color: "white" }}
-              >
-                Iniciar sesión
-              </Link>
-            </div>
-            <div>
-              <Link
-                to="/cuenta?vista=registro"
-                onClick={() => setInicioMenuAbierto(false)}
-                style={{ ...itemMenuInicio, textDecoration: "none", color: "white" }}
-              >
-                Crear cuenta gratuita
-              </Link>
-            </div>
-          </>
-        )}
-
+        <div
+          aria-hidden="true"
+          style={{ display: "flex", alignItems: "center", gap: 12, margin: "22px 4px 18px", color: "rgba(229, 192, 123, 0.55)" }}
+        >
+          <span style={{ flex: 1, height: 1, background: "linear-gradient(90deg, transparent, rgba(229, 192, 123, 0.45))" }} />
+          <span style={{ fontSize: 12, lineHeight: 1 }}>✦</span>
+          <span style={{ flex: 1, height: 1, background: "linear-gradient(270deg, transparent, rgba(229, 192, 123, 0.45))" }} />
+        </div>
         <div style={{ marginBottom: 6 }}>
           <button
             type="button"
-            onClick={() => {
-              setInicioMenuAbierto(false);
-              setSugerenciaModalAbierto(true);
+            onClick={() => {
+              setInicioMenuAbierto(false);
+              setSugerenciaModalAbierto(true);
             }}
             style={{
               ...itemMenuInicio,
@@ -971,13 +951,17 @@ export default function NavPrincipal({
               boxShadow: "0 0 18px rgba(212,175,55,0.10), inset 0 1px 0 rgba(245,230,163,0.10)"
             }}
           >
-            💡 Ayúdeanos a mejorar <span className="maika-menu-sparkle" aria-hidden>✨</span>
+            💡 Ayúdanos a mejorar <span className="maika-menu-sparkle" aria-hidden>✨</span>
             <span style={subtituloItemMenu}>Tu opinión nos ayuda</span>
             <span style={{ ...subtituloItemMenu, marginTop: 6, fontSize: 11.5 }}>
               🔐 Requiere estar registrado
             </span>
           </button>
         </div>
+
+        <div style={tituloSeccionMenu}>🔐 Reglas</div>
+        <p style={lineaReglaMenu}>🌙 Sueños → requiere estar registrado.</p>
+        <p style={lineaReglaMenu}>🔮 Horóscopos → requiere estar registrado.</p>
       </div>
     )}
     {modalAdminAbierto && (

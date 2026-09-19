@@ -167,6 +167,23 @@
     overflow-y: hidden !important;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    /*
+     * Heredado del sticky antiguo (12px/14px): desplazaba la fila interior hacia abajo
+     * y el logo/iconos quedaban colgando bajo el borde. La barra hero centra sin ese padding.
+     */
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  /*
+   * El logo cuelga unos px por el borde inferior de la barra (offset Y en NavPrincipal).
+   * `clip` no crea scrollport: permite `overflow-y: visible` sin que aparezca scroll vertical.
+   * Sin soporte de `clip` se mantiene el recorte anterior (logo dentro de la barra).
+   */
+  @supports (overflow-x: clip) {
+    .app-topbar.app-topbar--hero-style {
+      overflow-x: clip !important;
+      overflow-y: visible !important;
+    }
   }
   .app-topbar.app-topbar--hero-style::-webkit-scrollbar {
     display: none;
