@@ -1111,7 +1111,7 @@ export default function Tienda({
           gap: 30,
         }}
       >
-        {categoriasCatalogo.map((categoria) => {
+        {categoriasCatalogo.filter((categoria) => getProductosForCategoria(categoria.id, velas, inciensos, figuras, kits, joyas).length > 0).map((categoria) => {
           const productosCat = getProductosForCategoria(categoria.id, velas, inciensos, figuras, kits, joyas);
           const nombreDisplay = categoria.nombre.charAt(0).toUpperCase() + categoria.nombre.slice(1);
           return (
