@@ -131,7 +131,7 @@ export default function PreciosCompetenciaSection({
                 >
                   <div style={{ width: 44, height: 44, borderRadius: 6, overflow: "hidden", background: "#fff" }}>
                     {it.imagen ? (
-                      <img src={it.imagen} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                      <img src={it.imagen} alt="" loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
                     ) : null}
                   </div>
                   <div style={{ minWidth: 0 }}>
