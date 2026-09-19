@@ -2,7 +2,7 @@ import { Router } from "express";
 import crypto from "node:crypto";
 import jwt from "jsonwebtoken";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { PREMIUM_JWT_SECRET, premiumSeguimientoOkFile, premiumJtiLegacyUsedFile, suenoUsoGratuitoFile, IS_PRODUCTION } from "../lib/env.js";
+import { PREMIUM_JWT_SECRET, premiumSeguimientoOkFile, premiumJtiLegacyUsedFile, suenoUsoGratuitoFile, IS_PRODUCTION, limitesPruebaDesactivados } from "../lib/env.js";
 import { suenoInterpretarLimiter, suenoImagenLimiter } from "../lib/rateLimits.js";
 import { authMiddleware } from "../lib/auth.js";
 import { fechaHoyEspana, msHastaMedianocheEspana } from "../lib/fechaEspana.js";
@@ -345,8 +345,10 @@ async function interpretarSuenoSeguimientoOpenAI(textProvider, texto, interpreta
  * (`sueno_uso_gratuito.json`): borrar localStorage, cambiar de navegador, cerrar sesión o reiniciar
  * el servidor no lo reinician.
  * `SUENO_GRATUITO_COOLDOWN_MS=0` desactiva el límite (tests); en tests vale desactivado por defecto.
+ * `MAIKA_PRUEBAS_SIN_LIMITES=1` también lo desactiva (modo pruebas manual en móvil/web).
  */
 function suenoLimiteDiarioActivo() {
+  if (limitesPruebaDesactivados()) return false;
   const env = Number(process.env.SUENO_GRATUITO_COOLDOWN_MS);
   if (Number.isFinite(env)) return env > 0;
   return process.env.NODE_ENV !== "test";

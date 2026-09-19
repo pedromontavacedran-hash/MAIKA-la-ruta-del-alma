@@ -43,6 +43,19 @@ if (process.env.MAIKA_QUIET !== "1") {
   console.log("[maika-backend] API KEY length:", (process.env.OPENAI_API_KEY || "").length);
 }
 
+/**
+ * Modo pruebas (solo desarrollo local): `MAIKA_PRUEBAS_SIN_LIMITES=1` desactiva los límites
+ * diarios de horóscopo/sueños y los rate-limits de sugerencias, interpretación e imagen de sueño.
+ * Se lee en cada llamada (no en import) para que tests puedan activarlo/desactivarlo en caliente.
+ */
+export function limitesPruebaDesactivados() {
+  return String(process.env.MAIKA_PRUEBAS_SIN_LIMITES || "").trim() === "1";
+}
+
+if (limitesPruebaDesactivados() && process.env.MAIKA_QUIET !== "1") {
+  console.log("[maika-backend] MODO PRUEBAS: límites diarios y rate-limits de experiencias DESACTIVADOS");
+}
+
 export const dataDir = process.env.MAIKA_USER_DATA
   ? path.join(process.env.MAIKA_USER_DATA, "maika-backend-data")
   : path.join(BACKEND_DIR, "data");
@@ -54,11 +67,11 @@ export const idempotenciaPedidosFile = path.join(dataDir, "idempotenciaPedidos.j
 export const idempotenciaPerfilFile = path.join(dataDir, "idempotenciaPerfil.json");
 export const carritosFile = path.join(dataDir, "carritos.json");
 export const usuariosFile = path.join(dataDir, "usuarios.json");
-/** Buzón de "Sugerir una mejora" del menú: escritura solo autenticada; lectura solo admin. */
-export const sugerenciasFile = path.join(dataDir, "sugerencias.json");
 export const productosFile = path.join(dataDir, "productos.json");
 export const categoriasFile = path.join(dataDir, "categorias.json");
 export const subcategoriasFile = path.join(dataDir, "subcategorias.json");
+/** Buzón de "Sugerir una mejora" del menú: escritura solo autenticada; lectura solo admin. */
+export const sugerenciasFile = path.join(dataDir, "sugerencias.json");
 /** `public/tienda/<categoria>/[<subcategoria>/]` — fotos reales de producto, servidas por Vite en dev y bundleadas en build. */
 export const publicTiendaDir = path.join(BACKEND_DIR, "..", "public", "tienda");
 /** `jti` de tokens premium con lectura profunda ya generada (permite chat con el mismo JWT hasta que caduque). */

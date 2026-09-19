@@ -1,5 +1,6 @@
 import rateLimit from "express-rate-limit";
 import { normalizarTelefono } from "./validacion.js";
+import { limitesPruebaDesactivados } from "./env.js";
 
 /**
  * Tras desbloquear un usuario desde admin, sus intentos anteriores no deben contar:
@@ -146,6 +147,7 @@ export const suenoInterpretarLimiter = rateLimit({
   limit: 100,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => limitesPruebaDesactivados(),
   message: {
     ok: false,
     error: "Demasiadas interpretaciones seguidas. Espera unos minutos y vuelve a intentarlo."
@@ -157,6 +159,8 @@ export const suenoImagenLimiter = rateLimit({
   limit: 6,
   standardHeaders: true,
   legacyHeaders: false,
+  /* OJO: con el modo pruebas activo cada imagen llama a DALL-E (coste real por llamada). */
+  skip: () => limitesPruebaDesactivados(),
   message: {
     ok: false,
     error: "Demasiadas imágenes seguidas. Espera unos minutos y vuelve a intentarlo."
@@ -180,6 +184,7 @@ export const sugerenciaLimiter = rateLimit({
   limit: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => limitesPruebaDesactivados(),
   message: {
     error: "Demasiadas sugerencias seguidas. Espera unos minutos y vuelve a intentarlo."
   }

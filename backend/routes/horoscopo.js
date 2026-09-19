@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { horoscopoUsoDiarioFile } from "../lib/env.js";
+import { horoscopoUsoDiarioFile, limitesPruebaDesactivados } from "../lib/env.js";
 import { authMiddleware } from "../lib/auth.js";
 import { suenoInterpretarLimiter } from "../lib/rateLimits.js";
 import { fechaHoyEspana, msHastaMedianocheEspana } from "../lib/fechaEspana.js";
@@ -57,7 +57,7 @@ horoscopoRouter.get("/horoscopo/estado", authMiddleware, suenoInterpretarLimiter
   ensureUsoLoaded();
   const hoy = fechaHoyEspana();
   const uso = usoDiario.get(`usr:${req.user.id}`);
-  const yaUsado = !!uso && uso.fecha === hoy;
+  const yaUsado = !limitesPruebaDesactivados() && !!uso && uso.fecha === hoy;
   res.json({
     ok: true,
     yaUsado,
@@ -77,7 +77,7 @@ horoscopoRouter.post("/horoscopo/uso", authMiddleware, suenoInterpretarLimiter, 
   const hoy = fechaHoyEspana();
   const clave = `usr:${req.user.id}`;
   const uso = usoDiario.get(clave);
-  if (uso && uso.fecha === hoy) {
+  if (!limitesPruebaDesactivados() && uso && uso.fecha === hoy) {
     res.status(409).json({ ok: false, error: "limite_diario", signo: uso.signo });
     return;
   }
