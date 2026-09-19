@@ -57,6 +57,42 @@ export function segmentosDesdeTexto(texto: string): string[] {
 let speechChainId = 0;
 const PAUSA_ENTRE_FRASES_MS = 350;
 
+/*
+ * Mantiene la pantalla encendida mientras se narra: la lectura dura minutos sin tocar el
+ * móvil y el sistema la apagaba a mitad (pantalla en negro aunque el audio seguía).
+ * Screen Wake Lock no existe en todos los WebView: si falla, se sigue sin ella.
+ */
+type WakeLockSentinelLike = { release: () => Promise<void> };
+let wakeLockSentinel: WakeLockSentinelLike | null = null;
+let narracionEnCurso = false;
+
+async function pedirPantallaDespierta() {
+  if (typeof navigator === "undefined") return;
+  const wl = (navigator as { wakeLock?: { request: (tipo: string) => Promise<WakeLockSentinelLike> } }).wakeLock;
+  if (!wl) return;
+  try {
+    wakeLockSentinel = await wl.request("screen");
+  } catch {
+    wakeLockSentinel = null;
+  }
+}
+
+function soltarPantallaDespierta() {
+  narracionEnCurso = false;
+  const s = wakeLockSentinel;
+  wakeLockSentinel = null;
+  if (s) void s.release().catch(() => undefined);
+}
+
+/* El sistema suelta el wake-lock al ocultar la app; se repide al volver si seguía narrando. */
+if (typeof document !== "undefined") {
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && narracionEnCurso && !wakeLockSentinel) {
+      void pedirPantallaDespierta();
+    }
+  });
+}
+
 /**
  * Matices gratis por frase (nada de voz de pago): ligera entonación de pregunta/exclamación,
  * una pizca de variación aleatoria para que no suene siempre clavado igual, y pausa distinta
@@ -105,6 +141,12 @@ export function hablarNatural(
     onFin?.();
     return;
   }
+  narracionEnCurso = true;
+  void pedirPantallaDespierta();
+  const finYLiberar = () => {
+    soltarPantallaDespierta();
+    onFin?.();
+  };
   let i = 0;
   let pausaTimer: number | null = null;
   let revelado = "";
@@ -128,7 +170,7 @@ export function hablarNatural(
   function siguiente() {
     if (myId !== speechChainId) return;
     if (i >= segmentos.length) {
-      onFin?.();
+      finYLiberar();
       return;
     }
     const segmentoTexto = segmentos[i];
@@ -174,7 +216,7 @@ export function hablarNatural(
       onProgreso?.(revelado);
       i += 1;
       if (i >= segmentos.length) {
-        onFin?.();
+        finYLiberar();
         return;
       }
       pausaTimer = window.setTimeout(siguiente, matiz.pausaMs);
@@ -210,6 +252,14 @@ export function hablarNatural(
           onProgreso(prefijo ? `${prefijo} ${segmentoTexto.slice(0, idx)}` : segmentoTexto.slice(0, idx));
           if (idx >= caracteresFrase.length) {
             limpiarTimerFrase();
+            /*
+             * Sin `boundary` (WebView Android y voces que no emiten eventos) `onend`
+             * puede no dispararse nunca: el avance lo lleva el cronómetro y la lectura
+             * sigue fluida, sin esperas muertas entre frases. Los utterances se encolan
+             * en el motor de voz, así que el audio no se solapa. Si `onend` sí llega,
+             * el guard `finalizado` evita el doble avance.
+             */
+            avanzar();
           }
         }, msPorLetra);
       }
@@ -221,6 +271,7 @@ export function hablarNatural(
 /** Cancela cualquier narración en curso e invalida las cadenas de habla pendientes. */
 export function detenerNarracion() {
   speechChainId += 1;
+  soltarPantallaDespierta();
   emitSpeechEnd();
   if (typeof window !== "undefined" && window.speechSynthesis) {
     window.speechSynthesis.cancel();
