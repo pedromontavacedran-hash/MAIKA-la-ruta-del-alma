@@ -7,7 +7,7 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
   /** No lintar salidas de build (Vite, Gradle/Capacitor). */
-  globalIgnores(['dist', 'dist-electron', 'android/**', '**/build/**']),
+  globalIgnores(['dist', 'dist-electron', 'android/**', '**/build/**', 'backups/**']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
