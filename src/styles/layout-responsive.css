@@ -301,12 +301,16 @@
   /*
    * Igual que en escritorio (layout-shell ≥769): el documento no debe hacer scroll vertical.
    * Si no, la rueda/touch mueve `html/body` y a la vez `.app-shell__routes-grow` → sensación de “pantalla que se mueve”.
+   * Antes `html/body` llevaban `overflow-y: auto`: body capturaba el overflow pero el scrollingElement
+   * del documento es `html`, que no veía desplazamiento → en WebView/móvil la página quedaba congelada.
+   * Ahora el scrollport real es un elemento acotado: `.app-shell` en /tienda y `.app-shell__routes-grow`
+   * en el resto, mismo modelo que escritorio.
    */
   html,
   body {
     height: 100%;
     overflow-x: hidden;
-    overflow-y: auto;
+    overflow-y: hidden;
     overscroll-behavior: auto;
     overscroll-behavior-y: auto;
   }
@@ -321,7 +325,60 @@
     min-height: 100svh;
   }
 
+  /* /tienda (catálogo largo): el scroll va en el shell completo, como en escritorio. */
+  .app-shell.app-shell--tienda-shell-scroll {
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  .app-shell.app-shell--tienda-shell-scroll .app-shell__content {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  /* Resto de rutas: columna fija a viewport y scroll vertical dentro de `.app-shell__routes-grow`. */
+  .app-shell:not(.app-shell--tienda-shell-scroll) {
+    overflow: hidden;
+  }
+  .app-shell:not(.app-shell--tienda-shell-scroll) .app-shell__content {
+    height: 100%;
+    min-height: 0;
+    overflow-y: hidden;
+  }
+  .app-shell:not(.app-shell--tienda-shell-scroll) .app-shell__routes-grow {
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
   html::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    background: transparent;
+  }
+
+  /*
+   * Scrollports reales en móvil (página, tienda, desplegable, modales, fila de iconos):
+   * el gesto sigue funcionando pero la barra no se muestra nunca (aspecto app nativa).
+   */
+  .app-shell,
+  .app-shell__routes-grow,
+  .app-shell:not(.app-shell--tienda-shell-scroll) .app-shell__routes-grow,
+  .app-inicio-dropdown,
+  .app-topbar__inner-row,
+  .modal-overlay,
+  .modal-card {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .app-shell::-webkit-scrollbar,
+  .app-shell__routes-grow::-webkit-scrollbar,
+  .app-inicio-dropdown::-webkit-scrollbar,
+  .app-topbar__inner-row::-webkit-scrollbar,
+  .modal-overlay::-webkit-scrollbar,
+  .modal-card::-webkit-scrollbar {
     width: 0;
     height: 0;
     background: transparent;

@@ -82,7 +82,6 @@ export default function CampanaPackModal({
       abierto={abierto}
       onClose={onClose}
       maxWidth="520px"
-      styleOverlay={{ overflowY: "hidden" }}
       classNameOverlay="modal-overlay--checkout"
       classNameCard="checkout-modal-card campana-pack-modal-card"
       ariaLabelledBy="campana-pack-modal-titulo"

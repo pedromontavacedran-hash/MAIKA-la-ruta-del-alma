@@ -1,0 +1,8 @@
+/*
+ * /contacto — contenido mínimo que siempre cabe en pantalla: anulamos el min-height del
+ * wrap de ruta (`calc(100svh - var(--app-topbar-stack))`, ver routeLayouts) para que no quede
+ * un scroll fantasma de unos píxeles. Si el contenido creciera, el scroll sigue funcionando.
+ */
+html.contacto-page .page-top-spacing > div {
+  min-height: 0 !important;
+}

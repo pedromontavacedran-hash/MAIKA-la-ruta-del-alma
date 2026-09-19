@@ -1,9 +1,20 @@
+import { useEffect } from "react";
 import { CHECKOUT_CONFIG } from "@/config/checkoutConfig";
 import { THEME } from "../config";
+import "./contacto.css";
 
 const URL_WHATSAPP_CONTACTO = `https://wa.me/${CHECKOUT_CONFIG.whatsappNumber}?text=Hola%20Maika%2C%20quiero%20más%20información`;
 
 export default function ContactoPage() {
+  /* Marca la ruta en <html> para que contacto.css quite el scroll fantasma solo aquí. */
+  useEffect(() => {
+    const html = document.documentElement;
+    html.classList.add("contacto-page");
+    return () => {
+      html.classList.remove("contacto-page");
+    };
+  }, []);
+
   return (
     <div className="inicio-page" style={{ textAlign: "center", color: "inherit" }}>
       <div className="inicio-bloques-texto" style={{ maxWidth: 560, marginLeft: "auto", marginRight: "auto" }}>

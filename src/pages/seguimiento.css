@@ -1,0 +1,15 @@
+/*
+ * /seguimiento — contenido corto en vista cliente: quitamos los min-height del wrap de ruta
+ * (`calc(100svh - var(--app-topbar-stack))` en routeLayouts + `.maika-page { min-height: 100% }`)
+ * para que no quede un scroll fantasma de unos píxeles. Si el contenido crece (vista admin con
+ * gestión de pedidos), el scroll real sigue funcionando.
+ */
+html.seguimiento-page .page-top-spacing > div {
+  min-height: 0 !important;
+}
+
+html.seguimiento-page .maika-page {
+  min-height: 0;
+  /* Baja el bloque un poco respecto a la barra fija. */
+  margin-top: clamp(20px, 5vh, 56px);
+}

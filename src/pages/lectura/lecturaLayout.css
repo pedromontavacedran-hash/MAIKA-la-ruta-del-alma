@@ -42,7 +42,8 @@
   --lectura-pad-bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(40px, 11vw, 64px));
   --lectura-signo-fs: 18px;
   --lectura-signo-lh: 1.15;
-  height: var(--lectura-pantalla-alto);
+  /* min-height: pantalla completa si la lectura es corta; crece si es larga (el texto
+     varÃ­a por arcano) y el desplazamiento lo hace el scrollport de la ruta. */
   min-height: var(--lectura-pantalla-alto);
   /* `--lectura-tirar-hacia-barra` en `html` (admin): resta aire interno; el hueco bajo la nav sigue en `.page-top-spacing`. */
   padding-top: max(
@@ -55,7 +56,7 @@
   box-sizing: border-box;
   /* Fondo global: admin â†’ Â«Capa baseÂ» degradado lila (fondoPantallaConfig + FondoEstrellado). */
   background: transparent;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* Piscis: lectura larga; sube el bloque para ganar aire Ãºtil sin tocar el grid general */
@@ -98,8 +99,8 @@
   margin-right: auto;
   align-self: stretch;
   padding: 0 clamp(var(--l-space-sm), 3vw, var(--l-space-lg));
-  height: 100%;
-  max-height: 100%;
+  height: auto;
+  max-height: none;
   overflow: visible;
 
   /* --- visual --- */
@@ -108,9 +109,9 @@
   font-size: 16px;
 }
 
-/* Ocupa el alto bajo la barra; en mÃ³vil el scroll unificado va aquÃ­ (ver Â§11). */
+/* Ocupa el alto bajo la barra y crece si la lectura es larga; el scroll lo hace el scrollport de la ruta (ver Â§11). */
 .lectura-shell.lectura-page > .lectura-contenido.lectura-container.lectura-malla:not(.lectura-contenido--empty) {
-  flex: 1 1 0;
+  flex: 1 1 auto;
   min-height: 0;
 }
 

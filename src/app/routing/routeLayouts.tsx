@@ -34,7 +34,7 @@ export function bloqueLayoutContenido(children: ReactNode) {
 export function bloqueLayoutSuenos(children: ReactNode) {
   return (
     <div className="page-top-spacing">
-      <div style={buildScreenStyle(800, "20px", { minHeight: 0 }, "40px")}>{children}</div>
+      <div className="maika-suenos-ruta-wrap" style={buildScreenStyle(800, "20px", { minHeight: 0 }, "40px")}>{children}</div>
     </div>
   );
 }

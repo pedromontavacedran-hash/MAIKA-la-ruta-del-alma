@@ -250,18 +250,17 @@ body.inicio-no-scroll {
   }
 
   /*
-   * Mandala + CTA: superpuestos al JPG, bastante más arriba que el pie del arte
-   * (evita quedar sobre «Rutas del alma» y similares en el propio banner).
+   * Mandala + CTA: superpuestos al JPG, bajo el arco superior del arte.
+   * Anclado desde el borde superior del visual (como en escritorio, que usa padding-top):
+   * con `bottom`+dvh la posición dependía del alto de ventana y en ventanas bajas de PC
+   * el botón caía a media altura del arte.
    */
   .hero-section__brand-stack {
     position: absolute;
     left: 0;
     right: 0;
-    bottom: max(
-      calc(10px + env(safe-area-inset-bottom, 0px)),
-      clamp(132px, 39dvh, 294px)
-    );
-    top: auto;
+    top: clamp(20px, 11%, 44px);
+    bottom: auto;
     width: 100%;
     max-width: 100%;
     flex: unset;

@@ -13,14 +13,10 @@ body.lectura-no-scroll {
 }
 
 /*
- * Escritorio: `.app-shell__routes-grow` es un contenedor de scroll propio, distinto de html/body
- * (ver layout-shell.css), asÃ­ que el `overflow:hidden` de arriba no lo cubre por sÃ­ solo.
+ * La lectura puede superar el alto de pantalla (el texto varÃ­a por arcano): la pÃ¡gina crece
+ * con el contenido y scrollea por `.app-shell__routes-grow`, el scrollport real de la app en
+ * todas las anchuras (ver layout-shell.css). Ya no se bloquea el scroll en ningÃºn viewport.
  */
-@media (min-width: 769px) {
-  html.lectura-no-scroll .app-shell__routes-grow {
-    overflow-y: hidden !important;
-  }
-}
 
 /* Valores por defecto; el admin puede sobreescribirlos en `html` vÃ­a `lecturaPantallaConfig.ts`. */
 :root {

@@ -4,6 +4,7 @@ import BotonCerrar from "../components/BotonCerrar";
 import { THEME } from "../config";
 import { textoDireccionVistaAdmin } from "../utils/pedidos/direccionPedidoVista";
 import { useEffect, useMemo, useState } from "react";
+import "./seguimiento.css";
 
 const BUSQUEDA_PEDIDO_SESSION_KEY = "maika_admin_busqueda_pedido";
 const PENDIENTES_ABIERTO_SESSION_KEY = "maika_admin_pendientes_abierto";
@@ -40,6 +41,15 @@ export default function SeguimientoPage() {
     setPagina
   } = useApp();
   const [busquedaPedidoInput, setBusquedaPedidoInput] = useState(busquedaPedido);
+
+  /* Marca la ruta en <html> para que seguimiento.css ajuste solo esta página (sin scroll fantasma). */
+  useEffect(() => {
+    const html = document.documentElement;
+    html.classList.add("seguimiento-page");
+    return () => {
+      html.classList.remove("seguimiento-page");
+    };
+  }, []);
 
   useEffect(() => {
     if (!accesoAdmin) return;
