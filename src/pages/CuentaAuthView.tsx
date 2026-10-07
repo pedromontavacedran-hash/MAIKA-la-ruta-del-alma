@@ -3,15 +3,14 @@ import type { CSSProperties, Dispatch, SetStateAction } from "react";
 import type { AuthForm, Usuario, Pedido, Pagina } from "../types";
 import { checkoutInputStyle, checkoutPrimaryButtonStyleNoShadow } from "../styles/inputStyle";
 import BotonCerrar from "../components/BotonCerrar";
-import UbicacionCpPanel from "../components/UbicacionCpPanel";
-import CalleInputConSugerencias from "../components/CalleInputConSugerencias";
 import { THEME } from "../config";
 import {
   loginApi,
   LoginApiError,
-  registerApi
+  registerApi,
+  solicitarCodigoRegistroApi
 } from "../services/apiAuth";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { construirDireccionBasica } from "../utils/direccion";
 import { leerMaikaUsuarios } from "../utils/maikaUsuarios";
 import { normalizarTelefonoES9 } from "../utils/telefono";
@@ -52,7 +51,6 @@ export interface CuentaPageProps {
   precargarDatosClienteDesdeUsuario: (u: Usuario | null) => void;
   pedidos: Pedido[];
   onRepetirPedido: (pedido: MaikaPedidoLS) => void;
-  enviarCodigoEmail: (email: string, nombre: string, codigo: string) => Promise<boolean>;
   setPagina: (p: Pagina) => void;
   telefonoForzadoRegistroDesdeAcceso: string;
   setTelefonoForzadoRegistroDesdeAcceso: Dispatch<SetStateAction<string>>;
@@ -85,7 +83,6 @@ export default function CuentaAuthView({
   setReenvioDisponibleEn,
   mostrarNotificacion,
   precargarDatosClienteDesdeUsuario,
-  enviarCodigoEmail,
   setPagina,
   telefonoForzadoRegistroDesdeAcceso,
   setTelefonoForzadoRegistroDesdeAcceso,
@@ -117,6 +114,10 @@ export default function CuentaAuthView({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [registroAdminLoading, setRegistroAdminLoading] = useState(false);
   const [envioCodigoRegistroCargando, setEnvioCodigoRegistroCargando] = useState(false);
+  /** Aceptación expresa obligatoria en alta pública (el alta admin no la pide). */
+  const [aceptaTerminos, setAceptaTerminos] = useState(false);
+  const [aceptaPrivacidad, setAceptaPrivacidad] = useState(false);
+  const [declaraMayorEdad, setDeclaraMayorEdad] = useState(false);
   const prevModoRef = useRef<"login" | "register" | null>(null);
   const nombreRegistroRef = useRef<HTMLInputElement>(null);
   const emailRegistroRef = useRef<HTMLInputElement>(null);
@@ -124,14 +125,7 @@ export default function CuentaAuthView({
   const confirmPasswordRegistroRef = useRef<HTMLInputElement>(null);
   const botonEnviarCodigoRegistroRef = useRef<HTMLButtonElement>(null);
   const botonCrearUsuarioGestionRef = useRef<HTMLButtonElement>(null);
-  const inputCalleRegistroRef = useRef<HTMLInputElement>(null);
   const telefonoRegistroRef = useRef<HTMLInputElement>(null);
-  const cpRegistroRef = useRef<HTMLInputElement>(null);
-  const numeroRegistroRef = useRef<HTMLInputElement>(null);
-  const pisoRegistroRef = useRef<HTMLInputElement>(null);
-  const puertaRegistroRef = useRef<HTMLInputElement>(null);
-  const bloqueRegistroRef = useRef<HTMLInputElement>(null);
-  const escaleraRegistroRef = useRef<HTMLInputElement>(null);
 
   // Estados para recuperar contraseña
   const [modoRecuperar, setModoRecuperar] = useState(false);
@@ -139,11 +133,11 @@ export default function CuentaAuthView({
   const [enlaceRecuperacionMismoNavegador, setEnlaceRecuperacionMismoNavegador] = useState<string | null>(null);
   const claveUsuario = claveTelefonoMaika(usuario?.telefono || "");
   const [, setMaikaPedidosUsuario] = useState<MaikaPedidoLS[]>([]);
-  const [mostrarCamposOpcionalesRegistro, setMostrarCamposOpcionalesRegistro] = useState(false);
+
   const [, setMostrarBannerCompletarPerfil] = useState(false);
   const [telefonoDuplicadoRegistro, setTelefonoDuplicadoRegistro] = useState(false);
   const [emailDuplicadoRegistro, setEmailDuplicadoRegistro] = useState(false);
-  const [calleRegistroResetSignal, setCalleRegistroResetSignal] = useState(0);
+
   const mostrarAvisoAccesoTemporalLogin = useMemo(() => {
     const ident = String(formAuth.email || "").trim().toLowerCase();
     if (!ident) return false;
@@ -239,7 +233,6 @@ export default function CuentaAuthView({
         notificarError(mostrarNotificacion, "❌ El teléfono debe ser 9 dígitos (móvil España, 6 o 7)");
         return false;
       }
-      const requiereDireccion = !registroForzadoDesdeAcceso;
       if (!formAuth.nombre || !formAuth.telefono || !formAuth.password || !formAuth.confirmPassword) {
         notificarError(mostrarNotificacion, "❌ Completa todos los campos obligatorios");
         return false;
@@ -254,19 +247,33 @@ export default function CuentaAuthView({
         notificarError(mostrarNotificacion, "❌ Indica un correo electrónico válido");
         return false;
       }
-      if (
-        requiereDireccion &&
-        (!formAuth.calle || !formAuth.numero || !formAuth.cp || !formAuth.provincia || !formAuth.poblacion || !formAuth.pais)
-      ) {
-        notificarError(mostrarNotificacion, "❌ Completa todos los campos obligatorios");
-        return false;
-      }
       if (formAuth.password !== formAuth.confirmPassword) {
         notificarError(mostrarNotificacion, "❌ Las contraseñas no coinciden");
         return false;
       }
       if (!passwordSeguraBasica(formAuth.password)) {
         notificarError(mostrarNotificacion, "❌ La contraseña debe tener mínimo 8 caracteres, con letras y números");
+        return false;
+      }
+      if (!skipActivacionCheck && !aceptaTerminos) {
+        notificarError(
+          mostrarNotificacion,
+          "❌ Debes aceptar los Términos y Condiciones"
+        );
+        return false;
+      }
+      if (!skipActivacionCheck && !aceptaPrivacidad) {
+        notificarError(
+          mostrarNotificacion,
+          "❌ Debes aceptar la Política de Privacidad"
+        );
+        return false;
+      }
+      if (!skipActivacionCheck && !declaraMayorEdad) {
+        notificarError(
+          mostrarNotificacion,
+          "❌ Debes declarar que eres mayor de 18 años"
+        );
         return false;
       }
       if (
@@ -289,7 +296,10 @@ export default function CuentaAuthView({
       activacionForzadaDesdeAcceso,
       confirmacionIdentidadActivacion,
       telefonoForzadoRegistroDesdeAcceso,
-      mostrarNotificacion
+      mostrarNotificacion,
+      aceptaTerminos,
+      aceptaPrivacidad,
+      declaraMayorEdad
     ]
   );
 
@@ -305,6 +315,8 @@ export default function CuentaAuthView({
       embedGestion?: boolean;
       /** Tras registro+login en desarrollo: mensaje, banner y abrir flujo de dirección (checkout embebido). */
       postDevAutoPerfil?: boolean;
+      /** Alta pública: token emitido por el backend tras validar el código de email (paso 2). */
+      verificacionToken?: string;
     }) => {
       let emailNorm = (formAuth.email || formAuth.confirmEmail || "").trim().toLowerCase();
       if (!tieneEmailVerificable(emailNorm) && isDev) {
@@ -375,6 +387,10 @@ export default function CuentaAuthView({
           password: formAuth.password,
           telefono: telefonoApi,
           nombre: nombreApi,
+          verificacionToken: opts?.verificacionToken,
+          aceptacionTerminos: aceptaTerminos,
+          aceptacionPrivacidad: aceptaPrivacidad,
+          declaraMayorEdad,
           activarCuentaTecnica: activacionForzadaDesdeAcceso,
           codigoUltimoPedido: activacionForzadaDesdeAcceso
             ? obtenerCodigoActivacionVerificadaEnSession(telefonoForzadoRegistroDesdeAcceso)
@@ -428,6 +444,9 @@ export default function CuentaAuthView({
         setModoForzadoRegistroDesdeAcceso("");
         setConfirmacionIdentidadActivacion(false);
         limpiarActivacionIdentidadVerificada();
+        setAceptaTerminos(false);
+        setAceptaPrivacidad(false);
+        setDeclaraMayorEdad(false);
         setFormAuth(formAuthReset);
         setReenvioDisponibleEn(0);
         setModoRegistro("login");
@@ -468,7 +487,10 @@ export default function CuentaAuthView({
       setReenvioDisponibleEn,
       navigate,
       onExitoAltaEmbedGestion,
-      setModoRegistro
+      setModoRegistro,
+      aceptaTerminos,
+      aceptaPrivacidad,
+      declaraMayorEdad
     ]
   );
 
@@ -501,7 +523,6 @@ export default function CuentaAuthView({
         }));
       } else {
         setFormAuth({ ...formAuthReset, pasoVerificacion: 1 });
-        setCalleRegistroResetSignal((n) => n + 1);
       }
     } else if (modoRegistro === "login" && prev === "register") {
       setFormAuth((prevForm) => ({
@@ -689,10 +710,12 @@ export default function CuentaAuthView({
                 setModoForzadoRegistroDesdeAcceso("");
                 setConfirmacionIdentidadActivacion(false);
                 limpiarActivacionIdentidadVerificada();
+                setAceptaTerminos(false);
+                setAceptaPrivacidad(false);
+                setDeclaraMayorEdad(false);
                 setFormAuth({ ...formAuthReset, pasoVerificacion: 1 });
                 setReenvioDisponibleEn(0);
                 setModoRecuperar(false);
-                setCalleRegistroResetSignal((n) => n + 1);
               }}
             >Registrarse</button>
           </div>
@@ -894,7 +917,7 @@ export default function CuentaAuthView({
                     } else if (registroForzadoDesdeAcceso) {
                       botonEnviarCodigoRegistroRef.current?.click();
                     } else {
-                      cpRegistroRef.current?.focus();
+                      botonEnviarCodigoRegistroRef.current?.focus();
                     }
                   }}
                   style={cuentaRegistroDensoInput}
@@ -902,240 +925,85 @@ export default function CuentaAuthView({
                 />
                 <button type="button" onClick={() => setShowConfirmPassword((v) => !v)} style={eyeBtnStyle} title={showConfirmPassword ? "Ocultar contraseña" : "Ver contraseña"} aria-label={showConfirmPassword ? "Ocultar contraseña" : "Ver contraseña"}>{showConfirmPassword ? "🙈" : "👁"}</button>
               </div>
-              {!registroForzadoDesdeAcceso && !ocultarTelefonoYDireccionRegistroRapido && (
+              {!adminRegistroSinVerificacion ? (
                 <>
-                  <p style={{ fontSize: 12, color: THEME.goldMain, fontWeight: 700, letterSpacing: 0.4, marginBottom: 6, marginTop: 10 }}>
-                    Dirección de envío
-                  </p>
-                  <p style={{ fontSize: 11, color: "rgba(255,255,255,0.65)", marginTop: -4, marginBottom: 8 }}>
-                    Usaremos esta dirección como principal para tus pedidos.
-                  </p>
-                  <div style={{ marginBottom: 0 }}>
-                    <UbicacionCpPanel
-                      namePrefix="maika-registro"
-                      layoutUbicacion="stack"
-                      cpInputRef={cpRegistroRef}
-                      cp={formAuth.cp || ""}
-                      onCpChange={(next) => {
-                        setFormAuth((prev) => ({
-                          ...prev,
-                          cp: next,
-                          ...(next.length < 5 ? { poblacion: "", provincia: "", pais: "" } : {})
-                        }));
-                      }}
-                      onCpKeyDown={(e) => {
-                        if (e.key !== "Enter") return;
-                        e.preventDefault();
-                        inputCalleRegistroRef.current?.focus();
-                      }}
-                      poblacion={formAuth.poblacion || ""}
-                      provincia={formAuth.provincia || ""}
-                      pais={formAuth.pais || ""}
-                      inputStyle={cuentaRegistroDensoInput}
-                    />
-                  </div>
-                  {/*
-                    Misma proporción en las dos filas: columna principal flexible + 96px fijos
-                    (alinea Puerta bajo N.º sin depender del grid con celdas de altura distinta).
-                  */}
-                  <div
+                  <label
                     style={{
                       display: "flex",
-                      flexDirection: "column",
+                      alignItems: "flex-start",
                       gap: 8,
                       marginTop: 8,
-                      marginBottom: 0,
-                      maxWidth: "100%"
-                    }}
-                  >
-                    <div style={{ display: "flex", gap: 10, alignItems: "flex-start", width: "100%" }}>
-                      <div style={{ flex: "1 1 0", minWidth: 0, width: "100%" }}>
-                        <CalleInputConSugerencias
-                          name="maika-registro-calle"
-                          placeholder="Calle *"
-                          value={formAuth.calle || ""}
-                          onValueChange={(v) => setFormAuth((prev) => ({ ...prev, calle: v }))}
-                          onMergeCampos={(patch) => setFormAuth((prev) => ({ ...prev, ...patch }))}
-                          cp={formAuth.cp || ""}
-                          poblacion={formAuth.poblacion || ""}
-                          inputStyle={cuentaRegistroDensoInput}
-                          forwardedRef={inputCalleRegistroRef}
-                          attachGooglePlaces={modoRegistro === "register" && (!usuario || adminRegistroSinVerificacion)}
-                          resetSignal={calleRegistroResetSignal}
-                          onInputKeyDown={(e) => {
-                            if (e.key !== "Enter") return;
-                            e.preventDefault();
-                            numeroRegistroRef.current?.focus();
-                          }}
-                        />
-                      </div>
-                      <input
-                        ref={numeroRegistroRef}
-                        type="text"
-                        name="maika-registro-numero"
-                        placeholder="N.º *"
-                        className="checkout-mini-placeholder"
-                        autoComplete="off"
-                        value={formAuth.numero}
-                        onChange={(e) => setFormAuth({ ...formAuth, numero: e.target.value.toUpperCase() })}
-                        onKeyDown={(e) => {
-                          if (e.key !== "Enter") return;
-                          e.preventDefault();
-                          pisoRegistroRef.current?.focus();
-                        }}
-                        style={{
-                          ...cuentaRegistroDensoInput,
-                          textTransform: "uppercase",
-                          marginBottom: 0,
-                          marginTop: 0,
-                          width: 96,
-                          minWidth: 96,
-                          maxWidth: 96,
-                          flexShrink: 0,
-                          boxSizing: "border-box",
-                          textAlign: "center"
-                        }}
-                      />
-                    </div>
-                    <div style={{ display: "flex", gap: 10, alignItems: "flex-start", width: "100%" }}>
-                      <input
-                        ref={pisoRegistroRef}
-                        type="text"
-                        name="maika-registro-piso"
-                        placeholder="Piso"
-                        className="checkout-mini-placeholder"
-                        autoComplete="off"
-                        value={formAuth.piso}
-                        onChange={(e) => setFormAuth({ ...formAuth, piso: e.target.value.toUpperCase() })}
-                        onKeyDown={(e) => {
-                          if (e.key !== "Enter") return;
-                          e.preventDefault();
-                          puertaRegistroRef.current?.focus();
-                        }}
-                        style={{
-                          ...cuentaRegistroDensoInput,
-                          textTransform: "uppercase",
-                          marginBottom: 0,
-                          flex: "1 1 0",
-                          minWidth: 0,
-                          width: "100%",
-                          boxSizing: "border-box",
-                          padding: "6px 9px",
-                          fontSize: 12,
-                          lineHeight: 1.25
-                        }}
-                      />
-                      <input
-                        ref={puertaRegistroRef}
-                        type="text"
-                        name="maika-registro-puerta"
-                        placeholder="Puerta"
-                        className="checkout-mini-placeholder"
-                        autoComplete="off"
-                        value={formAuth.puerta}
-                        onChange={(e) => setFormAuth({ ...formAuth, puerta: e.target.value.toUpperCase() })}
-                        onKeyDown={(e) => {
-                          if (e.key !== "Enter") return;
-                          e.preventDefault();
-                          if (mostrarCamposOpcionalesRegistro) {
-                            bloqueRegistroRef.current?.focus();
-                          } else {
-                            botonEnviarCodigoRegistroRef.current?.focus();
-                          }
-                        }}
-                        style={{
-                          ...cuentaRegistroDensoInput,
-                          textTransform: "uppercase",
-                          marginBottom: 0,
-                          width: 96,
-                          minWidth: 96,
-                          maxWidth: 96,
-                          flexShrink: 0,
-                          boxSizing: "border-box",
-                          textAlign: "center",
-                          padding: "6px 9px",
-                          fontSize: 12,
-                          lineHeight: 1.25
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setMostrarCamposOpcionalesRegistro((prev) => !prev)}
-                    style={{
-                      width: "100%",
-                      padding: "8px 10px",
-                      borderRadius: 8,
-                      border: `1px solid ${THEME.goldMain}`,
-                      background: "rgba(255,255,255,0.04)",
-                      color: THEME.goldMain,
+                      fontSize: 12,
+                      lineHeight: 1.45,
+                      color: "rgba(255,255,255,0.8)",
                       cursor: "pointer",
-                      fontWeight: "bold",
-                      fontSize: 13,
-                      marginTop: 10,
-                      marginBottom: mostrarCamposOpcionalesRegistro ? 6 : 4
+                      textAlign: "left"
                     }}
                   >
-                    {mostrarCamposOpcionalesRegistro ? "Ocultar bloque y escalera" : "Añadir bloque o escalera"}
-                  </button>
-                  {!mostrarCamposOpcionalesRegistro ? (
-                    <p
-                      style={{
-                        margin: "0 0 8px",
-                        fontSize: 11,
-                        lineHeight: 1.35,
-                        color: "rgba(255,255,255,0.52)",
-                        textAlign: "center"
-                      }}
-                    >
-                      Opcional: solo si tu vivienda lo necesita
-                    </p>
-                  ) : null}
-                  {mostrarCamposOpcionalesRegistro && (
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
-                        gap: 8,
-                        marginBottom: 6,
-                        maxWidth: "100%"
-                      }}
-                    >
-                      <input
-                        ref={bloqueRegistroRef}
-                        type="text"
-                        name="maika-registro-bloque"
-                        placeholder="Bloque"
-                        autoComplete="off"
-                        value={formAuth.bloque}
-                        onChange={(e) => setFormAuth({ ...formAuth, bloque: e.target.value.toUpperCase() })}
-                        onKeyDown={(e) => {
-                          if (e.key !== "Enter") return;
-                          e.preventDefault();
-                          escaleraRegistroRef.current?.focus();
-                        }}
-                        style={{ ...cuentaRegistroDensoInput, textTransform: "uppercase", marginBottom: 0 }}
-                      />
-                      <input
-                        ref={escaleraRegistroRef}
-                        type="text"
-                        name="maika-registro-escalera"
-                        placeholder="Escalera"
-                        autoComplete="off"
-                        value={formAuth.escalera}
-                        onChange={(e) => setFormAuth({ ...formAuth, escalera: e.target.value.toUpperCase() })}
-                        onKeyDown={(e) => {
-                          if (e.key !== "Enter") return;
-                          e.preventDefault();
-                          botonEnviarCodigoRegistroRef.current?.focus();
-                        }}
-                        style={{ ...cuentaRegistroDensoInput, textTransform: "uppercase", marginBottom: 0 }}
-                      />
-                    </div>
-                  )}
+                    <input
+                      type="checkbox"
+                      checked={aceptaTerminos}
+                      onChange={(e) => setAceptaTerminos(e.target.checked)}
+                      style={{ marginTop: 2, accentColor: THEME.goldMain, flexShrink: 0 }}
+                    />
+                    <span>
+                      He leído y acepto los{" "}
+                      <Link to="/legal/terminos" target="_blank" style={{ color: THEME.goldMain }}>
+                        Términos y Condiciones
+                      </Link>
+                      . *
+                    </span>
+                  </label>
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 8,
+                      marginTop: 4,
+                      fontSize: 12,
+                      lineHeight: 1.45,
+                      color: "rgba(255,255,255,0.8)",
+                      cursor: "pointer",
+                      textAlign: "left"
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={aceptaPrivacidad}
+                      onChange={(e) => setAceptaPrivacidad(e.target.checked)}
+                      style={{ marginTop: 2, accentColor: THEME.goldMain, flexShrink: 0 }}
+                    />
+                    <span>
+                      He leído y acepto la{" "}
+                      <Link to="/legal/privacidad" target="_blank" style={{ color: THEME.goldMain }}>
+                        Política de Privacidad
+                      </Link>
+                      . *
+                    </span>
+                  </label>
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 8,
+                      marginTop: 4,
+                      fontSize: 12,
+                      lineHeight: 1.45,
+                      color: "rgba(255,255,255,0.8)",
+                      cursor: "pointer",
+                      textAlign: "left"
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={declaraMayorEdad}
+                      onChange={(e) => setDeclaraMayorEdad(e.target.checked)}
+                      style={{ marginTop: 2, accentColor: THEME.goldMain, flexShrink: 0 }}
+                    />
+                    <span>Declaro que soy mayor de 18 años. *</span>
+                  </label>
                 </>
-              )}
+              ) : null}
               {adminRegistroSinVerificacion ? (
                 <button
                   ref={botonCrearUsuarioGestionRef}
@@ -1173,26 +1041,27 @@ export default function CuentaAuthView({
                   onClick={async () => {
                     if (!validarRegistroPaso1ParaApi(false)) return;
                     const emailParaCodigo = (formAuth.email || formAuth.confirmEmail || "").trim().toLowerCase();
-                    const codigo = Math.floor(100000 + Math.random() * 900000).toString();
                     setEnvioCodigoRegistroCargando(true);
                     try {
-                      const enviado = await enviarCodigoEmail(emailParaCodigo, formAuth.nombre, codigo);
-                      if (enviado) {
-                        setFormAuth((prev) => ({
-                          ...prev,
-                          email: emailParaCodigo,
-                          confirmEmail: emailParaCodigo,
-                          codigoVerificacion: codigo,
-                          codigoIngresado: "",
-                          pasoVerificacion: 2
-                        }));
-                        setReenvioDisponibleEn(60);
-                        notificarExito(mostrarNotificacion, `✅ Código enviado a ${emailParaCodigo}`);
-                      } else {
-                        notificarError(mostrarNotificacion, "❌ Error al enviar el código. Revisa la consola (F12)");
-                      }
-                    } catch {
-                      notificarError(mostrarNotificacion, "❌ Error al enviar el código");
+                      const r = await solicitarCodigoRegistroApi(emailParaCodigo, declaraMayorEdad);
+                      setFormAuth((prev) => ({
+                        ...prev,
+                        email: emailParaCodigo,
+                        confirmEmail: emailParaCodigo,
+                        codigoVerificacion: "",
+                        codigoIngresado: "",
+                        pasoVerificacion: 2
+                      }));
+                      setReenvioDisponibleEn(60);
+                      notificarExito(
+                        mostrarNotificacion,
+                        r.emailEnviado
+                          ? `✅ Código enviado a ${emailParaCodigo}`
+                          : "⚠️ No se pudo enviar el email ahora; prueba «Reenviar código» en unos segundos."
+                      );
+                    } catch (e) {
+                      const msg = e instanceof Error ? e.message : "❌ Error al enviar el código";
+                      notificarError(mostrarNotificacion, `❌ ${msg}`);
                     } finally {
                       setEnvioCodigoRegistroCargando(false);
                     }
@@ -1228,8 +1097,8 @@ export default function CuentaAuthView({
               reenvioDisponibleEn={reenvioDisponibleEn}
               setReenvioDisponibleEn={setReenvioDisponibleEn}
               mostrarNotificacion={mostrarNotificacion}
-              enviarCodigoEmail={enviarCodigoEmail}
-              onCompletarRegistro={async () => { await completarRegistroApiYSesion({ quitarQueryAdmin: false }); }}
+              declaraMayorEdad={declaraMayorEdad}
+              onCompletarRegistro={async (verificacionToken) => { await completarRegistroApiYSesion({ quitarQueryAdmin: false, verificacionToken }); }}
               onVolver={() => { setFormAuth((prev) => ({ ...prev, pasoVerificacion: 1, codigoIngresado: "" })); setReenvioDisponibleEn(0); }}
               cuentaRegistroDensoInput={cuentaRegistroDensoInput}
               cuentaCtaPrincipalStyle={cuentaCtaPrincipalStyle}
@@ -1288,10 +1157,6 @@ export default function CuentaAuthView({
                 setFormAuth((prev) => ({ ...prev, email, confirmEmail: email, password: "" }));
               }}
               mostrarNotificacion={mostrarNotificacion}
-              enviarCodigoEmail={enviarCodigoEmail}
-              cuentaInputWithEyeStyle={cuentaInputWithEyeStyle}
-              passwordWrapperStyle={passwordWrapperStyle}
-              eyeBtnStyle={eyeBtnStyle}
               cuentaBotonAuth={cuentaBotonAuth}
               cuentaCtaPrincipalStyle={cuentaCtaPrincipalStyle}
             />

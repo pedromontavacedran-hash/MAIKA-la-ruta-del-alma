@@ -2,11 +2,9 @@ import { useState, useRef, type CSSProperties } from "react";
 import type { AuthForm } from "../../types";
 import { THEME } from "../../config";
 import { notificarError, notificarExito } from "../../utils/ui/notificaciones";
-import {
-  codigoVerificacionSoloDigitos,
-  tieneEmailVerificable
-} from "../../utils/cuentaPageHelpers";
+import { codigoVerificacionSoloDigitos, tieneEmailVerificable } from "../../utils/cuentaPageHelpers";
 import { esActivacionIdentidadVerificadaEnSession } from "../../utils/activacionIdentidadSession";
+import { solicitarCodigoRegistroApi, verificarCodigoRegistroApi } from "../../services/apiAuth";
 
 export interface RegistroVerificarCuentaViewProps {
   formAuth: AuthForm;
@@ -17,27 +15,31 @@ export interface RegistroVerificarCuentaViewProps {
   reenvioDisponibleEn: number;
   setReenvioDisponibleEn: (v: number) => void;
   mostrarNotificacion: (mensaje: string, tipo: "normal" | "exito" | "error") => void;
-  enviarCodigoEmail: (email: string, nombre: string, codigo: string) => Promise<boolean>;
-  onCompletarRegistro: () => Promise<void>;
+  /** Declaración hecha en el paso 1; el backend la vuelve a exigir al reenviar el código. */
+  declaraMayorEdad: boolean;
+  /** El código se valida en backend; este callback recibe el token de verificación emitido. */
+  onCompletarRegistro: (verificacionToken: string) => Promise<void>;
   onVolver: () => void;
   cuentaRegistroDensoInput: CSSProperties;
   cuentaCtaPrincipalStyle: CSSProperties;
   cuentaBotonAuth: CSSProperties;
 }
 
-/** Registro paso 2: verificar cuenta con código de 6 dígitos. */
+/** Registro paso 2: verificar cuenta con código de 6 dígitos (validación en servidor). */
 export default function RegistroVerificarCuentaView(p: RegistroVerificarCuentaViewProps) {
   const [verificarRegistroCargando, setVerificarRegistroCargando] = useState(false);
   const [reenviandoCodigoRegistro, setReenviandoCodigoRegistro] = useState(false);
   const botonVerificarRegistroCodigoRef = useRef<HTMLButtonElement>(null);
+
+  const emailRegistro = (p.formAuth.email || p.formAuth.confirmEmail || "").trim().toLowerCase();
 
   return (
     <>
       <h3 style={{ color: THEME.goldMain, textAlign: "center", marginBottom: 8, fontSize: 15 }}>
         {p.activacionForzadaDesdeAcceso ? "Paso 2: Activar cuenta" : "Paso 2: Verificar cuenta"}
       </h3>
-      <p style={{ color: "white", textAlign: "center", marginBottom: 8, fontSize: 13 }}>{p.formAuth.email?.trim() ? `Hemos enviado un código a ${p.formAuth.email}` : "Introduce el código que te hemos mostrado"}</p>
-      <p style={{ color: "white", textAlign: "center", fontSize: 12, marginTop: -4, marginBottom: 10, opacity: 0.85 }}>{p.formAuth.email?.trim() ? "El mensaje suele llegar en menos de 1 minuto. Revisa también spam." : "Si no lo anotaste, vuelve atrás y pon un email para recibir el código."}</p>
+      <p style={{ color: "white", textAlign: "center", marginBottom: 8, fontSize: 13 }}>{emailRegistro ? `Hemos enviado un código a ${emailRegistro}` : "Introduce el código que te hemos mostrado"}</p>
+      <p style={{ color: "white", textAlign: "center", fontSize: 12, marginTop: -4, marginBottom: 10, opacity: 0.85 }}>{emailRegistro ? "El mensaje suele llegar en menos de 1 minuto. Revisa también spam." : "Si no lo anotaste, vuelve atrás y pon un email para recibir el código."}</p>
       <input
         type="text"
         placeholder="Código de 6 dígitos"
@@ -56,17 +58,16 @@ export default function RegistroVerificarCuentaView(p: RegistroVerificarCuentaVi
         disabled={verificarRegistroCargando}
         aria-busy={verificarRegistroCargando}
         onClick={async () => {
-          const esperado = codigoVerificacionSoloDigitos(p.formAuth.codigoVerificacion || "");
           const ingresado = codigoVerificacionSoloDigitos(p.formAuth.codigoIngresado || "");
-          if (!esperado) {
-            notificarError(
-              p.mostrarNotificacion,
-              "❌ No hay código activo. Vuelve al paso anterior y pulsa «Enviar código» o «Reenviar código»."
-            );
+          if (ingresado.length < 6) {
+            notificarError(p.mostrarNotificacion, "❌ Escribe el código de 6 dígitos");
             return;
           }
-          if (ingresado.length < 6 || ingresado !== esperado) {
-            notificarError(p.mostrarNotificacion, "❌ Código incorrecto");
+          if (!tieneEmailVerificable(emailRegistro)) {
+            notificarError(
+              p.mostrarNotificacion,
+              "❌ No hay email válido. Vuelve al paso anterior y pulsa «Enviar código»."
+            );
             return;
           }
           if (
@@ -82,7 +83,20 @@ export default function RegistroVerificarCuentaView(p: RegistroVerificarCuentaVi
           }
           setVerificarRegistroCargando(true);
           try {
-            await p.onCompletarRegistro();
+            const r = await verificarCodigoRegistroApi(emailRegistro, ingresado);
+            await p.onCompletarRegistro(r.verificacionToken);
+          } catch (e) {
+            const err = e as Error & { restantes?: number };
+            const msg = err?.message || "codigo_invalido";
+            const mapa: Record<string, string> = {
+              codigo_invalido: "Código incorrecto",
+              codigo_caducado: "El código ha caducado. Pide uno nuevo.",
+              demasiados_intentos: "Demasiados intentos. Pide un código nuevo."
+            };
+            const restantes = typeof err?.restantes === "number" && err.restantes > 0
+              ? ` (te quedan ${err.restantes} intentos)`
+              : "";
+            notificarError(p.mostrarNotificacion, `❌ ${mapa[msg] ?? msg}${restantes}`);
           } finally {
             setVerificarRegistroCargando(false);
           }
@@ -104,29 +118,23 @@ export default function RegistroVerificarCuentaView(p: RegistroVerificarCuentaVi
       <button
         onClick={async () => {
           if (p.reenvioDisponibleEn > 0 || reenviandoCodigoRegistro) return;
-          const codigo = Math.floor(100000 + Math.random() * 900000).toString();
-          const emailR = (p.formAuth.email || "").trim().toLowerCase();
-          if (!tieneEmailVerificable(emailR)) {
+          if (!tieneEmailVerificable(emailRegistro)) {
             notificarError(p.mostrarNotificacion, "❌ Debes indicar un email válido para reenviar el código");
             return;
           }
           setReenviandoCodigoRegistro(true);
           try {
-            const enviado = await p.enviarCodigoEmail(emailR, p.formAuth.nombre, codigo);
-            if (enviado) {
-              p.setFormAuth((prev) => ({
-                ...prev,
-                email: emailR,
-                confirmEmail: emailR,
-                codigoVerificacion: codigo,
-                codigoIngresado: "",
-                pasoVerificacion: 2
-              }));
-              p.setReenvioDisponibleEn(60);
-              notificarExito(p.mostrarNotificacion, `✅ Nuevo código enviado a ${emailR}`);
-            } else {
-              notificarError(p.mostrarNotificacion, "❌ No se pudo reenviar el código");
-            }
+            await solicitarCodigoRegistroApi(emailRegistro, p.declaraMayorEdad);
+            p.setFormAuth((prev) => ({
+              ...prev,
+              codigoIngresado: "",
+              pasoVerificacion: 2
+            }));
+            p.setReenvioDisponibleEn(60);
+            notificarExito(p.mostrarNotificacion, `✅ Nuevo código enviado a ${emailRegistro}`);
+          } catch (e) {
+            const msg = e instanceof Error ? e.message : "No se pudo reenviar el código";
+            notificarError(p.mostrarNotificacion, `❌ ${msg}`);
           } finally {
             setReenviandoCodigoRegistro(false);
           }

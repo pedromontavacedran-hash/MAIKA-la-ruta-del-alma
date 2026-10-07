@@ -80,3 +80,13 @@ export const AdminSugerenciasPage = lazy(loadAdminSugerenciasPage);
 export const loadConfigMetricasPage = () => import("../../pages/admin/ConfigMetricasPage");
 export const ConfigMetricasPage = lazy(loadConfigMetricasPage);
 
+export const loadAnaliticaPage = () => import("../../pages/admin/AnaliticaPage");
+export const AnaliticaPage = lazy(loadAnaliticaPage);
+
+/* ---------------- Artículos ---------------- */
+export const loadArticulosPage = () => import("../../pages/ArticulosPage");
+export const ArticulosPage = lazy(loadArticulosPage);
+
+export const loadArticuloPage = () => import("../../pages/ArticuloPage");
+export const ArticuloPage = lazy(loadArticuloPage);
+

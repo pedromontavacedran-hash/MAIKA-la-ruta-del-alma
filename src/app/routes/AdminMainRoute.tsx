@@ -51,7 +51,6 @@ export type AdminMainRouteProps = {
   precargarDatosClienteDesdeUsuario: (u: Usuario | null) => void;
   pedidos: Pedido[];
   handleRepetirPedido: (pedido: MaikaPedidoLS) => void;
-  enviarCodigoEmail: (email: string, nombre: string, codigo: string) => Promise<boolean>;
   setPagina: (p: Pagina) => void;
   telefonoForzadoRegistroDesdeAcceso: string;
   setTelefonoForzadoRegistroDesdeAcceso: (v: string) => void;
@@ -119,7 +118,6 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
     precargarDatosClienteDesdeUsuario,
     pedidos,
     handleRepetirPedido,
-    enviarCodigoEmail,
     setPagina,
     telefonoForzadoRegistroDesdeAcceso,
     setTelefonoForzadoRegistroDesdeAcceso,
@@ -203,7 +201,6 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
                   precargarDatosClienteDesdeUsuario={precargarDatosClienteDesdeUsuario}
                   pedidos={pedidos}
                   onRepetirPedido={handleRepetirPedido}
-                  enviarCodigoEmail={enviarCodigoEmail}
                   setPagina={setPagina}
                   telefonoForzadoRegistroDesdeAcceso={telefonoForzadoRegistroDesdeAcceso}
                   setTelefonoForzadoRegistroDesdeAcceso={setTelefonoForzadoRegistroDesdeAcceso}
@@ -648,6 +645,12 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
                 onClick={() => setPagina("adminSugerencias")}
               >
                 💡 SUGERENCIAS Y MEJORAS
+              </button>
+              <button
+                className="btn-admin-limpio admin-btn admin-btn--purple"
+                onClick={() => setPagina("adminAnalitica")}
+              >
+                📈 ANALÍTICA
               </button>
             </div>
               </section>

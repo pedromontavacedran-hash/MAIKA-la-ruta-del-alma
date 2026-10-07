@@ -167,6 +167,19 @@ export const suenoImagenLimiter = rateLimit({
   }
 });
 
+/** «Explora y pregunta» de Rutas del Alma llama a la IA de texto (coste real) sin sesión — igual que /sueno/interpretar. */
+export const rutasDelAlmaChatLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 40,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => limitesPruebaDesactivados(),
+  message: {
+    ok: false,
+    error: "Demasiadas preguntas seguidas. Espera unos minutos y vuelve a intentarlo."
+  }
+});
+
 /** Segunda capa de límite en /auth/register (activarCuentaTecnica): por IP, además del límite por teléfono. */
 export const registroActivarTecnicaLimiterIp = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -175,6 +188,70 @@ export const registroActivarTecnicaLimiterIp = rateLimit({
   legacyHeaders: false,
   message: {
     error: "Demasiados intentos. Espera unos minutos y vuelve a intentarlo."
+  }
+});
+
+/** Solicitud/reenvío del código de verificación de registro: frena spam de emails salientes. */
+export const registroCodigoLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => limitesPruebaDesactivados(),
+  message: {
+    error: "Demasiadas solicitudes de código. Espera unos minutos y vuelve a intentarlo."
+  }
+});
+
+/** Intento de verificación del código de registro: frena fuerza bruta por IP (además del tope por email). */
+export const registroVerificarLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 15,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => limitesPruebaDesactivados(),
+  message: {
+    error: "Demasiados intentos de verificación. Espera unos minutos y vuelve a intentarlo."
+  }
+});
+
+/** Solicitud/reenvío del código de «acceso rápido» (checkout): frena spam de emails salientes. */
+export const accesoRapidoCodigoLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => limitesPruebaDesactivados(),
+  message: {
+    error: "Demasiadas solicitudes de código. Espera unos minutos y vuelve a intentarlo."
+  }
+});
+
+/** Intento de verificación del código de «acceso rápido»: frena fuerza bruta por IP. */
+export const accesoRapidoVerificarLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 15,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => limitesPruebaDesactivados(),
+  message: {
+    error: "Demasiados intentos de verificación. Espera unos minutos y vuelve a intentarlo."
+  }
+});
+
+/**
+ * Analítica propia: generoso (cada cambio de sección dispara un evento) pero frena abuso.
+ * La IP solo vive en memoria del limiter; `lib/analytics.js` nunca la persiste.
+ */
+export const analyticsLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => limitesPruebaDesactivados(),
+  message: {
+    ok: false,
+    error: "Demasiados eventos. Espera unos minutos."
   }
 });
 

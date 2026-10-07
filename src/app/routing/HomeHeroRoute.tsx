@@ -9,7 +9,8 @@ type HomeHeroRouteProps = {
   visualTick: number;
   logoCfg: HeroLogoConfig;
   portalTiendaActivo: boolean;
-  onExplorarTienda: () => void;
+  /** Si no se pasa, el CTA «Explorar tienda» no se renderiza (tienda oculta). */
+  onExplorarTienda?: () => void;
 };
 
 /** Inicio visual aislado de la tabla de rutas: no conoce sesión, catálogo ni estado del checkout. */
@@ -62,17 +63,19 @@ export function HomeHeroRoute({
                 }}
               />
             ) : null}
-            <button
-              type="button"
-              className="hero-section__btn-explorar"
-              onClick={(event) => {
-                event.stopPropagation();
-                onExplorarTienda();
-              }}
-              aria-label="Explorar tienda"
-            >
-              Explorar tienda
-            </button>
+            {onExplorarTienda ? (
+              <button
+                type="button"
+                className="hero-section__btn-explorar"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onExplorarTienda();
+                }}
+                aria-label="Explorar tienda"
+              >
+                Explorar tienda
+              </button>
+            ) : null}
           </div>
         </div>
       </section>

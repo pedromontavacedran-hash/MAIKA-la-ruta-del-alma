@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CHECKOUT_CONFIG } from "../config/checkoutConfig";
+import { SERVICIOS_CONTRATABLES } from "../config/lanzamiento";
 import { THEME } from "../config";
 import { PATH_BY_PAGINA } from "../app/routing/routeMaps";
 import { getMaikaScrollPortEl } from "../utils/maikaScrollPort";
@@ -147,9 +148,10 @@ export default function TarotEvolutivoPage() {
           </ul>
 
           <div className="tarot-evolutivo-detalle__meta">
-            <span className="tarot-evolutivo-detalle__precio">{m.precio} €</span>
+            <span className="tarot-evolutivo-detalle__precio">{SERVICIOS_CONTRATABLES ? `${m.precio} €` : "Próximamente"}</span>
           </div>
 
+          {SERVICIOS_CONTRATABLES && (
           <a
             href={urlWhatsAppModalidad(m)}
             target="_blank"
@@ -173,6 +175,7 @@ export default function TarotEvolutivoPage() {
           >
             Consultar por WhatsApp
           </a>
+          )}
 
           <button
             type="button"

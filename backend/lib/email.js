@@ -108,6 +108,82 @@ export async function enviarEmailResetPassword(to, resetLink, { clickHref } = {}
   return true;
 }
 
+/** Código de verificación de cuenta en el registro (6 dígitos). El código solo viaja por email. */
+export async function enviarEmailCodigoRegistro(to, codigo) {
+  const transporter = getSmtpTransporter();
+  if (!transporter) return false;
+  const toEmail = String(to || "").trim().toLowerCase();
+  if (!esEmailVerificable(toEmail)) return false;
+  const fromUser = String(process.env.SMTP_USER || "").trim();
+  const safeCodigo = escapeHtml(codigo);
+  const waUrl = leerWhatsappUrlParaEmail();
+  const waHtml = waUrl
+    ? `<p style="font-size:13px;color:#555;">Si el código no te llega, escríbenos por <a href="${escapeHtml(waUrl)}" style="color:#bfa15a;">WhatsApp</a>.</p>`
+    : "";
+  await transporter.sendMail({
+    from: `"MAIKA" <${fromUser}>`,
+    to: toEmail,
+    subject: "Código de verificación — MAIKA Rutas del Alma",
+    text: [
+      "MAIKA - Verificación de cuenta",
+      "",
+      "Tu código de verificación es:",
+      "",
+      String(codigo),
+      "",
+      "Caduca en 10 minutos. Si no solicitaste este código, ignora este mensaje.",
+      ""
+    ].join("\n"),
+    html: `
+      <h2>MAIKA - Verificación de cuenta</h2>
+      <p>Tu código de verificación es:</p>
+      <p style="font-size:30px;font-weight:bold;letter-spacing:5px;color:#bfa15a;">${safeCodigo}</p>
+      <p>Caduca en 10 minutos.</p>
+      ${waHtml}
+      <p>Si no solicitaste este código, ignora este mensaje.</p>
+    `
+  });
+  return true;
+}
+
+/** Código de «acceso rápido» en checkout (6 dígitos). El código solo viaja por email. */
+export async function enviarEmailCodigoAccesoRapido(to, codigo) {
+  const transporter = getSmtpTransporter();
+  if (!transporter) return false;
+  const toEmail = String(to || "").trim().toLowerCase();
+  if (!esEmailVerificable(toEmail)) return false;
+  const fromUser = String(process.env.SMTP_USER || "").trim();
+  const safeCodigo = escapeHtml(codigo);
+  const waUrl = leerWhatsappUrlParaEmail();
+  const waHtml = waUrl
+    ? `<p style="font-size:13px;color:#555;">Si el código no te llega, escríbenos por <a href="${escapeHtml(waUrl)}" style="color:#bfa15a;">WhatsApp</a>.</p>`
+    : "";
+  await transporter.sendMail({
+    from: `"MAIKA" <${fromUser}>`,
+    to: toEmail,
+    subject: "Código de acceso — MAIKA Rutas del Alma",
+    text: [
+      "MAIKA - Acceso a tu cuenta",
+      "",
+      "Tu código de acceso es:",
+      "",
+      String(codigo),
+      "",
+      "Caduca en 10 minutos. Si no solicitaste este código, ignora este mensaje.",
+      ""
+    ].join("\n"),
+    html: `
+      <h2>MAIKA - Acceso a tu cuenta</h2>
+      <p>Tu código de acceso es:</p>
+      <p style="font-size:30px;font-weight:bold;letter-spacing:5px;color:#bfa15a;">${safeCodigo}</p>
+      <p>Caduca en 10 minutos.</p>
+      ${waHtml}
+      <p>Si no solicitaste este código, ignora este mensaje.</p>
+    `
+  });
+  return true;
+}
+
 export async function verificarSmtpAlArrancar() {
   if (process.env.NODE_ENV === "production" || smtpBloqueadoEnTests()) return;
   if (!smtpConfigCompleta()) {

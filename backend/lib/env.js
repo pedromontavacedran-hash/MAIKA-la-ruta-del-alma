@@ -47,9 +47,18 @@ if (process.env.MAIKA_QUIET !== "1") {
  * Modo pruebas (solo desarrollo local): `MAIKA_PRUEBAS_SIN_LIMITES=1` desactiva los límites
  * diarios de horóscopo/sueños y los rate-limits de sugerencias, interpretación e imagen de sueño.
  * Se lee en cada llamada (no en import) para que tests puedan activarlo/desactivarlo en caliente.
+ * Blindaje: con `NODE_ENV=production` el flag se ignora siempre — los límites antiabuso no pueden
+ * quedar desactivados en producción por un `.env` heredado o una variable de entorno olvidada.
  */
 export function limitesPruebaDesactivados() {
-  return String(process.env.MAIKA_PRUEBAS_SIN_LIMITES || "").trim() === "1";
+  if (String(process.env.MAIKA_PRUEBAS_SIN_LIMITES || "").trim() !== "1") return false;
+  if (process.env.NODE_ENV === "production") {
+    console.error(
+      "[maika-backend] MAIKA_PRUEBAS_SIN_LIMITES=1 ignorado en producción: límites antiabuso ACTIVOS"
+    );
+    return false;
+  }
+  return true;
 }
 
 if (limitesPruebaDesactivados() && process.env.MAIKA_QUIET !== "1") {
@@ -81,6 +90,8 @@ export const premiumJtiLegacyUsedFile = path.join(dataDir, "premium_unlock_jtis.
 export const suenoUsoGratuitoFile = path.join(dataDir, "sueno_uso_gratuito.json");
 /** Mapa `usr:<id>` → { fecha, signo } de la lectura de horóscopo del día (límite 1 / día natural ES). */
 export const horoscopoUsoDiarioFile = path.join(dataDir, "horoscopo_uso_diario.json");
+/** Estadística propia y agregada por día (`lib/analytics.js`): sin IPs, sin ids de persona, sin contenido. */
+export const analyticsFile = path.join(dataDir, "analytics.json");
 
 export const CATEGORIAS_PRODUCTO = ["velas", "inciensos", "figuras", "kits", "joyas"];
 export const IS_PRODUCTION = process.env.NODE_ENV === "production";

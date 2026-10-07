@@ -313,6 +313,17 @@
     animation: none;
   }
 }
+/* Marcador dorado uniforme de las entradas del menú principal: estrella fina de 4 puntas (SVG) */
+.app-menu-item__marcador {
+  margin-right: 11px;
+  vertical-align: 1px;
+  color: rgba(229, 192, 123, 0.55);
+  transition: color 0.25s ease;
+}
+.app-menu-item:hover .app-menu-item__marcador,
+.app-menu-item:focus-visible .app-menu-item__marcador {
+  color: rgba(229, 192, 123, 0.95);
+}
 /* Cerrar del desplegable menú: sin borde ni caja */
 .app-inicio-dropdown__close,
 .app-inicio-dropdown__close:hover,

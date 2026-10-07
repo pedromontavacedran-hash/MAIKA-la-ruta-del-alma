@@ -37,6 +37,12 @@ export default defineConfig({
         target: "http://127.0.0.1:3001",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/sueno/, "/sueno")
+      },
+      /** `POST /api/rutas-del-alma/chat` → `/rutas-del-alma/chat` en :3001 (mismo patrón que sueno). */
+      "/api/rutas-del-alma": {
+        target: "http://127.0.0.1:3001",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/rutas-del-alma/, "/rutas-del-alma")
       }
     }
   },
@@ -49,7 +55,6 @@ export default defineConfig({
           if (id.includes("node_modules")) {
             if (id.includes("react-dom")) return "vendor-react";
             if (id.includes("react")) return "vendor-react";
-            if (id.includes("emailjs")) return "vendor-email";
             return "vendor";
           }
         },

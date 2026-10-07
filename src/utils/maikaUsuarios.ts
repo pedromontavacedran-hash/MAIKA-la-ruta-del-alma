@@ -143,7 +143,7 @@ export async function sincronizarUnUsuarioMaikaConBackend(
       try {
         await api.registerApi({
           email: email || `maika.sync.${tel9}@usuarios.maika.shop`,
-          password: `Sync!${tel9}Maika`,
+          password: crypto.randomUUID(),
           telefono: tel9,
           nombre: `${String(u.nombre || "").trim()} ${String(u.apellidos || "").trim()}`.trim() || "Cliente",
           dni: String(u.dni || "").trim(),
@@ -205,7 +205,7 @@ export async function sincronizarUnUsuarioMaikaConBackend(
     try {
       await api.registerApi({
         email: email || `maika.sync.${tel9}@usuarios.maika.shop`,
-        password: `Sync!${tel9}Maika`,
+        password: crypto.randomUUID(),
         telefono: tel9,
         nombre: `${String(u.nombre || "").trim()} ${String(u.apellidos || "").trim()}`.trim() || "Cliente",
         dni: String(u.dni || "").trim(),

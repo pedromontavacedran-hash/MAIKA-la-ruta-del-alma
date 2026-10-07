@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CHECKOUT_CONFIG } from "../config/checkoutConfig";
+import { SERVICIOS_CONTRATABLES } from "../config/lanzamiento";
 import { THEME } from "../config";
 import { PATH_BY_PAGINA } from "../app/routing/routeMaps";
 import { getMaikaScrollPortEl } from "../utils/maikaScrollPort";
@@ -192,9 +193,10 @@ export default function LimpiezaEnergeticaPage() {
 
           <div className="limpieza-energetica-detalle__meta">
             <span className="limpieza-energetica-detalle__duracion">{o.duracion}</span>
-            <span className="limpieza-energetica-detalle__precio">{o.precio} €</span>
+            <span className="limpieza-energetica-detalle__precio">{SERVICIOS_CONTRATABLES ? `${o.precio} €` : "Próximamente"}</span>
           </div>
 
+          {SERVICIOS_CONTRATABLES && (
           <a
             href={urlWhatsAppOpcion(o)}
             target="_blank"
@@ -218,6 +220,7 @@ export default function LimpiezaEnergeticaPage() {
           >
             Consultar por WhatsApp
           </a>
+          )}
 
           <button
             type="button"

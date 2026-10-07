@@ -1,0 +1,115 @@
+[
+  {
+    "id": "nombres72.formacion-tripletes",
+    "titulo": "Formación tradicional de los 72 tripletes",
+    "palabrasClave": [
+      "72 nombres",
+      "exodo",
+      "216 letras",
+      "tres letras",
+      "tripletes",
+      "como se crearon",
+      "de donde salen",
+      "por que son 72",
+      "cruzaron el mar",
+      "versiculos"
+    ],
+    "certeza": "documentado",
+    "capas": {
+      "tradicion": "Según la tradición, los 72 Nombres se derivan de Éxodo 14:19–21: los tres versículos que narran el cruce del mar. Cada versículo tiene 72 letras hebreas (216 en total). Se disponen en tres filas leídas de forma alterna —el primer versículo en su orden, el segundo en orden inverso y el tercero de nuevo en su orden (lectura boustrophedon)— formando 72 columnas de tres letras.",
+      "historia": "La derivación aparece documentada en el Sefer ha-Bahir (cuya composición y datación son objeto de debate académico) y es explicada por Rashi en su comentario a b. Sukkah 45a; también es importante en el Sefer Raziel ha-Malaj.",
+      "interpretaciones": "En tradiciones cabalísticas posteriores, Moisés aparece relacionado con el Nombre de 72 letras y con la apertura del mar; esta interpretación no aparece formulada de ese modo en el relato bíblico del Éxodo."
+    },
+    "fuentes": [
+      "Éxodo 14:19–21",
+      "Sefer ha-Bahir",
+      "Rashi, b. Sukkah 45a",
+      "Sefer Raziel ha-Malaj"
+    ],
+    "relacionados": [
+      "nombres72.shem-hamephorash",
+      "nombres72.capa-angelica",
+      "historia.bahir",
+      "nombres72.significado-literal"
+    ]
+  },
+  {
+    "id": "nombres72.shem-hamephorash",
+    "titulo": "Shem HaMephorash: cambio de sentido del término",
+    "palabrasClave": [
+      "shem hamephorash",
+      "nombre explicito",
+      "nombre de dios",
+      "tetragrammaton",
+      "216"
+    ],
+    "certeza": "documentado",
+    "capas": {
+      "tradicion": "Shem HaMephorash («el Nombre explícito») designaba originalmente al Tetragrammaton en las fuentes tempranas (Mishnah, literatura geónica).",
+      "historia": "En la época medieval el término se reinterpretó para otros nombres divinos, incluido el nombre de 216 letras derivado de Éxodo 14:19–21."
+    },
+    "fuentes": [
+      "Mishnah",
+      "literatura geónica"
+    ],
+    "relacionados": [
+      "nombres72.formacion-tripletes"
+    ]
+  },
+  {
+    "id": "nombres72.capa-angelica",
+    "titulo": "Los nombres angélicos: capa posterior a los tripletes",
+    "palabrasClave": [
+      "angeles",
+      "nombre de angel",
+      "nombres angelicos",
+      "son angeles",
+      "reuchlin",
+      "rudd",
+      "agripa",
+      "kircher",
+      "coro angelical",
+      "versiculo asociado"
+    ],
+    "certeza": "documentado",
+    "capas": {
+      "tradicion": "En la tradición cabalística judía los 72 Nombres son tripletes de letras hebreas derivados de Éxodo 14:19–21; las fuentes judías tempranas no los presentan como una lista de nombres de ángeles.",
+      "historia": "La asociación de cada triplete con un nombre angélico es un desarrollo posterior dentro de la Cábala cristiano-hermética.",
+      "interpretaciones": "Johannes Reuchlin (De Arte Cabalistica, 1517) añadió sufijos como -el o -iah a los tripletes para formar nombres angélicos pronunciables; el sistema influyó en Agripa y en Kircher. La tabla de Thomas Rudd (siglo XVII) asignó además a cada nombre un coro angelical y un versículo de los Salmos. Estas capas son legítimas como tradiciones posteriores, pero no son la tradición judía original."
+    },
+    "fuentes": [
+      "Reuchlin, De Arte Cabalistica (1517)",
+      "Agripa",
+      "Kircher",
+      "Thomas Rudd (s. XVII)"
+    ],
+    "relacionados": [
+      "nombres72.formacion-tripletes",
+      "diferenciacion.judia-vs-hermetica"
+    ]
+  },
+  {
+    "id": "nombres72.significado-literal",
+    "titulo": "¿Tienen los tripletes un significado literal?",
+    "palabrasClave": [
+      "significado",
+      "traduccion",
+      "que significa",
+      "significa cada nombre",
+      "traducir"
+    ],
+    "certeza": "incierto",
+    "capas": {
+      "tradicion": "Los 72 tripletes son combinaciones de tres letras hebreas obtenidas mecánicamente de los versículos; no son palabras hebreas ordinarias. Las fuentes no permiten asignar a cada triplete una traducción única establecida.",
+      "interpretaciones": "Las listas de «significados» o «poderes» por nombre que circulan hoy son elaboraciones modernas, no equivalen a traducciones documentadas."
+    },
+    "fuentes": [
+      "Éxodo 14:19–21",
+      "Sefer ha-Bahir"
+    ],
+    "relacionados": [
+      "nombres72.formacion-tripletes",
+      "nombres72.capa-angelica"
+    ]
+  }
+]

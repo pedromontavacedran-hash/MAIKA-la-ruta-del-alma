@@ -14,6 +14,7 @@ export const PATH_BY_PAGINA: Record<Pagina, string> = {
   envios: "/envios",
   contacto: "/contacto",
   sobreMaika: "/sobre-maika",
+  rutasDelAlma: "/rutas-del-alma",
   legal: "/legal",
   legalTerminos: "/legal/terminos",
   legalPrivacidad: "/legal/privacidad",
@@ -30,7 +31,9 @@ export const PATH_BY_PAGINA: Record<Pagina, string> = {
   inventario: "/admin/inventario",
   nuevoProducto: "/admin/nuevo-producto",
   nuevaCategoria: "/admin/nueva-categoria",
-  adminSugerencias: "/admin/sugerencias"
+  adminSugerencias: "/admin/sugerencias",
+  adminAnalitica: "/admin/analitica",
+  articulos: "/articulos"
 };
 
 export const PAGINA_BY_PATH: Record<string, Pagina> = {
@@ -49,6 +52,9 @@ export const PAGINA_BY_PATH: Record<string, Pagina> = {
   "/envios": "envios",
   "/contacto": "contacto",
   "/sobre-maika": "sobreMaika",
+  "/rutas-del-alma": "rutasDelAlma",
+  "/rutas-del-alma/cabala": "rutasDelAlma",
+  "/rutas-del-alma/72-nombres": "rutasDelAlma",
   "/legal": "legal",
   "/legal/terminos": "legalTerminos",
   "/legal/privacidad": "legalPrivacidad",
@@ -69,6 +75,8 @@ export const PAGINA_BY_PATH: Record<string, Pagina> = {
   "/admin/nuevo-producto": "nuevoProducto",
   "/admin/nueva-categoria": "nuevaCategoria",
   "/admin/sugerencias": "adminSugerencias",
+  "/admin/analitica": "adminAnalitica",
+  "/articulos": "articulos",
   "/admin/diseno-web": "admin",
   "/admin/diseno-web/imagen": "admin",
   "/admin/diseno-web/fondo": "admin",

@@ -10,6 +10,7 @@ import {
 import {
   AdminMainRoute,
   AdminSugerenciasPage,
+  AnaliticaPage,
   ConfigMetricasPage,
   ContabilidadPage,
   DetalleClientePage,
@@ -77,7 +78,6 @@ export function AdminRoutes(p: AdminRoutesProps) {
         precargarDatosClienteDesdeUsuario={p.precargarDatosClienteDesdeUsuario}
         pedidos={p.pedidos}
         handleRepetirPedido={p.handleRepetirPedido}
-        enviarCodigoEmail={p.enviarCodigoEmail}
         setPagina={p.setPagina}
         telefonoForzadoRegistroDesdeAcceso={p.telefonoForzadoRegistroDesdeAcceso}
         setTelefonoForzadoRegistroDesdeAcceso={p.setTelefonoForzadoRegistroDesdeAcceso}
@@ -399,6 +399,12 @@ export function AdminRoutes(p: AdminRoutesProps) {
     <Route
       path="/admin/sugerencias"
       element={p.accesoAdmin ? <Suspense fallback={fallbackAdmin}>{bloqueLayoutContenido(<AdminSugerenciasPage />)}</Suspense> : <Navigate to="/" replace />}
+    />
+
+    {/* ANALÍTICA PROPIA (agregada, solo admin) */}
+    <Route
+      path="/admin/analitica"
+      element={p.accesoAdmin ? <Suspense fallback={fallbackAdmin}>{bloqueLayoutContenido(<AnaliticaPage />)}</Suspense> : <Navigate to="/" replace />}
     />
     </>
   );

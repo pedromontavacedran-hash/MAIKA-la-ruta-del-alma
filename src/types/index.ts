@@ -187,7 +187,7 @@ export interface Cliente {
   direccion?: string;
   /** Tipo de vía: Calle, Avenida, Plaza, etc. */
   tipoVia?: string;
-  /** Nombre de la vía (sin el tipo): ej. "Joan Vilanova i Abril". */
+  /** Nombre de la vía (sin el tipo): ej. "Mayor". */
   nombreVia?: string;
   calle?: string;
   numero?: string;
@@ -341,9 +341,6 @@ export interface CuponAplicado {
 
 export interface ConsentimientoCookies {
   necesarias: true;
-  preferencias: boolean;
-  analiticas: boolean;
-  marketing: boolean;
   fechaActualizacion: string;
   version: number;
 }
@@ -435,6 +432,7 @@ export type Pagina =
   | "envios"
   | "contacto"
   | "sobreMaika"
+  | "rutasDelAlma"
   | "legal"
   | "legalTerminos"
   | "legalPrivacidad"
@@ -451,4 +449,6 @@ export type Pagina =
   | "inventario"
   | "nuevoProducto"
   | "nuevaCategoria"
-  | "adminSugerencias";
+  | "adminSugerencias"
+  | "adminAnalitica"
+  | "articulos";

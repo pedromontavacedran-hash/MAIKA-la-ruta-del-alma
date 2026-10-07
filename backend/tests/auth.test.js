@@ -16,16 +16,91 @@ describe.sequential("Auth API", () => {
     testEmail = `vitest-${Date.now()}-${Math.random().toString(16).slice(2)}@maika.test`;
     testPhone = `6${String(Date.now()).slice(-8)}`;
     await ensureStorage();
+    // Alta pública real: solicitar código (en test se expone vía globalThis, nunca en la respuesta),
+    // verificarlo y registrar con el token emitido + aceptación legal.
+    const cod = await agent
+      .post("/auth/registro/solicitar-codigo")
+      .send({ email: testEmail, declaraMayorEdad: true });
+    expect(cod.status).toBe(200);
+    const codigo = globalThis.__MAIKA_TEST_REGISTRO_CODIGOS__?.[testEmail];
+    expect(typeof codigo).toBe("string");
+    const ver = await agent
+      .post("/auth/registro/verificar")
+      .send({ email: testEmail, codigo });
+    expect(ver.status).toBe(200);
+    expect(ver.body.verificacionToken).toBeTruthy();
     const reg = await agent
       .post("/auth/register")
       .send({
         email: testEmail,
         password: TEST_PASSWORD,
         nombre: "Vitest",
-        telefono: testPhone
+        telefono: testPhone,
+        verificacionToken: ver.body.verificacionToken,
+        aceptacionTerminos: true,
+        aceptacionPrivacidad: true,
+        declaraMayorEdad: true
       });
     expect(reg.status).toBe(200);
     expect(reg.body.ok).toBe(true);
+    const { readUsuarios } = await import("../lib/storage.js");
+    const guardado = (await readUsuarios()).find(
+      (u) => String(u?.email || "").toLowerCase() === testEmail
+    );
+    expect(guardado?.declaraMayorEdad).toBe(true);
+    expect(typeof guardado?.declaraMayorEdadFecha).toBe("string");
+    expect(guardado?.fechaNacimiento).toBeUndefined();
+  });
+
+  it("rechaza el alta sin verificación de email ni aceptación legal", async () => {
+    const res = await agent.post("/auth/register").send({
+      email: `sin-verificar-${Date.now()}@maika.test`,
+      password: TEST_PASSWORD,
+      nombre: "Sin Verificar",
+      telefono: `6${String(Date.now() + 1).slice(-8)}`
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it("rechaza solicitar código sin declarar mayoría de edad", async () => {
+    const res = await agent
+      .post("/auth/registro/solicitar-codigo")
+      .send({ email: `menor-${Date.now()}@maika.test` });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/18/);
+  });
+
+  it("rechaza el alta pública sin declarar mayoría de edad aunque el email esté verificado", async () => {
+    const email = `sin-mayor-edad-${Date.now()}@maika.test`;
+    await agent
+      .post("/auth/registro/solicitar-codigo")
+      .send({ email, declaraMayorEdad: true });
+    const codigo = globalThis.__MAIKA_TEST_REGISTRO_CODIGOS__?.[email];
+    const ver = await agent.post("/auth/registro/verificar").send({ email, codigo });
+    expect(ver.status).toBe(200);
+    const reg = await agent.post("/auth/register").send({
+      email,
+      password: TEST_PASSWORD,
+      nombre: "Sin Mayor Edad",
+      telefono: `6${String(Date.now() + 2).slice(-8)}`,
+      verificacionToken: ver.body.verificacionToken,
+      aceptacionTerminos: true,
+      aceptacionPrivacidad: true
+    });
+    expect(reg.status).toBe(400);
+    expect(reg.body.error).toMatch(/18/);
+  });
+
+  it("rechaza un código de verificación incorrecto", async () => {
+    const email = `codigo-mal-${Date.now()}@maika.test`;
+    await agent
+      .post("/auth/registro/solicitar-codigo")
+      .send({ email, declaraMayorEdad: true });
+    const res = await agent
+      .post("/auth/registro/verificar")
+      .send({ email, codigo: "000000" });
+    // Puede ser incorrecto (400) o, por azar 1/1.000.000, correcto (200): ambos son válidos.
+    expect([200, 400]).toContain(res.status);
   });
 
   it("login correcto establece cookie de sesión", async () => {

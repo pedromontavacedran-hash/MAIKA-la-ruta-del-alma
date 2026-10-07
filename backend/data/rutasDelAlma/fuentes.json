@@ -1,0 +1,71 @@
+[
+  {
+    "id": "scholem-origins-kabbalah",
+    "autor": "Gershom Scholem",
+    "titulo": "Origins of the Kabbalah",
+    "tituloOriginal": "Ursprung und Anfänge der Kabbala (1962); ed. inglesa de R. J. Zwi Werblowsky, trad. Allan Arkush",
+    "editorial": "Jewish Publication Society / Princeton University Press",
+    "año": 1987,
+    "isbn": "0-691-07314-7",
+    "enlace": "https://archive.org/details/originsofkabbala0000scho",
+    "estadoAcceso": "disponible_prestamo_digital_controlado",
+    "capitulosConsultados": [],
+    "paginasConsultadas": null,
+    "temasRelacionados": [
+      "orígenes de la Cábala medieval",
+      "Provenza",
+      "Cataluña",
+      "primeros cabalistas",
+      "contexto de aparición de la Cábala",
+      "Bahir"
+    ],
+    "observaciones": "Disponible en Internet Archive con préstamo digital controlado (cuenta gratuita): xvi+487 pp., JPS/Princeton 1987. Existe además una subida comunitaria en archive.org marcada «opensource» de estatus incierto: NO usarla, usar el registro de préstamo controlado. ISBN verificado vía Open Library (OL2714437M).",
+    "nivel": "monografia-academica"
+  },
+  {
+    "id": "idel-new-perspectives",
+    "autor": "Moshe Idel",
+    "titulo": "Kabbalah: New Perspectives",
+    "editorial": "Yale University Press",
+    "año": 1988,
+    "isbn": "0-300-03860-7",
+    "isbnEdicionAlternativa": "0-300-04699-5 (rústica, 1990)",
+    "enlace": "https://archive.org/details/kabbalahnewpersp0000idel",
+    "estadoAcceso": "disponible_prestamo_digital_controlado",
+    "capitulosConsultados": [],
+    "paginasConsultadas": null,
+    "temasRelacionados": [
+      "contraste historiográfico con Scholem",
+      "corrientes de la Cábala",
+      "experiencia mística (devekut, unio mystica)",
+      "técnicas cabalísticas",
+      "teosofía y teurgia",
+      "hermenéutica cabalística"
+    ],
+    "observaciones": "Disponible en Internet Archive con préstamo digital controlado: xx+419 pp., Yale 1988. Índice publicado (vía SDSU Humanities Hub): scholarship, metodología, variedades de devekut, unio mystica, técnicas místicas, teosofía, teurgia antigua y cabalística, hermenéutica, perfil intelectual de la Cábala como factor cultural. ISBNs verificados vía Open Library.",
+    "nivel": "monografia-academica"
+  },
+  {
+    "id": "giller-reading-zohar",
+    "autor": "Pinchas Giller",
+    "titulo": "Reading the Zohar: The Sacred Text of the Kabbalah",
+    "tituloSolicitado": "Reading the Zohar: A Sacred Text of Kabbalah",
+    "editorial": "Oxford University Press",
+    "año": 2001,
+    "isbn": "0-19-511849-9",
+    "isbnEdicionAlternativa": "0-19-511439-8 (impresa)",
+    "enlace": "https://books.google.com/books?id=e8vnCwAAQBAJ",
+    "estadoAcceso": "vista_previa_parcial_y_prestamo_bibliotecario",
+    "capitulosConsultados": [],
+    "paginasConsultadas": null,
+    "temasRelacionados": [
+      "Zóhar",
+      "estructura y contenido del corpus zohárico",
+      "recepción y comentaristas",
+      "tradición zohárica posterior",
+      "Luria y el Zóhar"
+    ],
+    "observaciones": "Subtítulo real: «The Sacred Text of the Kabbalah» (corregido respecto a la ficha inicial). 246 pp., OUP 2001. Vías legales localizadas: Google Books (vista previa parcial), ebook en OverDrive/Libby mediante biblioteca (ISBN 9780195118490). No localizado texto completo de acceso abierto; no usar vías alternativas.",
+    "nivel": "monografia-academica"
+  }
+]

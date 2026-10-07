@@ -38,6 +38,13 @@ export const iconPersona = (sizePx?: number) => (
   </svg>
 );
 
+/** Marcador uniforme de las entradas del menú: estrella fina de cuatro puntas (dorada vía CSS). */
+export const iconMenuMarcador = (
+  <svg className="app-menu-item__marcador" width="8" height="8" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true" style={{ display: "inline-block", flexShrink: 0 }}>
+    <path d="M12 2c1 6 4 9 10 10-6 1-9 4-10 10-1-6-4-9-10-10 6-1 9-4 10-10z" />
+  </svg>
+);
+
 export const linkStyle = (active: boolean, size = 16): CSSProperties => ({
   color: "var(--barra-iconos-color, #e5c07b)",
   background: "none",

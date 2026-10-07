@@ -1,14 +1,8 @@
 import type { ConsentimientoCookies } from "../types";
 
-export function construirConsentimientoCookies(
-  consentimientoBase: Omit<ConsentimientoCookies, "necesarias" | "fechaActualizacion" | "version">,
-  version: number
-): ConsentimientoCookies {
+export function construirConsentimientoCookies(version: number): ConsentimientoCookies {
   return {
     necesarias: true,
-    preferencias: !!consentimientoBase.preferencias,
-    analiticas: !!consentimientoBase.analiticas,
-    marketing: !!consentimientoBase.marketing,
     fechaActualizacion: new Date().toISOString(),
     version
   };
@@ -26,12 +20,9 @@ export function cargarConsentimientoCookiesDesdeStorage(
   if (!raw) return null;
   try {
     const parseado = JSON.parse(raw) as ConsentimientoCookies;
-    if (parseado?.version === version) {
+    if (parseado?.version === version && parseado?.necesarias === true) {
       return {
         necesarias: true,
-        preferencias: !!parseado.preferencias,
-        analiticas: !!parseado.analiticas,
-        marketing: !!parseado.marketing,
         fechaActualizacion: parseado.fechaActualizacion || "",
         version
       };

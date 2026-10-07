@@ -180,7 +180,6 @@ export type CheckoutViewProps = {
   setLoginModalAbierto: (v: boolean) => void;
   onLoginModalSuccess: (u: Usuario) => void;
   iniciarSesionConToken: (token: string, opts?: { mostrarBienvenida?: boolean }) => Promise<Usuario | null>;
-  enviarCodigoEmail: (email: string, nombre: string, codigo: string) => Promise<boolean>;
   comprarEnUnClick: () => Promise<void>;
   /** Perfil de compra rápida válido y carrito con artículos. */
   compraRapidaCheckoutDisponible: boolean;
@@ -301,7 +300,6 @@ export default function CheckoutView(p: CheckoutViewProps) {
           mostrarNotificacion={p.mostrarNotificacion}
           onLoginSuccess={p.onLoginModalSuccess}
           iniciarSesionConToken={p.iniciarSesionConToken}
-          enviarCodigoEmail={p.enviarCodigoEmail}
         />
       ) : null}
       <AccesoRapidoCheckoutContainer

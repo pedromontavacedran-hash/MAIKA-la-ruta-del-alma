@@ -1,6 +1,7 @@
 import type { EditUsuarioForm } from "../App";
 import { useRef, useState, useEffect, type Dispatch, type SetStateAction } from "react";
 import { THEME } from "../config";
+import { solicitarResetAccesoAdminApi } from "../services/apiAuth";
 import ModalBase from "./ModalBase";
 import { checkoutInputStyle } from "../styles/inputStyle";
 import UbicacionCpPanel from "./UbicacionCpPanel";
@@ -26,26 +27,15 @@ const editModalInputBlueStyle: React.CSSProperties = {
   background: "rgba(30, 44, 110, 0.72)"
 };
 
-function generarPasswordTemporalMaika(nombre: string): string {
-  const base = String(nombre || "Cliente")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]/gi, "")
-    .slice(0, 6) || "Cliente";
-  const sufijo = Math.floor(1000 + Math.random() * 9000);
-  return `Maika${sufijo}!${base}`;
-}
-
-function abrirWhatsappTemporal(telefono: string, email: string, password: string) {
+function abrirWhatsappResetAcceso(telefono: string, resetLink: string) {
   const tel = String(telefono || "").replace(/\D/g, "");
   const telIntl = tel.length === 9 ? `34${tel}` : tel;
   const texto = [
-    "Hola, te he creado un acceso temporal a MAIKA.",
+    "Hola, te he generado un enlace para restablecer tu acceso a MAIKA.",
     "",
-    `Email: ${email || "tu email"}`,
-    `Contraseña temporal: ${password}`,
+    resetLink,
     "",
-    "Caduca en 10 minutos. Entra y cámbiala desde Mi Cuenta > Cambiar contraseña."
+    "Caduca en 15 minutos y solo puede usarse una vez. Al abrirlo podrás elegir una contraseña nueva."
   ].join("\n");
   if (telIntl) {
     window.open(`https://wa.me/${telIntl}?text=${encodeURIComponent(texto)}`, "_blank", "noopener,noreferrer");
@@ -65,8 +55,9 @@ export default function EditUsuarioModal({
     if (!abierto) setNombreDesbloqueado(false);
   }, [abierto]);
   const [buscandoCalle, setBuscandoCalle] = useState(false);
-  const [confirmarTemporal, setConfirmarTemporal] = useState<null | { telefono: string; email: string; password: string }>(null);
-  const [guardandoTemporal, setGuardandoTemporal] = useState(false);
+  const [confirmarReset, setConfirmarReset] = useState<null | { telefono: string; resetLink: string }>(null);
+  const [generandoReset, setGenerandoReset] = useState(false);
+  const [errorReset, setErrorReset] = useState("");
   const dniRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const telefonoRef = useRef<HTMLInputElement>(null);
@@ -251,10 +242,18 @@ export default function EditUsuarioModal({
         </div>
         <button
           type="button"
-          onClick={() => {
-            const pwd = generarPasswordTemporalMaika(editUsuarioForm.nombre);
-            setEditUsuarioForm({ ...editUsuarioForm, password: pwd, passwordTemporal: true });
-            setConfirmarTemporal({ telefono: editUsuarioForm.telefono, email: editUsuarioForm.email, password: pwd });
+          disabled={generandoReset}
+          onClick={async () => {
+            setErrorReset("");
+            setGenerandoReset(true);
+            try {
+              const { resetLink } = await solicitarResetAccesoAdminApi(editUsuarioForm.id);
+              setConfirmarReset({ telefono: editUsuarioForm.telefono, resetLink });
+            } catch (e) {
+              setErrorReset(e instanceof Error ? e.message : "No se pudo generar el enlace de recuperación.");
+            } finally {
+              setGenerandoReset(false);
+            }
           }}
           style={{
             width: "100%",
@@ -265,13 +264,14 @@ export default function EditUsuarioModal({
             border: `1px solid ${THEME.goldMain}`,
             background: "rgba(212,175,55,0.1)",
             color: THEME.goldMain,
-            cursor: "pointer",
-            fontWeight: 700
+            cursor: generandoReset ? "not-allowed" : "pointer",
+            fontWeight: 700,
+            opacity: generandoReset ? 0.65 : 1
           }}
         >
-          Generar acceso temporal WhatsApp (10 min)
+          {generandoReset ? "Generando enlace…" : "Generar enlace de recuperación WhatsApp (15 min)"}
         </button>
-        {editUsuarioForm.passwordTemporal && editUsuarioForm.password ? (
+        {errorReset ? (
           <div
             role="alert"
             style={{
@@ -279,17 +279,15 @@ export default function EditUsuarioModal({
               marginBottom: 14,
               padding: "10px 12px",
               borderRadius: 10,
-              border: `1px solid ${THEME.goldMain}`,
-              background: "rgba(212,175,55,0.18)",
-              color: THEME.goldMain,
+              border: `1px solid rgba(255,120,120,0.5)`,
+              background: "rgba(255,120,120,0.1)",
+              color: "#ff9c9c",
               fontSize: 12,
               lineHeight: 1.45,
               fontWeight: 700
             }}
           >
-            ⚠️ Contraseña temporal generada. Confirma el envío por WhatsApp: se guardará en el
-            servidor y se abrirá WhatsApp con el mensaje. Caduca en 10 minutos y el cliente deberá
-            cambiarla al entrar.
+            ⚠️ {errorReset}
           </div>
         ) : null}
 
@@ -487,10 +485,10 @@ export default function EditUsuarioModal({
         </div>
     </ModalBase>
 
-    {confirmarTemporal && (
+    {confirmarReset && (
       <ModalBase
         abierto
-        onClose={() => setConfirmarTemporal(null)}
+        onClose={() => setConfirmarReset(null)}
         zIndex={12000}
         maxWidth="560px"
         styleCard={{
@@ -517,10 +515,10 @@ export default function EditUsuarioModal({
         >
           <div style={{ fontSize: 40, lineHeight: 1, marginBottom: 6 }}>🔐</div>
           <h2 style={{ color: THEME.goldMain, margin: 0, fontSize: 22, fontWeight: 800, letterSpacing: 0.5 }}>
-            ACCESO TEMPORAL
+            RECUPERAR ACCESO
           </h2>
           <p style={{ color: "rgba(255,255,255,0.75)", margin: "6px 0 0", fontSize: 12, letterSpacing: 0.3 }}>
-            Vas a guardar una contraseña temporal y enviarla por WhatsApp
+            Enlace de restablecimiento generado en el servidor. Vas a enviarlo por WhatsApp
           </p>
         </div>
 
@@ -547,16 +545,16 @@ export default function EditUsuarioModal({
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: 13 }}>
               <span style={{ color: "rgba(255,255,255,0.55)" }}>Teléfono</span>
-              <span style={{ color: "#fff", fontWeight: 600, textAlign: "right" }}>{confirmarTemporal.telefono || "—"}</span>
+              <span style={{ color: "#fff", fontWeight: 600, textAlign: "right" }}>{confirmarReset.telefono || "—"}</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: 13 }}>
               <span style={{ color: "rgba(255,255,255,0.55)" }}>Email</span>
-              <span style={{ color: "#fff", fontWeight: 600, textAlign: "right", overflowWrap: "anywhere" }}>{confirmarTemporal.email || "—"}</span>
+              <span style={{ color: "#fff", fontWeight: 600, textAlign: "right", overflowWrap: "anywhere" }}>{editUsuarioForm.email || "—"}</span>
             </div>
           </div>
 
           <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 11, margin: "0 0 10px", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700 }}>
-            Contraseña temporal (caduca en 10 min)
+            Enlace de restablecimiento (15 min, un solo uso)
           </p>
           <div
             style={{
@@ -571,13 +569,13 @@ export default function EditUsuarioModal({
             }}
           >
             <code style={{ color: THEME.goldMain, fontSize: 16, fontWeight: 700, flex: 1, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", overflowWrap: "anywhere" }}>
-              {confirmarTemporal.password}
+              {confirmarReset.resetLink}
             </code>
             <button
               type="button"
-              onClick={() => { void navigator.clipboard?.writeText(confirmarTemporal.password).catch(() => {}); }}
-              aria-label="Copiar contraseña"
-              title="Copiar contraseña"
+              onClick={() => { void navigator.clipboard?.writeText(confirmarReset.resetLink).catch(() => {}); }}
+              aria-label="Copiar enlace"
+              title="Copiar enlace"
               style={{
                 background: "transparent",
                 border: `1px solid ${THEME.goldMain}`,
@@ -606,8 +604,8 @@ export default function EditUsuarioModal({
               marginBottom: 18
             }}
           >
-            ⚠️ Al confirmar se <strong>guardará en el servidor</strong> y se abrirá WhatsApp con el mensaje.
-            El cliente deberá cambiarla al entrar. Si cancelas, no se guarda nada.
+            ⚠️ El enlace <strong>ya está activo en el servidor</strong> (caduca en 15 minutos y solo puede
+            usarse una vez). Al confirmar se abrirá WhatsApp con el mensaje. No se envía ninguna contraseña.
           </div>
         </div>
 
@@ -615,8 +613,7 @@ export default function EditUsuarioModal({
         <div style={{ display: "flex", gap: 12, padding: "0 24px 22px" }}>
           <button
             type="button"
-            onClick={() => setConfirmarTemporal(null)}
-            disabled={guardandoTemporal}
+            onClick={() => setConfirmarReset(null)}
             style={{
               flex: 1,
               padding: "14px 16px",
@@ -624,7 +621,7 @@ export default function EditUsuarioModal({
               border: `1px solid rgba(255,255,255,0.3)`,
               background: "transparent",
               color: "rgba(255,255,255,0.8)",
-              cursor: guardandoTemporal ? "not-allowed" : "pointer",
+              cursor: "pointer",
               fontWeight: 700,
               fontSize: 15
             }}
@@ -633,20 +630,11 @@ export default function EditUsuarioModal({
           </button>
           <button
             type="button"
-            disabled={guardandoTemporal}
-            onClick={async () => {
-              const datos = confirmarTemporal;
+            onClick={() => {
+              const datos = confirmarReset;
               if (!datos) return;
-              setGuardandoTemporal(true);
-              try {
-                await onSave();
-                abrirWhatsappTemporal(datos.telefono, datos.email, datos.password);
-              } catch {
-                /* onSave ya notifica errores; no abrimos WhatsApp si falla */
-              } finally {
-                setGuardandoTemporal(false);
-                setConfirmarTemporal(null);
-              }
+              abrirWhatsappResetAcceso(datos.telefono, datos.resetLink);
+              setConfirmarReset(null);
             }}
             style={{
               flex: 1.4,
@@ -655,14 +643,13 @@ export default function EditUsuarioModal({
               border: `2px solid ${THEME.goldMain}`,
               background: "linear-gradient(135deg, rgba(212,175,55,0.25), rgba(212,175,55,0.1))",
               color: THEME.goldMain,
-              cursor: guardandoTemporal ? "not-allowed" : "pointer",
+              cursor: "pointer",
               fontWeight: 800,
               fontSize: 15,
-              letterSpacing: 0.3,
-              opacity: guardandoTemporal ? 0.6 : 1
+              letterSpacing: 0.3
             }}
           >
-            {guardandoTemporal ? "Guardando…" : "✓ Guardar y enviar por WhatsApp"}
+            ✓ Enviar enlace por WhatsApp
           </button>
         </div>
       </ModalBase>

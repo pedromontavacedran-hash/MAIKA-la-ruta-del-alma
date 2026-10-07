@@ -118,7 +118,7 @@ export type CheckoutRepeatPack = Pick<
 
 export type CheckoutLoginPack = Pick<
   CheckoutViewProps,
-  "loginModalAbierto" | "setLoginModalAbierto" | "iniciarSesionConToken" | "enviarCodigoEmail"
+  "loginModalAbierto" | "setLoginModalAbierto" | "iniciarSesionConToken"
 >;
 
 export type CheckoutCompraRapidaPack = Pick<

@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import ModalBase from "../ModalBase";
 import type { Usuario } from "../../types";
 import { checkoutInputStyle, checkoutPrimaryButtonStyleNoShadow } from "../../styles/inputStyle";
 import { emailValidoLoginCuenta, loginEmailPasswordFlow } from "../../utils/loginEmailPasswordFlow";
-import { passwordSeguraBasica } from "../../utils/accesoRapidoUtils";
 import { solicitarRecuperacionPasswordApi } from "../../services/apiAuth";
 import { notificarError, notificarExito } from "../../utils/ui/notificaciones";
 import { leerMaikaUsuarios } from "../../utils/maikaUsuarios";
@@ -18,7 +17,6 @@ type Props = {
   mostrarNotificacion: (m: string, t: "normal" | "exito" | "error") => void;
   onLoginSuccess: (usuario: Usuario) => void;
   iniciarSesionConToken: (token: string, opts?: { mostrarBienvenida?: boolean }) => Promise<Usuario | null>;
-  enviarCodigoEmail: (email: string, nombre: string, codigo: string) => Promise<boolean>;
 };
 
 /**
@@ -32,25 +30,17 @@ export default function LoginModal({
   inputStyle = checkoutInputStyle,
   mostrarNotificacion,
   onLoginSuccess,
-  iniciarSesionConToken,
-  enviarCodigoEmail
+  iniciarSesionConToken
 }: Props) {
-  void enviarCodigoEmail;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [cargando, setCargando] = useState(false);
   const [modoRecuperar, setModoRecuperar] = useState(false);
-  const [pasoRecuperar, setPasoRecuperar] = useState<1 | 2>(1);
   const [emailRecuperar, setEmailRecuperar] = useState("");
-  const [codigoRecuperar, setCodigoRecuperar] = useState("");
-  const [codigoIngresadoRecuperar, setCodigoIngresadoRecuperar] = useState("");
-  const [nuevaPassword, setNuevaPassword] = useState("");
-  const [cuentaAtrasRecuperar, setCuentaAtrasRecuperar] = useState(0);
   const [recuperando, setRecuperando] = useState(false);
   /** Evita que Chrome rellene antes del primer foco (truco habitual). */
   const [camposBloqueadosAutofill, setCamposBloqueadosAutofill] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  const [showNuevaPassword, setShowNuevaPassword] = useState(false);
   const desbloqueadoRef = useRef(false);
 
   /** Mismos criterios que `CuentaPage` (tarjeta azul + inputs). */
@@ -89,11 +79,7 @@ export default function LoginModal({
     color: goldColor
   };
 
-  const tituloSeccion = !modoRecuperar
-    ? "Iniciar sesión"
-    : pasoRecuperar === 1
-      ? "Recuperar contraseña"
-      : "Cambiar contraseña";
+  const tituloSeccion = modoRecuperar ? "Recuperar contraseña" : "Iniciar sesión";
   const mostrarAvisoAccesoTemporal = (() => {
     const ident = String(email || "").trim().toLowerCase();
     if (!ident) return false;
@@ -114,35 +100,15 @@ export default function LoginModal({
     });
   };
 
-  useEffect(() => {
-    if (cuentaAtrasRecuperar <= 0) return;
-    const id = window.setTimeout(() => {
-      setCuentaAtrasRecuperar((prev) => Math.max(0, prev - 1));
-    }, 1000);
-    return () => window.clearTimeout(id);
-  }, [cuentaAtrasRecuperar]);
-
   const abrirRecuperar = () => {
     const emailNorm = (email || "").trim().toLowerCase();
     setModoRecuperar(true);
-    setPasoRecuperar(1);
     setEmailRecuperar(emailNorm);
-    setCodigoRecuperar("");
-    setCodigoIngresadoRecuperar("");
-    setNuevaPassword("");
-    setCuentaAtrasRecuperar(0);
-    setShowNuevaPassword(false);
   };
 
   const volverLogin = () => {
     setModoRecuperar(false);
-    setPasoRecuperar(1);
-    setCodigoRecuperar("");
-    setCodigoIngresadoRecuperar("");
-    setNuevaPassword("");
-    setCuentaAtrasRecuperar(0);
     setRecuperando(false);
-    setShowNuevaPassword(false);
   };
 
   const submit = async () => {
@@ -180,55 +146,13 @@ export default function LoginModal({
       mostrarNotificacion("📧 Preparando enlace seguro de recuperación...", "normal");
       await solicitarRecuperacionPasswordApi(emailNorm);
       setEmail(emailNorm);
-      setCodigoRecuperar("");
-      setCodigoIngresadoRecuperar("");
-      setNuevaPassword("");
-      setCuentaAtrasRecuperar(0);
       setModoRecuperar(false);
-      setPasoRecuperar(1);
       notificarExito(
         mostrarNotificacion,
         "✅ Si existe una cuenta con ese email, enviaremos instrucciones para restablecerla."
       );
     } catch {
       notificarError(mostrarNotificacion, "❌ No se pudo solicitar la recuperación. Inténtalo más tarde.");
-    } finally {
-      setRecuperando(false);
-    }
-  };
-
-  const actualizarPasswordRecuperacion = async () => {
-    if (!codigoIngresadoRecuperar || !nuevaPassword) {
-      notificarError(mostrarNotificacion, "❌ Completa todos los campos");
-      return;
-    }
-    if (cuentaAtrasRecuperar <= 0) {
-      notificarError(mostrarNotificacion, "❌ Código expirado. Solicita uno nuevo");
-      return;
-    }
-    if (!passwordSeguraBasica(nuevaPassword)) {
-      notificarError(mostrarNotificacion, "❌ La contraseña debe tener mínimo 8 caracteres, con letras y números");
-      return;
-    }
-    if (codigoIngresadoRecuperar !== codigoRecuperar) {
-      notificarError(mostrarNotificacion, "❌ Código incorrecto");
-      return;
-    }
-    const emailNorm = (emailRecuperar || "").trim().toLowerCase();
-    if (!emailValidoLoginCuenta(emailNorm)) {
-      notificarError(mostrarNotificacion, "❌ E-mail no válido");
-      return;
-    }
-    setRecuperando(true);
-    try {
-      await solicitarRecuperacionPasswordApi(emailNorm);
-      setEmail(emailNorm);
-      setPassword("");
-      notificarExito(mostrarNotificacion, "✅ Te hemos enviado un enlace seguro para crear tu contraseña.");
-      volverLogin();
-    } catch (e) {
-      const m = e instanceof Error ? e.message : String(e);
-      notificarError(mostrarNotificacion, `❌ ${m}`);
     } finally {
       setRecuperando(false);
     }
@@ -261,7 +185,7 @@ export default function LoginModal({
           color: goldColor,
           textAlign: "center",
           marginTop: 0,
-          marginBottom: modoRecuperar && pasoRecuperar === 1 ? 20 : 12,
+          marginBottom: modoRecuperar ? 20 : 12,
           fontSize: 15,
           fontWeight: 600
         }}
@@ -383,7 +307,7 @@ export default function LoginModal({
             </button>
           </div>
         </form>
-      ) : pasoRecuperar === 1 ? (
+      ) : (
         <form
           autoComplete="off"
           onSubmit={(e) => {
@@ -393,7 +317,7 @@ export default function LoginModal({
           style={{ display: "flex", flexDirection: "column" }}
         >
           <p style={{ color: "white", textAlign: "center", marginTop: 0, marginBottom: 20, fontSize: 14, lineHeight: 1.45 }}>
-            Introduce el e-mail de tu cuenta
+            Introduce el e-mail de tu cuenta y te enviaremos un enlace seguro.
           </p>
           <input
             type="email"
@@ -415,88 +339,7 @@ export default function LoginModal({
               marginTop: 10
             }}
           >
-            {recuperando ? "Enviando…" : "Enviar código"}
-          </button>
-          <button
-            type="button"
-            onClick={volverLogin}
-            style={{
-              ...cuentaBotonAuth,
-              background: "transparent",
-              color: goldColor,
-              border: "1px solid rgba(212, 175, 55, 0.45)",
-              marginTop: 10
-            }}
-          >
-            ← Cancelar
-          </button>
-        </form>
-      ) : (
-        <form
-          autoComplete="off"
-          onSubmit={(e) => {
-            e.preventDefault();
-            void actualizarPasswordRecuperacion();
-          }}
-          style={{ display: "flex", flexDirection: "column" }}
-        >
-          <p style={{ color: "white", textAlign: "center", marginTop: 0, marginBottom: 8, fontSize: 14, lineHeight: 1.45 }}>
-            Introduce el código y tu nueva contraseña
-          </p>
-          <p style={{ margin: "0 0 16px", textAlign: "center", color: "rgba(255,255,255,0.8)", fontSize: 13 }}>
-            Código válido durante {cuentaAtrasRecuperar}s
-          </p>
-          {cuentaAtrasRecuperar <= 0 ? (
-            <p style={{ color: "#ffb3b3", textAlign: "center", marginTop: -8, marginBottom: 14, fontSize: 13 }}>
-              El código ha expirado. Solicita uno nuevo.
-            </p>
-          ) : null}
-          <input
-            type="text"
-            placeholder="Código de verificación"
-            value={codigoIngresadoRecuperar}
-            disabled={recuperando}
-            onChange={(e) => setCodigoIngresadoRecuperar(e.target.value.trim())}
-            style={{ ...campoStyle, opacity: recuperando ? 0.85 : 1 }}
-            autoComplete="off"
-          />
-          <div style={passwordWrapperStyle}>
-            <input
-              type={showNuevaPassword ? "text" : "password"}
-              placeholder="Nueva Contraseña"
-              value={nuevaPassword}
-              disabled={recuperando}
-              onChange={(e) => setNuevaPassword(e.target.value)}
-              style={{ ...inputConOjoStyle, opacity: recuperando ? 0.85 : 1 }}
-              autoComplete="new-password"
-            />
-            <button
-              type="button"
-              disabled={recuperando}
-              onClick={() => setShowNuevaPassword((v) => !v)}
-              style={{
-                ...eyeBtnStyle,
-                opacity: recuperando ? 0.5 : 1,
-                cursor: recuperando ? "not-allowed" : "pointer"
-              }}
-              title={showNuevaPassword ? "Ocultar contraseña" : "Ver contraseña"}
-              aria-label={showNuevaPassword ? "Ocultar contraseña" : "Ver contraseña"}
-            >
-              {showNuevaPassword ? "🙈" : "👁"}
-            </button>
-          </div>
-          <button
-            type="submit"
-            disabled={recuperando}
-            className="checkout-boton-finalizar"
-            style={{
-              ...cuentaCtaPrincipalStyle,
-              cursor: recuperando ? "wait" : "pointer",
-              opacity: recuperando ? 0.88 : 1,
-              marginTop: 10
-            }}
-          >
-            {recuperando ? "Actualizando…" : "Cambiar contraseña"}
+            {recuperando ? "Enviando…" : "Enviar enlace"}
           </button>
           <button
             type="button"

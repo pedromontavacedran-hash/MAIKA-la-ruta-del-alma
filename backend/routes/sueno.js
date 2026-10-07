@@ -6,6 +6,7 @@ import { PREMIUM_JWT_SECRET, premiumSeguimientoOkFile, premiumJtiLegacyUsedFile,
 import { suenoInterpretarLimiter, suenoImagenLimiter } from "../lib/rateLimits.js";
 import { authMiddleware } from "../lib/auth.js";
 import { fechaHoyEspana, msHastaMedianocheEspana } from "../lib/fechaEspana.js";
+import { registrarFuncionAnalitica } from "../lib/analytics.js";
 
 export const suenoRouter = Router();
 
@@ -438,43 +439,8 @@ suenoRouter.get("/sueno/estado", suenoInterpretarLimiter, (req, res) => {
 /**
  * Texto de interpretación del sueño (chat). Requiere DEEPSEEK_API_KEY u OPENAI_API_KEY (ver
  * `resolveSuenoTextProvider`); si no hay ninguna, el cliente puede usar fallback local.
- * Prueba rápida en navegador: GET /sueno/interpretar?texto=cachorros (misma lógica que POST).
+ * Solo POST: el relato viaja en el body, nunca en la URL (historial del navegador, Referer, logs).
  */
-suenoRouter.get("/sueno/interpretar", suenoInterpretarLimiter, async (req, res) => {
-  const textProvider = resolveSuenoTextProvider();
-  if (!textProvider) {
-    res.status(503).json({ ok: false, reason: "no_key" });
-    return;
-  }
-  const texto = String(req.query?.texto ?? "").trim();
-  if (!texto || texto.length > 12_000) {
-    res.status(400).json({
-      ok: false,
-      error: "texto_invalido",
-      hint: "Añade ?texto=tu relato, por ejemplo: /sueno/interpretar?texto=cachorros"
-    });
-    return;
-  }
-  try {
-    const clavesUso = suenoClavesIdentificacion(req);
-    if (suenoGratuitoUsadoHoy(clavesUso)) {
-      res.status(429).json({ ok: false, error: "limite_diario", restanteMs: msHastaMedianocheEspana() });
-      return;
-    }
-    const out = await interpretarSuenoOpenAI(textProvider, texto);
-    if (!out.ok) {
-      res.status(502).json(out);
-      return;
-    }
-    registrarUsoSuenoGratuito(clavesUso);
-    res.json(out);
-  } catch (e) {
-     
-    console.error("[sueno/interpretar GET]", e);
-    res.status(502).json({ ok: false, error: "red" });
-  }
-});
-
 suenoRouter.post("/sueno/interpretar", suenoInterpretarLimiter, async (req, res) => {
   const textProvider = resolveSuenoTextProvider();
   if (!textProvider) {
@@ -498,6 +464,7 @@ suenoRouter.post("/sueno/interpretar", suenoInterpretarLimiter, async (req, res)
       return;
     }
     registrarUsoSuenoGratuito(clavesUso);
+    registrarFuncionAnalitica("interpretaciones");
     res.json(out);
   } catch (e) {
      

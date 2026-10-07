@@ -61,7 +61,6 @@ export type UseAccesoRapidoCheckoutDeps = {
   proyectarUsuariosDesdeMaika: (u: MaikaUsuarioLS[]) => Usuario[];
   leerMaikaUsuarios: () => MaikaUsuarioLS[];
   guardarMaikaUsuarios: (u: MaikaUsuarioLS[]) => void;
-  enviarCodigoEmail: (email: string, nombre: string, codigo: string) => Promise<boolean>;
   loadCuentaPage: () => Promise<unknown>;
   /** Permite hidratar lista de direcciones al autenticarse desde acceso rápido. */
   onAuthAccesoRapido?: (usuarioAuth: Usuario) => void;
@@ -72,7 +71,6 @@ export type UseAccesoRapidoCheckoutDeps = {
 const ACCESO_RAPIDO_MAX_INTENTOS_EMAIL = 3;
 export const ACCESO_RAPIDO_MSG_EMAIL_NO_COINCIDE = "El correo no coincide con este teléfono.";
 const ACCESO_RAPIDO_CODIGO_EXPIRA_MIN = 10;
-const ACCESO_RAPIDO_MAX_INTENTOS = 5;
 
 export function useAccesoRapidoCheckout(d: UseAccesoRapidoCheckoutDeps) {
   const {
@@ -96,7 +94,6 @@ export function useAccesoRapidoCheckout(d: UseAccesoRapidoCheckoutDeps) {
     proyectarUsuariosDesdeMaika,
     leerMaikaUsuarios,
     guardarMaikaUsuarios,
-    enviarCodigoEmail,
     loadCuentaPage,
     onAuthAccesoRapido,
     antesDeAbrirModalPedido
@@ -432,7 +429,6 @@ export function useAccesoRapidoCheckout(d: UseAccesoRapidoCheckoutDeps) {
         emailRegistradoPorTelefono: emailRegistradoUnificadoParaTel9,
         proyectarUsuariosDesdeMaika,
         leerMaikaUsuarios,
-        enviarCodigoEmail,
         guardarBloqueoEmail: guardarBloqueoEmailAccesoRapido,
         limpiarBloqueoEmail: limpiarBloqueoEmailAccesoRapido,
         codigoExpiraMin: ACCESO_RAPIDO_CODIGO_EXPIRA_MIN,
@@ -459,19 +455,14 @@ export function useAccesoRapidoCheckout(d: UseAccesoRapidoCheckoutDeps) {
       emailRegistradoUnificadoParaTel9,
       proyectarUsuariosDesdeMaika,
       leerMaikaUsuarios,
-      enviarCodigoEmail,
       mostrarNotificacion,
       setAvisoTelefonoCheckout
     ]
   );
 
   const verificarCodigoAccesoRapido = useCallback(() => {
-    ejecutarVerificacionCodigoAccesoRapido({
-      codigoExpiraEnMs: accesoRapidoCodigoExpiraEnMs,
+    void ejecutarVerificacionCodigoAccesoRapido({
       codigoIngresado: accesoRapidoCodigoIngresado,
-      codigoEnviadoHash: accesoRapidoCodigoEnviado,
-      intentosCodigo: accesoRapidoIntentosCodigo,
-      maxIntentos: ACCESO_RAPIDO_MAX_INTENTOS,
       telefonoAcceso: accesoRapidoTelefono,
       emailRegistradoPorTelefono: emailRegistradoUnificadoParaTel9,
       proyectarUsuariosDesdeMaika,
@@ -481,7 +472,6 @@ export function useAccesoRapidoCheckout(d: UseAccesoRapidoCheckoutDeps) {
       setCodigoEnviado: setAccesoRapidoCodigoEnviado,
       setCodigoIngresado: setAccesoRapidoCodigoIngresado,
       setErrorCodigo,
-      setIntentosCodigo: setAccesoRapidoIntentosCodigo,
       setEmailVerificado: setAccesoRapidoEmailVerificado,
       setCodigoExpiraEnMs: setAccesoRapidoCodigoExpiraEnMs,
       setEnviando,
@@ -493,10 +483,7 @@ export function useAccesoRapidoCheckout(d: UseAccesoRapidoCheckoutDeps) {
       setPaso: setAccesoRapidoPaso
     });
   }, [
-    accesoRapidoCodigoExpiraEnMs,
     accesoRapidoCodigoIngresado,
-    accesoRapidoCodigoEnviado,
-    accesoRapidoIntentosCodigo,
     accesoRapidoTelefono,
     emailRegistradoUnificadoParaTel9,
     proyectarUsuariosDesdeMaika,
@@ -512,7 +499,6 @@ export function useAccesoRapidoCheckout(d: UseAccesoRapidoCheckoutDeps) {
       emailRegistradoPorTelefono: emailRegistradoUnificadoParaTel9,
       proyectarUsuariosDesdeMaika,
       leerMaikaUsuarios,
-      enviarCodigoEmail,
       notificar: mostrarNotificacion,
       codigoExpiraMin: ACCESO_RAPIDO_CODIGO_EXPIRA_MIN,
       setEnviando,
@@ -530,7 +516,6 @@ export function useAccesoRapidoCheckout(d: UseAccesoRapidoCheckoutDeps) {
     proyectarUsuariosDesdeMaika,
     leerMaikaUsuarios,
     accesoRapidoEmailRegistrado,
-    enviarCodigoEmail,
     mostrarNotificacion
   ]);
 

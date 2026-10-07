@@ -35,7 +35,6 @@
   "dependencies": {
     "@capacitor/android": "^8.1.0",
     "@capacitor/core": "^8.1.0",
-    "@emailjs/browser": "^4.4.1",
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.9.1",
     "bcryptjs": "^3.0.3",

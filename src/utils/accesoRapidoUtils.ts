@@ -1,7 +1,3 @@
-export function hashCodigoAccesoRapido(codigo: string): string {
-  return btoa(`${codigo}_maika_salt`);
-}
-
 export function passwordSeguraBasica(password: string): boolean {
   return /^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(String(password || ""));
 }

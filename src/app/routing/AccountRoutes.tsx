@@ -7,7 +7,7 @@ import { bloqueLayoutContenido } from "./routeLayouts";
 type AccountRoutesProps = Pick<AppRoutesProps,
   | "formAuth" | "setFormAuth" | "modoRegistro" | "setModoRegistro" | "usuario" | "setUsuario"
   | "iniciarSesionConToken" | "reenvioDisponibleEn" | "setReenvioDisponibleEn" | "mostrarNotificacion"
-  | "precargarDatosClienteDesdeUsuario" | "pedidos" | "handleRepetirPedido" | "enviarCodigoEmail"
+  | "precargarDatosClienteDesdeUsuario" | "pedidos" | "handleRepetirPedido"
   | "setPagina" | "telefonoForzadoRegistroDesdeAcceso" | "setTelefonoForzadoRegistroDesdeAcceso"
   | "modoForzadoRegistroDesdeAcceso" | "setModoForzadoRegistroDesdeAcceso"
   | "confirmacionIdentidadActivacion" | "setConfirmacionIdentidadActivacion"
@@ -28,7 +28,7 @@ export function AccountRoutes(p: AccountRoutesProps) {
               iniciarSesionConToken={p.iniciarSesionConToken} reenvioDisponibleEn={p.reenvioDisponibleEn}
               setReenvioDisponibleEn={p.setReenvioDisponibleEn} mostrarNotificacion={p.mostrarNotificacion}
               precargarDatosClienteDesdeUsuario={p.precargarDatosClienteDesdeUsuario} pedidos={p.pedidos}
-              onRepetirPedido={p.handleRepetirPedido} enviarCodigoEmail={p.enviarCodigoEmail} setPagina={p.setPagina}
+              onRepetirPedido={p.handleRepetirPedido} setPagina={p.setPagina}
               telefonoForzadoRegistroDesdeAcceso={p.telefonoForzadoRegistroDesdeAcceso}
               setTelefonoForzadoRegistroDesdeAcceso={p.setTelefonoForzadoRegistroDesdeAcceso}
               modoForzadoRegistroDesdeAcceso={p.modoForzadoRegistroDesdeAcceso}

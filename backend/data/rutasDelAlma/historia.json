@@ -1,0 +1,99 @@
+[
+  {
+    "id": "historia.zohar-autoria",
+    "titulo": "El Zóhar: atribución tradicional e investigación moderna",
+    "palabrasClave": ["zohar", "quien escribio", "autor del zohar", "shimon bar yohai", "rashbi", "moises de leon", "cuando aparecio"],
+    "certeza": "discutido",
+    "capas": {
+      "tradicion": "La tradición atribuye el Zóhar a Rabbi Shimon bar Yojai, sabio del siglo II.",
+      "historia": "El corpus zohárico apareció en la Castilla de finales del siglo XIII y comienzos del XIV.",
+      "academia": "La investigación moderna considera que el corpus fue producido probablemente por varios autores castellanos de finales del siglo XIII y comienzos del XIV, con Moses de León como figura central en su formación y transmisión. La atribución a Shimon bar Yojai se mantiene como creencia tradicional, no como reconstrucción histórica aceptada."
+    },
+    "fuentes": ["Zóhar", "tradición rabínica", "investigación académica moderna (Moses de León, Castilla s. XIII–XIV)"],
+    "referencias": [
+      { "fuente": "giller-reading-zohar", "nota": "Obra de referencia registrada para la recepción del Zóhar; capítulos y páginas pendientes de consulta verificada." }
+    ],
+    "relacionados": ["historia.desarrollo-medieval", "conceptos.sefirot"]
+  },
+  {
+    "id": "historia.sefer-yetzirah",
+    "titulo": "Sefer Yetzirah: texto fundamental de datación incierta",
+    "palabrasClave": ["sefer yetzirah", "libro de la formacion", "quien escribio el yetzirah", "32 caminos", "treinta y dos caminos"],
+    "certeza": "incierto",
+    "capas": {
+      "tradicion": "El Sefer Yetzirah («Libro de la Formación») es un texto fundamental de la mística judía: habla de diez sefirot y de las veintidós letras hebreas como los «treinta y dos caminos de la sabiduría» mediante los que se describe la formación del mundo.",
+      "historia": "Su datación y su autoría son inciertas y discutidas por la investigación; la atribución a Abraham es legendaria, no un hecho histórico establecido.",
+      "academia": "Las diez sefirot del Sefer Yetzirah no son conceptualmente idénticas a las diez sefirot de la Cábala teosófica medieval: el concepto evoluciona entre el texto antiguo y el sistema medieval."
+    },
+    "fuentes": ["Sefer Yetzirah"],
+    "relacionados": ["conceptos.sefirot", "conceptos.letras-gematria", "conceptos.arbol-vida"]
+  },
+  {
+    "id": "historia.bahir",
+    "titulo": "Sefer ha-Bahir: procedencia discutida",
+    "palabrasClave": ["bahir", "sefer habahir", "libro del resplandor"],
+    "certeza": "discutido",
+    "capas": {
+      "historia": "El Sefer ha-Bahir es un texto fundamental para el desarrollo temprano de la Cábala medieval; su autoría es desconocida y su datación y procedencia (formación en el Oriente judío, edición en Provenza) son discutidas por la investigación.",
+      "academia": "Es importante para el desarrollo temprano de conceptos sefiróticos; conviene no convertir las hipótesis historiográficas antiguas en hechos definitivos."
+    },
+    "fuentes": ["Sefer ha-Bahir"],
+    "relacionados": ["historia.desarrollo-medieval", "historia.isaac-el-ciego", "nombres72.formacion-tripletes"]
+  },
+  {
+    "id": "historia.desarrollo-medieval",
+    "titulo": "Desarrollo medieval de la Cábala",
+    "palabrasClave": ["origen de la cabala", "historia de la cabala", "provenza", "gerona", "castilla", "safed", "luria", "cordovero", "expulsion", "medieval", "quien creo la cabala", "quien descubrio la cabala", "descubrio", "aparicion", "comienzo", "surgimiento", "primeros circulos", "moises", "tora", "sinai", "transmision", "elias", "adan", "fundador"],
+    "certeza": "documentado",
+    "capas": {
+      "tradicion": "Algunas tradiciones cabalísticas medievales vinculaban el origen de esta sabiduría con la Torá recibida por Moisés, con Elías o incluso con Adán, dentro de una cadena de transmisión esotérica. Son afirmaciones de la propia tradición, no reconstrucción histórica.",
+      "historia": "La investigación histórica no permite afirmar que Moisés —ni ninguna otra figura— fuera el «descubridor» o fundador de la Cábala. La Cábala como corriente mística diferenciada emerge gradualmente en Provenza desde finales del siglo XII y durante el XIII; Gerona se convierte después en un centro cabalístico reconocible en la primera mitad del siglo XIII, y Castilla es otro foco posterior. Entre las primeras figuras históricamente identificables aparecen Abraham ben Isaac de Narbona e Isaac el Ciego, dentro de los primeros círculos cabalísticos de Provenza. La Cábala hunde raíces en la mística judía antigua (tradiciones de la Merkavá, literatura de los Heikhalot).",
+      "academia": "No se atribuye la Cábala a un único fundador histórico: la investigación la describe como un desarrollo gradual de corrientes místicas judías que cristaliza en textos y escuelas medievales, con varios círculos y generaciones. Las fuentes académicas no son completamente uniformes al identificar a la primera figura cabalística, debido a la escasez de documentación anterior a 1200."
+    },
+    "fuentes": ["literatura Heikhalot", "tradición de la Merkavá", "historiografía de la Cábala medieval"],
+    "referencias": [
+      { "fuente": "scholem-origins-kabbalah", "nota": "Obra de referencia registrada para orígenes medievales (Provenza, Cataluña, primeros cabalistas); capítulos y páginas pendientes de consulta verificada." },
+      { "fuente": "idel-new-perspectives", "nota": "Contraste historiográfico registrado; pendiente de consulta verificada." }
+    ],
+    "relacionados": ["historia.isaac-el-ciego", "historia.bahir", "historia.zohar-autoria", "conceptos.que-es-cabala"]
+  },
+  {
+    "id": "historia.isaac-el-ciego",
+    "titulo": "Isaac el Ciego (Isaac Sagi Nahor)",
+    "palabrasClave": ["isaac el ciego", "isaac sagi nahor", "primer cabalista", "primeros cabalistas", "posquieres", "rabd", "abraham ben david"],
+    "certeza": "documentado",
+    "capas": {
+      "historia": "Isaac el Ciego (Isaac Sagi Nahor), hijo de Abraham ben David de Posquières (el Rabad), es una de las primeras figuras cabalísticas históricamente identificables y una figura fundamental de los primeros círculos cabalísticos de Provenza, activo a finales del siglo XII y comienzos del XIII.",
+      "academia": "Su entorno es el punto de partida de los primeros círculos cabalísticos documentados; de su ámbito proceden los maestros del círculo de Gerona. La tradición posterior lo presenta como receptor de una sabiduría transmitida por su familia. Precaución historiográfica: una investigación académica reciente sobre la Provenza medieval identifica a Abraham ben Isaac de Narbona como la primera figura de la que sabemos que se ocupó de la Cábala, y la identificación de los primeros cabalistas no es completamente uniforme entre los estudiosos — la documentación anterior a 1200 es escasa —, por lo que conviene no presentar a Isaac el Ciego como «el primer cabalista» ni como «el fundador de la Cábala»."
+    },
+    "fuentes": ["historiografía de la Cábala medieval", "tradición del círculo de Gerona"],
+    "referencias": [
+      { "fuente": "scholem-origins-kabbalah", "nota": "Obra de referencia registrada para los primeros cabalistas de Provenza; capítulos y páginas pendientes de consulta verificada." }
+    ],
+    "relacionados": ["historia.desarrollo-medieval", "historia.bahir", "historia.abraham-ben-isaac"]
+  },
+  {
+    "id": "historia.abraham-ben-isaac",
+    "titulo": "Abraham ben Isaac de Narbona",
+    "palabrasClave": ["abraham ben isaac", "narbona", "rabbi abraham", "eshkol", "sefer ha-eshkol", "primeras figuras", "provenzal"],
+    "certeza": "discutido",
+    "capas": {
+      "historia": "Abraham ben Isaac de Narbona (autor del Sefer ha-Eshkol) es una de las primeras figuras de la Provenza medieval vinculadas a la Cábala. Una investigación académica reciente sobre la Provenza lo identifica como la primera figura de la que sabemos que se ocupó de la Cábala.",
+      "academia": "La identificación de la primera figura cabalística no es uniforme entre los estudiosos, debido a la escasez de documentación anterior a 1200; conviene presentarlo como una de las primeras figuras dentro de un proceso gradual de varios círculos y generaciones, no como «fundador de la Cábala». Junto a él destaca Isaac el Ciego, figura fundamental de los primeros círculos provenzales."
+    },
+    "fuentes": ["historiografía de la Cábala provenzal", "investigación académica reciente sobre la Provenza medieval"],
+    "relacionados": ["historia.desarrollo-medieval", "historia.isaac-el-ciego", "historia.bahir"]
+  },
+  {
+    "id": "historia.moises",
+    "titulo": "Moisés",
+    "palabrasClave": ["quien es moises", "quien fue moises", "moises", "profeta", "sinai", "liberacion", "exodo figura"],
+    "certeza": "documentado",
+    "capas": {
+      "tradicion": "Moisés es el profeta y líder central del relato del Éxodo y la figura a quien la tradición bíblica atribuye la recepción de la Torá en el Sinaí.",
+      "interpretaciones": "En tradiciones cabalísticas posteriores, Moisés aparece relacionado con la transmisión de una sabiduría esotérica y con el Nombre de 72 letras asociado a la apertura del mar; estas interpretaciones no aparecen formuladas de ese modo en el relato bíblico del Éxodo."
+    },
+    "fuentes": ["relato bíblico del Éxodo", "tradición cabalística medieval"],
+    "relacionados": ["historia.desarrollo-medieval", "nombres72.formacion-tripletes"]
+  }
+]

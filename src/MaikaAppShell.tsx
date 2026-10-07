@@ -62,17 +62,8 @@ export default function MaikaAppShell() {
     notificacion,
     mostrarNotificacion,
     mostrarAvisoCookies,
-    mostrarConfigCookies,
-    consentimientoCookies,
-    rechazarCookiesOpcionales,
     aceptarCookies,
-    toggleMostrarConfigCookies,
-    cerrarConfigCookies,
-    cerrarNotificacion,
-    guardarPreferenciasCookiesPanel,
-    onUpdatePreferencias,
-    onUpdateAnaliticas,
-    onUpdateMarketing
+    cerrarNotificacion
   } = chromeState;
 
   const categorias = useCategorias();
@@ -251,7 +242,6 @@ export default function MaikaAppShell() {
     handleRepetirPedido,
     hayModalAbiertoCheckout,
     checkoutViewProps,
-    enviarCodigoEmail,
     checkoutHayRechazoServidor,
     procesandoPagoCheckout,
     sincronizarCarritoAlEntrarVista
@@ -405,8 +395,8 @@ export default function MaikaAppShell() {
   const chromeRoutesPack = useMemo(() => ({ mostrarNotificacion }), [mostrarNotificacion]);
 
   const checkoutRoutesPack = useMemo(
-    () => ({ pedidos, handleRepetirPedido, enviarCodigoEmail }),
-    [pedidos, handleRepetirPedido, enviarCodigoEmail]
+    () => ({ pedidos, handleRepetirPedido }),
+    [pedidos, handleRepetirPedido]
   );
 
   const sesionRoutesPack = useSesionRoutesPack(sesionState);
@@ -612,20 +602,11 @@ export default function MaikaAppShell() {
         mostrarAvisoCookies={mostrarAvisoCookies}
         bgColor={THEME.bg}
         goldColor={THEME.goldMain}
-        mostrarConfigCookies={mostrarConfigCookies}
-        consentimientoCookies={consentimientoCookies}
         notificacion={notificacion}
         onPrefetchPagina={onPrefetchPagina}
         onTerminarCompra={() => finalizarCarrito()}
         onAbrirPoliticaCookies={() => setPagina("legalCookies")}
-        onRechazarOpcionales={rechazarCookiesOpcionales}
-        onToggleConfigCookies={toggleMostrarConfigCookies}
-        onAceptarTodasCookies={aceptarCookies}
-        onCerrarConfigCookies={cerrarConfigCookies}
-        onGuardarPreferenciasCookies={guardarPreferenciasCookiesPanel}
-        onUpdatePreferencias={onUpdatePreferencias}
-        onUpdateAnaliticas={onUpdateAnaliticas}
-        onUpdateMarketing={onUpdateMarketing}
+        onAceptarCookies={aceptarCookies}
         onCerrarNotificacion={cerrarNotificacion}
       />
       ) : null}

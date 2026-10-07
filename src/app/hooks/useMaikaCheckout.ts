@@ -27,7 +27,6 @@ import type { CatalogoActualizadoCheckout } from "../../checkout/enviarPedidoWha
 import { inputStyle } from "../../styles/inputStyle";
 import {
   CARRITO_KEY,
-  EMAILJS_CONFIG,
   GUEST_CART_PENDING_KEY,
   CUPONES_DISPONIBLES,
   CUPONES_MAIKA_KEY,
@@ -41,7 +40,6 @@ import {
   resolverCuponAplicable
 } from "../../utils/cupones";
 import { normalizarTelefonoBizum } from "../../utils/pago";
-import { enviarCodigoEmail as enviarCodigoEmailUtil } from "../../utils/emailCodigo";
 import { hasClientSession } from "../../services/apiAuth";
 import { enmascararEmail } from "../../utils/accesoRapidoUtils";
 import { direccionesDesdePedidosMaikaLegacy } from "../../utils/direccionesHistorialPedidosMaika";
@@ -571,10 +569,6 @@ export function useMaikaCheckout(p: UseMaikaCheckoutInput) {
   const obtenerCodigoUltimoPedidoPorTel9 = (tel9: string): string =>
     obtenerCodigoUltimoPedidoPorTel9Util(tel9, claveTelefonoES, parseFechaPedido, leerMaikaPedidos);
 
-  const enviarCodigoEmail = async (email: string, nombre: string, codigo: string) => {
-    return enviarCodigoEmailUtil(email, nombre, codigo, EMAILJS_CONFIG);
-  };
-
   const accesoRapido = useAccesoRapidoCheckout({
     datosCliente,
     mostrarNotificacion,
@@ -596,7 +590,6 @@ export function useMaikaCheckout(p: UseMaikaCheckoutInput) {
     proyectarUsuariosDesdeMaika,
     leerMaikaUsuarios,
     guardarMaikaUsuarios,
-    enviarCodigoEmail,
     loadCuentaPage,
     onAuthAccesoRapido: (usuarioAuth) => {
       precargarDatosClienteDesdeUsuario(usuarioAuth);
@@ -953,7 +946,7 @@ export function useMaikaCheckout(p: UseMaikaCheckoutInput) {
       setUrlWhatsAppPendiente,
       setPedidoRealizado
     },
-    login: { loginModalAbierto, setLoginModalAbierto, iniciarSesionConToken, enviarCodigoEmail },
+    login: { loginModalAbierto, setLoginModalAbierto, iniciarSesionConToken },
     compraRapida: {
       comprarEnUnClick,
       compraRapidaCheckoutDisponible: metodoPagoRapidoValido && cart.length > 0
@@ -974,7 +967,6 @@ export function useMaikaCheckout(p: UseMaikaCheckoutInput) {
     handleRepetirPedido,
     hayModalAbiertoCheckout,
     checkoutViewProps,
-    enviarCodigoEmail,
     setRecordarDatosInvitado,
     checkoutHayRechazoServidor,
     procesandoPagoCheckout: procesandoPago,

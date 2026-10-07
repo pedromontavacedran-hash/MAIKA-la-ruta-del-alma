@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CHECKOUT_CONFIG } from "../config/checkoutConfig";
+import { SERVICIOS_CONTRATABLES } from "../config/lanzamiento";
 import { THEME } from "../config";
 import { PATH_BY_PAGINA } from "../app/routing/routeMaps";
 import { getMaikaScrollPortEl } from "../utils/maikaScrollPort";
@@ -143,9 +144,10 @@ export default function RitualPersonalizadoPage() {
           </ul>
 
           <div className="ritual-personalizado-detalle__meta">
-            <span className="ritual-personalizado-detalle__precio">{m.precio} €</span>
+            <span className="ritual-personalizado-detalle__precio">{SERVICIOS_CONTRATABLES ? `${m.precio} €` : "Próximamente"}</span>
           </div>
 
+          {SERVICIOS_CONTRATABLES && (
           <a
             href={urlWhatsAppModalidad(m)}
             target="_blank"
@@ -169,6 +171,7 @@ export default function RitualPersonalizadoPage() {
           >
             Consultar por WhatsApp
           </a>
+          )}
 
           <button
             type="button"
@@ -219,7 +222,7 @@ export default function RitualPersonalizadoPage() {
               <div className="ritual-personalizado-page__meta">
                 <p className="ritual-personalizado-page__descripcion">{m.descripcion}</p>
                 <div className="ritual-personalizado-page__precio-linea">
-                  <span className="ritual-personalizado-page__precio">{m.precio} €</span>
+                  <span className="ritual-personalizado-page__precio">{SERVICIOS_CONTRATABLES ? `${m.precio} €` : "Próximamente"}</span>
                 </div>
               </div>
               <button

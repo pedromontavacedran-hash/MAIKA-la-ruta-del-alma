@@ -4,14 +4,8 @@
 
 import { CHECKOUT_CONFIG } from "./checkoutConfig";
 
-export const EMAILJS_CONFIG = {
-  PUBLIC_KEY: "Z-4fOHeB2ph9ZNZIH",
-  SERVICE_ID: "service_m0olcbz",
-  TEMPLATE_ID: "template_k1m7v65"
-} as const;
-
 export const COOKIE_CONSENT_KEY = "maikaCookieConsentV1";
-export const COOKIE_CONSENT_VERSION = 1;
+export const COOKIE_CONSENT_VERSION = 2;
 
 export const DEMO_ACTIVO_KEY = "maikaDemoActivoV1";
 export const DEMO_CATALOGO_KEY = "maikaDemoCatalogoV1";

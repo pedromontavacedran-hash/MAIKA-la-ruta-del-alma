@@ -1,0 +1,56 @@
+[
+  {
+    "id": "diferenciacion.judia-vs-hermetica",
+    "titulo": "Cábala judía y Cábala cristiano-hermética",
+    "palabrasClave": [
+      "cabala cristiana",
+      "cabala hermetica",
+      "diferencia",
+      "judia o cristiana",
+      "qabalah",
+      "occidental"
+    ],
+    "certeza": "documentado",
+    "capas": {
+      "tradicion": "La Cábala judía es una corriente mística interna del judaísmo, desarrollada en textos y escuelas medievales y modernas (Zóhar, Safed, tradición luriánica).",
+      "interpretaciones": "Desde el Renacimiento, autores cristianos como Pico della Mirandola, Reuchlin y posteriormente Agrippa reinterpretaron materiales cabalísticos dentro de contextos cristianos, herméticos y ocultistas. Estas corrientes posteriores desarrollaron nuevas asociaciones y correspondencias que deben distinguirse de la Cábala judía medieval, entre ellas diferentes sistemas de correspondencias con astrología, magia y, posteriormente, Tarot. Son desarrollos legítimos en su propio contexto, pero posteriores y diferentes de la Cábala judía."
+    },
+    "fuentes": [
+      "Reuchlin, De Arte Cabalistica (1517)",
+      "tradición hermética renacentista"
+    ],
+    "relacionados": [
+      "nombres72.capa-angelica",
+      "diferenciacion.ocultismo-moderno",
+      "historia.desarrollo-medieval"
+    ]
+  },
+  {
+    "id": "diferenciacion.ocultismo-moderno",
+    "titulo": "Ocultismo occidental y espiritualidad contemporánea",
+    "palabrasClave": [
+      "tarot",
+      "astrologia",
+      "planetas",
+      "golden dawn",
+      "ocultismo",
+      "chakra",
+      "proteccion",
+      "poderes",
+      "manifestacion",
+      "significado moderno"
+    ],
+    "certeza": "documentado",
+    "capas": {
+      "interpretaciones": "Correspondencias como tarot–senderos, planetas, colores o «poderes» de los nombres pertenecen a síntesis modernas del ocultismo europeo (siglos XVIII–XIX, con sistemas como los de la Golden Dawn) y a la espiritualidad contemporánea. No forman parte de la Cábala judía histórica ni deben presentarse como tales.",
+      "miradaMaika": "En Rutas del Alma estas capas se explican como desarrollos posteriores con su propio contexto: se pueden estudiar como historia de las ideas, sin confundirlas con la tradición de origen."
+    },
+    "fuentes": [
+      "historiografía del ocultismo occidental"
+    ],
+    "relacionados": [
+      "diferenciacion.judia-vs-hermetica",
+      "conceptos.arbol-vida"
+    ]
+  }
+]

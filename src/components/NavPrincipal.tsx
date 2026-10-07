@@ -5,6 +5,7 @@ import { preloadAdminOnce } from "@/app/routing/preloadOnce";
 import { useApp } from "../context/AppContext";
 import type { Pagina } from "../types";
 import { THEME } from "../config";
+import { TIENDA_PUBLICA } from "../config/lanzamiento";
 import MaikaLogoImg from "./MaikaLogoImg";
 import SyncIndicator from "./SyncIndicator";
 import { isAdminAuthorized, setAdminAuthorization } from "../utils/adminAuth";
@@ -41,6 +42,7 @@ import {
   gold,
   iconAdmin,
   iconCarrito,
+  iconMenuMarcador,
   iconMenuTresLineas,
   iconCerrar,
   iconPersona,
@@ -158,6 +160,16 @@ export default function NavPrincipal({
     fontSize: 12,
     fontWeight: 400,
     color: "rgba(229, 192, 123, 0.62)"
+  };
+  /** Lema/aclaración en línea junto a una entrada del menú: discreto, no parece enlace. */
+  const lemaItemMenu = {
+    marginLeft: 8,
+    fontSize: 12.5,
+    fontWeight: 400,
+    fontStyle: "italic" as const,
+    letterSpacing: "0.03em",
+    color: "rgba(229, 192, 123, 0.62)",
+    whiteSpace: "normal" as const
   };
   /** Líneas informativas del bloque «Reglas» del menú: texto, no enlaces. */
   const lineaReglaMenu = {
@@ -661,6 +673,7 @@ export default function NavPrincipal({
           >
             {iconPersona(navIconRightVisualPx)}
           </Link>
+          {TIENDA_PUBLICA && (
           <button
             type="button"
             onClick={(e) => {
@@ -693,6 +706,7 @@ export default function NavPrincipal({
               {mostrarBadgeCarrito && <span style={{ fontSize: "0.95em" }}>({totalItemsCarrito})</span>}
             </span>
           </button>
+          )}
           </div>
         </div>
       </div>
@@ -731,6 +745,7 @@ export default function NavPrincipal({
             <span style={{ fontSize: "1.75rem", lineHeight: 1, display: "inline-flex" }}>{iconCerrar}</span>
           </button>
         </div>
+        {TIENDA_PUBLICA && (
         <div style={{ marginBottom: 10 }}>
           <div style={{ display: "flex", gap: 6, marginBottom: 6, minWidth: 0, alignItems: "stretch" }}>
             <input
@@ -775,40 +790,67 @@ export default function NavPrincipal({
             </button>
           </div>
         </div>
-        <div style={tituloSeccionMenu}>✨ Experiencias</div>
+        )}
+        <div style={tituloSeccionMenu}>Experiencias</div>
         <div style={{ marginBottom: 6 }}>
           <Link
             to={PATH_BY_PAGINA.servicios}
             onClick={() => setInicioMenuAbierto(false)}
+            className="app-menu-item"
             style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: location.pathname === PATH_BY_PAGINA.servicios ? 700 : itemMenuInicio.fontWeight }}
           >
-            ✨ Servicios
+            {iconMenuMarcador}Servicios
           </Link>
         </div>
         <div style={{ marginBottom: 6 }}>
           <Link
             to={PATH_BY_PAGINA.horoscopos}
             onClick={() => setInicioMenuAbierto(false)}
+            className="app-menu-item"
             style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: location.pathname === PATH_BY_PAGINA.horoscopos ? 700 : itemMenuInicio.fontWeight }}
           >
-            🔮 Horóscopos
+            {iconMenuMarcador}Horóscopos
           </Link>
         </div>
         <div>
           <Link
             to={PATH_BY_PAGINA.suenos}
             onClick={() => setInicioMenuAbierto(false)}
+            className="app-menu-item"
             style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: location.pathname === PATH_BY_PAGINA.suenos ? 700 : itemMenuInicio.fontWeight }}
           >
-            🌙 Sueños
+            {iconMenuMarcador}Sueños
           </Link>
         </div>
 
-        <div style={tituloSeccionMenu}>🛍️ Tienda</div>
+        <div style={tituloSeccionMenu}>Rutas del Alma</div>
+        <div>
+          <Link
+            to={PATH_BY_PAGINA.rutasDelAlma}
+            onClick={() => setInicioMenuAbierto(false)}
+            className="app-menu-item"
+            style={{
+              ...itemMenuInicio,
+              textDecoration: "none",
+              color: "white",
+              fontWeight:
+                location.pathname === PATH_BY_PAGINA.rutasDelAlma || location.pathname.startsWith(`${PATH_BY_PAGINA.rutasDelAlma}/`)
+                  ? 700
+                  : itemMenuInicio.fontWeight
+            }}
+          >
+            {iconMenuMarcador}Rutas del Alma
+            <span style={lemaItemMenu}>(Encuéntrate a ti mismo)</span>
+          </Link>
+        </div>
+
+        <div style={tituloSeccionMenu}>Tienda</div>
+        {TIENDA_PUBLICA && (<>
         <div style={{ marginBottom: 6 }}>
           <Link
             to={PATH_BY_PAGINA.ritualDelMes}
             onClick={() => setInicioMenuAbierto(false)}
+            className="app-menu-item"
             style={{
               ...itemMenuInicio,
               textDecoration: "none",
@@ -816,7 +858,7 @@ export default function NavPrincipal({
               fontWeight: location.pathname === PATH_BY_PAGINA.ritualDelMes ? 700 : itemMenuInicio.fontWeight
             }}
           >
-            🕯️ Ritual del mes
+            {iconMenuMarcador}Ritual del mes
           </Link>
         </div>
         <div style={{ marginBottom: 6 }}>
@@ -824,9 +866,10 @@ export default function NavPrincipal({
             to={PATH_BY_PAGINA.tienda}
             onClick={onClickSeccionTienda(TIENDA_ANCHOR_IDS.packsDestacados)}
             onMouseEnter={() => onPrefetchPagina?.("tienda")}
+            className="app-menu-item"
             style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: itemMenuInicio.fontWeight }}
           >
-            🎁 Packs destacados
+            {iconMenuMarcador}Packs destacados
           </Link>
         </div>
         <div style={{ marginBottom: 6 }}>
@@ -834,48 +877,72 @@ export default function NavPrincipal({
             to={PATH_BY_PAGINA.tienda}
             onClick={onClickSeccionTienda(TIENDA_ANCHOR_IDS.masVendidos)}
             onMouseEnter={() => onPrefetchPagina?.("tienda")}
+            className="app-menu-item"
             style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: itemMenuInicio.fontWeight }}
           >
-            🔥 Los más vendidos
+            {iconMenuMarcador}Los más vendidos
           </Link>
         </div>
+        </>)}
+        {/* «Tienda» siempre visible: con TIENDA_PUBLICA=false abre el catálogo «Próximamente» de /tienda. */}
         <div style={{ marginBottom: 6 }}>
           <Link
             to={PATH_BY_PAGINA.tienda}
             onClick={() => setInicioMenuAbierto(false)}
             onMouseEnter={() => onPrefetchPagina?.("tienda")}
+            className="app-menu-item"
             style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: esRutaVistaTiendaShellScroll(location.pathname) ? 700 : itemMenuInicio.fontWeight }}
           >
-            🛒 Tienda
+            {iconMenuMarcador}Tienda
           </Link>
         </div>
-        {!accesoAdmin && (
+        {TIENDA_PUBLICA && !accesoAdmin && (
           <div>
             <Link
               to={PATH_BY_PAGINA.seguimiento}
               onClick={() => setInicioMenuAbierto(false)}
               onMouseEnter={() => onPrefetchPagina?.("seguimiento")}
+              className="app-menu-item"
               style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: location.pathname === PATH_BY_PAGINA.seguimiento ? 700 : itemMenuInicio.fontWeight }}
             >
-              📦 Seguimiento de pedidos
+              {iconMenuMarcador}Seguimiento de pedidos
             </Link>
           </div>
         )}
 
-        <div style={tituloSeccionMenu}>🌿 Sobre Maika</div>
+        <div style={tituloSeccionMenu}>Sobre Maika</div>
         <div style={{ marginBottom: 6 }}>
           <Link
             to={PATH_BY_PAGINA.sobreMaika}
             onClick={() => setInicioMenuAbierto(false)}
+            className="app-menu-item"
             style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: location.pathname === PATH_BY_PAGINA.sobreMaika ? 700 : itemMenuInicio.fontWeight }}
           >
-            🌿 Sobre Maika
+            {iconMenuMarcador}Sobre Maika
+          </Link>
+        </div>
+        <div style={{ marginBottom: 6 }}>
+          <Link
+            to={PATH_BY_PAGINA.articulos}
+            onClick={() => setInicioMenuAbierto(false)}
+            className="app-menu-item"
+            style={{
+              ...itemMenuInicio,
+              textDecoration: "none",
+              color: "white",
+              fontWeight: location.pathname === PATH_BY_PAGINA.articulos || location.pathname.startsWith(`${PATH_BY_PAGINA.articulos}/`)
+                ? 700
+                : itemMenuInicio.fontWeight
+            }}
+          >
+            {iconMenuMarcador}Artículos
           </Link>
         </div>
         <div style={{ marginBottom: 6 }}>
           <Link
             to={PATH_BY_PAGINA.testimonios}
             onClick={() => setInicioMenuAbierto(false)}
+            className="app-menu-item"
             style={{
               ...itemMenuInicio,
               textDecoration: "none",
@@ -883,31 +950,36 @@ export default function NavPrincipal({
               fontWeight: location.pathname === PATH_BY_PAGINA.testimonios ? 700 : itemMenuInicio.fontWeight
             }}
           >
-            💬 Testimonios
+            {iconMenuMarcador}Testimonios
           </Link>
         </div>
         <div style={{ marginBottom: 6 }}>
           <Link
             to={PATH_BY_PAGINA.contacto}
             onClick={() => setInicioMenuAbierto(false)}
+            className="app-menu-item"
             style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: location.pathname === PATH_BY_PAGINA.contacto ? 700 : itemMenuInicio.fontWeight }}
           >
-            📩 Contacto
+            {iconMenuMarcador}Contacto
           </Link>
         </div>
+        {TIENDA_PUBLICA && (
         <div style={{ marginBottom: 6 }}>
           <Link
             to={PATH_BY_PAGINA.envios}
             onClick={() => setInicioMenuAbierto(false)}
+            className="app-menu-item"
             style={{ ...itemMenuInicio, textDecoration: "none", color: "white", fontWeight: location.pathname === PATH_BY_PAGINA.envios ? 700 : itemMenuInicio.fontWeight }}
           >
-            🚚 Envíos
+            {iconMenuMarcador}Envíos
           </Link>
         </div>
+        )}
         <div>
           <Link
             to={PATH_BY_PAGINA.legal}
             onClick={() => setInicioMenuAbierto(false)}
+            className="app-menu-item"
             style={{
               ...itemMenuInicio,
               textDecoration: "none",
@@ -918,7 +990,7 @@ export default function NavPrincipal({
                   : itemMenuInicio.fontWeight
             }}
           >
-            ⚖️ Legal
+            {iconMenuMarcador}Legal
           </Link>
         </div>
         <div
@@ -932,9 +1004,12 @@ export default function NavPrincipal({
         <div style={{ marginBottom: 6 }}>
           <button
             type="button"
-            onClick={() => {
-              setInicioMenuAbierto(false);
-              setSugerenciaModalAbierto(true);
+            onClick={() => {
+
+              setInicioMenuAbierto(false);
+
+              setSugerenciaModalAbierto(true);
+
             }}
             style={{
               ...itemMenuInicio,
@@ -951,17 +1026,17 @@ export default function NavPrincipal({
               boxShadow: "0 0 18px rgba(212,175,55,0.10), inset 0 1px 0 rgba(245,230,163,0.10)"
             }}
           >
-            💡 Ayúdanos a mejorar <span className="maika-menu-sparkle" aria-hidden>✨</span>
+            Ayúdanos a mejorar
             <span style={subtituloItemMenu}>Tu opinión nos ayuda</span>
             <span style={{ ...subtituloItemMenu, marginTop: 6, fontSize: 11.5 }}>
-              🔐 Requiere estar registrado
+              Requiere estar registrado
             </span>
           </button>
         </div>
 
-        <div style={tituloSeccionMenu}>🔐 Reglas</div>
-        <p style={lineaReglaMenu}>🌙 Sueños → requiere estar registrado.</p>
-        <p style={lineaReglaMenu}>🔮 Horóscopos → requiere estar registrado.</p>
+        <div style={tituloSeccionMenu}>Reglas</div>
+        <p style={lineaReglaMenu}>Sueños → requiere estar registrado.</p>
+        <p style={lineaReglaMenu}>Horóscopos → requiere estar registrado.</p>
       </div>
     )}
     {modalAdminAbierto && (

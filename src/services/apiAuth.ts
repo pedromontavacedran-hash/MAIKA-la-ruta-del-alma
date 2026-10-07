@@ -489,6 +489,13 @@ export async function registerApi(data: {
   /** Obligatorio junto a `activarCuentaTecnica`: el backend lo valida contra el último pedido real del teléfono. */
   codigoUltimoPedido?: string;
   passwordTemporal?: boolean;
+  /** Alta pública: JWT emitido por POST /auth/registro/verificar tras validar el código de email. */
+  verificacionToken?: string;
+  /** Alta pública: aceptación expresa de Términos y Política de Privacidad. */
+  aceptacionTerminos?: boolean;
+  aceptacionPrivacidad?: boolean;
+  /** Alta pública: declaración de mayoría de edad (sin fecha de nacimiento). */
+  declaraMayorEdad?: boolean;
 }): Promise<{ ok: true; user: AuthUser }> {
   const body: Record<string, unknown> = {
     email: data.email,
@@ -523,6 +530,12 @@ export async function registerApi(data: {
   if (data.passwordTemporal === true) {
     body.passwordTemporal = true;
   }
+  if (String(data.verificacionToken ?? "").trim()) {
+    body.verificacionToken = String(data.verificacionToken).trim();
+  }
+  if (data.aceptacionTerminos === true) body.aceptacionTerminos = true;
+  if (data.aceptacionPrivacidad === true) body.aceptacionPrivacidad = true;
+  if (data.declaraMayorEdad === true) body.declaraMayorEdad = true;
   const res = await fetchMaikaApi(`${getApiBaseUrl()}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -539,6 +552,87 @@ export async function registerApi(data: {
     throw new Error(msg);
   }
   return (await res.json()) as { ok: true; user: AuthUser };
+}
+
+/**
+ * Registro paso 1→2: el backend genera el código, guarda solo su hash y lo envía por email (SMTP).
+ * El código nunca viaja en la respuesta.
+ */
+export async function solicitarCodigoRegistroApi(email: string, declaraMayorEdad: boolean): Promise<{ ok: true; emailEnviado: boolean }> {
+  const res = await fetchMaikaApi(`${getApiBaseUrl()}/auth/registro/solicitar-codigo`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: String(email || "").trim().toLowerCase(),
+      declaraMayorEdad: declaraMayorEdad === true
+    })
+  });
+  const j = (await res.json().catch(() => ({}))) as { ok?: boolean; emailEnviado?: boolean; error?: string };
+  if (!res.ok) throw new Error(typeof j.error === "string" && j.error.trim() ? j.error.trim() : `Solicitud de código fallida (${res.status})`);
+  return { ok: true, emailEnviado: j.emailEnviado === true };
+}
+
+/** Registro paso 2: valida el código en backend y devuelve el token de verificación para /auth/register. */
+export async function verificarCodigoRegistroApi(email: string, codigo: string): Promise<{ ok: true; verificacionToken: string }> {
+  const res = await fetchMaikaApi(`${getApiBaseUrl()}/auth/registro/verificar`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: String(email || "").trim().toLowerCase(), codigo: String(codigo || "").trim() })
+  });
+  const j = (await res.json().catch(() => ({}))) as { ok?: boolean; verificacionToken?: string; error?: string; restantes?: number };
+  if (!res.ok || typeof j.verificacionToken !== "string" || !j.verificacionToken) {
+    const err = new Error(
+      typeof j.error === "string" && j.error.trim() ? j.error.trim() : `Verificación fallida (${res.status})`
+    ) as Error & { restantes?: number };
+    if (typeof j.restantes === "number") err.restantes = j.restantes;
+    throw err;
+  }
+  return { ok: true, verificacionToken: j.verificacionToken };
+}
+
+/**
+ * Acceso rápido en checkout paso 1: el backend comprueba teléfono+email, genera el código,
+ * guarda solo su hash y lo envía por email (SMTP). El código nunca viaja en la respuesta.
+ */
+export async function solicitarCodigoAccesoRapidoApi(
+  telefono: string,
+  email: string
+): Promise<{ ok: true; emailEnviado: boolean }> {
+  const res = await fetchMaikaApi(`${getApiBaseUrl()}/auth/acceso-rapido/solicitar-codigo`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      telefono: String(telefono || "").trim(),
+      email: String(email || "").trim().toLowerCase()
+    })
+  });
+  const j = (await res.json().catch(() => ({}))) as { ok?: boolean; emailEnviado?: boolean; error?: string };
+  if (!res.ok) throw new Error(typeof j.error === "string" && j.error.trim() ? j.error.trim() : `Solicitud de código fallida (${res.status})`);
+  return { ok: true, emailEnviado: j.emailEnviado === true };
+}
+
+/** Acceso rápido paso 2: valida el código en backend (un solo uso, caducidad y límite de intentos en servidor). */
+export async function verificarCodigoAccesoRapidoApi(
+  telefono: string,
+  codigo: string
+): Promise<{ ok: true }> {
+  const res = await fetchMaikaApi(`${getApiBaseUrl()}/auth/acceso-rapido/verificar`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      telefono: String(telefono || "").trim(),
+      codigo: String(codigo || "").trim()
+    })
+  });
+  const j = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string; restantes?: number };
+  if (!res.ok || j.ok !== true) {
+    const err = new Error(
+      typeof j.error === "string" && j.error.trim() ? j.error.trim() : `Verificación fallida (${res.status})`
+    ) as Error & { restantes?: number };
+    if (typeof j.restantes === "number") err.restantes = j.restantes;
+    throw err;
+  }
+  return { ok: true };
 }
 
 export class PerfilApiError extends Error {
@@ -700,6 +794,27 @@ export async function actualizarUsuarioPorIdApi(
     );
   }
   return (await res.json()) as { ok: true; usuario: UsuarioPerfilCompletoApi };
+}
+
+/**
+ * Devolver acceso desde gestión: el servidor genera un enlace de restablecimiento
+ * (token único, 15 min, un solo uso). El admin lo envía al cliente; nunca se transmite
+ * una contraseña en claro. Requiere sesión admin (misma regla que GET /usuarios).
+ */
+export async function solicitarResetAccesoAdminApi(
+  id: string | number
+): Promise<{ ok: true; resetLink: string; expiresInMin: number }> {
+  const res = await fetchMaikaApi(
+    `${getApiBaseUrl()}/usuarios/${encodeURIComponent(String(id))}/reset-acceso`,
+    { method: "POST", headers: { "Content-Type": "application/json" } }
+  );
+  if (res.status === 401 || res.status === 403) {
+    clearAdminSessionLocalAndCache();
+  }
+  if (!res.ok) {
+    throw new Error(`No se pudo generar el enlace de recuperación (${res.status})`);
+  }
+  return (await res.json()) as { ok: true; resetLink: string; expiresInMin: number };
 }
 
 /** Compat: solo envía `direccion` al perfil (el servidor acepta el cuerpo parcial). */

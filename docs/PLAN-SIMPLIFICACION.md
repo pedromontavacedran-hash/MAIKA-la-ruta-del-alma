@@ -26,7 +26,7 @@ src/
 │   └── index.ts               # Producto, ItemCarrito, Cliente, Usuario, Pedido, CategoriaEntrada, etc.
 │
 ├── config/                    # Constantes y configuración
-│   └── index.ts               # Claves localStorage, EMAILJS, keys admin, etc.
+│   └── index.ts               # Claves localStorage, keys admin, etc.
 │
 ├── hooks/                     # Lógica reutilizable
 │   ├── useCatalogo.ts         # velas, inciensos, figuras + localStorage
@@ -81,7 +81,7 @@ src/
 
 ### Fase 1 – Tipos y config (sin cambiar comportamiento)
 - Crear `src/types/index.ts`: mover `Producto`, `ItemCarrito`, `Cliente`, `Usuario`, `Pedido`, `CategoriaEntrada`, `AuthForm`, `EditUsuarioForm`, etc.
-- Crear `src/config/index.ts`: claves localStorage, EMAILJS, cualquier constante de negocio.
+- Crear `src/config/index.ts`: claves localStorage, cualquier constante de negocio.
 - En `App.tsx` sustituir definiciones por `import type { ... } from "./types"` e `import { ... } from "./config"`.
 - Resultado: App.tsx sigue igual en lógica, pero sin ~150 líneas de tipos y constantes.
 

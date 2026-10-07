@@ -4,6 +4,7 @@ import { horoscopoUsoDiarioFile, limitesPruebaDesactivados } from "../lib/env.js
 import { authMiddleware } from "../lib/auth.js";
 import { suenoInterpretarLimiter } from "../lib/rateLimits.js";
 import { fechaHoyEspana, msHastaMedianocheEspana } from "../lib/fechaEspana.js";
+import { registrarFuncionAnalitica } from "../lib/analytics.js";
 
 export const horoscopoRouter = Router();
 
@@ -83,5 +84,6 @@ horoscopoRouter.post("/horoscopo/uso", authMiddleware, suenoInterpretarLimiter, 
   }
   usoDiario.set(clave, { fecha: hoy, signo });
   persistUsoSync();
+  registrarFuncionAnalitica("horoscopos");
   res.json({ ok: true });
 });

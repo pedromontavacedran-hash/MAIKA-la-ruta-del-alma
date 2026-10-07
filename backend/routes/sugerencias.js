@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import { readSugerencias, writeSugerencias } from "../lib/storage.js";
 import { authMiddleware, usuariosAccessMiddleware } from "../lib/auth.js";
 import { sugerenciaLimiter } from "../lib/rateLimits.js";
+import { registrarFuncionAnalitica } from "../lib/analytics.js";
 
 export const sugerenciasRouter = Router();
 
@@ -56,6 +57,7 @@ sugerenciasRouter.post("/sugerencias", authMiddleware, sugerenciaLimiter, async 
     const lista = await readSugerencias();
     lista.push(sugerencia);
     await writeSugerencias(lista);
+    registrarFuncionAnalitica("sugerencias");
     res.status(201).json({ ok: true, id: sugerencia.id });
   } catch {
     res.status(500).json({ error: "No se pudo guardar la sugerencia. Inténtalo de nuevo." });

@@ -1,0 +1,172 @@
+[
+  {
+    "id": "conceptos.que-es-cabala",
+    "titulo": "Qué es la Cábala",
+    "palabrasClave": [
+      "que es la cabala",
+      "que es realmente la cabala",
+      "definicion",
+      "cabala",
+      "qabbalah",
+      "kabbalah",
+      "palabra cabala",
+      "significa cabala",
+      "mistica judia"
+    ],
+    "certeza": "documentado",
+    "capas": {
+      "tradicion": "El término hebreo qabbalah está relacionado con la idea de recepción o tradición recibida. En la Edad Media pasó a designar una tradición mística y esotérica desarrollada dentro del judaísmo —una forma de interpretar la Torah y lo divino más allá de la lectura literal, centrada en las Sefirot, los nombres divinos y la estructura del mundo—, aunque sus antecedentes se encuentran en formas anteriores de mística judía.",
+      "historia": "Como corriente diferenciada se desarrolla en la Edad Media (Provenza, Gerona, Castilla) sobre raíces de la mística judía antigua; posteriormente evoluciona en centros como Safed y en diversas tradiciones modernas."
+    },
+    "fuentes": [
+      "tradición cabalística",
+      "historiografía de la Cábala medieval"
+    ],
+    "relacionados": [
+      "historia.desarrollo-medieval",
+      "conceptos.sefirot",
+      "conceptos.ein-sof",
+      "historia.zohar-autoria"
+    ]
+  },
+  {
+    "id": "conceptos.ein-sof",
+    "titulo": "Ein Sof",
+    "palabrasClave": [
+      "ein sof",
+      "ain sof",
+      "infinito",
+      "que es ein sof"
+    ],
+    "certeza": "documentado",
+    "capas": {
+      "tradicion": "Ein Sof («sin fin») designa en la Cábala lo divino infinito e incognoscible, más allá de las emanaciones; las sefirot son el modo en que lo divino se manifiesta, no divisiones de su esencia."
+    },
+    "fuentes": [
+      "tradición cabalística medieval"
+    ],
+    "relacionados": [
+      "conceptos.sefirot",
+      "conceptos.que-es-cabala"
+    ]
+  },
+  {
+    "id": "conceptos.sefirot",
+    "titulo": "Las diez Sefirot y su evolución histórica",
+    "palabrasClave": [
+      "sefirot",
+      "sefira",
+      "diez sefirot",
+      "que son las sefirot",
+      "keter",
+      "jojma",
+      "bina",
+      "jesed",
+      "guebura",
+      "tiferet",
+      "netsaj",
+      "hod",
+      "yesod",
+      "maljut"
+    ],
+    "certeza": "documentado",
+    "capas": {
+      "tradicion": "En la Cábala teosófica medieval las diez Sefirot son Kéter, Jojmá, Biná, Jesed, Gueburá, Tiféret, Nétsaj, Hod, Yesod y Maljut: emanaciones o atributos mediante los que lo divino se manifiesta, no «partes» separadas de Dios.",
+      "academia": "El concepto evoluciona históricamente: las diez sefirot del Sefer Yetzirah (números/ dimensiones de la formación del mundo) no son conceptualmente idénticas a las sefirot teosóficas medievales. Al hablar de «diez sefirot» conviene distinguir la época y el texto."
+    },
+    "fuentes": [
+      "tradición cabalística medieval",
+      "Sefer Yetzirah"
+    ],
+    "relacionados": [
+      "conceptos.arbol-vida",
+      "conceptos.ein-sof",
+      "historia.sefer-yetzirah"
+    ]
+  },
+  {
+    "id": "conceptos.arbol-vida",
+    "titulo": "El Árbol de la Vida y los 22 senderos",
+    "palabrasClave": [
+      "arbol de la vida",
+      "senderos",
+      "22 senderos",
+      "veintidos senderos",
+      "caminos",
+      "diagrama",
+      "biblia",
+      "origen del arbol",
+      "quien invento el arbol",
+      "cuando empezo"
+    ],
+    "certeza": "documentado",
+    "capas": {
+      "tradicion": "El Árbol de la Vida es el diagrama que representa las diez sefirot y sus relaciones.",
+      "historia": "El sistema de las sefirot se desarrolla progresivamente y el Árbol como esquema gráfico se consolida durante el desarrollo de la Cábala medieval; no existe una única fecha ni un inventor identificable para la forma actual, y las representaciones posteriores fueron evolucionando. La asociación concreta de los 22 senderos del Árbol con las 22 letras hebreas pertenece a desarrollos cabalísticos posteriores; no debe proyectarse automáticamente sobre el Sefer Yetzirah ni sobre toda la Cábala medieval.",
+      "interpretaciones": "La correspondencia de los 22 senderos con los arcanos mayores del tarot es una síntesis moderna del ocultismo europeo (siglos XVIII–XIX), no pertenece a la Cábala judía medieval."
+    },
+    "fuentes": [
+      "tradición cabalística medieval"
+    ],
+    "relacionados": [
+      "conceptos.sefirot",
+      "conceptos.letras-gematria",
+      "diferenciacion.ocultismo-moderno"
+    ]
+  },
+  {
+    "id": "conceptos.cuatro-mundos",
+    "titulo": "Los cuatro mundos",
+    "palabrasClave": [
+      "cuatro mundos",
+      "atzilut",
+      "briah",
+      "yetzirah mundo",
+      "asiyah",
+      "olam"
+    ],
+    "certeza": "documentado",
+    "capas": {
+      "tradicion": "La tradición cabalística describe cuatro mundos o planos de la existencia: Atzilut (emanación), Briah (creación), Yetzirah (formación) y Asiyah (acción/hacer)."
+    },
+    "fuentes": [
+      "tradición cabalística"
+    ],
+    "relacionados": [
+      "conceptos.sefirot",
+      "conceptos.ein-sof"
+    ]
+  },
+  {
+    "id": "conceptos.letras-gematria",
+    "titulo": "Letras hebreas y gematría",
+    "palabrasClave": [
+      "letras hebreas",
+      "alfabeto hebreo",
+      "gematria",
+      "valor numerico",
+      "creacion",
+      "22 letras",
+      "numero",
+      "numerologia",
+      "numero personal",
+      "fecha de nacimiento",
+      "mi numero",
+      "que numero soy"
+    ],
+    "certeza": "documentado",
+    "capas": {
+      "tradicion": "En la tradición judía las veintidós letras hebreas son instrumentos de la creación (el Sefer Yetzirah describe el mundo formado mediante letras y números). La gematría es una técnica interpretativa basada en el valor numérico de las letras hebreas, utilizada en la tradición judía y posteriormente desarrollada también dentro de la Cábala.",
+      "interpretaciones": "La asignación de un «número personal» a partir de la fecha de nacimiento pertenece a la numerología moderna, no a la Cábala tradicional: conviene distinguir ambas prácticas sin presentar la numerología como enseñanza cabalística."
+    },
+    "fuentes": [
+      "Sefer Yetzirah",
+      "tradición rabínica"
+    ],
+    "relacionados": [
+      "historia.sefer-yetzirah",
+      "conceptos.arbol-vida",
+      "nombres72.formacion-tripletes"
+    ]
+  }
+]

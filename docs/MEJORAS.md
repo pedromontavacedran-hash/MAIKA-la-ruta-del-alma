@@ -19,7 +19,7 @@ Lista priorizada de mejoras. Marca cuando apliques cada una.
 
 | # | Mejora | Esfuerzo | Impacto |
 |---|--------|----------|---------|
-| 2.1 | **Code splitting**: Cargar páginas admin con `React.lazy` + `Suspense`. | ~~Bajo~~ | ✅ **Hecho** – Admin en chunks separados; manualChunks para React y EmailJS. |
+| 2.1 | **Code splitting**: Cargar páginas admin con `React.lazy` + `Suspense`. | ~~Bajo~~ | ✅ **Hecho** – Admin en chunks separados; manualChunks para React. |
 | 2.2 | **Vite**: Ajustar más `manualChunks` o límites si quieres afinar carga. | Bajo | Bajo – Opcional. |
 
 ---
@@ -38,7 +38,7 @@ Lista priorizada de mejoras. Marca cuando apliques cada una.
 
 | # | Mejora | Esfuerzo | Impacto |
 |---|--------|----------|---------|
-| 4.1 | **Claves sensibles**: EmailJS (PUBLIC_KEY, etc.) en variables de entorno (`import.meta.env.VITE_*`) en lugar de en `config` en claro, para no subirlas al repo si se hace público. | Bajo | Alto – Si el repo es o será público. |
+| 4.1 | **Claves sensibles**: ~~EmailJS~~ El envío de emails se migró a SMTP backend (`SMTP_*` en `.env`, fuera del repo). Ya no hay claves de terceros en el frontend. | ~~Bajo~~ | ✅ **Hecho** – EmailJS eliminado por completo. |
 | 4.2 | **Validación de formularios**: Unificar validación (email, teléfono, CP) en helpers o una pequeña lib (ej. zod) para no duplicar reglas. | Medio | Medio – Menos bugs y mensajes coherentes. |
 
 ---
@@ -51,7 +51,7 @@ Lista priorizada de mejoras. Marca cuando apliques cada una.
 
 ## Resumen rápido
 
-- **Rápido y muy útil**: 1.3 (THEME), 1.4 (Error boundary), 3.1 (Escape en modales), 4.1 (env para EmailJS).
+- **Rápido y muy útil**: 1.3 (THEME), 1.4 (Error boundary), 3.1 (Escape en modales).
 - **Más trabajo, mucho impacto**: 1.1 (usePedidos), 1.2 (React Router).
 
 *(2.1 Code splitting ya aplicado.)*

@@ -62,7 +62,6 @@ export interface CuentaPageProps {
   precargarDatosClienteDesdeUsuario: (u: Usuario | null) => void;
   pedidos: Pedido[];
   onRepetirPedido: (pedido: MaikaPedidoLS) => void;
-  enviarCodigoEmail: (email: string, nombre: string, codigo: string) => Promise<boolean>;
   setPagina: (p: Pagina) => void;
   telefonoForzadoRegistroDesdeAcceso: string;
   setTelefonoForzadoRegistroDesdeAcceso: Dispatch<SetStateAction<string>>;
@@ -400,14 +399,6 @@ export default function CuentaPage(props: CuentaPageProps) {
       document.documentElement.classList.remove("cuenta-maika-sin-scrollbar");
       document.body.classList.remove("cuenta-maika-sin-scrollbar");
     };
-  }, [embedPanelGestion]);
-
-  /** Bloquear la rueda del ratón en Mi Cuenta (el contenido cabe sin scroll). */
-  useEffect(() => {
-    if (embedPanelGestion) return;
-    const bloquearRueda = (e: WheelEvent) => e.preventDefault();
-    window.addEventListener("wheel", bloquearRueda, { passive: false });
-    return () => window.removeEventListener("wheel", bloquearRueda);
   }, [embedPanelGestion]);
 
   /** Tras enlace de recuperación: mensaje claro y URL limpia. */

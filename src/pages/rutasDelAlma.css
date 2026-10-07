@@ -1,0 +1,692 @@
+/*
+ * /rutas-del-alma — contenido espiritual informativo (Cábala y futuras entradas).
+ * Todo va scopeado bajo `.rutas-del-alma-page` para no afectar a otras rutas.
+ * Paleta MAIKA: fondo oscuro, verde oliva suave y dorado.
+ */
+
+.rutas-del-alma-page {
+  color: inherit;
+  padding-bottom: clamp(24px, 4vw, 48px);
+}
+
+.rutas-del-alma-contenido {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.rutas-del-alma-titulo {
+  font-size: clamp(24px, 4vw, 32px);
+  color: var(--gold-main, #d4af37);
+  font-weight: bold;
+  text-align: center;
+  margin: 8px 0 10px;
+  scroll-margin-top: 140px;
+}
+
+.rutas-del-alma-subtitulo {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: clamp(14px, 1.6vw, 16px);
+  margin: 0 auto clamp(22px, 4vw, 36px);
+  max-width: 560px;
+  line-height: 1.6;
+}
+
+.rutas-del-alma-seccion-titulo {
+  color: var(--gold-light, #e8c96a);
+  font-size: clamp(18px, 2.4vw, 22px);
+  margin: clamp(26px, 4vw, 38px) 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rutas-del-alma-texto p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: clamp(15px, 1.6vw, 16.5px);
+  line-height: 1.75;
+  margin: 0 0 14px;
+}
+
+.rutas-del-alma-texto strong {
+  color: var(--gold-light, #e8c96a);
+  font-weight: 600;
+}
+
+/* Separador ornamental (mismo lenguaje que el resto de la web) */
+.rutas-del-alma-separador {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: clamp(26px, 5vw, 42px) auto;
+  max-width: 420px;
+}
+
+.rutas-del-alma-separador .linea {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.55), transparent);
+}
+
+.rutas-del-alma-separador .estrella {
+  color: var(--gold-main, #d4af37);
+  font-size: 15px;
+}
+
+/* Tarjetas del índice de la sección */
+.rutas-del-alma-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.rutas-del-alma-tarjeta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  border: 1.5px solid rgba(212, 175, 55, 0.5);
+  background: linear-gradient(160deg, rgba(27, 23, 69, 0.72), rgba(14, 18, 12, 0.85));
+  text-decoration: none;
+  transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.rutas-del-alma-tarjeta:hover,
+.rutas-del-alma-tarjeta:focus-visible {
+  border-color: var(--gold-main, #d4af37);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.14);
+  outline: none;
+}
+
+/* La tarjeta de «Chat de Cábala» es un <button>: reset para verse igual que los <Link>. */
+.rutas-del-alma-tarjeta--boton {
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.rutas-del-alma-tarjeta__icono {
+  font-size: 30px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* Icono SVG de la tarjeta de chat: dorado MAIKA a juego con el borde de la tarjeta */
+.rutas-del-alma-tarjeta__icono--dorado {
+  color: var(--gold-main, #d4af37);
+}
+
+.rutas-del-alma-tarjeta__titulo {
+  color: var(--gold-light, #e8c96a);
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.rutas-del-alma-tarjeta__desc {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13.5px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.rutas-del-alma-tarjeta__flecha {
+  margin-left: auto;
+  color: var(--gold-main, #d4af37);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* Diagrama del Árbol de la Vida (SVG inline) */
+.rutas-del-alma-arbol {
+  display: block;
+  width: 100%;
+  max-width: 340px;
+  margin: 18px auto 6px;
+}
+
+/* Sefirot interactivas: pulsar lleva a su ficha; halo sutil al hover/focus */
+.rutas-del-alma-arbol g[role="button"] {
+  cursor: pointer;
+  outline: none;
+}
+
+.rutas-del-alma-arbol .sefira-halo {
+  transition: opacity 0.3s ease;
+}
+
+.rutas-del-alma-arbol g[role="button"]:hover .sefira-halo,
+.rutas-del-alma-arbol g[role="button"]:focus-visible .sefira-halo {
+  opacity: 0.36;
+}
+
+.rutas-del-alma-arbol g[role="button"]:focus-visible > circle:first-child {
+  stroke: #e8c96a;
+  stroke-width: 2.4px;
+}
+
+/* Resaltado de la ficha a la que se llega desde el Árbol: parpadeo muy suave (~40 s) */
+.rutas-del-alma-sefirot li.sefira-destino {
+  animation: sefira-destino-flash 2s ease-in-out 20;
+  border-radius: 8px;
+}
+
+@keyframes sefira-destino-flash {
+  0%, 100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(212, 175, 55, 0.13);
+  }
+}
+
+.rutas-del-alma-arbol text {
+  fill: var(--gold-light, #e8c96a);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Lista de las 10 Sefirot */
+.rutas-del-alma-sefirot {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rutas-del-alma-sefirot li {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  background: rgba(27, 23, 69, 0.45);
+}
+
+.rutas-del-alma-sefirot .num {
+  color: var(--gold-main, #d4af37);
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+  min-width: 18px;
+}
+
+.rutas-del-alma-sefirot .nombre {
+  color: var(--gold-light, #e8c96a);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rutas-del-alma-sefirot .significado {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Nota final de reflexión */
+.rutas-del-alma-nota {
+  margin-top: clamp(24px, 4vw, 36px);
+  padding: 16px 20px;
+  border-radius: 14px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  background: rgba(212, 175, 55, 0.06);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 14px;
+  line-height: 1.65;
+  font-style: italic;
+}
+
+/* En móvil la lista de sefirot puede apilarse nombre/significado */
+@media (max-width: 560px) {
+  .rutas-del-alma-sefirot li {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .rutas-del-alma-sefirot .nombre {
+    white-space: normal;
+  }
+}
+
+/* Cuadrícula de los 72 Nombres: fluida, sin scroll horizontal */
+.rutas-del-alma-nombres-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 10px;
+}
+
+.rutas-del-alma-nombres-grid > li {
+  min-width: 0;
+}
+
+.rutas-del-alma-nombre {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  background: rgba(255, 255, 255, 0.03);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  min-width: 0;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.rutas-del-alma-nombre:hover,
+.rutas-del-alma-nombre:focus-visible {
+  border-color: rgba(212, 175, 55, 0.6);
+  background: rgba(212, 175, 55, 0.08);
+  outline: none;
+}
+
+.rutas-del-alma-nombre .num {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
+
+.rutas-del-alma-nombre .sep {
+  color: rgba(212, 175, 55, 0.45);
+  font-size: 12px;
+}
+
+.rutas-del-alma-nombre .letras {
+  font-size: 24px;
+  color: #d4af37;
+  letter-spacing: 0.06em;
+  line-height: 1.3;
+}
+
+@media (max-width: 560px) {
+  .rutas-del-alma-nombres-grid {
+    grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+    gap: 8px;
+  }
+
+  .rutas-del-alma-nombre {
+    gap: 6px;
+    padding: 10px 6px 8px;
+  }
+
+  .rutas-del-alma-nombre .letras {
+    font-size: 19px;
+  }
+}
+
+/* Ficha de un Nombre (modal) */
+.rutas-del-alma-ficha {
+  text-align: center;
+  padding: 4px 4px 0;
+}
+
+.rutas-del-alma-ficha .num-grande {
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.rutas-del-alma-ficha .letras-grande {
+  margin: 4px 0 18px;
+  font-size: 44px;
+  line-height: 1.2;
+  color: #d4af37;
+  letter-spacing: 0.08em;
+}
+
+.rutas-del-alma-ficha-datos {
+  margin: 0;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rutas-del-alma-ficha-datos dt {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(212, 175, 55, 0.8);
+}
+
+.rutas-del-alma-ficha-datos dd {
+  margin: 3px 0 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.rutas-del-alma-ficha-nota {
+  display: block;
+  margin-top: 4px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.rutas-del-alma-ficha-fuentes {
+  margin: 20px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid rgba(212, 175, 55, 0.2);
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* «Explora y pregunta»: contenido del modal (la tarjeta de acceso usa .rutas-del-alma-tarjeta) */
+.rutas-del-alma-chat {
+  margin: 0;
+  padding: 0;
+}
+
+/* Cabecera del chat: título a la izquierda y control de voz discreto a la derecha */
+.rutas-del-alma-chat-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rutas-del-alma-chat-cabecera .rutas-del-alma-seccion-titulo {
+  margin-bottom: 0;
+}
+
+.chat-acciones--cabecera {
+  margin-top: 0;
+  flex-shrink: 0;
+}
+
+.rutas-del-alma-chat-intro {
+  margin: 8px 0 14px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.rutas-del-alma-chat-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.rutas-del-alma-chat-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  background: rgba(0, 0, 0, 0.35);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+}
+
+.rutas-del-alma-chat-form input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.rutas-del-alma-chat-form input:focus-visible {
+  outline: none;
+  border-color: rgba(212, 175, 55, 0.6);
+}
+
+.rutas-del-alma-chat-form button {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  background: rgba(212, 175, 55, 0.12);
+  color: #d4af37;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease;
+}
+
+.rutas-del-alma-chat-form button:hover,
+.rutas-del-alma-chat-form button:focus-visible {
+  background: rgba(212, 175, 55, 0.22);
+  outline: none;
+}
+
+.rutas-del-alma-chat-mensajes {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.rutas-del-alma-chat-mensaje .chat-pregunta {
+  margin: 0;
+  font-size: 14px;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.rutas-del-alma-chat-mensaje .chat-pregunta strong {
+  color: rgba(212, 175, 55, 0.85);
+  font-style: normal;
+}
+
+.rutas-del-alma-chat-mensaje .chat-respuesta {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  background: rgba(212, 175, 55, 0.05);
+}
+
+.rutas-del-alma-chat-mensaje .chat-quien {
+  margin: 0 0 8px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(212, 175, 55, 0.8);
+}
+
+.rutas-del-alma-chat-mensaje .chat-respuesta p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.rutas-del-alma-chat-mensaje .chat-respuesta p + p {
+  margin-top: 8px;
+}
+
+.rutas-del-alma-chat-mensaje .chat-respuesta .chat-fuentes {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(212, 175, 55, 0.18);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.rutas-del-alma-chat-mensaje .chat-respuesta .chat-cargando {
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
+.rutas-del-alma-chat-mensaje .chat-respuesta strong {
+  color: #d4af37;
+  font-weight: 600;
+}
+
+.rutas-del-alma-chat-form input:disabled,
+.rutas-del-alma-chat-form button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+@media (max-width: 560px) {
+  .rutas-del-alma-chat-form {
+    flex-direction: column;
+  }
+
+  .rutas-del-alma-chat-form button {
+    width: 100%;
+  }
+}
+
+/* «Fuentes y bibliografía»: desplegable discreto al final de las páginas */
+.rutas-fuentes {
+  margin: 28px 0 0;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  overflow: hidden;
+}
+
+.rutas-fuentes-resumen {
+  cursor: pointer;
+  padding: 14px 18px;
+  color: var(--gold-light, #e8c96a);
+  font-size: 15px;
+  font-weight: 600;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: background 0.25s ease;
+}
+
+.rutas-fuentes-resumen::-webkit-details-marker {
+  display: none;
+}
+
+.rutas-fuentes-resumen::after {
+  content: "▾";
+  font-size: 13px;
+  color: rgba(212, 175, 55, 0.7);
+  transition: transform 0.25s ease;
+}
+
+.rutas-fuentes[open] .rutas-fuentes-resumen::after {
+  transform: rotate(180deg);
+}
+
+.rutas-fuentes-resumen:hover,
+.rutas-fuentes-resumen:focus-visible {
+  background: rgba(212, 175, 55, 0.07);
+  outline: none;
+}
+
+.rutas-fuentes-cuerpo {
+  padding: 0 18px 16px;
+  border-top: 1px solid rgba(212, 175, 55, 0.15);
+}
+
+.rutas-fuentes-intro {
+  margin: 12px 0 4px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(235, 228, 205, 0.65);
+  font-style: italic;
+}
+
+.rutas-fuentes-grupo {
+  margin: 14px 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(212, 175, 55, 0.85);
+}
+
+.rutas-fuentes-lista {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: rgba(235, 228, 205, 0.85);
+}
+
+.rutas-fuentes-lista em {
+  color: rgba(232, 201, 106, 0.95);
+}
+
+.rutas-fuentes-ambito {
+  color: rgba(235, 228, 205, 0.55);
+  font-size: 12.5px;
+}
+
+.rutas-fuentes-enlace {
+  color: var(--gold-main, #d4af37);
+  font-size: 12.5px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.rutas-fuentes-enlace:hover,
+.rutas-fuentes-enlace:focus-visible {
+  text-decoration: underline;
+}
+
+/* Fila de acciones bajo cada respuesta del chat (copiar / escuchar) */
+.chat-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 10px;
+}
+
+/* Botones «Copiar» y «Escuchar» en cada respuesta del chat */
+.chat-copiar,
+.chat-voz {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-family: inherit;
+  color: rgba(212, 175, 55, 0.85);
+  background: transparent;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 0.25s ease, background 0.25s ease, color 0.25s ease;
+}
+
+/* Acciones flotantes de cada respuesta: escuchar + copiar, esquina superior derecha */
+.chat-acciones--flotantes {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  margin: 0;
+  gap: 6px;
+}
+
+.chat-acciones--flotantes .chat-voz,
+.chat-acciones--flotantes .chat-copiar {
+  margin: 0;
+}
+
+.chat-copiar:hover,
+.chat-copiar:focus-visible,
+.chat-voz:hover,
+.chat-voz:focus-visible {
+  border-color: var(--gold-main, #d4af37);
+  background: rgba(212, 175, 55, 0.1);
+  color: var(--gold-light, #e8c96a);
+  outline: none;
+}

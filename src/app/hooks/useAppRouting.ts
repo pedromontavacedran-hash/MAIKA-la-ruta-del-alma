@@ -32,9 +32,11 @@ export function useAppRouting() {
     PAGINA_BY_PATH[location.pathname] ??
     (location.pathname.startsWith("/admin/diseno-web")
       ? "admin"
-      : esRutaVistaTiendaShellScroll(location.pathname)
-        ? "tienda"
-        : "inicio");
+      : location.pathname.startsWith("/articulos/")
+        ? "articulos"
+        : esRutaVistaTiendaShellScroll(location.pathname)
+          ? "tienda"
+          : "inicio");
   const modoDireccionCheckout = new URLSearchParams(location.search).get("modo") === "direccion";
 
   const setPagina = useCallback(
@@ -69,6 +71,8 @@ export function useAppRouting() {
     if (PAGINA_BY_PATH[location.pathname]) return;
     /** Rutas hero diseño web: el panel vive en React Router; no forzar `/` (map puede ir por detrás de nuevos segmentos). */
     if (location.pathname.startsWith("/admin/diseno-web")) return;
+    /** `/articulos/:slug` es ruta válida aunque el mapa solo conozca `/articulos` (slugs dinámicos). */
+    if (location.pathname.startsWith("/articulos/")) return;
     if (esRutaVistaTiendaShellScroll(location.pathname)) return;
     navigate("/", { replace: true });
   }, [location.pathname, navigate]);

@@ -1,17 +1,16 @@
 import type { Usuario } from "../types";
 import type { MaikaUsuarioLS } from "./maikaUsuarios";
-import { hashCodigoAccesoRapido } from "./accesoRapidoUtils";
 import { tieneEmailRealMaika } from "./emailTecnicoMaika";
 import { normalizarTelefonoES9 } from "./telefono";
+import {
+  solicitarCodigoAccesoRapidoApi,
+  verificarCodigoAccesoRapidoApi
+} from "../services/apiAuth";
 
 type Notificar = (mensaje: string, tipo: "normal" | "exito" | "error") => void;
 
-export function ejecutarVerificacionCodigoAccesoRapido(params: {
-  codigoExpiraEnMs: number | null;
+export async function ejecutarVerificacionCodigoAccesoRapido(params: {
   codigoIngresado: string;
-  codigoEnviadoHash: string;
-  intentosCodigo: number;
-  maxIntentos: number;
   telefonoAcceso: string;
   emailRegistradoPorTelefono: (tel9: string) => string;
   proyectarUsuariosDesdeMaika: (usuarios: MaikaUsuarioLS[]) => Usuario[];
@@ -21,7 +20,6 @@ export function ejecutarVerificacionCodigoAccesoRapido(params: {
   setCodigoEnviado: (v: string) => void;
   setCodigoIngresado: (v: string) => void;
   setErrorCodigo: (v: boolean) => void;
-  setIntentosCodigo: (v: number) => void;
   setEmailVerificado: (v: string) => void;
   setCodigoExpiraEnMs: (v: number | null) => void;
   setEnviando: (v: boolean) => void;
@@ -33,37 +31,36 @@ export function ejecutarVerificacionCodigoAccesoRapido(params: {
   setPaso: (v: 3) => void;
 }) {
   const {
-    codigoExpiraEnMs, codigoIngresado, codigoEnviadoHash, intentosCodigo, maxIntentos,
-    telefonoAcceso, emailRegistradoPorTelefono, proyectarUsuariosDesdeMaika, leerMaikaUsuarios,
-    notificar, setCodigoBloqueado, setCodigoEnviado, setCodigoIngresado, setErrorCodigo, setIntentosCodigo,
+    codigoIngresado, telefonoAcceso, emailRegistradoPorTelefono, proyectarUsuariosDesdeMaika, leerMaikaUsuarios,
+    notificar, setCodigoBloqueado, setCodigoEnviado, setCodigoIngresado, setErrorCodigo,
     setEmailVerificado, setCodigoExpiraEnMs, setEnviando, setReenvioEn, setPasswordNueva, setPasswordConfirmar,
     setMostrarPasswordNueva, setMostrarPasswordConfirmar, setPaso
   } = params;
 
-  const ahora = Date.now();
-  if (codigoExpiraEnMs && ahora > codigoExpiraEnMs) {
-    setCodigoBloqueado(true);
-    setCodigoEnviado("");
-    setCodigoIngresado("");
+  const tel9 = normalizarTelefonoES9(telefonoAcceso || "");
+  try {
+    await verificarCodigoAccesoRapidoApi(tel9, codigoIngresado || "");
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    const restantes = (e as { restantes?: number })?.restantes;
     setErrorCodigo(true);
-    notificar("❌ Código expirado, solicita uno nuevo", "error");
-    return;
-  }
-  const inputHash = hashCodigoAccesoRapido(codigoIngresado || "");
-  if (inputHash !== codigoEnviadoHash) {
-    setErrorCodigo(true);
-    const proximo = intentosCodigo + 1;
-    setIntentosCodigo(proximo);
-    if (proximo >= maxIntentos) {
+    if (msg === "codigo_caducado") {
+      setCodigoBloqueado(true);
+      setCodigoEnviado("");
+      setCodigoIngresado("");
+      setCodigoExpiraEnMs(null);
+      notificar("❌ Código expirado, solicita uno nuevo", "error");
+    } else if (msg === "demasiados_intentos") {
       setCodigoBloqueado(true);
       notificar("❌ Demasiados intentos. Reenvía el código.", "error");
+    } else if (typeof restantes === "number" && restantes > 0) {
+      notificar(`❌ Código incorrecto. Te quedan ${restantes} intentos.`, "error");
     } else {
-      notificar(`❌ Código incorrecto. Te quedan ${maxIntentos - proximo} intentos.`, "error");
+      notificar("❌ Código incorrecto", "error");
     }
     return;
   }
   setErrorCodigo(false);
-  const tel9 = normalizarTelefonoES9(telefonoAcceso || "");
   const emailCuentaFijaRaw = emailRegistradoPorTelefono(tel9);
   const emailCuentaFija = tieneEmailRealMaika(emailCuentaFijaRaw) ? emailCuentaFijaRaw : "";
   if (!emailCuentaFija) {
@@ -83,7 +80,6 @@ export function ejecutarVerificacionCodigoAccesoRapido(params: {
   setCodigoEnviado("");
   setCodigoIngresado("");
   setCodigoExpiraEnMs(null);
-  setIntentosCodigo(0);
   setCodigoBloqueado(false);
   setEnviando(false);
   setReenvioEn(0);
@@ -102,7 +98,6 @@ export async function ejecutarReenvioCodigoAccesoRapido(params: {
   emailRegistradoPorTelefono: (tel9: string) => string;
   proyectarUsuariosDesdeMaika: (usuarios: MaikaUsuarioLS[]) => Usuario[];
   leerMaikaUsuarios: () => MaikaUsuarioLS[];
-  enviarCodigoEmail: (email: string, nombre: string, codigo: string) => Promise<boolean>;
   notificar: Notificar;
   codigoExpiraMin: number;
   setEnviando: (v: boolean) => void;
@@ -115,7 +110,7 @@ export async function ejecutarReenvioCodigoAccesoRapido(params: {
 }) {
   const {
     enviando, telefonoAcceso, emailRegistradoAcceso, emailRegistradoPorTelefono, proyectarUsuariosDesdeMaika, leerMaikaUsuarios,
-    enviarCodigoEmail, notificar, codigoExpiraMin, setEnviando, setErrorCodigo, setCodigoEnviado, setCodigoExpiraEnMs,
+    notificar, codigoExpiraMin, setEnviando, setErrorCodigo, setCodigoEnviado, setCodigoExpiraEnMs,
     setIntentosCodigo, setCodigoBloqueado, setReenvioEn
   } = params;
   if (enviando) return;
@@ -137,15 +132,21 @@ export async function ejecutarReenvioCodigoAccesoRapido(params: {
       notificar("❌ Este número no tiene email asociado para reenviar código", "error");
       return;
     }
-    const codigo = Math.floor(100000 + Math.random() * 900000).toString();
-    const enviado = await enviarCodigoEmail(emailRegistradoAcceso, usuariosLS[idx].nombre || "Cliente", codigo);
-    if (!enviado) { notificar("❌ No se pudo reenviar el código", "error"); return; }
-    setCodigoEnviado(hashCodigoAccesoRapido(codigo));
+    const r = await solicitarCodigoAccesoRapidoApi(tel9, emailRegistradoAcceso);
+    setCodigoEnviado("1");
     setCodigoExpiraEnMs(Date.now() + codigoExpiraMin * 60_000);
     setIntentosCodigo(0);
     setCodigoBloqueado(false);
     setReenvioEn(90);
-    notificar("✅ Código reenviado a tu email registrado", "exito");
+    notificar(
+      r.emailEnviado
+        ? "✅ Código reenviado a tu email registrado"
+        : "⚠️ No se pudo enviar el email ahora; inténtalo de nuevo en unos segundos.",
+      r.emailEnviado ? "exito" : "error"
+    );
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    notificar(`❌ ${msg}`, "error");
   } finally {
     setEnviando(false);
   }
@@ -161,7 +162,6 @@ export async function ejecutarEnvioCodigoAccesoRapidoPaso1(params: {
   emailRegistradoPorTelefono: (tel9: string) => string;
   proyectarUsuariosDesdeMaika: (usuarios: MaikaUsuarioLS[]) => Usuario[];
   leerMaikaUsuarios: () => MaikaUsuarioLS[];
-  enviarCodigoEmail: (email: string, nombre: string, codigo: string) => Promise<boolean>;
   guardarBloqueoEmail: (tel9: string) => void;
   limpiarBloqueoEmail: (tel9: string) => void;
   codigoExpiraMin: number;
@@ -180,7 +180,7 @@ export async function ejecutarEnvioCodigoAccesoRapidoPaso1(params: {
 }) {
   const {
     enviando, emailUiBloqueado, telefonoAcceso, emailRegistradoAcceso, emailIntroducidoRaw, mensajeEmailNoCoincide,
-    emailRegistradoPorTelefono, proyectarUsuariosDesdeMaika, leerMaikaUsuarios, enviarCodigoEmail,
+    emailRegistradoPorTelefono, proyectarUsuariosDesdeMaika, leerMaikaUsuarios,
     guardarBloqueoEmail, limpiarBloqueoEmail, codigoExpiraMin, notificar, setEnviando, setErrorCodigo, setEmailUi,
     setCodigoEnviado, setCodigoExpiraEnMs, setIntentosCodigo, setCodigoBloqueado, setReenvioEn, setCodigoIngresado,
     setPaso, setAvisoTelefonoCheckoutNull
@@ -229,21 +229,10 @@ export async function ejecutarEnvioCodigoAccesoRapidoPaso1(params: {
       return;
     }
 
+    const r = await solicitarCodigoAccesoRapidoApi(tel9, emailEnvio);
     setEmailUi((s) => ({ ...s, ayudaInline: null }));
     limpiarBloqueoEmail(tel9);
-    const usuariosLS2 = proyectarUsuariosDesdeMaika(leerMaikaUsuarios());
-    const idxEnvio = usuariosLS2.findIndex((u) => normalizarTelefonoES9(u.telefono || "") === tel9);
-    if (idxEnvio === -1) {
-      notificar("❌ No existe cuenta con ese teléfono", "error");
-      return;
-    }
-    const codigo = Math.floor(100000 + Math.random() * 900000).toString();
-    const enviado = await enviarCodigoEmail(emailEnvio, usuariosLS2[idxEnvio].nombre || "Cliente", codigo);
-    if (!enviado) {
-      notificar("❌ No se pudo enviar el código. Revisa tu conexión o inténtalo más tarde.", "error");
-      return;
-    }
-    setCodigoEnviado(hashCodigoAccesoRapido(codigo));
+    setCodigoEnviado("1");
     setCodigoExpiraEnMs(Date.now() + codigoExpiraMin * 60_000);
     setIntentosCodigo(0);
     setCodigoBloqueado(false);
@@ -251,7 +240,15 @@ export async function ejecutarEnvioCodigoAccesoRapidoPaso1(params: {
     setCodigoIngresado("");
     setPaso(2);
     setAvisoTelefonoCheckoutNull();
-    notificar("✅ Te hemos enviado un código a tu correo. Introdúcelo en el siguiente paso.", "exito");
+    notificar(
+      r.emailEnviado
+        ? "✅ Te hemos enviado un código a tu correo. Introdúcelo en el siguiente paso."
+        : "⚠️ No se pudo enviar el email ahora; usa «Reenviar código» en unos segundos.",
+      r.emailEnviado ? "exito" : "error"
+    );
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    notificar(`❌ ${msg}`, "error");
   } finally {
     setEnviando(false);
   }

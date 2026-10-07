@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { CHECKOUT_CONFIG } from "../config/checkoutConfig";
+import { SERVICIOS_CONTRATABLES } from "../config/lanzamiento";
 import { THEME } from "../config";
 import { RUTA_TAROT_EVOLUTIVO } from "./tarotEvolutivoRuta";
 import { RUTA_LIMPIEZA_ENERGETICA } from "./limpiezaEnergeticaRuta";
@@ -109,7 +110,7 @@ export default function ServiciosPage() {
                 {conOpciones ? null : (
                   <>
                     <p className="inicio-servicio-duracion" style={{ color: "white", fontSize: 14, textAlign: "center" }}>{s.duracion}</p>
-                    <p className="inicio-servicio-precio-linea" style={{ color: THEME.goldMain, fontSize: 18, fontWeight: "bold", textAlign: "center" }}>{s.precio}</p>
+                    <p className="inicio-servicio-precio-linea" style={{ color: THEME.goldMain, fontSize: 18, fontWeight: "bold", textAlign: "center" }}>{SERVICIOS_CONTRATABLES ? s.precio : "Próximamente"}</p>
                   </>
                 )}
                 {conOpciones ? (
@@ -136,7 +137,7 @@ export default function ServiciosPage() {
                   >
                     Ver opciones
                   </button>
-                ) : (
+                ) : !SERVICIOS_CONTRATABLES ? null : (
                   <a
                     href={s.urlWhatsApp}
                     target="_blank"

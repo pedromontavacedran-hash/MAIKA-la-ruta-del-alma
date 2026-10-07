@@ -268,6 +268,20 @@ export function hablarNatural(
   siguiente();
 }
 
+/** Suspende el utterance actual; los segmentos siguientes quedan encolados hasta reanudar. */
+export function pausarNarracion() {
+  if (typeof window !== "undefined" && window.speechSynthesis) {
+    window.speechSynthesis.pause();
+  }
+}
+
+/** Reanuda una narración pausada. */
+export function reanudarNarracion() {
+  if (typeof window !== "undefined" && window.speechSynthesis) {
+    window.speechSynthesis.resume();
+  }
+}
+
 /** Cancela cualquier narración en curso e invalida las cadenas de habla pendientes. */
 export function detenerNarracion() {
   speechChainId += 1;

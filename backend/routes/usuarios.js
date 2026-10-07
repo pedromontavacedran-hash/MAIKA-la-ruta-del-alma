@@ -18,7 +18,8 @@ import {
   usuarioIdIdempotencia,
   idempotencyConflictBody
 } from "../lib/storage.js";
-import { authMiddleware, authMiddlewareCheckoutOk, usuariosAccessMiddleware } from "../lib/auth.js";
+import { authMiddleware, authMiddlewareCheckoutOk, usuariosAccessMiddleware, generateResetToken, hashResetToken } from "../lib/auth.js";
+import { resolveFrontendBaseUrlFromRequest, buildResetPasswordPageUrl } from "../lib/origins.js";
 import { marcarDesbloqueoReciente } from "../lib/rateLimits.js";
 import { pickUsuarioPerfilServidor } from "../utils/pickUsuarioPerfilServidor.js";
 
@@ -166,6 +167,36 @@ usuariosRouter.patch("/usuarios/:id", usuariosAccessMiddleware, async (req, res)
     return { status: 200, body: { ok: true, usuario: usuarioPublicoPerfil(u) } };
   });
   res.status(resultado.status).json(resultado.body);
+});
+
+/**
+ * Devolver acceso desde gestión: genera un enlace de restablecimiento de contraseña
+ * (token único, 15 min, un solo uso — mismo mecanismo que /auth/forgot-password).
+ * El admin lo envía al cliente (p. ej. por WhatsApp); nunca viaja una contraseña en claro.
+ */
+usuariosRouter.post("/usuarios/:id/reset-acceso", usuariosAccessMiddleware, async (req, res) => {
+  const rawId = String(req.params.id ?? "").trim();
+  if (!rawId) {
+    res.status(400).json({ error: "Id requerido" });
+    return;
+  }
+  const token = generateResetToken();
+  const aplicado = await updateUsuarios((usuarios) => {
+    const idx = usuarios.findIndex((u) => String(u?.id) === rawId);
+    if (idx === -1) return false;
+    usuarios[idx] = {
+      ...usuarios[idx],
+      resetPasswordTokenHash: hashResetToken(token),
+      resetPasswordExpiresAt: Date.now() + 15 * 60 * 1000
+    };
+    return true;
+  });
+  if (!aplicado) {
+    res.status(404).json({ error: "No encontrado" });
+    return;
+  }
+  const baseUrl = resolveFrontendBaseUrlFromRequest(req);
+  res.json({ ok: true, resetLink: buildResetPasswordPageUrl(baseUrl, token), expiresInMin: 15 });
 });
 
 /** Misma protección que GET /usuarios: alinear con borrado desde gestión en el cliente. */

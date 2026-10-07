@@ -18,10 +18,17 @@ import TestimoniosPage from "../pages/TestimoniosPage";
 import EnviosPage from "../pages/EnviosPage";
 import ContactoPage from "../pages/ContactoPage";
 import SobreMaikaPage from "../pages/SobreMaikaPage";
+import RutasDelAlmaPage from "../pages/RutasDelAlmaPage";
+import CabalaPage from "../pages/CabalaPage";
+import Nombres72Page from "../pages/Nombres72Page";
 import LegalIndexPage from "../pages/LegalIndexPage";
 import LegalDocumentPage from "../pages/LegalDocumentPage";
+import TiendaProximamentePage from "../pages/TiendaProximamentePage";
+import { TIENDA_PUBLICA } from "../config/lanzamiento";
 import { type CuponAdminEntrada } from "./routes/EditarCuponesAdminPanel";
 import {
+  ArticuloPage,
+  ArticulosPage,
   CarritoPage,
   HoroscoposPage,
   LecturaPage,
@@ -63,7 +70,8 @@ import {
   type HeroLogoConfig
 } from "../utils/heroLogoConfig";
 import { PATH_BY_PAGINA } from "./routing/routeMaps";
-import { tituloDocumento } from "./routing/routeTitles";
+import { descripcionDocumento, tituloDocumento } from "./routing/routeTitles";
+import { instalarSalidaAnalitica, registrarVistaAnalitica } from "../utils/analytics";
 import {
   bloqueLayoutContenido,
   bloqueLayoutContenidoAncho,
@@ -97,7 +105,6 @@ export interface AppRoutesProps {
   precargarDatosClienteDesdeUsuario: (u: Usuario | null) => void;
   pedidos: Pedido[];
   handleRepetirPedido: (pedido: MaikaPedidoLS) => void;
-  enviarCodigoEmail: (email: string, nombre: string, codigo: string) => Promise<boolean>;
   telefonoForzadoRegistroDesdeAcceso: string;
   setTelefonoForzadoRegistroDesdeAcceso: (v: string) => void;
   modoForzadoRegistroDesdeAcceso: "" | "registro" | "activar";
@@ -294,6 +301,15 @@ export function AppRoutes(p: AppRoutesProps) {
   /** Título de la pestaña según la ruta (`routeTitles.ts`); index.html deja el de la portada. */
   useEffect(() => {
     document.title = tituloDocumento(pathname);
+    document
+      .querySelector('meta[name="description"]')
+      ?.setAttribute("content", descripcionDocumento(pathname));
+  }, [pathname]);
+
+  /** Analítica propia (agregada, sin contenido ni identificadores): una vista por cambio de ruta. */
+  useEffect(() => {
+    instalarSalidaAnalitica();
+    registrarVistaAnalitica(pathname);
   }, [pathname]);
 
   useEffect(() => {
@@ -386,14 +402,14 @@ export function AppRoutes(p: AppRoutesProps) {
         visualTick={heroBannerVisualTick}
         logoCfg={heroLogoCfg}
         portalTiendaActivo={portalTiendaActivo}
-        onExplorarTienda={entrarTiendaDesdeHero}
+        onExplorarTienda={TIENDA_PUBLICA ? entrarTiendaDesdeHero : undefined}
       />
     )} />
 
     {AccountRoutes(p)}
 
-    {/* TIENDA */}
-    <Route path="/tienda/*" element={(
+    {/* TIENDA — oculta al público mientras `TIENDA_PUBLICA` es false (reactivar con el flag). */}
+    <Route path="/tienda/*" element={TIENDA_PUBLICA ? (
       <Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando MAIKA...</div>}>
         {bloqueLayoutTienda(
           <div
@@ -404,7 +420,7 @@ export function AppRoutes(p: AppRoutesProps) {
           </div>
         )}
       </Suspense>
-    )} />
+    ) : bloqueLayoutContenido(<TiendaProximamentePage conCatalogo={/^\/tienda\/?$/.test(location.pathname)} />)} />
 
     <Route path="/servicios" element={bloqueLayoutContenidoAncho(<ServiciosPage />)} />
     <Route path="/servicios/tarot-evolutivo" element={bloqueLayoutContenidoAncho(<TarotEvolutivoPage />)} />
@@ -419,6 +435,12 @@ export function AppRoutes(p: AppRoutesProps) {
     <Route path="/envios" element={bloqueLayoutContenido(<EnviosPage />)} />
     <Route path="/contacto" element={bloqueLayoutContenido(<ContactoPage />)} />
     <Route path="/sobre-maika" element={bloqueLayoutContenido(<SobreMaikaPage />)} />
+    <Route path="/rutas-del-alma" element={bloqueLayoutContenido(<RutasDelAlmaPage />)} />
+    <Route path="/rutas-del-alma/cabala" element={bloqueLayoutContenido(<CabalaPage />)} />
+    <Route path="/rutas-del-alma/72-nombres" element={bloqueLayoutContenido(<Nombres72Page />)} />
+
+    <Route path="/articulos" element={bloqueLayoutContenido(<Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando…</div>}><ArticulosPage /></Suspense>)} />
+    <Route path="/articulos/:slug" element={bloqueLayoutContenido(<Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando…</div>}><ArticuloPage /></Suspense>)} />
 
     <Route path="/legal" element={bloqueLayoutContenido(<LegalIndexPage />)} />
     <Route path="/legal/:slug" element={bloqueLayoutContenido(<LegalDocumentPage />)} />
@@ -426,14 +448,16 @@ export function AppRoutes(p: AppRoutesProps) {
     {AdminRoutes({ ...p, mostrarNotificacion: sinNotificacionAdmin })}
 
     {/* CARRITO */}
-    <Route path="/carrito" element={(
+    <Route path="/carrito" element={TIENDA_PUBLICA ? (
       <Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando MAIKA...</div>}>
         {bloqueLayoutContenido(<CarritoPage />)}
       </Suspense>
-    )} />
+    ) : bloqueLayoutContenido(<TiendaProximamentePage />)} />
 
     {/* SEGUIMIENTO DE PEDIDOS */}
-    <Route path="/seguimiento" element={<Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando MAIKA...</div>}>{bloqueLayoutContenido(<SeguimientoPage />)}</Suspense>} />
+    <Route path="/seguimiento" element={TIENDA_PUBLICA ? (
+      <Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando MAIKA...</div>}>{bloqueLayoutContenido(<SeguimientoPage />)}</Suspense>
+    ) : bloqueLayoutContenido(<TiendaProximamentePage />)} />
 
     <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

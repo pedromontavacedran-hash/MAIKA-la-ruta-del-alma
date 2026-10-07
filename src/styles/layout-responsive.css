@@ -493,6 +493,11 @@
   .app-inicio-dropdown.app-inicio-dropdown--overlay {
     top: calc(var(--app-topbar-stack) - 2px) !important;
     z-index: 9950 !important;
+    /* A ancho completo: con 50vw el texto de la página quedaba cortado a medias detrás del panel. */
+    width: 100vw !important;
+    max-width: 100vw !important;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
   }
 }
 

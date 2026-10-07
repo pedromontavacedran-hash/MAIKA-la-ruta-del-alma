@@ -39,7 +39,6 @@ export type AppRoutesSesionUsuariosPack = Pick<
   | "precargarDatosClienteDesdeUsuario"
   | "pedidos"
   | "handleRepetirPedido"
-  | "enviarCodigoEmail"
   | "telefonoForzadoRegistroDesdeAcceso"
   | "setTelefonoForzadoRegistroDesdeAcceso"
   | "modoForzadoRegistroDesdeAcceso"
@@ -59,8 +58,8 @@ export type AppRoutesSesionUsuariosPack = Pick<
   | "guardarEdicionUsuario"
 >;
 
-/** Props de rutas que vienen del flujo de checkout (pedidos / repetir / email). */
-export type AppRoutesCheckoutPack = Pick<AppRoutesProps, "pedidos" | "handleRepetirPedido" | "enviarCodigoEmail">;
+/** Props de rutas que vienen del flujo de checkout (pedidos / repetir). */
+export type AppRoutesCheckoutPack = Pick<AppRoutesProps, "pedidos" | "handleRepetirPedido">;
 
 /** Notificaciones globales (chrome) reutilizadas en pantallas de rutas. */
 export type AppRoutesChromePack = Pick<AppRoutesProps, "mostrarNotificacion">;
@@ -68,7 +67,7 @@ export type AppRoutesChromePack = Pick<AppRoutesProps, "mostrarNotificacion">;
 /** Sesión / usuarios en rutas, sin mezclar checkout ni chrome. */
 export type AppRoutesSesionCorePack = Omit<
   AppRoutesSesionUsuariosPack,
-  "pedidos" | "handleRepetirPedido" | "enviarCodigoEmail" | "mostrarNotificacion"
+  "pedidos" | "handleRepetirPedido" | "mostrarNotificacion"
 >;
 
 export type AppRoutesCategoriasPack = Pick<
