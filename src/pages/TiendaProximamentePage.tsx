@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { CHECKOUT_CONFIG } from "@/config/checkoutConfig";
 import { PATH_BY_PAGINA } from "@/app/routing/routeMaps";
 import { MOSTRAR_CATALOGO_PROXIMAMENTE } from "@/config/lanzamiento";
-import TiendaCatalogoPreview from "../components/tienda/TiendaCatalogoPreview";
 import { THEME } from "../config";
 
 const URL_WHATSAPP = `https://wa.me/${CHECKOUT_CONFIG.whatsappNumber}?text=${encodeURIComponent(
@@ -66,7 +65,11 @@ export default function TiendaProximamentePage({ conCatalogo = false }: { conCat
             Descubrir servicios MAIKA
           </Link>
         </div>
-        {conCatalogo && MOSTRAR_CATALOGO_PROXIMAMENTE ? <TiendaCatalogoPreview /> : null}
+        {conCatalogo && MOSTRAR_CATALOGO_PROXIMAMENTE ? (
+          <div style={{ padding: 24, color: THEME.goldMain }}>
+            Catálogo temporalmente deshabilitado para diagnóstico
+          </div>
+        ) : null}
       </div>
     </div>
   );
