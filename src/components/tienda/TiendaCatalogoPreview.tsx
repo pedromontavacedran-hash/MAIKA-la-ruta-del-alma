@@ -519,9 +519,12 @@ export default function TiendaCatalogoPreview() {
                                 })
                               }
                               onAnadir={(it) => {
-                                const ok = agregarAlCarrito(it.producto);
-                                if (ok) {
-                                  // Feedback visual opcional
+                                if (it.producto) {
+                                  const productoConCantidad = { ...it.producto, cantidad: 1 };
+                                  const ok = agregarAlCarrito(productoConCantidad);
+                                  if (ok) {
+                                    // Feedback visual opcional
+                                  }
                                 }
                               }}
                             />
