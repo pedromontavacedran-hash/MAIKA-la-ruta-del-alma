@@ -11,6 +11,7 @@ export default function CarritoPage() {
     cambiarCantidad,
     eliminarProductoCarrito,
     volverATienda,
+    finalizarCarrito,
     vaciarCarrito,
     checkoutHayRechazoServidor,
     procesandoPagoCheckout,
@@ -39,6 +40,7 @@ export default function CarritoPage() {
         cambiarCantidad={cambiarCantidad}
         eliminarProducto={eliminarProductoCarrito}
         volver={volverATienda}
+        finalizar={finalizarCarrito}
         vaciar={vaciarCarrito}
         checkoutHayRechazoServidor={checkoutHayRechazoServidor}
         procesandoPagoCheckout={procesandoPagoCheckout}
