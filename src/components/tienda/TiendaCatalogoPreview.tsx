@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import type { Producto } from "../../types";
 import { THEME } from "../../config";
-import { CHECKOUT_CONFIG } from "../../config/checkoutConfig";
 import { useApp } from "../../context/AppContext";
 import { fetchProductosTienda } from "../../services/apiProductos";
 import { categoriasPorDefecto, getProductImageSrc } from "../../tienda/tiendaHelpers";
@@ -55,7 +54,7 @@ function ordenarCategorias(ids: string[]): string[] {
   });
 }
 
-type ItemPreview = { key: string; src: string | null; titulo: string; descripcion: string; precio: number | null };
+type ItemPreview = { key: string; src: string | null; titulo: string; descripcion: string; precio: number | null; producto?: Producto };
 type GrupoPreview = { id: string; titulo: string | null; imagen: (string | null)[]; items: ItemPreview[] };
 type SeccionPreview = { id: string; titulo: string; unidad: string; imagen: string | null; grupos: GrupoPreview[]; total: number };
 
@@ -75,7 +74,7 @@ function ImgConFallback({ srcs, alt, style }: { srcs: (string | null | undefined
   );
 }
 
-function TarjetaPreview({ item, onAmpliar }: { item: ItemPreview; onAmpliar: (item: ItemPreview) => void }) {
+function TarjetaPreview({ item, onAmpliar, onAnadir }: { item: ItemPreview; onAmpliar: (item: ItemPreview) => void; onAnadir: (item: ItemPreview) => void }) {
   return (
     <article
       role="button"
@@ -164,35 +163,39 @@ function TarjetaPreview({ item, onAmpliar }: { item: ItemPreview; onAmpliar: (it
             {item.precio.toFixed(2)} €
           </p>
         ) : null}
-        <a
-          href={`https://wa.me/${CHECKOUT_CONFIG.whatsappNumber}?text=${encodeURIComponent(`Hola, me interesa ${item.titulo}`)}`}
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onAnadir(item);
+          }}
           style={{
             marginTop: 10,
             padding: "8px 12px",
             fontSize: 13,
             fontWeight: 600,
-            color: "#25d366",
-            background: "rgba(37, 211, 102, 0.1)",
-            border: "1px solid rgba(37, 211, 102, 0.3)",
+            color: THEME.goldMain,
+            background: "rgba(212, 175, 55, 0.1)",
+            border: "1px solid rgba(212, 175, 55, 0.3)",
             borderRadius: 8,
-            textDecoration: "none",
+            cursor: "pointer",
             textAlign: "center",
             display: "block",
+            width: "100%",
             transition: "background 0.2s ease, border-color 0.2s ease"
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = "rgba(37, 211, 102, 0.2)";
-            e.currentTarget.style.borderColor = "rgba(37, 211, 102, 0.5)";
+            e.currentTarget.style.background = "rgba(212, 175, 55, 0.2)";
+            e.currentTarget.style.borderColor = "rgba(212, 175, 55, 0.5)";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = "rgba(37, 211, 102, 0.1)";
-            e.currentTarget.style.borderColor = "rgba(37, 211, 102, 0.3)";
+            e.currentTarget.style.background = "rgba(212, 175, 55, 0.1)";
+            e.currentTarget.style.borderColor = "rgba(212, 175, 55, 0.3)";
           }}
         >
-          💬 Consultar por WhatsApp
-        </a>
+          🛒 Añadir al carrito
+        </button>
       </div>
     </article>
   );
@@ -206,7 +209,7 @@ function TarjetaPreview({ item, onAmpliar }: { item: ItemPreview; onAmpliar: (it
  * sin carrito: nada aquí inicia una compra.
  */
 export default function TiendaCatalogoPreview() {
-  const { serviciosInicio, subcategoriasCatalogo } = useApp();
+  const { serviciosInicio, subcategoriasCatalogo, agregarAlCarrito } = useApp();
   const [productos, setProductos] = useState<Producto[] | null>(null);
   const [cargando, setCargando] = useState(true);
   const [lightbox, setLightbox] = useState<ImagenLightbox | null>(null);
@@ -268,7 +271,8 @@ export default function TiendaCatalogoPreview() {
     src: getProductImageSrc(p),
     titulo: p.nombre,
     descripcion: p.descripcion ?? "",
-    precio: p.precio ?? null
+    precio: p.precio ?? null,
+    producto: p
   });
 
   const secciones: SeccionPreview[] = ordenarCategorias([...porCategoria.keys()]).map((cat) => {
@@ -514,6 +518,12 @@ export default function TiendaCatalogoPreview() {
                                   pie: [it.titulo, it.descripcion].filter(Boolean).join(" — ")
                                 })
                               }
+                              onAnadir={(it) => {
+                                const ok = agregarAlCarrito(it.producto);
+                                if (ok) {
+                                  // Feedback visual opcional
+                                }
+                              }}
                             />
                           ))}
                         </div>

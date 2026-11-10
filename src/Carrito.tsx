@@ -1,7 +1,7 @@
-import type { CSSProperties } from "react";
 import { type ItemCarrito } from "./App";
 import BotonCerrar from "./components/BotonCerrar";
 import { THEME } from "./config";
+import { CHECKOUT_CONFIG } from "./config/checkoutConfig";
 
 interface Props {
   cart: ItemCarrito[];
@@ -9,7 +9,6 @@ interface Props {
   cambiarCantidad: (id: number, incremento: number) => void;
   eliminarProducto: (id: number) => void;
   volver: () => void;
-  finalizar: () => void;
   vaciar: () => void;
   /** Rechazo 4xx en checkout (p. ej. stock): mismo bloqueo que el paso de pago del modal. */
   checkoutHayRechazoServidor?: boolean;
@@ -22,7 +21,6 @@ export default function Carrito({
   cambiarCantidad,
   eliminarProducto,
   volver,
-  finalizar,
   vaciar,
   checkoutHayRechazoServidor = false,
   procesandoPagoCheckout = false
@@ -33,17 +31,16 @@ export default function Carrito({
   const faltaParaEnvioGratis = Math.max(0, UMBRAL_ENVIO_GRATIS - total);
   const envioCalculado = total >= UMBRAL_ENVIO_GRATIS ? 0 : ENVIO_BASE;
   const totalConEnvio = total + envioCalculado;
-  const finalizarDeshabilitado = checkoutHayRechazoServidor || procesandoPagoCheckout;
-  const estiloRechazoServidor: CSSProperties | undefined = checkoutHayRechazoServidor
-    ? {
-        background: "#5a5a5a",
-        border: "1px solid #666",
-        color: "rgba(255,255,255,0.88)",
-        opacity: 0.92,
-        cursor: "not-allowed",
-        boxShadow: "none"
-      }
-    : undefined;
+  const finalizarDeshabilitado = checkoutHayRechazoServidor || procesandoPagoCheckout || cart.length === 0;
+
+  const generarMensajeWhatsApp = () => {
+    const lineas = cart.map((item) => {
+      const precio = obtenerPrecioItem(item);
+      return `- ${item.nombre} — ${item.cantidad} — ${precio.toFixed(2)} €`;
+    });
+    const totalTexto = totalConEnvio.toFixed(2);
+    return `Hola, me interesan los siguientes artículos de MAIKA · Rutas del Alma:\n\n${lineas.join("\n")}\n\nTotal estimado: ${totalTexto} €\n\n¿Podrías informarme sobre su disponibilidad?`;
+  };
 
   if (cart.length === 0) {
     return (
@@ -192,26 +189,25 @@ export default function Carrito({
           </div>
 
           <div className="carrito-resumen__acciones">
-            <button
-              type="button"
+            <a
+              href={`https://wa.me/${CHECKOUT_CONFIG.whatsappNumber}?text=${encodeURIComponent(generarMensajeWhatsApp())}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="carrito-btn-principal"
-              disabled={finalizarDeshabilitado}
-              title={
-                checkoutHayRechazoServidor
-                  ? "Cierra el modal de pedido (X) para ir a la tienda; no puedes finalizar mientras haya error de stock."
-                  : procesandoPagoCheckout
-                    ? "Espera a que termine el pago en curso."
-                    : undefined
-              }
-              style={estiloRechazoServidor}
-              onClick={finalizar}
+              style={{
+                display: "block",
+                textAlign: "center",
+                textDecoration: "none",
+                background: "#25d366",
+                border: "1px solid #25d366",
+                color: "#fff",
+                opacity: finalizarDeshabilitado ? 0.5 : 1,
+                pointerEvents: finalizarDeshabilitado ? "none" : "auto",
+                cursor: finalizarDeshabilitado ? "not-allowed" : "pointer"
+              }}
             >
-              {checkoutHayRechazoServidor
-                ? "Volver a la tienda"
-                : procesandoPagoCheckout
-                  ? "Preparando pedido…"
-                  : "finalizar pedido por WhatsApp"}
-            </button>
+              💬 Enviar mi selección por WhatsApp
+            </a>
 
             <div className="carrito-resumen__fila-botones">
               <button type="button" onClick={vaciar} className="maika-btn-secondary">
