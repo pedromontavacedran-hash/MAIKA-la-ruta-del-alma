@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import "./sobreMaika.css";
 
 function SeparadorSeccion() {
@@ -11,9 +12,19 @@ function SeparadorSeccion() {
 }
 
 export default function SobreMaikaPage() {
+  const navigate = useNavigate();
   return (
     <div className="inicio-page sobre-maika-page">
       <div className="sobre-maika-pergamino">
+        <button
+          type="button"
+          className="sobre-maika-cerrar"
+          aria-label="Volver al inicio"
+          title="Volver al inicio"
+          onClick={() => navigate("/")}
+        >
+          ×
+        </button>
         <div className="sobre-maika-deco" aria-hidden="true">
           <span className="estrella">✦</span>
           <span className="luna">☾</span>

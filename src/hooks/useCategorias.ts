@@ -6,7 +6,7 @@ const CATALOGO_DEFAULT: CategoriaEntrada[] = [
   { id: "velas", nombre: "velas" },
   { id: "inciensos", nombre: "inciensos" },
   { id: "figuras", nombre: "figuras" },
-  { id: "kits", nombre: "kits" },
+  { id: "kits", nombre: "Colecciones" },
   { id: "joyas", nombre: "joyería del alma" },
 ];
 
@@ -24,7 +24,7 @@ function normalizarCategoriasCatalogo(raw: unknown): CategoriaEntrada[] {
       }
       return { id: "velas", nombre: "velas" };
     });
-    if (!list.some((x) => x.id === "kits")) list.push({ id: "kits", nombre: "kits" });
+    if (!list.some((x) => x.id === "kits")) list.push({ id: "kits", nombre: "Colecciones" });
     if (!list.some((x) => x.id === "joyas")) list.push({ id: "joyas", nombre: "joyería del alma" });
     return list;
   }

@@ -140,7 +140,7 @@ export default function RecuperarPasswordView(p: RecuperarPasswordViewProps) {
           📱 Escribir por WhatsApp
         </a>
       )}
-      <button type="button" onClick={p.onClose} style={{ ...p.cuentaBotonAuth, background: "transparent", color: THEME.goldMain, border: "1px solid rgba(212, 175, 55, 0.45)", marginTop: 10 }}>← Cancelar</button>
+      <button type="button" onClick={p.onClose} className="cuenta-maika-btn-sec" style={{ ...p.cuentaBotonAuth, background: "transparent", color: THEME.goldMain, border: "1px solid rgba(212, 175, 55, 0.45)", marginTop: 10 }}>← Cancelar</button>
     </form>
   );
 }

@@ -63,9 +63,28 @@ function preferApiHostDeLaPaginaEnLoopback(configured: string): string {
   return configured;
 }
 
-export async function resolveApiBaseUrl(): Promise<string> {
+/**
+ * Dominio público (ni loopback ni IP privada LAN): el front y la API conviven en
+ * el mismo origen — el backend sirve `dist/` con `MAIKA_SERVE_DIST=1`.
+ */
+function paginaEsDominioPublico(): boolean {
+  if (typeof window === "undefined") return false;
+  const h = window.location.hostname;
+  if (h === "localhost" || h === "127.0.0.1") return false;
+  return !esIPv4PrivadaLan(h);
+}
+
+/** Último recurso cuando no hay `maika-api.json`, ni host LAN, ni `VITE_API_URL`. */
+export function apiBaseFallback(): string {
   const env = (import.meta.env.VITE_API_URL as string | undefined)?.trim();
-  const fallback = "http://localhost:3001";
+  if (env) return stripTrailingSlash(env);
+  if (paginaEsDominioPublico() && typeof window !== "undefined") {
+    return window.location.origin;
+  }
+  return "http://localhost:3001";
+}
+
+export async function resolveApiBaseUrl(): Promise<string> {
   let fromFile = "";
   try {
     const res = await fetch("/maika-api.json", { cache: "no-store" });
@@ -84,7 +103,7 @@ export async function resolveApiBaseUrl(): Promise<string> {
   const fromHost = apiUrlFromPageHost();
   if (fromHost) return fromHost;
   if (fromFile && !apiBaseApuntaSoloLoopback(fromFile)) return stripTrailingSlash(fromFile);
-  return stripTrailingSlash(env || fallback);
+  return apiBaseFallback();
 }
 
 /** Usar tras el arranque (main.tsx asigna `window.__MAIKA_API_BASE__`). */
@@ -101,6 +120,5 @@ export function getApiBaseUrl(): string {
   }
   const fromHost = apiUrlFromPageHost();
   if (fromHost) return fromHost;
-  const env = (import.meta.env.VITE_API_URL as string | undefined)?.trim();
-  return stripTrailingSlash(env || "http://localhost:3001");
+  return apiBaseFallback();
 }

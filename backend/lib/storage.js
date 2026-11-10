@@ -24,11 +24,14 @@ const CATEGORIAS_DEFAULT = [
   { id: "velas", nombre: "velas" },
   { id: "inciensos", nombre: "inciensos" },
   { id: "figuras", nombre: "figuras" },
-  { id: "kits", nombre: "kits" },
+  { id: "kits", nombre: "Colecciones" },
   { id: "joyas", nombre: "joyería del alma" }
 ];
 
 const SUBCATEGORIAS_DEFAULT = [
+  { id: "renovacion", categoriaId: "kits", nombre: "Renovación" },
+  { id: "armonizacion", categoriaId: "kits", nombre: "Armonización" },
+  { id: "amuletos", categoriaId: "kits", nombre: "Amuletos" },
   { id: "collares", categoriaId: "joyas", nombre: "Collares" },
   { id: "colgantes-amuletos", categoriaId: "joyas", nombre: "Colgantes y Amuletos" },
   { id: "pulseras", categoriaId: "joyas", nombre: "Pulseras" },

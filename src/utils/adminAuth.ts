@@ -3,11 +3,13 @@ export const ADMIN_TOKEN_VALUE = "admin_ok_2026";
 export const ADMIN_LAST_LOGIN_KEY = "maika_admin_last_login";
 export const ADMIN_SESSION_MINUTES_KEY = "maika_admin_session_minutes";
 export const ADMIN_SESSION_MINUTES = 60; // Cambia este valor cuando quieras.
+export const ADMIN_REMEMBER_MINUTES = 30 * 24 * 60; // "Recuérdame": 30 días.
 const ADMIN_PANEL_JWT_KEY = "maika_admin_usuarios_jwt"; // legacy: antes guardaba el JWT admin en sessionStorage.
 
 type AdminSession = {
   token: string;
   expiresAt: number;
+  durationMs?: number; // duración elegida al entrar — las renovaciones la respetan
 };
 
 function readSession(raw: string | null): AdminSession | null {
@@ -16,7 +18,8 @@ function readSession(raw: string | null): AdminSession | null {
     const parsed = JSON.parse(raw) as Partial<AdminSession>;
     if (parsed?.token !== ADMIN_TOKEN_VALUE) return null;
     if (typeof parsed.expiresAt !== "number") return null;
-    return { token: parsed.token, expiresAt: parsed.expiresAt };
+    return { token: parsed.token, expiresAt: parsed.expiresAt,
+             durationMs: typeof parsed.durationMs === "number" ? parsed.durationMs : undefined };
   } catch {
     // Formato no JSON (token legacy): no calcular aquí para evitar
     // que el contador se "reinicie" en cada lectura.
@@ -24,10 +27,11 @@ function readSession(raw: string | null): AdminSession | null {
   }
 }
 
-function writeSession(expiresAt: number): void {
+function writeSession(expiresAt: number, durationMs?: number): void {
   const payload: AdminSession = {
     token: ADMIN_TOKEN_VALUE,
-    expiresAt
+    expiresAt,
+    ...(durationMs ? { durationMs } : {})
   };
   localStorage.setItem(ADMIN_TOKEN_KEY, JSON.stringify(payload));
 }
@@ -63,10 +67,11 @@ function emitMaikaAdminAuthChanged(): void {
   }
 }
 
-export function setAdminAuthorization(): void {
+export function setAdminAuthorization(remember = false): void {
   try {
-    const sessionMs = getAdminSessionMinutes() * 60 * 1000;
-    writeSession(Date.now() + sessionMs);
+    const sessionMs = (remember ? ADMIN_REMEMBER_MINUTES
+                              : getAdminSessionMinutes()) * 60 * 1000;
+    writeSession(Date.now() + sessionMs, sessionMs);
     localStorage.setItem(ADMIN_LAST_LOGIN_KEY, String(Date.now()));
   } catch {
     // ignore storage errors
@@ -76,8 +81,12 @@ export function setAdminAuthorization(): void {
 
 export function renewAdminAuthorizationWithoutTouchingLastLogin(): void {
   try {
-    const sessionMs = getAdminSessionMinutes() * 60 * 1000;
-    writeSession(Date.now() + sessionMs);
+    // Renovar conserva la duración elegida al entrar ("recuérdame"
+    // no se degrada a 60 min en la primera renovación).
+    const prev = readSession(localStorage.getItem(ADMIN_TOKEN_KEY));
+    const sessionMs = prev?.durationMs
+      ?? getAdminSessionMinutes() * 60 * 1000;
+    writeSession(Date.now() + sessionMs, sessionMs);
   } catch {
     // ignore storage errors
   }

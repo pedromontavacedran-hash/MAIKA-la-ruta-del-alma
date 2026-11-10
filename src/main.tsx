@@ -5,7 +5,7 @@ import "@/styles/global.css";
 import './index.css'
 import App from './App.tsx'
 import { AppErrorBoundary } from './components/AppErrorBoundary'
-import { resolveApiBaseUrl } from './config/apiBaseUrl'
+import { apiBaseFallback, resolveApiBaseUrl } from './config/apiBaseUrl'
 import {
   leerBarraTopPedidoExitoCfg,
   ALTURA_BARRA_TOP_MIN,
@@ -54,8 +54,7 @@ void (async () => {
   try {
     ;(window as Window & { __MAIKA_API_BASE__?: string }).__MAIKA_API_BASE__ = await resolveApiBaseUrl()
   } catch {
-    ;(window as Window & { __MAIKA_API_BASE__?: string }).__MAIKA_API_BASE__ =
-      (import.meta.env.VITE_API_URL as string | undefined)?.trim() || "http://localhost:3001"
+    ;(window as Window & { __MAIKA_API_BASE__?: string }).__MAIKA_API_BASE__ = apiBaseFallback()
   }
 
   const tree = (

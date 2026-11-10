@@ -1,4 +1,4 @@
-import { BACKEND_DIR } from "./lib/env.js";
+import { BACKEND_DIR, publicTiendaDir } from "./lib/env.js";
 import path from "node:path";
 import { existsSync } from "node:fs";
 import express from "express";
@@ -15,6 +15,7 @@ import { suenoRouter } from "./routes/sueno.js";
 import { rutasDelAlmaRouter } from "./routes/rutasDelAlma.js";
 import { horoscopoRouter } from "./routes/horoscopo.js";
 import { webEstadoRouter } from "./routes/webEstado.js";
+import { enlacesRouter } from "./routes/enlaces.js";
 import { disenoWebRouter } from "./routes/disenoWeb.js";
 import { preciosCompetenciaRouter } from "./routes/preciosCompetencia.js";
 import { sugerenciasRouter } from "./routes/sugerencias.js";
@@ -44,6 +45,7 @@ app.use(suenoRouter);
 app.use(rutasDelAlmaRouter);
 app.use(horoscopoRouter);
 app.use(webEstadoRouter);
+app.use(enlacesRouter);
 app.use(disenoWebRouter);
 app.use(preciosCompetenciaRouter);
 app.use(sugerenciasRouter);
@@ -54,6 +56,13 @@ if (serveMaikaDist) {
   const distDir = path.join(BACKEND_DIR, "..", "dist");
   if (existsSync(path.join(distDir, "index.html"))) {
     app.use(express.static(distDir));
+    /**
+     * Imágenes de producto subidas en runtime por el admin: el backend las escribe
+     * en `public/tienda/` (ver imagenesTienda.js), que NO está dentro de `dist/`.
+     * Este mount las sirve en producción sin tocar el build; en dev las sirve Vite.
+     * Va después del static de dist: los archivos del build tienen prioridad.
+     */
+    app.use("/tienda", express.static(publicTiendaDir));
     app.use((req, res, next) => {
       if (req.method !== "GET" && req.method !== "HEAD") {
         next();

@@ -431,6 +431,7 @@ export type Pagina =
   | "lectura"
   | "envios"
   | "contacto"
+  | "enlaces"
   | "sobreMaika"
   | "rutasDelAlma"
   | "legal"

@@ -140,6 +140,7 @@ export default function RegistroVerificarCuentaView(p: RegistroVerificarCuentaVi
           }
         }}
         disabled={p.reenvioDisponibleEn > 0 || reenviandoCodigoRegistro}
+        className="cuenta-maika-btn-sec"
         style={{
           ...p.cuentaBotonAuth,
           background: p.reenvioDisponibleEn > 0 ? "#666" : "rgba(255,255,255,0.04)",
@@ -157,7 +158,7 @@ export default function RegistroVerificarCuentaView(p: RegistroVerificarCuentaVi
             ? `Reenviar código en ${p.reenvioDisponibleEn}s`
             : "Reenviar código"}
       </button>
-      <button type="button" onClick={p.onVolver} style={{ ...p.cuentaBotonAuth, background: "transparent", color: THEME.goldMain, border: "1px solid rgba(212, 175, 55, 0.45)", marginTop: 10 }}>← Volver</button>
+      <button type="button" onClick={p.onVolver} className="cuenta-maika-btn-sec" style={{ ...p.cuentaBotonAuth, background: "transparent", color: THEME.goldMain, border: "1px solid rgba(212, 175, 55, 0.45)", marginTop: 10 }}>← Volver</button>
     </>
   );
 }

@@ -9,5 +9,4 @@ Disallow: /seguimiento
 Disallow: /reset-password
 Disallow: /contabilidad
 
-# Cuando la web tenga dominio, descomenta y pon la URL real:
-# Sitemap: https://tudominio.com/sitemap.xml
+Sitemap: https://maikarutasdelalma.com/sitemap.xml

@@ -302,7 +302,9 @@ export function purgarMarcaAdminLocalSinCookie(): void {
 /**
  * Intercambia la clave escrita por el admin por una cookie httpOnly de sesión admin.
  */
-export async function ensureAdminPanelJwtInSession(password: string): Promise<boolean> {
+export async function ensureAdminPanelJwtInSession(
+  password: string, remember = false
+): Promise<boolean> {
   lastAdminPanelLoginError = null;
   lastAdminPanelRateLimitResetAt = null;
   resetAdminBackendSessionRejected();
@@ -316,7 +318,7 @@ export async function ensureAdminPanelJwtInSession(password: string): Promise<bo
     const res = await fetchMaikaApi(`${getApiBaseUrl()}/auth/admin-panel-token`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ password: passwordTrim })
+      body: JSON.stringify({ password: passwordTrim, remember })
     });
     if (res.status === 429) {
       lastAdminPanelLoginError = "rate_limit";

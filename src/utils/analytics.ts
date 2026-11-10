@@ -41,6 +41,7 @@ function seccionDesdePathname(pathname: string): string {
     "/rutas-del-alma": "rutas-del-alma",
     "/articulos": "articulos",
     "/contacto": "contacto",
+    "/enlaces": "enlaces",
     "/envios": "envios",
     "/legal": "legal",
     "/cuenta": "cuenta",

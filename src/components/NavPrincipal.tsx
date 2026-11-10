@@ -5,7 +5,7 @@ import { preloadAdminOnce } from "@/app/routing/preloadOnce";
 import { useApp } from "../context/AppContext";
 import type { Pagina } from "../types";
 import { THEME } from "../config";
-import { TIENDA_PUBLICA } from "../config/lanzamiento";
+import { TIENDA_PUBLICA, CARrito_VISIBLE } from "../config/lanzamiento";
 import MaikaLogoImg from "./MaikaLogoImg";
 import SyncIndicator from "./SyncIndicator";
 import { isAdminAuthorized, setAdminAuthorization } from "../utils/adminAuth";
@@ -105,6 +105,10 @@ export default function NavPrincipal({
   /** Altura temporal desde el panel admin (vista previa); null = usar valor guardado. */
   const [previewBarraAltura, setPreviewBarraAltura] = useState<number | null>(null);
   const [previewBarraIconosEscala, setPreviewBarraIconosEscala] = useState<number | null>(null);
+  /** Ancho del viewport: en móvil la barra se compacta un poco sin tocar la config del admin. */
+  const [anchoViewportPx, setAnchoViewportPx] = useState<number>(() =>
+    typeof window !== "undefined" ? window.innerWidth : 1280
+  );
 
   const irABuscarEnTienda = () => {
     onPrefetchPagina?.("tienda");
@@ -318,19 +322,17 @@ export default function NavPrincipal({
     return () => window.removeEventListener(BARRA_TOP_ADMIN_PREVIEW_EVENT, onPreview as EventListener);
   }, []);
 
-  useLayoutEffect(() => {
-    const h = Math.max(
-      ALTURA_BARRA_TOP_MIN,
-      Math.min(ALTURA_BARRA_TOP_MAX, Math.round(previewBarraAltura ?? alturaBarraSuperior))
-    );
-    document.documentElement.style.setProperty("--app-topbar-h", `${h}px`);
-  }, [previewBarraAltura, alturaBarraSuperior]);
-
-  /** Altura efectiva de la barra (px); vista previa admin o valor guardado. */
-  const barH = Math.max(
+  /** Altura efectiva de la barra (px); vista previa admin o valor guardado.
+   *  Móvil/tablet (≤768px): tope de 88px para ganar alto útil; nunca por encima del valor configurado. */
+  const barHConfig = Math.max(
     ALTURA_BARRA_TOP_MIN,
     Math.min(ALTURA_BARRA_TOP_MAX, Math.round(previewBarraAltura ?? alturaBarraSuperior))
   );
+  const barH = anchoViewportPx <= 768 ? Math.min(barHConfig, 88) : barHConfig;
+
+  useLayoutEffect(() => {
+    document.documentElement.style.setProperty("--app-topbar-h", `${barH}px`);
+  }, [barH]);
   /**
    * Padding vertical interior: con barra baja (p. ej. 72px) el padding fijo 10+10 + logo 80+ px
    * superaba la altura y `overflow-y: hidden` en la topbar recortaba iconos.
@@ -395,7 +397,10 @@ export default function NavPrincipal({
   useLayoutEffect(() => {
     recomputeLogoSlideGeoCap();
     const inner = topbarInnerRowRef.current;
-    const onResize = () => recomputeLogoSlideGeoCap();
+    const onResize = () => {
+      setAnchoViewportPx(window.innerWidth);
+      recomputeLogoSlideGeoCap();
+    };
     window.addEventListener("resize", onResize);
     let ro: ResizeObserver | null = null;
     if (typeof ResizeObserver !== "undefined" && inner) {
@@ -673,7 +678,7 @@ export default function NavPrincipal({
           >
             {iconPersona(navIconRightVisualPx)}
           </Link>
-          {TIENDA_PUBLICA && (
+          {CARrito_VISIBLE && (
           <button
             type="button"
             onClick={(e) => {
@@ -701,9 +706,35 @@ export default function NavPrincipal({
             aria-label={mostrarBadgeCarrito ? `Carrito: ${totalItemsCarrito} artículo${totalItemsCarrito === 1 ? "" : "s"}` : "Carrito"}
             title="Carrito"
           >
-            <span data-maika-cart-icon style={{ display: "inline-flex", alignItems: "center", gap: 3, whiteSpace: "nowrap" }}>
-              <span style={{ display: "inline-flex", alignItems: "center" }}>{iconCarrito(navIconRightVisualPx)}</span>
-              {mostrarBadgeCarrito && <span style={{ fontSize: "0.95em" }}>({totalItemsCarrito})</span>}
+            <span data-maika-cart-icon style={{ display: "inline-flex", alignItems: "center", position: "relative" }}>
+              {iconCarrito(navIconRightVisualPx)}
+              {mostrarBadgeCarrito && (
+                <span
+                  aria-hidden="true"
+                  style={{
+                    position: "absolute",
+                    top: -5,
+                    right: -6,
+                    minWidth: 18,
+                    height: 18,
+                    padding: "0 4px",
+                    borderRadius: 9,
+                    background: "linear-gradient(135deg, #f1d27a, #d4af37)",
+                    color: "#050308",
+                    fontSize: 11,
+                    fontWeight: 700,
+                    lineHeight: 1,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxSizing: "border-box",
+                    boxShadow: "0 2px 6px rgba(0, 0, 0, 0.5)",
+                    pointerEvents: "none"
+                  }}
+                >
+                  {totalItemsCarrito > 99 ? "99+" : totalItemsCarrito}
+                </span>
+              )}
             </span>
           </button>
           )}

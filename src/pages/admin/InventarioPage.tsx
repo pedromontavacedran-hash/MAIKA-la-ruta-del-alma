@@ -29,7 +29,7 @@ const CATEGORIAS: { id: CategoriaCatalogo; nombre: string; emoji: string }[] = [
   { id: "velas", nombre: "Velas", emoji: "🕯️" },
   { id: "inciensos", nombre: "Inciensos", emoji: "🌿" },
   { id: "figuras", nombre: "Figuras", emoji: "🪷" },
-  { id: "kits", nombre: "Kits", emoji: "📦" },
+  { id: "kits", nombre: "Colecciones", emoji: "📦" },
   { id: "joyas", nombre: "Joyería del alma", emoji: "✨" }
 ];
 
@@ -663,7 +663,7 @@ export default function InventarioPage(props: InventarioPageProps) {
           ...velas.filter((p) => (p.stock ?? 0) <= umbralStockBajo).map((p) => ({ nombre: p.nombre, categoria: "Velas", categoriaId: "velas" as CategoriaCatalogo, stock: p.stock ?? 0, product: p })),
           ...inciensos.filter((p) => (p.stock ?? 0) <= umbralStockBajo).map((p) => ({ nombre: p.nombre, categoria: "Inciensos", categoriaId: "inciensos" as CategoriaCatalogo, stock: p.stock ?? 0, product: p })),
           ...figuras.filter((p) => (p.stock ?? 0) <= umbralStockBajo).map((p) => ({ nombre: p.nombre, categoria: "Figuras", categoriaId: "figuras" as CategoriaCatalogo, stock: p.stock ?? 0, product: p })),
-          ...kits.filter((p) => (p.stock ?? 0) <= umbralStockBajo).map((p) => ({ nombre: p.nombre, categoria: "Kits", categoriaId: "kits" as CategoriaCatalogo, stock: p.stock ?? 0, product: p })),
+          ...kits.filter((p) => (p.stock ?? 0) <= umbralStockBajo).map((p) => ({ nombre: p.nombre, categoria: "Colecciones", categoriaId: "kits" as CategoriaCatalogo, stock: p.stock ?? 0, product: p })),
           ...joyas.filter((p) => (p.stock ?? 0) <= umbralStockBajo).map((p) => ({ nombre: p.nombre, categoria: "Joyería del alma", categoriaId: "joyas" as CategoriaCatalogo, stock: p.stock ?? 0, product: p }))
         ];
         const conStockBajo = listaBajo.length;

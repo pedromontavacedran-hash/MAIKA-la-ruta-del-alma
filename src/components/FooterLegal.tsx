@@ -19,20 +19,8 @@ export default function FooterLegal() {
         maxWidth: "95%"
       }}
     >
-      <Link to={PATH_BY_PAGINA.legalAviso} style={linkStyle}>
-        Aviso Legal
-      </Link>
-      ·
       <Link to={PATH_BY_PAGINA.legalCookies} style={linkStyle}>
         Política de Cookies
-      </Link>
-      ·
-      <Link to={PATH_BY_PAGINA.legalPrivacidad} style={linkStyle}>
-        Política de Privacidad
-      </Link>
-      ·
-      <Link to={PATH_BY_PAGINA.legalTerminos} style={linkStyle}>
-        Términos y Condiciones
       </Link>
     </footer>
   );

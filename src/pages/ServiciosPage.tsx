@@ -42,8 +42,23 @@ export default function ServiciosPage() {
     };
   }, []);
 
+  const cerrar = () => {
+    // Vuelve atrás si hay historial dentro de la app; si no, a inicio.
+    const idx = (window.history.state as { idx?: number } | null)?.idx;
+    if (typeof idx === "number" && idx > 0) navigate(-1);
+    else navigate("/");
+  };
+
   return (
     <div className="inicio-page servicios-page" style={{ textAlign: "center", color: "inherit" }}>
+      <button
+        type="button"
+        className="servicios-page__cerrar"
+        aria-label="Cerrar servicios"
+        onClick={cerrar}
+      >
+        ✕
+      </button>
       <header className="servicios-page__intro">
         <h1 id="pagina-servicios-titulo" className="servicios-page__titulo">
           Servicios

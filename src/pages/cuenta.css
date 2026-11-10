@@ -354,3 +354,81 @@
   height: 0;
   background: transparent;
 }
+
+/* ========== Móvil: Mi Cuenta — más ancho útil y targets táctiles ========== */
+.cuenta-maika-btn-sec {
+  min-height: 44px;
+}
+
+@media (max-width: 640px) {
+  /* Sin margen lateral propio: la ruta usa full-bleed-x y el aire lo da la tarjeta. */
+  .cuenta-maika-page {
+    padding-left: max(0px, env(safe-area-inset-left, 0px)) !important;
+    padding-right: max(0px, env(safe-area-inset-right, 0px)) !important;
+  }
+
+  .cuenta-maika-card {
+    padding: 12px !important;
+  }
+
+  /* Registro largo: algo más de aire que los 12px inline sin perder campos por pantalla. */
+  .cuenta-maika-card--compacta {
+    padding: 8px !important;
+  }
+
+  .cuenta-maika-tabs {
+    gap: 8px;
+  }
+
+  .cuenta-maika-tab {
+    padding: 12px 8px;
+    font-size: 15px;
+  }
+
+  .cuenta-maika-card .checkout-boton-finalizar {
+    padding: 14px 16px !important;
+    font-size: 16px !important;
+  }
+
+  /* Campos cómodos de pulsar; los mini de dirección y los que llevan ojo conservan su padding. */
+  .cuenta-maika-card input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not(.checkout-direccion-campo-mini):not(.cuenta-maika-input--con-ojo),
+  .cuenta-maika-card textarea:not(.checkout-direccion-campo-mini),
+  .cuenta-maika-card select {
+    padding: 12px 14px !important;
+    font-size: 16px !important;
+  }
+
+  .cuenta-maika-card .cuenta-maika-input--con-ojo {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+    padding-left: 14px !important;
+    font-size: 16px !important;
+  }
+
+  .cuenta-maika-btn-sec {
+    padding: 12px 16px !important;
+    font-size: 16px !important;
+  }
+
+  /* Tipografía algo más compacta solo en Mi Cuenta; los inputs siguen a 16px (sin zoom iOS). */
+  .cuenta-maika-auth-heading {
+    font-size: 17px;
+  }
+
+  .cuenta-maika-card h3 {
+    font-size: 14px !important;
+  }
+
+  .cuenta-maika-card label {
+    font-size: 13px !important;
+  }
+
+  .cuenta-maika-card p {
+    font-size: 12px !important;
+  }
+
+  .cuenta-maika-card .checkout-boton-finalizar,
+  .cuenta-maika-card .cuenta-maika-btn-sec {
+    font-size: 15px !important;
+  }
+}

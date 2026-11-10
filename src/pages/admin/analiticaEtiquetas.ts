@@ -20,6 +20,7 @@ export const NOMBRE_SECCION: Record<string, string> = {
   "rutas-del-alma": "Rutas del Alma",
   articulos: "Artículos",
   contacto: "Contacto",
+  enlaces: "Enlaces",
   envios: "Envíos",
   legal: "Legal",
   cuenta: "Cuenta",

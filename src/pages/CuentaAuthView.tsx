@@ -722,7 +722,7 @@ export default function CuentaAuthView({
           ) : null}
         </div>
         <div
-          className="cuenta-maika-card maika-page-body"
+          className={`cuenta-maika-card maika-page-body${formularioRegistroLargo ? " cuenta-maika-card--compacta" : ""}`}
           style={{
             padding: formularioRegistroLargo ? 12 : 20,
             boxSizing: "border-box"
@@ -889,6 +889,7 @@ export default function CuentaAuthView({
                   ref={passwordRegistroRef}
                   type={showPassword ? "text" : "password"}
                   placeholder="Contraseña *"
+                  className="cuenta-maika-input--con-ojo"
                   value={formAuth.password}
                   onChange={(e) => setFormAuth({ ...formAuth, password: e.target.value })}
                   onKeyDown={(e) => {
@@ -907,6 +908,7 @@ export default function CuentaAuthView({
                   ref={confirmPasswordRegistroRef}
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirmar Contraseña *"
+                  className="cuenta-maika-input--con-ojo"
                   value={formAuth.confirmPassword}
                   onChange={(e) => setFormAuth({ ...formAuth, confirmPassword: e.target.value })}
                   onKeyDown={(e) => {
@@ -920,7 +922,7 @@ export default function CuentaAuthView({
                       botonEnviarCodigoRegistroRef.current?.focus();
                     }
                   }}
-                  style={cuentaRegistroDensoInput}
+                  style={cuentaRegistroConOjoStyle}
                   autoComplete="new-password"
                 />
                 <button type="button" onClick={() => setShowConfirmPassword((v) => !v)} style={eyeBtnStyle} title={showConfirmPassword ? "Ocultar contraseña" : "Ver contraseña"} aria-label={showConfirmPassword ? "Ocultar contraseña" : "Ver contraseña"}>{showConfirmPassword ? "🙈" : "👁"}</button>

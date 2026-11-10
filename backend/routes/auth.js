@@ -8,6 +8,7 @@ import {
   ADMIN_PANEL_PASSWORD,
   ADMIN_COOKIE_NAME,
   ADMIN_COOKIE_MAX_AGE_MS,
+  ADMIN_COOKIE_REMEMBER_MAX_AGE_MS,
   PASSWORD_MAX_LEN,
   PASSWORD_TEMPORAL_TTL_MS,
   BCRYPT_ROUNDS,
@@ -342,6 +343,10 @@ authRouter.post("/auth/admin-panel-token", adminLoginRateLimit, (req, res) => {
     res.status(401).json({ error: "No autorizado" });
     return;
   }
+  const remember = req.body?.remember === true;
+  const maxAgeMs = remember
+    ? ADMIN_COOKIE_REMEMBER_MAX_AGE_MS
+    : ADMIN_COOKIE_MAX_AGE_MS;
   const token = jwt.sign(
     {
       id: 0,
@@ -351,13 +356,13 @@ authRouter.post("/auth/admin-panel-token", adminLoginRateLimit, (req, res) => {
       adminTokenVersion: getAdminTokenVersion()
     },
     JWT_SECRET,
-    { expiresIn: Math.floor(ADMIN_COOKIE_MAX_AGE_MS / 1000) }
+    { expiresIn: Math.floor(maxAgeMs / 1000) }
   );
   res.cookie(ADMIN_COOKIE_NAME, token, {
     httpOnly: true,
     sameSite: "strict",
     secure: IS_PRODUCTION,
-    maxAge: ADMIN_COOKIE_MAX_AGE_MS,
+    maxAge: maxAgeMs,
     path: "/"
   });
   res.json({ ok: true });

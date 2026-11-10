@@ -4,6 +4,7 @@ import GestionUsuariosPage from "../../pages/GestionUsuariosPage";
 import AdminPanelShell from "../../components/admin/AdminPanelShell";
 import AdminCampanaPackPanel from "../../components/admin/AdminCampanaPackPanel";
 import AdminWebEstadoToggle from "../../components/admin/AdminWebEstadoToggle";
+import AdminEnlacesPanel from "../../components/admin/AdminEnlacesPanel";
 import { AdminLecturaPantallaPanel } from "../../components/admin/AdminLecturaPantallaPanel";
 import AdminMetricasPanel from "../../components/admin/AdminMetricasPanel";
 import {
@@ -283,6 +284,7 @@ export function AdminMainRoute(p: AdminMainRouteProps) {
               </button>
               <AdminLecturaPantallaPanel />
               <AdminWebEstadoToggle mostrarNotificacion={mostrarNotificacion} />
+              <AdminEnlacesPanel mostrarNotificacion={mostrarNotificacion} />
             </div>
               </section>
               ) : null}

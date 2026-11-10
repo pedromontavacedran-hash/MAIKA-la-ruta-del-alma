@@ -1,29 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Sitemap de MAIKA · Rutas del Alma.
-  IMPORTANTE: <loc> exige URLs absolutas. Cuando la web tenga dominio,
-  sustituye "https://TU-DOMINIO" por el dominio real (buscar y reemplazar)
-  y activa la línea Sitemap: de robots.txt.
+  Sitemap de MAIKA · Rutas del Alma — dominio: https://maikarutasdelalma.com
+  <loc> exige URLs absolutas; al cambiar de dominio, buscar y reemplazar el host.
 -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://TU-DOMINIO/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://TU-DOMINIO/servicios</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://TU-DOMINIO/servicios/tarot-evolutivo</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://TU-DOMINIO/servicios/limpieza-energetica</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://TU-DOMINIO/servicios/ritual-personalizado</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://TU-DOMINIO/ritual-del-mes</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://TU-DOMINIO/suenos</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://TU-DOMINIO/horoscopos</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://TU-DOMINIO/testimonios</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://TU-DOMINIO/sobre-maika</loc><changefreq>yearly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://TU-DOMINIO/rutas-del-alma</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://TU-DOMINIO/rutas-del-alma/cabala</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://TU-DOMINIO/rutas-del-alma/72-nombres</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://TU-DOMINIO/envios</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
-  <url><loc>https://TU-DOMINIO/contacto</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
-  <url><loc>https://TU-DOMINIO/articulos</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://TU-DOMINIO/articulos/sonar-con-agua</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://TU-DOMINIO/articulos/sonar-dientes-caen</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://TU-DOMINIO/articulos/que-es-maika-rutas-del-alma</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://TU-DOMINIO/articulos/tarot-evolutivo-cartas-mapa</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://maikarutasdelalma.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://maikarutasdelalma.com/servicios</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://maikarutasdelalma.com/servicios/tarot-evolutivo</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://maikarutasdelalma.com/servicios/limpieza-energetica</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://maikarutasdelalma.com/servicios/ritual-personalizado</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://maikarutasdelalma.com/ritual-del-mes</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://maikarutasdelalma.com/suenos</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://maikarutasdelalma.com/horoscopos</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://maikarutasdelalma.com/testimonios</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://maikarutasdelalma.com/sobre-maika</loc><changefreq>yearly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://maikarutasdelalma.com/rutas-del-alma</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://maikarutasdelalma.com/rutas-del-alma/cabala</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://maikarutasdelalma.com/rutas-del-alma/72-nombres</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://maikarutasdelalma.com/envios</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://maikarutasdelalma.com/contacto</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://maikarutasdelalma.com/enlaces</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://maikarutasdelalma.com/articulos</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://maikarutasdelalma.com/articulos/sonar-con-agua</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://maikarutasdelalma.com/articulos/sonar-dientes-caen</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://maikarutasdelalma.com/articulos/que-es-maika-rutas-del-alma</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://maikarutasdelalma.com/articulos/tarot-evolutivo-cartas-mapa</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 </urlset>

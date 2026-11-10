@@ -17,6 +17,7 @@ import RitualDelMesPage from "../pages/RitualDelMesPage";
 import TestimoniosPage from "../pages/TestimoniosPage";
 import EnviosPage from "../pages/EnviosPage";
 import ContactoPage from "../pages/ContactoPage";
+import EnlacesPage from "../pages/EnlacesPage";
 import SobreMaikaPage from "../pages/SobreMaikaPage";
 import RutasDelAlmaPage from "../pages/RutasDelAlmaPage";
 import CabalaPage from "../pages/CabalaPage";
@@ -24,7 +25,7 @@ import Nombres72Page from "../pages/Nombres72Page";
 import LegalIndexPage from "../pages/LegalIndexPage";
 import LegalDocumentPage from "../pages/LegalDocumentPage";
 import TiendaProximamentePage from "../pages/TiendaProximamentePage";
-import { TIENDA_PUBLICA } from "../config/lanzamiento";
+import { TIENDA_PUBLICA, CARrito_VISIBLE } from "../config/lanzamiento";
 import { type CuponAdminEntrada } from "./routes/EditarCuponesAdminPanel";
 import {
   ArticuloPage,
@@ -434,6 +435,7 @@ export function AppRoutes(p: AppRoutesProps) {
     <Route path="/lectura" element={bloqueLayoutLectura(<ExperienciaAuthGuard tipo="horoscopo"><Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando MAIKA...</div>}><LecturaPage /></Suspense></ExperienciaAuthGuard>)} />
     <Route path="/envios" element={bloqueLayoutContenido(<EnviosPage />)} />
     <Route path="/contacto" element={bloqueLayoutContenido(<ContactoPage />)} />
+    <Route path="/enlaces" element={bloqueLayoutContenido(<EnlacesPage />)} />
     <Route path="/sobre-maika" element={bloqueLayoutContenido(<SobreMaikaPage />)} />
     <Route path="/rutas-del-alma" element={bloqueLayoutContenido(<RutasDelAlmaPage />)} />
     <Route path="/rutas-del-alma/cabala" element={bloqueLayoutContenido(<CabalaPage />)} />
@@ -448,7 +450,7 @@ export function AppRoutes(p: AppRoutesProps) {
     {AdminRoutes({ ...p, mostrarNotificacion: sinNotificacionAdmin })}
 
     {/* CARRITO */}
-    <Route path="/carrito" element={TIENDA_PUBLICA ? (
+    <Route path="/carrito" element={CARrito_VISIBLE ? (
       <Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando MAIKA...</div>}>
         {bloqueLayoutContenido(<CarritoPage />)}
       </Suspense>

@@ -31,6 +31,7 @@ export const SECCIONES_ANALITICA = new Set([
   "rutas-del-alma",
   "articulos",
   "contacto",
+  "enlaces",
   "envios",
   "legal",
   "cuenta",

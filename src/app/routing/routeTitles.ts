@@ -22,6 +22,7 @@ const TITULO_POR_RUTA: Record<string, string> = {
   "/articulos": "Artículos · MAIKA",
   "/envios": "Envíos · MAIKA",
   "/contacto": "Contacto · MAIKA",
+  "/enlaces": "Enlaces · MAIKA · Rutas del Alma",
   "/legal": "Aviso Legal · MAIKA",
   "/carrito": "Carrito · MAIKA",
   "/cuenta": "Mi Cuenta · MAIKA",

@@ -181,6 +181,7 @@ export default function LoginFormView(p: LoginFormViewProps) {
             ref={passwordLoginRef}
             type={showPasswordLogin ? "text" : "password"}
             placeholder="Contraseña"
+            className="cuenta-maika-input--con-ojo"
             value={p.formAuth.password}
             disabled={loginCargando}
             onChange={(e) => p.setFormAuth((prev) => ({ ...prev, password: e.target.value }))}
@@ -222,7 +223,7 @@ export default function LoginFormView(p: LoginFormViewProps) {
           }}
         >{loginCargando ? "Entrando…" : "Iniciar Sesión"}</button>
         <div style={{ textAlign: "center", marginTop: 15 }}>
-          <button type="button" onClick={p.onOlvidastePassword} style={{ background: "none", border: "none", color: THEME.goldMain, cursor: "pointer", textDecoration: "underline", fontSize: 14 }}>¿Olvidaste tu contraseña?</button>
+          <button type="button" onClick={p.onOlvidastePassword} className="cuenta-maika-btn-sec" style={{ background: "none", border: "none", color: THEME.goldMain, cursor: "pointer", textDecoration: "underline", fontSize: 14, padding: "6px 4px" }}>¿Olvidaste tu contraseña?</button>
         </div>
       </form>
     </>

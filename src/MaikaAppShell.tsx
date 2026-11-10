@@ -575,6 +575,8 @@ export default function MaikaAppShell() {
   const esInterpretacionSuenos = location.pathname === "/suenos" || location.pathname === "/sueno-premium";
   const esLectura = location.pathname === "/lectura";
   const esHoroscopos = location.pathname === "/horoscopos";
+  const esCuentaOSeguridad =
+    location.pathname === "/cuenta" || location.pathname === "/reset-password";
   const esVistaSoloFondoEstrellas =
     location.pathname === "/" && esVistaFondoEstrellasSoloEmbebida(location.search);
 
@@ -582,7 +584,7 @@ export default function MaikaAppShell() {
     <Layout
       pulseStyle={pulseAnimationStyle}
       fullBleedTop={location.pathname === "/"}
-      fullBleedX={esLectura || esHoroscopos}
+      fullBleedX={esLectura || esHoroscopos || esCuentaOSeguridad}
       tiendaShellScroll={esRutaVistaTiendaShellScroll(location.pathname)}
       adminPanelScroll={
         esPanelAdminPrincipal ||

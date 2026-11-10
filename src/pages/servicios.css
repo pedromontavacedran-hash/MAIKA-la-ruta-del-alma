@@ -7,18 +7,51 @@
  * por ServiciosPage, así que no afecta a ninguna otra ruta. En móvil no se toca: las 3 tarjetas
  * apiladas siguen sin caber en una pantalla y necesitan poder desplazarse.
  */
+/* Scroll invisible en TODOS los anchos: la página sigue bajando/subiendo,
+   pero no se ve la barra ni en el contenedor ni en la ventana. */
+html.servicios-no-scroll .app-shell__routes-grow,
+html.servicios-no-scroll,
+html.servicios-no-scroll body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html.servicios-no-scroll .app-shell__routes-grow::-webkit-scrollbar,
+html.servicios-no-scroll::-webkit-scrollbar,
+html.servicios-no-scroll body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+
+/* Cruz de cierre: volver atrás (o a inicio si no hay historial). */
+.servicios-page__cerrar {
+  position: fixed;
+  top: 78px;
+  right: 16px;
+  z-index: 60;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 1px solid rgba(212, 175, 55, 0.55);
+  background: rgba(10, 8, 18, 0.72);
+  color: #d4af37;
+  font-size: 17px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+}
+.servicios-page__cerrar:hover {
+  background: rgba(212, 175, 55, 0.18);
+}
+
 @media (min-width: 900px) {
   /* Scroll sin barra visible (no `hidden`: en ventanas bajas o landscape ≥900px la página
      debe poder desplazarse igualmente; con `auto` + barra oculta el aspecto es el mismo). */
   html.servicios-no-scroll .app-shell__routes-grow {
     overflow-y: auto !important;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  html.servicios-no-scroll .app-shell__routes-grow::-webkit-scrollbar {
-    width: 0;
-    height: 0;
-    background: transparent;
   }
 
   /*

@@ -145,6 +145,9 @@ export const PASSWORD_MAX_LEN = 128;
 
 export const ADMIN_COOKIE_NAME = "admin_token";
 export const ADMIN_COOKIE_MAX_AGE_MS = 30 * 60 * 1000;
+// "Recuérdame" en el login admin: cookie + JWT a 30 días (el
+// cliente lo pide con remember=true; sin flag, sigue siendo 30 min).
+export const ADMIN_COOKIE_REMEMBER_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 export const SESSION_COOKIE_NAME = "maika_session";
 
 function jwtExpiresInMs(expiresIn) {
