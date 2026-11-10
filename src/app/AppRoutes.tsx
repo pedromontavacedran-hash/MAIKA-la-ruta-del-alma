@@ -25,7 +25,6 @@ import Nombres72Page from "../pages/Nombres72Page";
 import LegalIndexPage from "../pages/LegalIndexPage";
 import LegalDocumentPage from "../pages/LegalDocumentPage";
 import TiendaProximamentePage from "../pages/TiendaProximamentePage";
-import TiendaCatalogoPreview from "../components/tienda/TiendaCatalogoPreview";
 import { TIENDA_PUBLICA, CARrito_VISIBLE, MOSTRAR_CATALOGO_PROXIMAMENTE } from "../config/lanzamiento";
 import { type CuponAdminEntrada } from "./routes/EditarCuponesAdminPanel";
 import {
@@ -422,11 +421,7 @@ export function AppRoutes(p: AppRoutesProps) {
           </div>
         )}
       </Suspense>
-    ) : MOSTRAR_CATALOGO_PROXIMAMENTE ? (
-      <Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando MAIKA...</div>}>
-        {bloqueLayoutContenido(<TiendaCatalogoPreview />)}
-      </Suspense>
-    ) : bloqueLayoutContenido(<TiendaProximamentePage conCatalogo={/^\/tienda\/?$/.test(location.pathname)} />)} />
+    ) : bloqueLayoutContenido(<TiendaProximamentePage conCatalogo={MOSTRAR_CATALOGO_PROXIMAMENTE} />)} />
 
     <Route path="/servicios" element={bloqueLayoutContenidoAncho(<ServiciosPage />)} />
     <Route path="/servicios/tarot-evolutivo" element={bloqueLayoutContenidoAncho(<TarotEvolutivoPage />)} />
