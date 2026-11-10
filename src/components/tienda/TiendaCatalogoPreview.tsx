@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
+import type { CSSProperties } from "react";
 import type { Producto } from "../../types";
 import { THEME } from "../../config";
+import { CHECKOUT_CONFIG } from "../../config/checkoutConfig";
 import { useApp } from "../../context/AppContext";
 import { fetchProductosTienda } from "../../services/apiProductos";
 import { categoriasPorDefecto, getProductImageSrc } from "../../tienda/tiendaHelpers";
+import type { ImagenLightbox } from "../../tienda/tiendaHelpers";
+import { TiendaLightbox } from "../../tienda/TiendaLightbox";
 import {
   VELAS_INICIALES,
   INCIENSOS_INICIALES,
@@ -18,6 +22,13 @@ import {
  * con el precio impreso («29,90 €»), que no debe mostrarse en esta fase.
  */
 const IDS_OCULTOS_PREVIEW = new Set<number>([303]);
+
+/** Fichas de cabecera por sección (recortadas del arte en public/tienda/). */
+const CABECERA_SECCION: Record<string, string> = {
+  servicios: "/tienda/cabecera-servicios.webp",
+  inciensos: "/tienda/cabecera-inciensos.webp",
+  kits: "/tienda/cabecera-colecciones.webp"
+};
 
 const catalogoInicialPlano: Producto[] = [
   ...VELAS_INICIALES,
@@ -44,19 +55,48 @@ function ordenarCategorias(ids: string[]): string[] {
   });
 }
 
-type ItemPreview = { key: string; src: string | null; titulo: string; descripcion: string };
-type SeccionPreview = { id: string; titulo: string; unidad: string; items: ItemPreview[] };
+type ItemPreview = { key: string; src: string | null; titulo: string; descripcion: string; precio: number | null };
+type GrupoPreview = { id: string; titulo: string | null; imagen: (string | null)[]; items: ItemPreview[] };
+type SeccionPreview = { id: string; titulo: string; unidad: string; imagen: string | null; grupos: GrupoPreview[]; total: number };
 
-function TarjetaPreview({ item }: { item: ItemPreview }) {
+/** Imagen con cadena de fallbacks (portada de marca → primera foto de producto). */
+function ImgConFallback({ srcs, alt, style }: { srcs: (string | null | undefined)[]; alt: string; style?: CSSProperties }) {
+  const [idx, setIdx] = useState(0);
+  const validas = srcs.filter((s): s is string => Boolean(s));
+  if (idx >= validas.length) return null;
+  return (
+    <img
+      src={validas[idx]}
+      alt={alt}
+      loading="lazy"
+      onError={() => setIdx(idx + 1)}
+      style={style}
+    />
+  );
+}
+
+function TarjetaPreview({ item, onAmpliar }: { item: ItemPreview; onAmpliar: (item: ItemPreview) => void }) {
   return (
     <article
+      role="button"
+      tabIndex={0}
+      aria-label={`Ver ${item.titulo} en grande`}
+      onClick={() => item.src && onAmpliar(item)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          if (item.src) onAmpliar(item);
+        }
+      }}
       style={{
         borderRadius: 14,
         overflow: "hidden",
         border: "1px solid rgba(212,175,55,0.22)",
         background: "rgba(255,255,255,0.04)",
         display: "flex",
-        flexDirection: "column"
+        flexDirection: "column",
+        cursor: item.src ? "zoom-in" : "default",
+        minHeight: 220
       }}
     >
       <div style={{ position: "relative", aspectRatio: "1 / 1", background: "rgba(0,0,0,0.35)" }}>
@@ -86,7 +126,7 @@ function TarjetaPreview({ item }: { item: ItemPreview }) {
           Próximamente
         </span>
       </div>
-      <div style={{ padding: "12px 14px 14px" }}>
+      <div style={{ padding: "12px 14px 14px", display: "flex", flexDirection: "column", flex: 1 }}>
         <h4
           style={{
             margin: 0,
@@ -104,12 +144,55 @@ function TarjetaPreview({ item }: { item: ItemPreview }) {
               margin: "6px 0 0",
               fontSize: 12,
               lineHeight: 1.45,
-              color: "rgba(255,255,255,0.6)"
+              color: "rgba(255,255,255,0.6)",
+              flex: 1
             }}
           >
             {item.descripcion}
           </p>
         ) : null}
+        {item.precio != null ? (
+          <p
+            style={{
+              margin: "8px 0 0",
+              fontSize: 15,
+              fontWeight: 700,
+              color: THEME.goldMain,
+              lineHeight: 1.2
+            }}
+          >
+            {item.precio.toFixed(2)} €
+          </p>
+        ) : null}
+        <a
+          href={`https://wa.me/${CHECKOUT_CONFIG.whatsappNumber}?text=${encodeURIComponent(`Hola, me interesa ${item.titulo}`)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            marginTop: 10,
+            padding: "8px 12px",
+            fontSize: 13,
+            fontWeight: 600,
+            color: "#25d366",
+            background: "rgba(37, 211, 102, 0.1)",
+            border: "1px solid rgba(37, 211, 102, 0.3)",
+            borderRadius: 8,
+            textDecoration: "none",
+            textAlign: "center",
+            display: "block",
+            transition: "background 0.2s ease, border-color 0.2s ease"
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(37, 211, 102, 0.2)";
+            e.currentTarget.style.borderColor = "rgba(37, 211, 102, 0.5)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "rgba(37, 211, 102, 0.1)";
+            e.currentTarget.style.borderColor = "rgba(37, 211, 102, 0.3)";
+          }}
+        >
+          💬 Consultar por WhatsApp
+        </a>
       </div>
     </article>
   );
@@ -123,11 +206,21 @@ function TarjetaPreview({ item }: { item: ItemPreview }) {
  * sin carrito: nada aquí inicia una compra.
  */
 export default function TiendaCatalogoPreview() {
-  const { serviciosInicio } = useApp();
+  const { serviciosInicio, subcategoriasCatalogo } = useApp();
   const [productos, setProductos] = useState<Producto[] | null>(null);
   const [cargando, setCargando] = useState(true);
+  const [lightbox, setLightbox] = useState<ImagenLightbox | null>(null);
   /** Secciones desplegables: Inciensos abierto por defecto; el clic abre/cierra. */
   const [abiertas, setAbiertas] = useState<Set<string>>(new Set(["cat-inciensos"]));
+  /** Subgrupos (subcategorías) desplegables dentro de cada sección: cerrados por defecto. */
+  const [gruposAbiertos, setGruposAbiertos] = useState<Set<string>>(new Set());
+
+  const alternar = (set: Set<string>, id: string) => {
+    const next = new Set(set);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    return next;
+  };
 
   useEffect(() => {
     let vivo = true;
@@ -145,6 +238,15 @@ export default function TiendaCatalogoPreview() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!lightbox) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightbox(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightbox]);
+
   if (cargando) {
     return (
       <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 14, marginTop: 28 }}>
@@ -161,17 +263,36 @@ export default function TiendaCatalogoPreview() {
     porCategoria.set(cat, lista);
   }
 
-  const secciones: SeccionPreview[] = ordenarCategorias([...porCategoria.keys()]).map((cat) => ({
-    id: `cat-${cat}`,
-    titulo: etiquetaCategoria(cat),
-    unidad: "producto",
-    items: (porCategoria.get(cat) ?? []).map((p) => ({
-      key: `${cat}-${p.id}`,
-      src: getProductImageSrc(p),
-      titulo: p.nombre,
-      descripcion: p.descripcion ?? ""
-    }))
-  }));
+  const aItem = (cat: string, p: Producto): ItemPreview => ({
+    key: `${cat}-${p.id}`,
+    src: getProductImageSrc(p),
+    titulo: p.nombre,
+    descripcion: p.descripcion ?? "",
+    precio: p.precio ?? null
+  });
+
+  const secciones: SeccionPreview[] = ordenarCategorias([...porCategoria.keys()]).map((cat) => {
+    const lista = porCategoria.get(cat) ?? [];
+    /** Productos sin subcategoría primero; luego un grupo por subcategoría, en el orden del catálogo. */
+    const sinSub = lista.filter((p) => !p.subcategoriaId);
+    const subs = (subcategoriasCatalogo ?? []).filter((s) => s.categoriaId === cat);
+    const grupos: GrupoPreview[] = [];
+    /** Cabecera de marca: portada-banner.jpg en la carpeta de la primera
+     * foto del grupo; si falla, la propia foto del producto. */
+    const imagenGrupo = (items: ItemPreview[]): (string | null)[] => {
+      const primera = items.find((it) => it.src)?.src ?? null;
+      const portada = primera && primera.startsWith("/tienda/")
+        ? `${primera.slice(0, primera.lastIndexOf("/") + 1)}portada-banner.jpg`
+        : null;
+      return [portada, primera];
+    };
+    if (sinSub.length > 0) grupos.push({ id: `${cat}-general`, titulo: null, imagen: [], items: sinSub.map((p) => aItem(cat, p)) });
+    for (const sub of subs) {
+      const items = lista.filter((p) => p.subcategoriaId === sub.id).map((p) => aItem(cat, p));
+      if (items.length > 0) grupos.push({ id: `${cat}-${sub.id}`, titulo: sub.nombre, imagen: imagenGrupo(items), items });
+    }
+    return { id: `cat-${cat}`, titulo: etiquetaCategoria(cat), unidad: "producto", imagen: CABECERA_SECCION[cat] ?? null, grupos, total: lista.length };
+  });
 
   const servicios = (serviciosInicio ?? []).filter((s) => s?.titulo);
   if (servicios.length > 0) {
@@ -179,12 +300,22 @@ export default function TiendaCatalogoPreview() {
       id: "servicios",
       titulo: "Servicios",
       unidad: "servicio",
-      items: servicios.map((s, i) => ({
-        key: `servicio-${i}-${s.titulo}`,
-        src: s.imagen || null,
-        titulo: s.titulo,
-        descripcion: [s.fraseBreve, s.duracion].filter(Boolean).join(" · ")
-      }))
+      imagen: CABECERA_SECCION.servicios,
+      grupos: [
+        {
+          id: "servicios-general",
+          titulo: null,
+          imagen: [],
+          items: servicios.map((s, i) => ({
+            key: `servicio-${i}-${s.titulo}`,
+            src: s.imagen || null,
+            titulo: s.titulo,
+            descripcion: [s.fraseBreve, s.duracion].filter(Boolean).join(" · "),
+            precio: null
+          }))
+        }
+      ],
+      total: servicios.length
     });
   }
 
@@ -208,10 +339,7 @@ export default function TiendaCatalogoPreview() {
                 })
               }
               style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 10,
+                display: "block",
                 width: "100%",
                 padding: "10px 2px 8px",
                 marginBottom: abierta ? 14 : 0,
@@ -227,48 +355,177 @@ export default function TiendaCatalogoPreview() {
                 textAlign: "left"
               }}
             >
-              <span>
-                {seccion.titulo}
+              {seccion.imagen && !abierta ? (
                 <span
                   style={{
-                    marginLeft: 10,
-                    fontSize: 12,
-                    fontWeight: 400,
-                    color: "rgba(255,255,255,0.5)",
-                    textTransform: "none",
-                    letterSpacing: 0
+                    position: "relative",
+                    display: "block",
+                    borderRadius: 14,
+                    overflow: "hidden",
+                    border: "1px solid rgba(212,175,55,0.35)",
+                    marginBottom: 6
                   }}
                 >
-                  {seccion.items.length} {seccion.items.length === 1 ? seccion.unidad : `${seccion.unidad}s`}
+                  <img
+                    src={seccion.imagen}
+                    alt={seccion.titulo}
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      objectFit: "cover"
+                    }}
+                  />
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      position: "absolute",
+                      right: 12,
+                      bottom: 10,
+                      padding: "4px 9px",
+                      borderRadius: 999,
+                      background: "rgba(0,0,0,0.55)",
+                      border: "1px solid rgba(212,175,55,0.5)",
+                      fontSize: 12,
+                      color: THEME.goldMain,
+                      transform: abierta ? "rotate(180deg)" : "rotate(0deg)",
+                      transition: "transform 0.2s ease"
+                    }}
+                  >
+                    ▼
+                  </span>
                 </span>
-              </span>
-              <span
-                aria-hidden="true"
-                style={{
-                  fontSize: 13,
-                  transform: abierta ? "rotate(180deg)" : "rotate(0deg)",
-                  transition: "transform 0.2s ease"
-                }}
-              >
-                ▼
-              </span>
+              ) : (
+                <span
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 10
+                  }}
+                >
+                  <span>
+                    {seccion.titulo}
+                    <span
+                      style={{
+                        marginLeft: 10,
+                        fontSize: 12,
+                        fontWeight: 400,
+                        color: "rgba(255,255,255,0.5)",
+                        textTransform: "none",
+                        letterSpacing: 0
+                      }}
+                    >
+                      {seccion.total} {seccion.total === 1 ? seccion.unidad : `${seccion.unidad}s`}
+                    </span>
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      fontSize: 13,
+                      transform: abierta ? "rotate(180deg)" : "rotate(0deg)",
+                      transition: "transform 0.2s ease"
+                    }}
+                  >
+                    ▼
+                  </span>
+                </span>
+              )}
             </button>
-            {abierta ? (
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))",
-                  gap: 16
-                }}
-              >
-                {seccion.items.map((item) => (
-                  <TarjetaPreview key={item.key} item={item} />
-                ))}
-              </div>
-            ) : null}
+            {abierta
+              ? seccion.grupos.map((grupo) => {
+                  const grupoAbierto = grupo.titulo == null || gruposAbiertos.has(grupo.id);
+                  return (
+                    <div key={grupo.id} style={{ marginBottom: 18 }}>
+                      {grupo.titulo ? (
+                        <button
+                          type="button"
+                          aria-expanded={grupoAbierto}
+                          onClick={() => setGruposAbiertos((prev) => alternar(prev, grupo.id))}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            gap: 10,
+                            width: "100%",
+                            padding: "6px 2px",
+                            marginBottom: grupoAbierto ? 12 : 0,
+                            background: "none",
+                            border: "none",
+                            borderBottom: "1px solid rgba(212,175,55,0.15)",
+                            cursor: "pointer",
+                            fontSize: 14,
+                            fontWeight: 700,
+                            letterSpacing: 0.5,
+                            color: "rgba(255,255,255,0.75)",
+                            textTransform: "uppercase",
+                            textAlign: "left"
+                          }}
+                        >
+                          <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            {grupo.imagen.length > 0 ? (
+                              <ImgConFallback
+                                srcs={grupo.imagen}
+                                alt={grupo.titulo}
+                                style={{
+                                  width: 52,
+                                  height: 38,
+                                  objectFit: "cover",
+                                  borderRadius: 7,
+                                  border: "1px solid rgba(212,175,55,0.25)",
+                                  flexShrink: 0
+                                }}
+                              />
+                            ) : null}
+                            <span>
+                              {grupo.titulo}
+                              <span style={{ marginLeft: 8, fontSize: 12, fontWeight: 400, color: "rgba(255,255,255,0.5)", textTransform: "none" }}>
+                                {grupo.items.length} {grupo.items.length === 1 ? "producto" : "productos"}
+                              </span>
+                            </span>
+                          </span>
+                          <span
+                            aria-hidden="true"
+                            style={{ fontSize: 11, transform: grupoAbierto ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease" }}
+                          >
+                            ▼
+                          </span>
+                        </button>
+                      ) : null}
+                      {grupoAbierto ? (
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))",
+                            gap: 16
+                          }}
+                        >
+                          {grupo.items.map((item) => (
+                            <TarjetaPreview
+                              key={item.key}
+                              item={item}
+                              onAmpliar={(it) =>
+                                setLightbox({
+                                  src: it.src as string,
+                                  alt: it.titulo,
+                                  pie: [it.titulo, it.descripcion].filter(Boolean).join(" — ")
+                                })
+                              }
+                            />
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })
+              : null}
           </section>
         );
       })}
+      <TiendaLightbox imagen={lightbox} onClose={() => setLightbox(null)} ampliar />
     </div>
   );
 }

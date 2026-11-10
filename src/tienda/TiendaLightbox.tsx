@@ -38,6 +38,11 @@ export function TiendaLightbox({ imagen, onClose, ampliar = false }: { imagen: I
         onClick={(e) => e.stopPropagation()}
         style={{ width: ampliar ? "min(1400px, 100%)" : undefined, height: ampliar ? "85dvh" : undefined, maxWidth: "100%", maxHeight: "min(85dvh, calc(100dvh - 120px))", minHeight: 0, objectFit: "contain", borderRadius: 12 }}
       />
+      {imagen.pie ? (
+        <p style={{ color: "rgba(255,255,255,0.9)", fontSize: "1rem", margin: 0, textAlign: "center", flexShrink: 0, maxWidth: "min(680px, 90vw)" }}>
+          {imagen.pie}
+        </p>
+      ) : null}
       <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.9rem", margin: 0, textAlign: "center", flexShrink: 0 }}>
         Clic fuera o tecla Escape para cerrar
       </p>

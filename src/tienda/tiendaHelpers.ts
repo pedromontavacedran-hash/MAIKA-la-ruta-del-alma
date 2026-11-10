@@ -115,11 +115,11 @@ export const categoriasPorDefecto: CategoriaEntrada[] = [
   { id: "velas", nombre: "velas" },
   { id: "inciensos", nombre: "inciensos" },
   { id: "figuras", nombre: "figuras" },
-  { id: "kits", nombre: "kits" },
+  { id: "kits", nombre: "Colecciones" },
   { id: "joyas", nombre: "joyería del alma" }
 ];
 
-export type ImagenLightbox = { src: string; alt: string };
+export type ImagenLightbox = { src: string; alt: string; /** Pie de foto opcional (p. ej. nombre + descripción en el preview). */ pie?: string };
 
 /** Imagen del producto: data:/http/ruta explícita, o derivada del nombre, o convención `/categoria-id.jpg`. */
 export function getProductImageSrc(prod: Producto): string {

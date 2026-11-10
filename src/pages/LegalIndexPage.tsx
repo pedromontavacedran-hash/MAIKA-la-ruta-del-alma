@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { PATH_BY_PAGINA } from "@/app/routing/routeMaps";
-import { LEGAL_META, LEGAL_SLUGS, type LegalSlug } from "@/app/routing/legalRoutes";
+import { LEGAL_META, type LegalSlug } from "@/app/routing/legalRoutes";
 import { THEME } from "../config";
 
 const slugToPagina: Record<LegalSlug, "legalTerminos" | "legalPrivacidad" | "legalCookies" | "legalAviso"> = {
@@ -11,6 +11,10 @@ const slugToPagina: Record<LegalSlug, "legalTerminos" | "legalPrivacidad" | "leg
 };
 
 const LEGAL_TOP_PAD = "8px";
+
+/** Mientras la tienda/legal está en preparación solo se publicita la política de cookies.
+ *  Las demás URLs `/legal/*` siguen respondiendo (las usa el registro para las aceptaciones). */
+const SLUGS_VISIBLES: readonly LegalSlug[] = ["cookies"];
 
 export default function LegalIndexPage() {
   return (
@@ -31,7 +35,7 @@ export default function LegalIndexPage() {
         Legal
       </h1>
       <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 480, margin: "0 auto", width: "100%" }}>
-        {LEGAL_SLUGS.map((slug) => {
+        {SLUGS_VISIBLES.map((slug) => {
           const meta = LEGAL_META[slug];
           return (
             <Link
