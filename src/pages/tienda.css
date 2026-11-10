@@ -645,8 +645,6 @@ body.cuenta-maika-sin-scrollbar::-webkit-scrollbar {
   min-width: 1.5ch;
   text-align: center;
   font-variant-numeric: tabular-nums;
-  background: transparent;
-  border-radius: 0;
 }
 
 .carrito-producto-fila__subtotal {
