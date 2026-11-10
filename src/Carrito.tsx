@@ -103,7 +103,7 @@ export default function Carrito({
                     >
                       −
                     </button>
-                    <span className="carrito-producto-fila__cantidad">{Number(item.cantidad) || 1}</span>
+                    <span className="carrito-producto-fila__cantidad">{Number(item.cantidad || 0)}</span>
                     <button
                       type="button"
                       className="carrito-producto-fila__btn-qty"
