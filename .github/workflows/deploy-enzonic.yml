@@ -1,0 +1,88 @@
+# Despliegue continuo a Enzonic (servidor "maika", https://maika.enzonic.dev)
+#
+# Cada push a main/master: compila en GitHub, sube dist/ + backend/ + package.json
+# al servidor por la API del panel y lo reinicia. NO toca backend/data/ (datos en vivo),
+# public/tienda/ (imágenes subidas) ni las variables de Arranque.
+#
+# Configuración (una sola vez):
+#   1. Crea una clave en https://panel.enzonic.com/account/api (deja "IPs permitidas" vacío).
+#   2. En GitHub: Settings -> Secrets and variables -> Actions -> New repository secret
+#      Nombre: ENZONIC_API_KEY   Valor: la clave del paso 1
+#   3. Guarda este archivo en el repo como .github/workflows/deploy-enzonic.yml
+# También se puede lanzar a mano: Actions -> "Deploy to Enzonic" -> Run workflow.
+
+name: Deploy to Enzonic
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-enzonic
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PANEL: https://panel.enzonic.com
+      SERVER: 00045ed1
+      SITE: https://maika.enzonic.dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Package
+        run: |
+          tar -czf maika-deploy.tar.gz \
+            --exclude=backend/data \
+            --exclude=backend/.env \
+            --exclude=backend/node_modules \
+            dist backend package.json package-lock.json
+          ls -lh maika-deploy.tar.gz
+
+      - name: Upload, unpack and restart
+        env:
+          KEY: ${{ secrets.ENZONIC_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${KEY:-}" ]; then echo "Falta el secret ENZONIC_API_KEY"; exit 1; fi
+          api() {
+            curl -fsS -A "maika-deploy (github-actions)" \
+              -H "Authorization: Bearer $KEY" \
+              -H "Accept: application/json" \
+              -H "Content-Type: application/json" \
+              "$@"
+          }
+          URL=$(api "$PANEL/api/client/servers/$SERVER/files/upload" | jq -r '.attributes.url')
+          curl -fsS -A "maika-deploy (github-actions)" -F "files=@maika-deploy.tar.gz" "$URL&directory=/"
+          echo "Subido"
+          # dist/ se reemplaza entero (los bundles viejos no se acumulan); "permanent" = sin pasar
+          # por la papelera, para no llenar el disco en cada despliegue
+          api -X POST "$PANEL/api/client/servers/$SERVER/files/delete" -d '{"root":"/","files":["dist"],"permanent":true}'
+          api -X POST "$PANEL/api/client/servers/$SERVER/files/decompress" -d '{"root":"/","file":"maika-deploy.tar.gz"}'
+          api -X POST "$PANEL/api/client/servers/$SERVER/files/delete" -d '{"root":"/","files":["maika-deploy.tar.gz"],"permanent":true}'
+          echo "Descomprimido"
+          api -X POST "$PANEL/api/client/servers/$SERVER/power" -d '{"signal":"restart"}'
+          echo "Reiniciando"
+
+      - name: Check the site
+        run: |
+          sleep 20
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$SITE/health" || true)
+            if [ "$code" = "200" ]; then echo "OK: $SITE/health = 200"; exit 0; fi
+            echo "Esperando ($code)..."; sleep 10
+          done
+          echo "La web no respondió en 5 min: mira la Consola del servidor en el panel"; exit 1
