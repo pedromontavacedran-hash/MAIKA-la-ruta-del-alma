@@ -520,11 +520,7 @@ export default function TiendaCatalogoPreview() {
                               }
                               onAnadir={(it) => {
                                 if (it.producto) {
-                                  const productoConCantidad = { ...it.producto, cantidad: 1 };
-                                  const ok = agregarAlCarrito(productoConCantidad);
-                                  if (ok) {
-                                    // Feedback visual opcional
-                                  }
+                                  agregarAlCarrito(it.producto);
                                 }
                               }}
                             />
