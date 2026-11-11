@@ -1,7 +1,7 @@
-import type { CSSProperties } from "react";
 import { type ItemCarrito } from "./App";
 import BotonCerrar from "./components/BotonCerrar";
 import { THEME } from "./config";
+import { CHECKOUT_CONFIG } from "./config/checkoutConfig";
 
 interface Props {
   cart: ItemCarrito[];
@@ -9,11 +9,7 @@ interface Props {
   cambiarCantidad: (id: number, incremento: number) => void;
   eliminarProducto: (id: number) => void;
   volver: () => void;
-  finalizar: () => void;
   vaciar: () => void;
-  /** Rechazo 4xx en checkout (p. ej. stock): mismo bloqueo que el paso de pago del modal. */
-  checkoutHayRechazoServidor?: boolean;
-  procesandoPagoCheckout?: boolean;
 }
 
 export default function Carrito({
@@ -22,10 +18,7 @@ export default function Carrito({
   cambiarCantidad,
   eliminarProducto,
   volver,
-  finalizar,
-  vaciar,
-  checkoutHayRechazoServidor = false,
-  procesandoPagoCheckout = false
+  vaciar
 }: Props) {
   const UMBRAL_ENVIO_GRATIS = 50;
   const ENVIO_BASE = 4.9;
@@ -33,17 +26,18 @@ export default function Carrito({
   const faltaParaEnvioGratis = Math.max(0, UMBRAL_ENVIO_GRATIS - total);
   const envioCalculado = total >= UMBRAL_ENVIO_GRATIS ? 0 : ENVIO_BASE;
   const totalConEnvio = total + envioCalculado;
-  const finalizarDeshabilitado = checkoutHayRechazoServidor || procesandoPagoCheckout;
-  const estiloRechazoServidor: CSSProperties | undefined = checkoutHayRechazoServidor
-    ? {
-        background: "#5a5a5a",
-        border: "1px solid #666",
-        color: "rgba(255,255,255,0.88)",
-        opacity: 0.92,
-        cursor: "not-allowed",
-        boxShadow: "none"
-      }
-    : undefined;
+  const generarMensajeWhatsApp = () => {
+    const mensaje = cart.map(item => 
+      `- ${item.nombre} — ${item.cantidad} — ${(obtenerPrecioItem(item) * item.cantidad).toFixed(2)} €`
+    ).join('\n');
+    return `Hola, me interesan los siguientes artículos de MAIKA · Rutas del Alma:\n${mensaje}\n¿Podrías informarme sobre su disponibilidad?`;
+  };
+
+  const enviarPorWhatsApp = () => {
+    const mensaje = generarMensajeWhatsApp();
+    const url = `https://wa.me/${CHECKOUT_CONFIG.whatsappNumber}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+  };
 
   if (cart.length === 0) {
     return (
@@ -195,22 +189,10 @@ export default function Carrito({
             <button
               type="button"
               className="carrito-btn-principal"
-              disabled={finalizarDeshabilitado}
-              title={
-                checkoutHayRechazoServidor
-                  ? "Cierra el modal de pedido (X) para ir a la tienda; no puedes finalizar mientras haya error de stock."
-                  : procesandoPagoCheckout
-                    ? "Espera a que termine el pago en curso."
-                    : undefined
-              }
-              style={estiloRechazoServidor}
-              onClick={finalizar}
+              disabled={cart.length === 0}
+              onClick={enviarPorWhatsApp}
             >
-              {checkoutHayRechazoServidor
-                ? "Volver a la tienda"
-                : procesandoPagoCheckout
-                  ? "Preparando pedido…"
-                  : "finalizar pedido por WhatsApp"}
+              💬 Enviar mi selección por WhatsApp
             </button>
 
             <div className="carrito-resumen__fila-botones">
