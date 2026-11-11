@@ -165,7 +165,11 @@ function TarjetaPreview({ item, onAmpliar, onAnadir }: { item: ItemPreview; onAm
         ) : null}
         <button
           type="button"
-          onClick={() => item.producto && onAnadir(item)}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (item.producto) onAnadir(item);
+          }}
           style={{
             marginTop: 10,
             padding: "8px 12px",
