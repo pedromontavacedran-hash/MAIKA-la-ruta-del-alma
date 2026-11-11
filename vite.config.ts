@@ -8,8 +8,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // https://vite.dev/config/
 export default defineConfig({
-  /** Rutas relativas para `file://` (Electron empaquetado) y subcarpetas en hosting. */
-  base: "./",
+  /** Rutas absolutas para web hosting en raíz del dominio. */
+  base: "/",
   plugins: [react()],
   resolve: {
     alias: {
