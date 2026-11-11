@@ -713,6 +713,12 @@ body.cuenta-maika-sin-scrollbar::-webkit-scrollbar {
     gap: 12px;
     padding-top: 2px;
     box-sizing: border-box;
+    flex-wrap: wrap;
+  }
+
+  .carrito-producto-fila__control-precio .maika-btn-secondary {
+    min-width: fit-content;
+    flex-shrink: 0;
   }
 
   .carrito-producto-fila__btn-qty {

@@ -317,7 +317,7 @@ export function useCarrito(
       }
       const stockDisponible = Math.max(0, Number(producto.stock));
       if (!Number.isFinite(idNum) || stockDisponible <= 0) {
-        notificarError(mostrarNotificacion, `❌ ${producto.nombre} agotado`);
+        notificarError(mostrarNotificacion, `❌ No hay stock de ${producto.nombre}`);
         return false;
       }
       const cantidadEnCarrito = (() => {
@@ -325,7 +325,7 @@ export function useCarrito(
         return item ? Math.max(0, Number(item.cantidad) || 0) : 0;
       })();
       if (cantidadEnCarrito >= stockDisponible) {
-        notificarError(mostrarNotificacion, `Solo hay ${stockDisponible} unidades disponibles de ${producto.nombre}`);
+        notificarError(mostrarNotificacion, `Ya tienes todas las unidades disponibles de ${producto.nombre} en el carrito`);
         return false;
       }
       const precioNormalizado = (() => {

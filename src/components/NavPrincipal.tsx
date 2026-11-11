@@ -352,7 +352,7 @@ export default function NavPrincipal({
   const navIconVisualPx = Math.round(navIconBasePx * 1.8);
   const navIconMenuVisualPx = Math.round(navIconVisualPx * 1.08);
   const navIconRightVisualPx = Math.round(navIconVisualPx * 0.84);
-  const navIconTouchPx = Math.max(36, Math.round(navIconVisualPx + 8));
+  const navIconTouchPx = Math.max(44, Math.round(navIconVisualPx + 12));
   const navIconOffsetBottomPx = Math.max(0, Math.floor((barH - navIconTouchPx) / 2) - 8);
   /** Baja el logo respecto al centro óptico de la barra: con la barra más baja el logo besa/asoma por el borde inferior. */
   const logoBarMarkOffsetYPx = Math.min(20, Math.max(6, Math.round(barH * 0.16)));
@@ -713,14 +713,14 @@ export default function NavPrincipal({
                   aria-hidden="true"
                   style={{
                     position: "absolute",
-                    top: -5,
-                    right: -6,
+                    top: -12,
+                    right: -5,
                     minWidth: 18,
                     height: 18,
                     padding: "0 4px",
                     borderRadius: 9,
-                    background: "linear-gradient(135deg, #f1d27a, #d4af37)",
-                    color: "#fff",
+                    background: "transparent",
+                    color: THEME.goldMain,
                     fontSize: 11,
                     fontWeight: 700,
                     lineHeight: 1,
@@ -728,7 +728,6 @@ export default function NavPrincipal({
                     alignItems: "center",
                     justifyContent: "center",
                     boxSizing: "border-box",
-                    boxShadow: "0 2px 6px rgba(0, 0, 0, 0.5)",
                     pointerEvents: "none"
                   }}
                 >

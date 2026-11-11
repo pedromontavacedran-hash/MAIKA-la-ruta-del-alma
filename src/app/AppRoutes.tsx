@@ -448,11 +448,11 @@ export function AppRoutes(p: AppRoutesProps) {
     {AdminRoutes({ ...p, mostrarNotificacion: sinNotificacionAdmin })}
 
     {/* CARRITO */}
-    <Route path="/carrito" element={TIENDA_PUBLICA ? (
+    <Route path="/carrito" element={
       <Suspense fallback={<div style={{ opacity: 0.6, textAlign: "center", padding: 24, color: THEME.goldMain }}>Cargando MAIKA...</div>}>
         {bloqueLayoutContenido(<CarritoPage />)}
       </Suspense>
-    ) : bloqueLayoutContenido(<TiendaProximamentePage />)} />
+    } />
 
     {/* SEGUIMIENTO DE PEDIDOS */}
     <Route path="/seguimiento" element={TIENDA_PUBLICA ? (
