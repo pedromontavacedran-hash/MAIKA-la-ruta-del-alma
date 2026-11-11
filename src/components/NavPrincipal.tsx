@@ -720,7 +720,7 @@ export default function NavPrincipal({
                     padding: "0 4px",
                     borderRadius: 9,
                     background: "linear-gradient(135deg, #f1d27a, #d4af37)",
-                    color: "#050308",
+                    color: "#fff",
                     fontSize: 11,
                     fontWeight: 700,
                     lineHeight: 1,
