@@ -11,9 +11,19 @@ y targets PWA / Android (Capacitor) / Electron.
 - Página de enlaces para el QR de las tarjetas: **`/enlaces`**. Sus botones se
   editan en el panel admin (`enlaces.json` en `backend/data/`); endpoints
   `GET /enlaces-config` y `PUT /admin/enlaces`.
-- Pendiente fuera del repo: publicar la web en el dominio (DNS + hosting) y,
-  cuando `https://maikarutasdelalma.com/enlaces` responda, generar el QR
-  estático apuntando a esa URL.
+
+## Sistema QR para tarjetas físicas
+
+- **URL permanente del QR**: `https://maikarutasdelalma.com` (raíz del dominio)
+- **Destino actual**: `https://maika.enzonic.dev/enlaces`
+- **Archivo de redirección**: `public/index-redirect.html` (redirige automáticamente)
+- **Cómo configurar cuando el dominio esté activo**:
+  1. Configurar DNS para `maikarutasdelalma.com`
+  2. Configurar hosting (puede ser el mismo servidor que Enzonic o uno diferente)
+  3. Subir el contenido de `public/index-redirect.html` como `index.html` en el hosting del dominio
+  4. Verificar que `https://maikarutasdelalma.com` redirige a `https://maika.enzonic.dev/enlaces`
+  5. Generar el QR apuntando a `https://maikarutasdelalma.com` y guardarlo como `maika_qr.png`
+- **Ventaja**: El QR impreso nunca cambiará; solo se modifica el archivo de redirección en el hosting
 
 ## Verificación habitual
 
