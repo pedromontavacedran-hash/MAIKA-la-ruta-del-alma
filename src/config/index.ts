@@ -128,9 +128,9 @@ function maikaPublicUrl(pathSegments: string): string {
   return base.endsWith("/") ? `${base}${clean}` : `${base}/${clean}`;
 }
 
-/** Logo principal actualizado en `public/logos/logo web lila fuerte.png`. */
-const MAIKA_LOGO_CACHE_BUSTER = "20260421-1";
-export const MAIKA_LOGO_PUBLIC_URL = maikaPublicUrl(`logos/logo%20web%20lila%20fuerte.png?v=${MAIKA_LOGO_CACHE_BUSTER}`);
+/** Logo principal actualizado en `public/logos/logo web dorado.png`. */
+const MAIKA_LOGO_CACHE_BUSTER = "20261114-1";
+export const MAIKA_LOGO_PUBLIC_URL = maikaPublicUrl(`logos/logo%20web%20dorado.png?v=${MAIKA_LOGO_CACHE_BUSTER}`);
 
 /** Se mantiene el alias legacy, pero apuntando al logo nuevo para evitar volver al antiguo. */
 export const MAIKA_LOGO_LEGACY_PUBLIC_URL = MAIKA_LOGO_PUBLIC_URL;
